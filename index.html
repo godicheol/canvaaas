@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title>canvaaas</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<!-- ! -->
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<link rel='stylesheet' href='./dist/canvaaas.css' />
+	<script src="./dist/canvaaas.js"></script>
+	<!-- ! -->
+
+	<style>
+		html,body,div{
+			margin: 0;
+			padding: 0;
+		}
+
+		#tester{
+			padding: 24px;
+			overflow: hidden;
+		}
+
+		#logger{
+			width: 100%; 
+			word-break: all;
+			white-space: wrap;
+		}
+	</style>
+  </head>
+  <body style="">
+
+  	<!-- main -->
+		<div id="tester" style=""></div>
+
+		<div id="logger" style=""></div>
+
+		<div id="buttons">
+		  <!-- buttons -->
+		  <input type="file" onchange="canvaaas.uploadFiles(this, custom1)" multiple>
+		  <button type="button" onclick="canvaaas.uploadUrls('/img/1.jpeg', custom2)">uploadUrls(string, func)</button>
+		  <button type="button" onclick="canvaaas.uploadUrls(
+			['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'], custom3
+		  )">uploadUrls(array, func)</button>
+		  //
+		  <br>
+		  <button type="button" onclick="canvaaas.moveX(canvaaas.this(), 10)">moveX(id, 10)</button>
+		  <button type="button" onclick="canvaaas.moveX(canvaaas.this(), -10)">moveX(id, -10)</button>
+		  <button type="button" onclick="canvaaas.moveY(canvaaas.this(), 10)">moveY(id, 10)</button>
+		  <button type="button" onclick="canvaaas.moveY(canvaaas.this(), -10)">moveY(id, -10)</button>
+		  <button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0, 0)">moveTo(id, 0, 0)</button>
+		  <button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0.5, 0.5)">moveTo(id, 0.5, 0.5)</button>
+		  <button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 1, 1)">moveTo(id, 1, 1)</button>
+		  //
+		  <button type="button" onclick="canvaaas.zoom(canvaaas.this(), 0.1)">zoom(id, 0.1)</button>
+		  <button type="button" onclick="canvaaas.zoom(canvaaas.this(), -0.1)">zoom(id, -0.1)</button>
+		  <button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 0.01)">zoomTo(id, 0.01)</button>
+		  <button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'cover')">zoomTo(id, 'cover')</button>
+		  <button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'contain')">zoomTo(id, 'contain')</button>
+		  //
+		  <button type="button" onclick="canvaaas.rotate(canvaaas.this(), 45)">rotate(id, 45)</button>
+		  <button type="button" onclick="canvaaas.rotateTo(canvaaas.this(), 45)">rotateTo(id, 45)</button>
+		  //
+		  <button type="button" onclick="canvaaas.flipX(canvaaas.this())">flipX(id)</button>
+		  <button type="button" onclick="canvaaas.flipY(canvaaas.this())">flipY(id)</button>
+		  //
+		  <button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0)">opacityTo(id, 0)</button>
+		  <button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0.5)">opacityTo(id, 0.5)</button>
+		  <button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 1)">opacityTo(id, 1)</button>
+		  //
+		  <button type="button" onclick="canvaaas.indexUp(canvaaas.this(), 1)">indexUp(id, 1)</button>
+		  <button type="button" onclick="canvaaas.indexDown(canvaaas.this(), 1)">indexDown(id, 1)</button>
+		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1)</button>
+		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000)</button>
+		  //
+		  <button type="button" onclick="canvaaas.show(canvaaas.this())">show(id)</button>
+		  <button type="button" onclick="canvaaas.hide(canvaaas.this())">hide(id)</button>
+		  <button type="button" onclick="console.log(canvaaas.getHidden())">getHidden()</button>
+		  //
+		  <button type="button" onclick="canvaaas.focusIn(canvaaas.this())">focusIn(id)</button>
+		  <button type="button" onclick="canvaaas.focusOut()">focusOut()</button>
+		  //
+		  <button type="button" onclick="canvaaas.enableFocus(window.prompt())">enableFocus(id)</button>
+		  <button type="button" onclick="canvaaas.enableMove(canvaaas.this())">enableMove(id)</button>
+		  <button type="button" onclick="canvaaas.enableResize(canvaaas.this())">enableResize(id)</button>
+		  <button type="button" onclick="canvaaas.enableRotate(canvaaas.this())">enableRotate(id)</button>
+		  <button type="button" onclick="canvaaas.enableFlip(canvaaas.this())">enableFlip(id)</button>
+		  <button type="button" onclick="canvaaas.enableIndex(canvaaas.this())">enableIndex(id)</button>
+		  <button type="button" onclick="canvaaas.enableDraw(canvaaas.this())">enableDraw(id)</button>
+		  //
+		  <button type="button" onclick="canvaaas.disableFocus(canvaaas.this())">disableFocus(id)</button>
+		  <button type="button" onclick="canvaaas.disableMove(canvaaas.this())">disableMove(id)</button>
+		  <button type="button" onclick="canvaaas.disableResize(canvaaas.this())">disableResize(id)</button>
+		  <button type="button" onclick="canvaaas.disableRotate(canvaaas.this())">disableRotate(id)</button>
+		  <button type="button" onclick="canvaaas.disableFlip(canvaaas.this())">disableFlip(id)</button>
+		  <button type="button" onclick="canvaaas.disableIndex(canvaaas.this())">disableIndex(id)</button>
+		  <button type="button" onclick="canvaaas.disableDraw(canvaaas.this())">disableDraw(id)</button>
+		  //
+		  <button type="button" onclick="canvaaas.setState(canvaaas.this(), tmpState1)">setState(id, tmpState1)</button>
+		  //
+		  <button type="button" onclick="canvaaas.removeOne(canvaaas.this())">d.removeOne(id)</button>
+		  <button type="button" onclick="canvaaas.removeAll()">d.removeAll()</button>
+		  //
+
+		  <!-- config -->
+
+		  <button type="button" onclick="canvaaas.setConfig(tmpConfig1)">setConfig(tmpConfig1)</button>
+		  //
+		  <button type="button" onclick="canvaaas.setCanvas(512, 512, console.log)">setCanvas(512, 512)</button>
+		  <button type="button" onclick="canvaaas.setCanvas(1920, 1080, console.log)">setCanvas(1920, 1080)</button>
+		  <button type="button" onclick="canvaaas.setCanvas(1080, 1920, console.log)">setCanvas(1080, 1920)</button>
+		  //
+		  <button type="button" onclick="canvaaas.hideContainer()">hideContainer()</button>
+		  <button type="button" onclick="canvaaas.showContainer()">showContainer()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setEditable()">setEditable()</button>
+		  <button type="button" onclick="canvaaas.unsetEditable()">unsetEditable()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setFillColor('#000000')">setFillColor("000000")</button>
+		  <button type="button" onclick="canvaaas.setFillColor('FFFFFF')">setFillColor('FFFFFF')</button>
+		  <button type="button" onclick="canvaaas.unsetFillColor()">unsetFillColor()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setMimeType('image/jpeg')">setMimeType('image/jpeg')</button>
+		  <button type="button" onclick="canvaaas.setMimeType('image/png')">setMimeType('image/png')</button>
+		  <button type="button" onclick="canvaaas.unsetMimeType()">unsetMimeType()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setExtentions(['jpg', 'jpeg', 'png'])">setExtentions(['jpg', 'jpeg', 'png'])</button>
+		  <button type="button" onclick="canvaaas.setExtentions(['png'])">setExtentions(['png'])</button>
+		  <button type="button" onclick="canvaaas.unsetExtentions()">unsetExtentions()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setMaxNumberOfImages(1)">setMaxNumberOfImages(1)</button>
+		  //
+		  <button type="button" onclick="canvaaas.setOverlay()">setOverlay()</button>
+		  <button type="button" onclick="canvaaas.unsetOverlay()">unsetOverlay()</button>
+		  //
+		  <button type="button" onclick="canvaaas.setMagnetic()">setMagnetic()</button>
+		  <button type="button" onclick="canvaaas.unsetMagnetic()">unsetMagnetic()</button>
+		  //
+		  <button type="button" onclick="canvaaas.lockAspectRatio()">lockAspectRatio()</button>
+		  <button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio()</button>
+		  //
+		  <button type="button" onclick="canvaaas.draw(custom4)">draw(func)</button>
+		  //
+		  <button type="button" onclick="canvaaas.capture(custom5)">capture(func)</button>
+		  <button type="button" onclick="canvaaas.escapeCapture()">escapeCapture()</button>
+		  //
+		  <button type="button" onclick="canvaaas.download(custom6)">download(func)</button>
+		  //
+		  <button type="button" onclick="canvaaas.export(custom7)">export(func)</button>
+		  <button type="button" onclick="canvaaas.import(exportedStates, custom8)">import(states, func)</button>
+		  //
+		  <button type="button" onclick="console.log(canvaaas.this())">this()</button>
+		  <button type="button" onclick="console.log(canvaaas.thisData())">thisData()</button>
+		  //
+		  <button type="button" onclick="console.log(canvaaas.getConfigData())">getConfigData()</button>
+		  <button type="button" onclick="console.log(canvaaas.getContainerData())">getContainerData()</button>
+		  <button type="button" onclick="console.log(canvaaas.getCanvasData())">getCanvasData()</button>
+		  <button type="button" onclick="console.log(canvaaas.getImageData())">getImageData()</button>
+		  //
+		  <button type="button" onclick="canvaaas.reset(tmpConfig2)">reset()</button>
+		  //
+		  <button type="button" onclick="canvaaas.destroy()">destroy()</button>
+		</div>
+
+
+		<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
+		  <img id="preview1" style="width: 100%;" src="" alt="">
+		</div>
+		<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
+		  <img id="preview2" style="width: 100%;" src="" alt="">
+		</div>
+		<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
+		  <img id="preview3" style="width: 100%;" src="" alt="">
+		</div>
+		<div id="preview4" style="width: 30%;"></div>
+
+
+	<script>
+
+	  var exportedStates;
+
+	  var tmpState1 = {
+			// setState
+			index: 9999,
+			rotate: 15,
+			scaleX: -1,
+			scaleY: 1,
+			opacity: 0.7,
+			focusable: true,
+			movable: true,
+			resizable: true,
+			rotatable: true,
+			flippable: true,
+			indexable: true,
+			drawable: true,
+	  }
+
+	  var tmpConfig1 = {
+			// setConfig
+			editable: false
+	  }
+
+	  var tmpConfig2 = {
+			// reset()
+			// editable: false
+	  }
+
+	  function custom1(err, res) {
+			console.log("uploadFiles() callback", res);
+	  }
+
+	  function custom2(err, res) {
+			console.log("uploadUrls callback", res);
+	  }
+
+	  function custom3(err, res) {
+			console.log("custom callback", res);
+	  }
+
+	  function custom4(err, res) {
+			console.log("draw() callback", res);
+			preview1.src = res.data;
+	  }
+
+	  function custom5(err, res) {
+			console.log("captrue() callback", res);
+	  }
+
+	  function custom6(err, res) {
+			console.log("download() callback", res);
+	  }
+
+	  function custom7(err, res) {
+			console.log("export() callback", res);
+			exportedStates = res;
+	  }
+
+	  function custom8(err, res) {
+			console.log("import() callback", res);
+	  }
+
+	  var elem = document.getElementById("tester");
+	  canvaaas.init(elem, {
+		focus: function(err, res){
+		  console.log("event", res);
+		},
+		move: function(err, res){
+		  console.log("event", res);
+		},
+		resize: function(err, res){
+		  console.log("event", res);
+		},
+		rotate: function(err, res){
+		  console.log("event", res);
+		},
+		flip: function(err, res){
+		  console.log("event", res);
+		},
+		opacity: function(err, res){
+		  console.log("event", res);
+		},
+		index: function(err, res){
+		  console.log("event", res);
+		},
+		visibility: function(err, res){
+		  console.log("event", res);
+		},
+		state: function(err, res){
+		  console.log("event", res);
+		},
+		remove: function(err, res){
+		  console.log("event", res);
+		},
+		enable: function(err, res){
+		  console.log("event", res);
+		},
+		disable: function(err, res){
+		  console.log("event", res);
+		},
+		config: function(err, res){
+		  console.log("event", res);
+		},
+		container: function(err, res){
+		  console.log("event", res);
+		},
+		canvas: function(err, res){
+		  console.log("event", res);
+		},
+		upload: function(err, res){
+		  console.log("event", res);
+		},
+		draw: function(err, res){
+		  console.log("event", res);
+		},
+		capture: function(err, res){
+		  console.log("event", res);
+		},
+		export: function(err, res){
+		  console.log("event", res);
+		},
+		import: function(err, res){
+		  console.log("event", res);
+		},
+
+	  });
+	</script>
+ </body>
+</html>
