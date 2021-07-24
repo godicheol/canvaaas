@@ -13,7 +13,9 @@
  *** 
  *** release note
  * 
- * pinch zoom 이벤트 조정, 화면 밖에서도 가능
+ * pinch zoom, 화면 밖에서도 가능
+ * 
+ * resize handle, shiftKey 추가
  * 
  */
 
@@ -980,8 +982,7 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var scaleRatio,
-					aspectRatio,
+				var aspectRatio,
 					mouseX,
 					mouseY,
 					width,
@@ -993,7 +994,9 @@
 					radians,
 					cosFraction,
 					sinFraction,
-					onShiftKey = false;
+					onShiftKey = false,
+					minW,
+					minH;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -1009,7 +1012,8 @@
 					onShiftKey = true;
 				}
 
-				scaleRatio = canvasState.width / canvasState.originalWidth;
+				minW = config.minCanvasWidth * canvasState.width / canvasState.originalWidth;
+				minH = config.minCanvasHeight * canvasState.height / canvasState.originalHeight;
 				aspectRatio = state.originalWidth / state.originalHeight;
 				radians = state.rotate * Math.PI / 180;
 
@@ -1037,31 +1041,26 @@
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
 
-					if (onShiftKey === true) {
+					if (onShiftKey) {
 						width = height * aspectRatio;
 					}
 				} else if (direction === "ne") {
 					width += diffX;
 					height -= diffY;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-
-					if (onShiftKey === true) {
-						if (diffX > -diffY) {
+					if (!onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						if (2 * diffX < 2 * -diffY * aspectRatio) {
+							height -= diffY;
 							width = height * aspectRatio;
-
-							// axisX += 0.5 * diffY * sinFraction;
-							// axisY -= 0.5 * diffY * cosFraction;
 						} else {
+							width += diffX;
 							height = width / aspectRatio;
-							// axisX -= 0.5 * diffX * cosFraction;
-							// axisY -= 0.5 * diffX * sinFraction;
 						}
-
-
 					}
 				} else if (direction === "e") {
 					width += diffX;
@@ -1069,60 +1068,90 @@
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 
-					if (onShiftKey === true) {
+					if (onShiftKey) {
 						height = width / aspectRatio;
 					}
 				} else if (direction === "se") {
 					width += diffX;
 					height += diffY;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
+					if (!onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						if (2 * diffX < 2 * diffY * aspectRatio) {
+							height += diffY;
+							width = height * aspectRatio;
+						} else {
+							width += diffX;
+							height = width / aspectRatio;
+						}
+					}
 				} else if (direction === "s") {
 					height += diffY;
 
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
 
-					if (onShiftKey === true) {
+					if (onShiftKey) {
 						width = height * aspectRatio;
 					}
 				} else if (direction === "sw") {
 					width -= diffX;
 					height += diffY;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
+					if (!onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						if (2 * -diffX < 2 * diffY * aspectRatio) {
+							height += diffY;
+							width = height * aspectRatio;
+						} else {
+							width -= diffX;
+							height = width / aspectRatio;
+						}
+					}
 				} else if (direction === "w") {
 					width -= diffX;
 
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 
-					if (onShiftKey === true) {
+					if (onShiftKey) {
 						height = width / aspectRatio;
 					}
 				} else if (direction === "nw") {
 					width -= diffX;
 					height -= diffY;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
+					if (!onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						if (2 * -diffX < 2 * -diffY * aspectRatio) {
+							height -= diffY;
+							width = height * aspectRatio;
+						} else {
+							width -= diffX;
+							height = width / aspectRatio;
+						}
+					}
 				} else {
 					return false;
 				}
 
-				if (config.minCanvasWidth > width / scaleRatio) {
+				if (minW > width) {
 					return false;
 				}
 
-				if (config.minCanvasHeight > height / scaleRatio) {
+				if (minH > height) {
 					return false;
 				}
 
@@ -1185,13 +1214,15 @@
 					diffY,
 					width,
 					height,
-					scaleRatio;
+					minW,
+					minH;
 
 				if (!state.resizable) {
 					return false;
 				}
 
-				scaleRatio = canvasState.width / canvasState.originalWidth;
+				minW = config.minCanvasWidth * canvasState.width / canvasState.originalWidth;
+				minH = config.minCanvasHeight * canvasState.height / canvasState.originalHeight;
 				ratio = e.deltaY * 0.002;
 				diffX = state.width * ratio;
 				diffY = state.height * ratio;
@@ -1211,11 +1242,11 @@
 
 				clearTimeout(eventState.wheeling);
 
-				if (config.minCanvasWidth > width / scaleRatio) {
+				if (minW > width) {
 					return false;
 				}
 
-				if (config.minCanvasHeight > height / scaleRatio) {
+				if (minH > height) {
 					return false;
 				}
 
@@ -1310,9 +1341,11 @@
 					width,
 					height,
 					ratio,
-					scaleRatio;
+					minW,
+					minH;
 
-				scaleRatio = canvasState.width / canvasState.originalWidth;
+				minW = config.minCanvasWidth * canvasState.width / canvasState.originalWidth;
+				minH = config.minCanvasHeight * canvasState.height / canvasState.originalHeight;
 				mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
 				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
 				diagonal = getDiagonal(mouseX, mouseY);
@@ -1321,11 +1354,11 @@
 				width = eventState.initialW * ratio;
 				height = eventState.initialH * ratio;
 
-				if (config.minCanvasWidth > width / scaleRatio) {
+				if (minW > width) {
 					return false;
 				}
 
-				if (config.minCanvasHeight > height / scaleRatio) {
+				if (minH > height) {
 					return false;
 				}
 
