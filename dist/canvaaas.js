@@ -13,7 +13,7 @@
  *** 
  *** release note
  * 
- * 
+ * pinch zoom 이벤트 조정, 화면 밖에서도 가능
  * 
  */
 
@@ -28,6 +28,8 @@
  * maxX, maxY, minX, minY
  * 
  * 단축키
+ * 
+ * pinch zoom, document.event 로 바꾸기
  * 
  */
 
@@ -273,6 +275,8 @@
 
 				onUpload = true;
 
+				recursiveFunc();
+
 				function recursiveFunc() {
 					if (count < index) {
 						renderImage(files[count], function(err, id) {
@@ -290,18 +294,23 @@
 						});
 					} else {
 						// end
-
 						onUpload = false;
-
 					}
 				}
-
-				recursiveFunc();
 			},
 
-			escape: function(e) {
+			isOutside: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+
+				if (onMove = true) {
+					if (e.touches) {
+						if (e.touches.length === 2) {
+							handlers.startPinchZoom(e);
+							return false;
+						}
+					}
+				}
 
 				if (
 					e.target.tagName === "BUTTON" ||
@@ -315,6 +324,7 @@
 				}
 
 				if (eventState.target) {
+
 					if (
 						!e.target.classList.contains("canvaaas-image") &&
 						!e.target.classList.contains("canvaaas-clone")
@@ -322,6 +332,13 @@
 						var x = getIdByImageElement(eventState.target);
 						setFocusOut(x);
 					}
+				}
+			},
+
+			onOutsideScroll: function(e) {
+				if (eventState.target) {
+					var x = getIdByImageElement(eventState.target);
+					setFocusOut(x);
 				}
 			},
 
@@ -427,29 +444,7 @@
 					mouseX = e.touches[0].clientX;
 					mouseY = e.touches[0].clientY;
 				} else {
-
-					if (onMove) {
-						onMove = false;
-
-						document.removeEventListener("mousemove", handlers.onMove, false);
-						document.removeEventListener("mouseup", handlers.endMove, false);
-
-						document.removeEventListener("touchmove", handlers.onMove, false);
-						document.removeEventListener("touchend", handlers.endMove, false);
-
-					}
-
-					if (onZoom) {
-			    		onZoom = false;
-
-						document.removeEventListener("touchmove", handlers.onPinchZoom, false);
-						document.removeEventListener("touchend", handlers.endPinchZoom, false);
-
-					}
-					
-					if (e.touches.length > 1) {
-						return handlers.startPinchZoom(e);
-					}
+					return handlers.startPinchZoom(e);
 				}
 
 				if (!state.movable) {
@@ -1016,9 +1011,6 @@
 
 				scaleRatio = canvasState.width / canvasState.originalWidth;
 				aspectRatio = state.originalWidth / state.originalHeight;
-
-				
-
 				radians = state.rotate * Math.PI / 180;
 
 				if (state.scaleX !== 1) {
@@ -1044,6 +1036,10 @@
 
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
+
+					if (onShiftKey === true) {
+						width = height * aspectRatio;
+					}
 				} else if (direction === "ne") {
 					width += diffX;
 					height -= diffY;
@@ -1052,11 +1048,30 @@
 					axisY += 0.5 * diffX * sinFraction;
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
+
+					if (onShiftKey === true) {
+						if (diffX > -diffY) {
+							width = height * aspectRatio;
+
+							// axisX += 0.5 * diffY * sinFraction;
+							// axisY -= 0.5 * diffY * cosFraction;
+						} else {
+							height = width / aspectRatio;
+							// axisX -= 0.5 * diffX * cosFraction;
+							// axisY -= 0.5 * diffX * sinFraction;
+						}
+
+
+					}
 				} else if (direction === "e") {
 					width += diffX;
 
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
+
+					if (onShiftKey === true) {
+						height = width / aspectRatio;
+					}
 				} else if (direction === "se") {
 					width += diffX;
 					height += diffY;
@@ -1070,6 +1085,10 @@
 
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
+
+					if (onShiftKey === true) {
+						width = height * aspectRatio;
+					}
 				} else if (direction === "sw") {
 					width -= diffX;
 					height += diffY;
@@ -1083,6 +1102,10 @@
 
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
+
+					if (onShiftKey === true) {
+						height = width / aspectRatio;
+					}
 				} else if (direction === "nw") {
 					width -= diffX;
 					height -= diffY;
@@ -1094,12 +1117,6 @@
 				} else {
 					return false;
 				}
-
-				// if (!config.editableAspectRatio || e.shiftKey) {
-				// 	width = height * aspectRatio;
-				// 	axisX = eventState.initialX;
-				// 	axisY = eventState.initialY;
-				// }
 
 				if (config.minCanvasWidth > width / scaleRatio) {
 					return false;
@@ -1233,8 +1250,15 @@
 					return false;
 				}
 
-				if (e.touches.length !== 2) {
-					return false;
+				if (onMove) {
+					onMove = false;
+
+					document.removeEventListener("mousemove", handlers.onMove, false);
+					document.removeEventListener("mouseup", handlers.endMove, false);
+
+					document.removeEventListener("touchmove", handlers.onMove, false);
+					document.removeEventListener("touchend", handlers.endMove, false);
+
 				}
 
 				preEvent();
@@ -2806,8 +2830,11 @@
 	        // window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
-			document.addEventListener("mousedown", handlers.escape, false);
-			document.addEventListener("touchstart", handlers.escape, false);
+			document.addEventListener("mousedown", handlers.isOutside, false);
+			document.addEventListener("touchstart", handlers.isOutside, false);
+
+			document.addEventListener("scroll", handlers.onOutsideScroll, false);
+
 
 			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
 			containerElement.addEventListener('dragleave', handlers.preventDefaults, false);
@@ -3090,7 +3117,7 @@
 			}
 		}
 
-		myObject.moveY = function(id, y, cb) {
+		myObject.moveY = function(id, num, cb) {
 			var elem = getImageElementById(id);
 			var state = getImageStateById(id);
 			var clone = getCloneElementById(id);
@@ -3105,7 +3132,7 @@
 				return false;
 			}
 
-			if (typeof(y) !== "number") {
+			if (typeof(num) !== "number") {
 				if (config.move) {
 					config.move(errMsg.ARGUMENT_NUMBER);
 				}
@@ -5724,8 +5751,11 @@
 		myObject.reset = function(preConfig, cb){
 
 			window.removeEventListener("resize", handlers.resizeWindow, false);
-			document.removeEventListener("mousedown", handlers.escape, false);
-			document.removeEventListener("touchstart", handlers.escape, false);
+
+			document.addEventListener("mousedown", handlers.isOutside, false);
+			document.addEventListener("touchstart", handlers.isOutside, false);
+
+			document.addEventListener("scroll", handlers.onOutsideScroll, false);
 
 			var target = containerElement.parentNode;
 
