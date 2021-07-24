@@ -21,11 +21,13 @@
  * 
  * 업데이트 예정
  * 
- * resize handle - 대각선 이외 나머지도 적용
+ * resize handle - n, e, s, w 추가
  * 
- * edit history?
+ * 수정 이력, 되돌리기
  * 
  * maxX, maxY, minX, minY
+ * 
+ * 단축키
  * 
  */
 
@@ -35,6 +37,9 @@
  * 테스트 예정
  * 
  * 엄청 작은 사진 32px x 32px
+ * 
+ * 엄청 큰 사진
+ * 
  * 
  * 
  * 
@@ -993,6 +998,26 @@
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
 
+		// debug
+		// 
+		var anchors = getRotatedAnchors(
+			state.x, 
+			state.y, 
+			state.width, 
+			state.height, 
+			state.rotate
+		);
+		var axisX = Math.floor(
+			anchors[0][0]
+		);
+		var axisY = Math.floor(
+			anchors[0][1]
+		);
+		console.log("Start", axisX, axisY)
+		// 
+		// debug
+
+
 				onResize = true;
 
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -1016,25 +1041,23 @@
 				}
 
 				var handle = eventState.handle;
+				var direction = eventState.direction;
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var direction,
-					scaleRatio,
+				var scaleRatio,
 					aspectRatio,
 					mouseX,
 					mouseY,
-					deg,
 					width,
 					height,
 					axisX,
 					axisY,
-					rotatedX,
-					rotatedY,
-					rotatedW,
-					rotatedH,
-					rotatedA,
-					rotatedB;
+					diffX,
+					diffY,
+					radians,
+					cosFraction,
+					sinFraction;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -1046,145 +1069,102 @@
 					return false;
 				}
 
-				// if (!config.editableAspectRatio || e.shiftKey) {
-				// 	mouseX *= 2;
-				// 	mouseY *= 2;
-				// }
-
-				direction = eventState.direction;
-				scaleRatio = canvasState.width / canvasState.originalWidth;
-
-				var radians = state.rotate * Math.PI / 180;
-				var cosFraction = Math.cos(radians);
-				var sinFraction = Math.sin(radians);
-				var rotatedWDiff = cosFraction * mouseX + sinFraction * mouseY;
-				var rotatedHDiff = cosFraction * mouseY - sinFraction * mouseX;
-
-				var newW, newH, newX, newY;
-
-
-				// 
-				// test
-				// 
-
-				if (direction === "n") {
-					newW = eventState.initialW;
-					newH = eventState.initialH - rotatedHDiff;
-					newX = eventState.initialX + (mouseX * 0.5);
-					newY = eventState.initialY + (mouseY * 0.5);
-					// newX = eventState.initialX + (rotatedWDiff * 0.5);
-					// newY = eventState.initialY + (rotatedHDiff * 0.5);
-
-					newX -= 0.5 * rotatedWDiff * cosFraction;
-					newY += 0.5 * rotatedWDiff * sinFraction;
-
-					newX += 0.5 * rotatedHDiff * sinFraction;
-					// newY += 0.5 * rotatedHDiff * cosFraction;
-				} else if (direction === "ne") {
-					newW = eventState.initialW - rotatedWDiff;
-					newH = eventState.initialH - rotatedHDiff;
-					newX = eventState.initialX + (mouseX * 0.5);
-					newY = eventState.initialY + (mouseY * 0.5);
-					// newX = eventState.initialX + (rotatedWDiff * 0.5);
-					// newY = eventState.initialY + (rotatedHDiff * 0.5);
-
-					newX += 0.5 * rotatedWDiff * cosFraction;
-					newY += 0.5 * rotatedWDiff * sinFraction;
-
-					newX -= 0.5 * rotatedHDiff * sinFraction;
-					newY += 0.5 * rotatedHDiff * cosFraction;
-				}
-
-
-
-				state.width = newW;
-				state.height = newH;
-				state.x = newX;
-				state.y = newY;
-
-
 				// if (state.scaleX !== state.scaleY) {
 				// 	deg = -state.rotate;
 				// } else {
 				// 	deg = state.rotate;
 				// }
 
-				aspectRatio = state.originalWidth / state.originalHeight;
-
-				// rotatedA = getRotatedAnchors(
-				// 	eventState.initialX,
-				// 	eventState.initialY,
-				// 	eventState.initialW,
-				// 	eventState.initialH,
-				// 	deg
-				// );
-
-				// if (direction === "ne") {
-				// 	rotatedX = rotatedA[4][0];
-				// 	rotatedY = rotatedA[4][1];
-				// 	rotatedW = rotatedA[2][0] - rotatedA[6][0];
-				// 	rotatedH = rotatedA[6][1] - rotatedA[2][1];
-
-				// 	rotatedX += mouseX * 0.5;
-				// 	rotatedY += mouseY * 0.5;
-				// 	rotatedW += mouseX;
-				// 	rotatedH -= mouseY;
-				// } else if (direction === "sw") {
-				// 	rotatedX = rotatedA[4][0];
-				// 	rotatedY = rotatedA[4][1];
-				// 	rotatedW = rotatedA[2][0] - rotatedA[6][0];
-				// 	rotatedH = rotatedA[6][1] - rotatedA[2][1];
-
-				// 	rotatedX += mouseX * 0.5;
-				// 	rotatedY += mouseY * 0.5;
-				// 	rotatedW -= mouseX;
-				// 	rotatedH += mouseY;
-				// } else if (direction === "se") {
-				// 	rotatedX = rotatedA[4][0];
-				// 	rotatedY = rotatedA[4][1];
-				// 	rotatedW = rotatedA[8][0] - rotatedA[0][0];
-				// 	rotatedH = rotatedA[8][1] - rotatedA[0][1];
-
-				// 	rotatedX += mouseX * 0.5;
-				// 	rotatedY += mouseY * 0.5;
-				// 	rotatedW += mouseX;
-				// 	rotatedH += mouseY;
-
-				// 	deg = -deg;
-				// } else if (direction === "nw") {
-				// 	rotatedX = rotatedA[4][0];
-				// 	rotatedY = rotatedA[4][1];
-				// 	rotatedW = rotatedA[8][0] - rotatedA[0][0];
-				// 	rotatedH = rotatedA[8][1] - rotatedA[0][1];
-
-				// 	rotatedX += mouseX * 0.5;
-				// 	rotatedY += mouseY * 0.5;
-				// 	rotatedW -= mouseX;
-				// 	rotatedH -= mouseY;
-
-				// 	deg = -deg;
-				// } else {
-				// 	return false;
+				// if (!config.editableAspectRatio || e.shiftKey) {
+				// 	mouseX *= 2;
+				// 	mouseY *= 2;
 				// }
 
-				// rotatedB = getRotatedAnchors(
-				// 	rotatedX,
-				// 	rotatedY,
-				// 	rotatedW,
-				// 	rotatedH,
-				// 	deg
-				// );
+				scaleRatio = canvasState.width / canvasState.originalWidth;
 
-				// width = rotatedB[8][0] - rotatedB[0][0];
-				// height = rotatedB[8][1] - rotatedB[0][1];
-				// axisX = rotatedB[4][0];
-				// axisY = rotatedB[4][1];
+				radians = state.rotate * Math.PI / 180;
+				cosFraction = Math.cos(radians);
+				sinFraction = Math.sin(radians);
+				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
+				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
 
-				if (!config.editableAspectRatio || e.shiftKey) {
-					width = height * aspectRatio;
-					axisX = eventState.initialX;
-					axisY = eventState.initialY;
+				// 
+				// test
+				// 
+
+				width = eventState.initialW;
+				height = eventState.initialH;
+				axisX = eventState.initialX;
+				axisY = eventState.initialY;
+
+				if (direction === "n") {
+					height -= diffY;
+
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else if (direction === "ne") {
+					width += diffX;
+					height -= diffY;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else if (direction === "e") {
+					width += diffX;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+				} else if (direction === "se") {
+					width += diffX;
+					height += diffY;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else if (direction === "s") {
+					height += diffY;
+
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else if (direction === "sw") {
+					width -= diffX;
+					height += diffY;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else if (direction === "w") {
+					width -= diffX;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+				} else if (direction === "nw") {
+					width -= diffX;
+					height -= diffY;
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
+				} else {
+					return false;
 				}
+
+				state.width = width;
+				state.height = height;
+				state.x = axisX;
+				state.y = axisY;
+
+				// aspectRatio = state.originalWidth / state.originalHeight;
+
+				// if (!config.editableAspectRatio || e.shiftKey) {
+				// 	width = height * aspectRatio;
+				// 	axisX = eventState.initialX;
+				// 	axisY = eventState.initialY;
+				// }
 
 				if (config.minCanvasWidth > width / scaleRatio) {
 					return false;
@@ -1193,11 +1173,6 @@
 				if (config.minCanvasHeight > height / scaleRatio) {
 					return false;
 				}
-
-				// state.width = width;
-				// state.height = height;
-				// state.x = axisX;
-				// state.y = axisY;
 
 				setElement(elem, state);
 				setElement(clone, state);
@@ -1249,8 +1224,8 @@
 				var clone = getCloneElementByImageElement(elem);
 
 				var ratio,
-					wDiff,
-					hDiff,
+					diffX,
+					diffY,
 					width,
 					height,
 					scaleRatio;
@@ -1261,10 +1236,10 @@
 
 				scaleRatio = canvasState.width / canvasState.originalWidth;
 				ratio = e.deltaY * 0.002;
-				wDiff = state.width * ratio;
-				hDiff = state.height * ratio;
-				width = state.width + wDiff;
-				height = state.height + hDiff;
+				diffX = state.width * ratio;
+				diffY = state.height * ratio;
+				width = state.width + diffX;
+				height = state.height + diffY;
 
 				if (!onZoom) {
 
