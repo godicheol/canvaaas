@@ -74,9 +74,23 @@
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1)</button>
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000)</button>
 		  //
+		  <button type="button" onclick="canvaaas.minX(canvaaas.this(), 0)">minX(id, 0)</button>
+		  <button type="button" onclick="canvaaas.minX(canvaaas.this(), 0.25)">minX(id, 0.25)</button>
+		  <button type="button" onclick="canvaaas.minX(canvaaas.this(), 0.5)">minX(id, 0.5)</button>
+		  <button type="button" onclick="canvaaas.minY(canvaaas.this(), 0)">minY(id, 0)</button>
+		  <button type="button" onclick="canvaaas.minY(canvaaas.this(), 0.25)">minY(id, 0.25)</button>
+		  <button type="button" onclick="canvaaas.minY(canvaaas.this(), 0.5)">minY(id, 0.5)</button>
+		  //
+		  <button type="button" onclick="canvaaas.maxX(canvaaas.this(), 1)">maxX(id, 1)</button>
+		  <button type="button" onclick="canvaaas.maxX(canvaaas.this(), 0.75)">maxX(id, 0.75)</button>
+		  <button type="button" onclick="canvaaas.maxX(canvaaas.this(), 0.5)">maxX(id, 0.5)</button>
+		  <button type="button" onclick="canvaaas.maxY(canvaaas.this(), 1)">maxY(id, 1)</button>
+		  <button type="button" onclick="canvaaas.maxY(canvaaas.this(), 0.75)">maxY(id, 0.75)</button>
+		  <button type="button" onclick="canvaaas.maxY(canvaaas.this(), 0.5)">maxY(id, 0.5)</button>
+		  //
 		  <button type="button" onclick="canvaaas.show(canvaaas.this())">show(id)</button>
 		  <button type="button" onclick="canvaaas.hide(canvaaas.this())">hide(id)</button>
-		  <button type="button" onclick="console.log(canvaaas.getHidden())">getHidden()</button>
+		  <button type="button" onclick="console.log(canvaaas.getHiddens())">getHiddens()</button>
 		  //
 		  <button type="button" onclick="canvaaas.focusIn(canvaaas.this())">focusIn(id)</button>
 		  <button type="button" onclick="canvaaas.focusOut()">focusOut()</button>
@@ -187,6 +201,7 @@
 			scaleX: -1,
 			scaleY: 1,
 			opacity: 0.7,
+
 			focusable: true,
 			movable: true,
 			resizable: true,
@@ -243,64 +258,58 @@
 	  var elem = document.getElementById("tester");
 	  canvaaas.init(elem, {
 		focus: function(err, res){
-		  console.log("event", res);
+		  console.log("focus", res);
 		},
 		move: function(err, res){
-		  console.log("event", res);
+		  console.log("move", res);
 		},
 		resize: function(err, res){
-		  console.log("event", res);
+		  console.log("resize", res);
 		},
 		rotate: function(err, res){
-		  console.log("event", res);
+		  console.log("rotate", res);
 		},
 		flip: function(err, res){
-		  console.log("event", res);
+		  console.log("flip", res);
 		},
 		opacity: function(err, res){
-		  console.log("event", res);
+		  console.log("opacity", res);
 		},
 		index: function(err, res){
-		  console.log("event", res);
+		  console.log("index", res);
 		},
 		visibility: function(err, res){
-		  console.log("event", res);
+		  console.log("visibility", res);
 		},
 		state: function(err, res){
-		  console.log("event", res);
+		  console.log("state", res);
 		},
 		remove: function(err, res){
-		  console.log("event", res);
-		},
-		enable: function(err, res){
-		  console.log("event", res);
-		},
-		disable: function(err, res){
-		  console.log("event", res);
+		  console.log("remove", res);
 		},
 		config: function(err, res){
-		  console.log("event", res);
+		  console.log("config", res);
 		},
 		container: function(err, res){
-		  console.log("event", res);
+		  console.log("container", res);
 		},
 		canvas: function(err, res){
-		  console.log("event", res);
+		  console.log("canvas", res);
 		},
 		upload: function(err, res){
-		  console.log("event", res);
+		  console.log("upload", res);
 		},
 		draw: function(err, res){
-		  console.log("event", res);
+		  console.log("draw", res);
 		},
 		capture: function(err, res){
-		  console.log("event", res);
+		  console.log("capture", res);
 		},
 		export: function(err, res){
-		  console.log("event", res);
+		  console.log("export", res);
 		},
 		import: function(err, res){
-		  console.log("event", res);
+		  console.log("import", res);
 		},
 
 	  });

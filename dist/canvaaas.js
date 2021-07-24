@@ -13,9 +13,13 @@
  *** 
  *** release note
  * 
- * pinch zoom, 화면 밖에서도 가능
+ * pinch zoom, outside canvas
  * 
- * resize handle, shiftKey 추가
+ * resize handle, shiftKey
+ * 
+ * config.disalbe, config.enable => config.state
+ * 
+ * maxX, maxY, minX, minY
  * 
  */
 
@@ -23,15 +27,10 @@
  * 
  * 업데이트 예정
  * 
- * resize handle - n, e, s, w 추가
- * 
  * 수정 이력, 되돌리기
  * 
- * maxX, maxY, minX, minY
  * 
  * 단축키
- * 
- * pinch zoom, document.event 로 바꾸기
  * 
  */
 
@@ -122,10 +121,6 @@
 
     		state: undefined, // callback function
 
-    		enable: undefined, // callback function
-
-    		disable: undefined, // callback function
-
     		remove: undefined, // callback function
 
     		config: undefined, // callback function
@@ -189,6 +184,7 @@
 			OVER_MAXIMAGE: "최대 업로드 파일 개수를 초과했습니다",
 			NO_MIMETYPE: "허용되지 않는 MimeType입니다",
 			DUPE_FILENAME: "같은 파일이름이 존재합니다",
+			UNKNOWN: "알 수 없는 에러가 발생했습니다"
 		}
 
 		var conatinerTemplate = "";
@@ -435,9 +431,13 @@
 				var state = getImageStateByImageElement(elem);
 				var mouseX,
 					mouseY,
-					left,
-					top,
-					rotated;
+					halfWidth,
+					halfHeight,
+					rotated,
+					minX,
+					minY,
+					maxX,
+					maxY;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX;
@@ -461,15 +461,44 @@
 					state.rotate
 				);
 
-				left = Math.max(rotated[0][0], rotated[6][0], rotated[2][0], rotated[8][0]) - rotated[4][0];
-				top = Math.max(rotated[0][1], rotated[6][1], rotated[2][1], rotated[8][1]) - rotated[4][1];
+				halfWidth = Math.max(rotated[0][0], rotated[6][0], rotated[2][0], rotated[8][0]) - rotated[4][0];
+				halfHeight = Math.max(rotated[0][1], rotated[6][1], rotated[2][1], rotated[8][1]) - rotated[4][1];
+
+				var tmpWidth = canvasState.width - (halfWidth * 2);
+				var tmpHeight = canvasState.height - (halfHeight * 2);
+
+
+				if (!state.minX) {
+					minX = halfWidth;
+				} else {
+					minX = halfWidth + (tmpWidth * state.minX);
+				}
+
+				if (!state.maxX) {
+					maxX = canvasState.width - halfWidth;
+				} else {
+					maxX = halfWidth + (tmpWidth * state.maxX);
+				}
+
+				if (!state.minY) {
+					minY = halfHeight;
+				} else {
+					minY = halfHeight + (tmpHeight * state.minY);
+				}
+
+				if (!state.maxY) {
+					maxY = canvasState.height - halfHeight;
+				} else {
+					maxY = halfHeight + (tmpHeight * state.maxY);
+				}
+
 
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-				eventState.maxX = canvasState.width - left;
-				eventState.maxY = canvasState.height - top;
-				eventState.minX = 0 + left;
-				eventState.minY = 0 + top
+				eventState.minX = minX;
+				eventState.maxX = maxX;
+				eventState.minY = minY;
+				eventState.maxY = maxY;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 
@@ -531,27 +560,27 @@
 					}
 				}
 
-				if (state.maxX) {
-					if (axisX > state.maxX) {
-						axisX = state.maxX;
+				if (state.maxX !== undefined && state.maxX !== null) {
+					if (axisX > eventState.maxX) {
+						axisX = eventState.maxX;
 					}
 				}
 
-				if (state.minX) {
-					if (axisX < state.minX) {
-						axisX = state.minX;
+				if (state.minX !== undefined && state.minX !== null) {
+					if (axisX < eventState.minX) {
+						axisX = eventState.minX;
 					}
 				}
 
-				if (state.maxY) {
-					if (axisY > state.maxY) {
-						axisY = state.maxY;
+				if (state.maxY !== undefined && state.maxY !== null) {
+					if (axisY > eventState.maxY) {
+						axisY = eventState.maxY;
 					}
 				}
 
-				if (state.minY) {
-					if (axisY < state.minY) {
-						axisY = state.minY;
+				if (state.minY !== undefined && state.minY !== null) {
+					if (axisY < eventState.minY) {
+						axisY = eventState.minY;
 					}
 				}
 
@@ -4079,16 +4108,6 @@
 				return false;
 			}
 
-			if (typeof(num) !== "number") {
-				if (config.index) {
-					config.index(errMsg.ARGUMENT_NUMBER);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT_NUMBER);
-				} 
-				return false;
-			}
-
 			if (!config.editable) {
 				if (config.index) {
 					config.index(errMsg.UNEDITABLE);
@@ -4119,6 +4138,16 @@
 				return false;
 			}
 
+			if (typeof(num) !== "number") {
+				if (config.index) {
+					config.index(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
 			state.index = num;
 
 			setElement(elem, state);
@@ -4128,6 +4157,416 @@
 
 			if (config.index) {
 				config.index(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.minX = function(id, num, cb) {
+			var elem = getImageElementById(id);
+			var state = getImageStateById(id);
+			var clone = getCloneElementById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_STRING);
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.TARGET);
+				}
+				if (cb) {
+					cb(errMsg.TARGET);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "number") {
+				if (num > 1) {
+					num = 1;
+				}
+				if (num < 0) {
+					num = 0;
+				}
+			}
+
+			state.minX = num;
+
+			// check current state
+			var currentRect = getRotatedAnchors(
+				state.x,
+				state.y,
+				state.width,
+				state.height,
+				state.rotate
+			);
+
+			var halfWidth = Math.max(currentRect[0][0], currentRect[6][0], currentRect[2][0], currentRect[8][0]) - currentRect[4][0];
+			// var halfHeight = Math.max(currentRect[0][1], currentRect[6][1], currentRect[2][1], currentRect[8][1]) - currentRect[4][1];
+
+			var range = canvasState.width - (halfWidth * 2);
+			var minX = halfWidth + (range * state.minX);
+
+			if (state.x < minX) {
+				state.x = minX;
+				setElement(elem, state);
+				setElement(clone, state);
+			}
+
+			if (config.state) {
+				config.state(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.minY = function(id, num, cb) {
+			var elem = getImageElementById(id);
+			var state = getImageStateById(id);
+			var clone = getCloneElementById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_STRING);
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.TARGET);
+				}
+				if (cb) {
+					cb(errMsg.TARGET);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "number") {
+				if (num > 1) {
+					num = 1;
+				}
+				if (num < 0) {
+					num = 0;
+				}
+			}
+
+			state.minY = num;
+
+			// check current state
+			var currentRect = getRotatedAnchors(
+				state.x,
+				state.y,
+				state.width,
+				state.height,
+				state.rotate
+			);
+
+			// var halfWidth = Math.max(currentRect[0][0], currentRect[6][0], currentRect[2][0], currentRect[8][0]) - currentRect[4][0];
+			var halfHeight = Math.max(currentRect[0][1], currentRect[6][1], currentRect[2][1], currentRect[8][1]) - currentRect[4][1];
+
+			var range = canvasState.height - (halfHeight * 2);
+			var minY = halfHeight + (range * state.minY);
+
+			if (state.y < minY) {
+				state.y = minY;
+				setElement(elem, state);
+				setElement(clone, state);
+			}
+
+			if (config.state) {
+				config.state(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.maxX = function(id, num, cb) {
+			var elem = getImageElementById(id);
+			var state = getImageStateById(id);
+			var clone = getCloneElementById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_STRING);
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.TARGET);
+				}
+				if (cb) {
+					cb(errMsg.TARGET);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "number") {
+				if (num > 1) {
+					num = 1;
+				}
+				if (num < 0) {
+					num = 0;
+				}
+			}
+
+			state.maxX = num;
+
+			// check current state
+			var currentRect = getRotatedAnchors(
+				state.x,
+				state.y,
+				state.width,
+				state.height,
+				state.rotate
+			);
+
+			var halfWidth = Math.max(currentRect[0][0], currentRect[6][0], currentRect[2][0], currentRect[8][0]) - currentRect[4][0];
+			// var halfHeight = Math.max(currentRect[0][1], currentRect[6][1], currentRect[2][1], currentRect[8][1]) - currentRect[4][1];
+
+			var range = canvasState.width - (halfWidth * 2);
+			var maxX = halfWidth + (range * state.maxX);
+
+			if (state.x > maxX) {
+				state.x = maxX;
+				setElement(elem, state);
+				setElement(clone, state);
+			}
+
+			if (config.state) {
+				config.state(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.maxY = function(id, num, cb) {
+			var elem = getImageElementById(id);
+			var state = getImageStateById(id);
+			var clone = getCloneElementById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_STRING);
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.TARGET);
+				}
+				if (cb) {
+					cb(errMsg.TARGET);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "object") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "string") {
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_NUMBER);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT_NUMBER);
+				} 
+				return false;
+			}
+
+			if (typeof(num) === "number") {
+				if (num > 1) {
+					num = 1;
+				}
+				if (num < 0) {
+					num = 0;
+				}
+			}
+
+			state.maxY = num;
+
+			// check current state
+			var currentRect = getRotatedAnchors(
+				state.x,
+				state.y,
+				state.width,
+				state.height,
+				state.rotate
+			);
+
+			// var halfWidth = Math.max(currentRect[0][0], currentRect[6][0], currentRect[2][0], currentRect[8][0]) - currentRect[4][0];
+			var halfHeight = Math.max(currentRect[0][1], currentRect[6][1], currentRect[2][1], currentRect[8][1]) - currentRect[4][1];
+
+			var range = canvasState.height - (halfHeight * 2);
+			var maxY = halfHeight + (range * state.maxY);
+
+			if (state.y > maxY) {
+				state.y = maxY;
+				setElement(elem, state);
+				setElement(clone, state);
+			}
+
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4226,7 +4665,7 @@
 			}
 		}
 
-		myObject.getHidden = function() {
+		myObject.getHiddens = function(cb) {
 
 			var results = [];
 
@@ -4237,6 +4676,9 @@
 				}
 			})
 
+			if (cb) {
+				cb(null, results);
+			}
 			return results;
 		}
 
@@ -4321,15 +4763,15 @@
 				return false;
 			}
 
-			var x = getIdByImageElement(eventState.target);
+			var id = getIdByImageElement(eventState.target);
 
-			setFocusOut(x);
+			setFocusOut(id);
 
 			if (config.focus) {
-				config.focus(null, x);
+				config.focus(null, id);
 			}
 			if (cb) {
-				cb(null, x);
+				cb(null, id);
 			}
 		}
 
@@ -4338,8 +4780,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4348,8 +4790,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4358,8 +4800,8 @@
 			}
 
 			if (!elem) {
-				if (config.enable) {
-					config.enable(errMsg.TARGET);
+				if (config.state) {
+					config.state(errMsg.TARGET);
 				}
 				if (cb) {
 					cb(errMsg.TARGET);
@@ -4371,8 +4813,8 @@
 
 			elem.classList.remove("disabled");
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4384,8 +4826,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4394,8 +4836,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4405,8 +4847,8 @@
 
 			state.movable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4418,8 +4860,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4428,8 +4870,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4439,8 +4881,8 @@
 
 			state.resizable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4452,8 +4894,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4462,8 +4904,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4473,8 +4915,8 @@
 
 			state.rotatable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4486,8 +4928,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4496,8 +4938,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4507,8 +4949,8 @@
 
 			state.flippable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4520,8 +4962,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4530,8 +4972,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4541,8 +4983,8 @@
 
 			state.indexable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4554,8 +4996,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.enable) {
-					config.enable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4564,8 +5006,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.enable) {
-					config.enable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4575,8 +5017,8 @@
 
 			state.drawable = true;
 
-			if (config.enable) {
-				config.enable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4588,8 +5030,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4598,8 +5040,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4608,8 +5050,8 @@
 			}
 
 			if (!elem) {
-				if (config.disable) {
-					config.disable(errMsg.TARGET);
+				if (config.state) {
+					config.state(errMsg.TARGET);
 				}
 				if (cb) {
 					cb(errMsg.TARGET);
@@ -4627,8 +5069,8 @@
 
 			elem.classList.add("disabled");
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4640,8 +5082,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4650,8 +5092,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4661,8 +5103,8 @@
 
 			state.movable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4674,8 +5116,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4684,8 +5126,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4695,8 +5137,8 @@
 
 			state.resizable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4708,8 +5150,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4718,8 +5160,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4729,8 +5171,8 @@
 
 			state.rotatable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4742,8 +5184,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4752,8 +5194,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4763,8 +5205,8 @@
 
 			state.flippable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4776,8 +5218,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4786,8 +5228,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4797,8 +5239,8 @@
 
 			state.indexable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4810,8 +5252,8 @@
 			var state = getImageStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.disable) {
-					config.disable(errMsg.ARGUMENT_STRING);
+				if (config.state) {
+					config.state(errMsg.ARGUMENT_STRING);
 				}
 				if (cb) {
 					cb(errMsg.ARGUMENT_STRING);
@@ -4820,8 +5262,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.disable) {
-					config.disable(errMsg.UNEDITABLE);
+				if (config.state) {
+					config.state(errMsg.UNEDITABLE);
 				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
@@ -4831,8 +5273,8 @@
 
 			state.drawable = false;
 
-			if (config.disable) {
-				config.disable(null, state.id);
+			if (config.state) {
+				config.state(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5718,7 +6160,7 @@
 
 		}
 
-		myObject.this = function(){
+		myObject.this = function(cb){
 
 			if (!eventState.target) {
 				return false;
@@ -5727,13 +6169,19 @@
 			var id = getIdByImageElement(eventState.target);
 
 			if (!id) {
+				if (cb) {
+					cb(errMsg.NO_ARGUMENT);
+				}
 				return false;
 			}
 
+			if (cb) {
+				cb(null, id);
+			}
 			return id;
 		}
 
-		myObject.getThis = function(){
+		myObject.getThis = function(cb){
 
 			if (!eventState.target) {
 				return false;
@@ -5742,13 +6190,19 @@
 			var id = getIdByImageElement(eventState.target);
 
 			if (!id) {
+				if (cb) {
+					cb(errMsg.NO_ARGUMENT);
+				}
 				return false;
 			}
 
+			if (cb) {
+				cb(null, id);
+			}
 			return id;
 		}
 
-		myObject.getThisData = function(){
+		myObject.getThisData = function(cb){
 
 			if (!eventState.target) {
 				return false;
@@ -5757,27 +6211,45 @@
 			var id = getIdByImageElement(eventState.target);
 
 			if (!id) {
+				if (cb) {
+					cb(errMsg.NO_ARGUMENT);
+				}
 				return false;
 			}
 
 			var state = getImageStateById(id);
 
+			if (cb) {
+				cb(null, state);
+			}
 			return state;
 		}
 
-		myObject.getConfigData = function(){
+		myObject.getConfigData = function(cb){
+			if (cb) {
+				cb(null, config);
+			}
 			return config;
 		}
 
-		myObject.getContainerData = function(){
+		myObject.getContainerData = function(cb){
+			if (cb) {
+				cb(null, containerState);
+			}
 			return containerState;
 		}
 
-		myObject.getCanvasData = function(){
+		myObject.getCanvasData = function(cb){
+			if (cb) {
+				cb(null, canvasState);
+			}
 			return canvasState;
 		}
 
-		myObject.getImageData = function(){
+		myObject.getImageData = function(cb){
+			if (cb) {
+				cb(null, imageStates);
+			}
 			return imageStates;
 		}
 
@@ -5822,10 +6294,19 @@
 			onFlip = false;
 
 			myObject.init(target, preConfig);
+
+			if (cb) {
+				cb(null, true);
+			}
+			return true
 		}
 
-		myObject.destroy = function(){
+		myObject.destroy = function(cb){
 			containerElement.parentNode.removeChild(containerElement);
+			if (cb) {
+				cb(null, true);
+			}
+			return true
 		}
 
 		// 
