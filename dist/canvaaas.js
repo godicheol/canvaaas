@@ -910,6 +910,7 @@
 					mouseY,
 					flipX,
 					flipY,
+					dire,
 					direction;
 
 				if (!state.resizable) {
@@ -926,68 +927,27 @@
 					return false;
 				}
 
-				flipX = state.scaleX === -1;
-				flipY = state.scaleY === -1;
-
 				if (handle.classList.contains("canvaaas-resize-n")) {
-					direction = "n";
+					dire = "n";
 				} else if (handle.classList.contains("canvaaas-resize-ne")) {
-					if (flipX === false && flipY === false) {
-						direction = "ne";
-					} else if (flipX === true && flipY === false) {
-						direction = "nw";
-					} else if (flipX === false && flipY === true) {
-						direction = "se";
-					} else if (flipX === true && flipY === true) {
-						direction = "sw";
-					} else {
-						return false;
-					}
+					dire = "ne";
 				} else if (handle.classList.contains("canvaaas-resize-e")) {
-					direction = "e";
+					dire = "e";
 				} else if (handle.classList.contains("canvaaas-resize-se")) {
-					if (flipX === false && flipY === false) {
-						direction = "se";
-					} else if (flipX === true && flipY === false) {
-						direction = "sw";
-					} else if (flipX === false && flipY === true) {
-						direction = "ne";
-					} else if (flipX === true && flipY === true) {
-						direction = "nw";
-					} else {
-						return false;
-					}
+					dire = "se";
 				} else if (handle.classList.contains("canvaaas-resize-s")) {
-					direction = "s";
+					dire = "s";
 				} else if (handle.classList.contains("canvaaas-resize-sw")) {
-					if (flipX === false && flipY === false) {
-						direction = "sw";
-					} else if (flipX === true && flipY === false) {
-						direction = "se";
-					} else if (flipX === false && flipY === true) {
-						direction = "nw";
-					} else if (flipX === true && flipY === true) {
-						direction = "ne";
-					} else {
-						return false;
-					}
+					dire = "sw";
 				} else if (handle.classList.contains("canvaaas-resize-w")) {
-					direction = "w";
+					dire = "w";
 				} else if (handle.classList.contains("canvaaas-resize-nw")) {
-					if (flipX === false && flipY === false) {
-						direction = "nw";
-					} else if (flipX === true && flipY === false) {
-						direction = "ne";
-					} else if (flipX === false && flipY === true) {
-						direction = "sw";
-					} else if (flipX === true && flipY === true) {
-						direction = "se";
-					} else {
-						return false;
-					}
+					dire = "nw";
 				} else {
 					return false;
 				}
+
+				direction = getDirection(dire, state.scaleX, state.scaleY);
 
 				eventState.handle = handle;
 				eventState.direction = direction;
@@ -997,26 +957,6 @@
 				eventState.initialH = state.height;
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-
-		// debug
-		// 
-		var anchors = getRotatedAnchors(
-			state.x, 
-			state.y, 
-			state.width, 
-			state.height, 
-			state.rotate
-		);
-		var axisX = Math.floor(
-			anchors[0][0]
-		);
-		var axisY = Math.floor(
-			anchors[0][1]
-		);
-		console.log("Start", axisX, axisY)
-		// 
-		// debug
-
 
 				onResize = true;
 
@@ -1057,7 +997,8 @@
 					diffY,
 					radians,
 					cosFraction,
-					sinFraction;
+					sinFraction,
+					onShiftKey = false;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -1069,28 +1010,29 @@
 					return false;
 				}
 
-				// if (state.scaleX !== state.scaleY) {
-				// 	deg = -state.rotate;
-				// } else {
-				// 	deg = state.rotate;
-				// }
-
-				// if (!config.editableAspectRatio || e.shiftKey) {
-				// 	mouseX *= 2;
-				// 	mouseY *= 2;
-				// }
+				if (!config.editableAspectRatio || e.shiftKey) {
+					onShiftKey = true;
+				}
 
 				scaleRatio = canvasState.width / canvasState.originalWidth;
+				aspectRatio = state.originalWidth / state.originalHeight;
+
+				
 
 				radians = state.rotate * Math.PI / 180;
+
+				if (state.scaleX !== 1) {
+					radians *= -1;
+				}
+
+				if (state.scaleY !== 1) {
+					radians *= -1;
+				}
+
 				cosFraction = Math.cos(radians);
 				sinFraction = Math.sin(radians);
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-
-				// 
-				// test
-				// 
 
 				width = eventState.initialW;
 				height = eventState.initialH;
@@ -1153,13 +1095,6 @@
 					return false;
 				}
 
-				state.width = width;
-				state.height = height;
-				state.x = axisX;
-				state.y = axisY;
-
-				// aspectRatio = state.originalWidth / state.originalHeight;
-
 				// if (!config.editableAspectRatio || e.shiftKey) {
 				// 	width = height * aspectRatio;
 				// 	axisX = eventState.initialX;
@@ -1173,6 +1108,11 @@
 				if (config.minCanvasHeight > height / scaleRatio) {
 					return false;
 				}
+
+				state.width = width;
+				state.height = height;
+				state.x = axisX;
+				state.y = axisY;
 
 				setElement(elem, state);
 				setElement(clone, state);
@@ -2014,6 +1954,162 @@
 		function getDiagonal(w, h) {
 			return Math.sqrt( Math.pow(w, 2) + Math.pow(h, 2) );
 		};
+
+		function getDirection(candidateDirection, scaleX, scaleY) {
+			var flipX, flipY, direction;
+
+			if (scaleX > 0 || scaleX === false) {
+				flipX = false;
+			} else if (scaleX < 0 || scaleX === true) {
+				flipX = true;
+			}
+
+			if (scaleY > 0 || scaleY === false) {
+				flipY = false;
+			} else if (scaleY < 0 || scaleY === true) {
+				flipY = true;
+			}
+
+			if (
+				candidateDirection === "n" ||
+				candidateDirection === "N" ||
+				candidateDirection === "north" ||
+				candidateDirection === "North"
+			) {
+				direction = 0;
+			} else if (
+				candidateDirection === "ne" ||
+				candidateDirection === "NE" ||
+				candidateDirection === "north-east" ||
+				candidateDirection === "North-East"
+			) {
+				direction = 45;
+			} else if (
+				candidateDirection === "e" ||
+				candidateDirection === "E" ||
+				candidateDirection === "east" ||
+				candidateDirection === "East"
+			) {
+				direction = 90;
+			} else if (
+				candidateDirection === "se" ||
+				candidateDirection === "SE" ||
+				candidateDirection === "south-east" ||
+				candidateDirection === "South-East"
+			) {
+				direction = 135;
+			} else if (
+				candidateDirection === "s" ||
+				candidateDirection === "S" ||
+				candidateDirection === "south" ||
+				candidateDirection === "South"
+			) {
+				direction = 180;
+			} else if (
+				candidateDirection === "sw" ||
+				candidateDirection === "SW" ||
+				candidateDirection === "south-west" ||
+				candidateDirection === "South-West"
+			) {
+				direction = 225;
+			} else if (
+				candidateDirection === "w" ||
+				candidateDirection === "W" ||
+				candidateDirection === "west" ||
+				candidateDirection === "West"
+			) {
+				direction = 270;
+			} else if (
+				candidateDirection === "nw" ||
+				candidateDirection === "NW" ||
+				candidateDirection === "north-west" ||
+				candidateDirection === "North-West"
+			) {
+				direction = 315;
+			}
+
+			if (flipX === false && flipY === false) {
+				if (direction === 0) {
+					return "n";
+				} else if (direction === 45) {
+					return "ne";
+				} else if (direction === 90) {
+					return "e";
+				} else if (direction === 135) {
+					return "se";
+				} else if (direction === 180) {
+					return "s";
+				} else if (direction === 225) {
+					return "sw";
+				} else if (direction === 270) {
+					return "w";
+				} else if (direction === 315) {
+					return "nw";
+				} else {
+					return false;
+				}
+			} else if (flipX === true && flipY === false) {
+				if (direction === 0) {
+					return "n";
+				} else if (direction === 45) {
+					return "nw";
+				} else if (direction === 90) {
+					return "w";
+				} else if (direction === 135) {
+					return "sw";
+				} else if (direction === 180) {
+					return "s";
+				} else if (direction === 225) {
+					return "se";
+				} else if (direction === 270) {
+					return "e";
+				} else if (direction === 315) {
+					return "ne";
+				}
+			} else if (flipX === false && flipY === true) {
+				if (direction === 0) {
+					return "s";
+				} else if (direction === 45) {
+					return "se";
+				} else if (direction === 90) {
+					return "e";
+				} else if (direction === 135) {
+					return "ne";
+				} else if (direction === 180) {
+					return "n";
+				} else if (direction === 225) {
+					return "nw";
+				} else if (direction === 270) {
+					return "w";
+				} else if (direction === 315) {
+					return "sw";
+				} else {
+					return false;
+				}
+			} else if (flipX === true && flipY === true) {
+				if (direction === 0) {
+					return "s";
+				} else if (direction === 45) {
+					return "sw";
+				} else if (direction === 90) {
+					return "w";
+				} else if (direction === 135) {
+					return "nw";
+				} else if (direction === 180) {
+					return "n";
+				} else if (direction === 225) {
+					return "ne";
+				} else if (direction === 270) {
+					return "e";
+				} else if (direction === 315) {
+					return "se";
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
 
 		function getShortId() {
 		    var firstPart = (Math.random() * 46656) | 0;
