@@ -25,6 +25,8 @@
  * 
  * update undo, redo
  * 
+ * update index
+ * 
  */
 
 /*!
@@ -69,6 +71,10 @@
 			magnetic: true, // boolean
 
     		editableAspectRatio: true, // boolean
+
+    		minAutoIndex: 0,
+
+    		maxAutoIndex: 999,
 
 			maxNumberOfImages: 999,
 
@@ -174,6 +180,7 @@
 			ARGUMENT: "Argument error",
 			IMAGE_LIMIT: "Exceed the maximum numbers of images",
 			CACHE_LIMIT: "Exceed the maximum numbers of caches",
+			INDEX_LIMIT: "Exceed the maximum numbers of index",
 			MIMETYPE: "MimeType not allowed",
 			UNKNOWN: "An unknown error has occurred",
 			INDEXING: "Error creating index"
@@ -1674,7 +1681,16 @@
 					return -1;
 				}
 				return 0;
+			}).map(function(state, i){
+				if (
+					state.index > config.minAutoIndex - 1 &&
+					state.index < config.maxAutoIndex
+				) {
+					state.index = i;
+				}
+				return state;
 			});
+
 
 			tmpStates.forEach(function(state){
 				var elem = getImageElementById(state.id);
@@ -2703,14 +2719,23 @@
 			// start load
 			newImage.src = src;
 
+			newImage.onerror = function(e) {
+				if (cb) {
+					cb(errMsg.FAILLOAD);
+				}
+				return false;
+			}
+
 			newImage.onload = function(e){
 
-				var maxIndex = 0;
-
-				imageStates.map(function(state) {
-					if (state.index < 1000) {	
-						if (maxIndex < state.index) {
-							maxIndex = state.index;
+				var nextIndex = 0;
+				imageStates.forEach(function(state){
+					if (
+						state.index > config.minAutoIndex - 1 &&
+						state.index < config.maxAutoIndex
+					) {
+						if (nextIndex < state.index) {
+							nextIndex = state.index;
 						}
 					}
 				});
@@ -2777,7 +2802,7 @@
 				newState.type = typ;
 				newState.filename = filename;
 
-				newState.index = maxIndex + 1;
+				newState.index = nextIndex + 1;
 
 				newState.originalWidth = originalWidth;
 				newState.originalHeight = originalHeight;
@@ -2795,8 +2820,9 @@
 				newState.resizable = true;
 				newState.rotatable = true;
 				newState.flippable = true;
-				newState.indexable = true;
 				newState.drawable = true;
+
+				newState.uploadedAt = Date.now();
 
 				canvasElement.appendChild(newElem);
 
@@ -3141,16 +3167,15 @@
 			}
 
 			var arr = [];
-			var results = [];
-
 			if (!Array.isArray(imageUrls)) {
-				arr = [imageUrls]
+				arr[0] = imageUrls;
 			} else {
 				arr = imageUrls;
 			}
 
-			var index = arr.length,
-				count = 0;
+			var index = arr.length;
+			var count = 0;
+			var results = [];
 
 			onUpload = true;
 
@@ -4149,22 +4174,12 @@
 			}
 		}
 
-		myObject.indexUp = function(id, num, cb) {
+		myObject.indexUp = function(id, cb) {
 			var elem = getImageElementById(id);
 			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.index) {
-					config.index(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				} 
-				return false;
-			}
-
-			if (typeof(num) !== "number") {
 				if (config.index) {
 					config.index(errMsg.ARGUMENT);
 				}
@@ -4194,13 +4209,14 @@
 				return false;
 			}
 
-			if (!state.indexable) {
+			// check index limit
+			if (state.index > config.maxAutoIndex) {
 				if (config.index) {
-					config.index(errMsg.AVAILABILITY);
+					config.index(errMsg.INDEX_LIMIT);
 				}
 				if (cb) {
-					cb(errMsg.AVAILABILITY);
-				} 
+					cb(errMsg.INDEX_LIMIT);
+				}
 				return false;
 			}
 
@@ -4208,8 +4224,18 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			// check next index
+			if (imageStates[state.index + 1] !== undefined) {
+				if (
+					imageStates[state.index + 1].index > config.minAutoIndex - 1 &&
+					imageStates[state.index + 1].index < config.maxAutoIndex
+				) {
+					imageStates[state.index + 1].index = state.index;
+				}
+			}
+
 			// save state
-			state.index += num;
+			state.index += 1;
 
 			// adjust state
 			setElement(elem, state);
@@ -4235,22 +4261,12 @@
 			});
 		}
 
-		myObject.indexDown = function(id, num, cb) {
+		myObject.indexDown = function(id, cb) {
 			var elem = getImageElementById(id);
 			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.index) {
-					config.index(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				} 
-				return false;
-			}
-
-			if (typeof(num) !== "number") {
 				if (config.index) {
 					config.index(errMsg.ARGUMENT);
 				}
@@ -4280,13 +4296,14 @@
 				return false;
 			}
 
-			if (!state.indexable) {
+			// check index limit
+			if (state.index - 1 < config.minAutoIndex) {
 				if (config.index) {
-					config.index(errMsg.AVAILABILITY);
+					config.index(errMsg.INDEX_LIMIT);
 				}
 				if (cb) {
-					cb(errMsg.AVAILABILITY);
-				} 
+					cb(errMsg.INDEX_LIMIT);
+				}
 				return false;
 			}
 
@@ -4294,8 +4311,18 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			// check previous state
+			if (imageStates[state.index - 1] !== undefined) {
+				if (
+					imageStates[state.index - 1].index > config.minAutoIndex - 1 &&
+					imageStates[state.index - 1].index < config.maxAutoIndex
+				) {
+					imageStates[state.index - 1].index = state.index;
+				}
+			}
+
 			// save state
-			state.index -= num;
+			state.index -= 1;
 
 			// adjust state
 			setElement(elem, state);
@@ -4352,16 +4379,6 @@
 				}
 				if (cb) {
 					cb(errMsg.ELEMENT);
-				} 
-				return false;
-			}
-
-			if (!state.indexable) {
-				if (config.index) {
-					config.index(errMsg.AVAILABILITY);
-				}
-				if (cb) {
-					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -4864,55 +4881,6 @@
 			}
 		}
 
-		myObject.enableIndex = function(id, cb){
-			var elem = getImageElementById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (config.state) {
-					config.state(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.state) {
-					config.state(errMsg.UNEDITABLE);
-				}
-				if (cb) {
-					cb(errMsg.UNEDITABLE);
-				}
-				return false;
-			}
-
-			if (!elem) {
-				if (config.state) {
-					config.state(errMsg.ELEMENT);
-				}
-				if (cb) {
-					cb(errMsg.ELEMENT);
-				} 
-				return false;
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-			// save state
-			state.indexable = true;
-
-			if (config.state) {
-				config.state(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-		}
-
 		myObject.enableDraw = function(id, cb){
 			var elem = getImageElementById(id);
 			var state = getStateById(id);
@@ -5202,55 +5170,6 @@
 
 			// save state
 			state.flippable = false;
-
-			if (config.state) {
-				config.state(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-		}
-
-		myObject.disableIndex = function(id, cb){
-			var elem = getImageElementById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (config.state) {
-					config.state(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.state) {
-					config.state(errMsg.UNEDITABLE);
-				}
-				if (cb) {
-					cb(errMsg.UNEDITABLE);
-				}
-				return false;
-			}
-
-			if (!elem) {
-				if (config.state) {
-					config.state(errMsg.ELEMENT);
-				}
-				if (cb) {
-					cb(errMsg.ELEMENT);
-				} 
-				return false;
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-			// save state
-			state.indexable = false;
 
 			if (config.state) {
 				config.state(null, state.id);
@@ -6097,7 +6016,6 @@
 				tmp.resizable = state.resizable;
 				tmp.rotatable = state.rotatable;
 				tmp.flippable = state.flippable;
-				tmp.indexable = state.indexable;
 				tmp.drawable = state.drawable;
 
 				states.push(tmp);
@@ -6181,7 +6099,25 @@
 
 				// save state
 				state.isImported = true;
-				state.index = candidateState.index;
+				if (
+					candidateState.index < config.minAutoIndex ||
+					candidateState.index > config.maxAutoIndex
+				) {
+					state.index = candidateState.index;
+				} else {
+					var nextIndex = 0;
+					imageStates.forEach(function(state){
+						if (
+							state.index > config.minAutoIndex - 1 &&
+							state.index < config.maxAutoIndex
+						) {
+							if (nextIndex < state.index) {
+								nextIndex = state.index;
+							}
+						}
+					});
+					state.index = nextIndex;
+				}
 
 				state.x = candidateState.x * scaleRatio;
 				state.y = candidateState.y * scaleRatio;

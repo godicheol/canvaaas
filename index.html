@@ -69,8 +69,8 @@
 		  <button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0.5)">opacityTo(id, 0.5)</button>
 		  <button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 1)">opacityTo(id, 1)</button>
 		  //
-		  <button type="button" onclick="canvaaas.indexUp(canvaaas.this(), 1)">indexUp(id, 1)</button>
-		  <button type="button" onclick="canvaaas.indexDown(canvaaas.this(), 1)">indexDown(id, 1)</button>
+		  <button type="button" onclick="canvaaas.indexUp(canvaaas.this())">indexUp(id)</button>
+		  <button type="button" onclick="canvaaas.indexDown(canvaaas.this())">indexDown(id)</button>
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1)</button>
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000)</button>
 		  //
@@ -86,7 +86,6 @@
 		  <button type="button" onclick="canvaaas.enableResize(canvaaas.this())">enableResize(id)</button>
 		  <button type="button" onclick="canvaaas.enableRotate(canvaaas.this())">enableRotate(id)</button>
 		  <button type="button" onclick="canvaaas.enableFlip(canvaaas.this())">enableFlip(id)</button>
-		  <button type="button" onclick="canvaaas.enableIndex(canvaaas.this())">enableIndex(id)</button>
 		  <button type="button" onclick="canvaaas.enableDraw(canvaaas.this())">enableDraw(id)</button>
 		  //
 		  <button type="button" onclick="canvaaas.disableFocus(canvaaas.this())">disableFocus(id)</button>
@@ -94,7 +93,6 @@
 		  <button type="button" onclick="canvaaas.disableResize(canvaaas.this())">disableResize(id)</button>
 		  <button type="button" onclick="canvaaas.disableRotate(canvaaas.this())">disableRotate(id)</button>
 		  <button type="button" onclick="canvaaas.disableFlip(canvaaas.this())">disableFlip(id)</button>
-		  <button type="button" onclick="canvaaas.disableIndex(canvaaas.this())">disableIndex(id)</button>
 		  <button type="button" onclick="canvaaas.disableDraw(canvaaas.this())">disableDraw(id)</button>
 		  //
 		  <button type="button" onclick="canvaaas.setState(canvaaas.this(), tmpState1)">setState(id, tmpState1)</button>
@@ -202,7 +200,6 @@
 			resizable: true,
 			rotatable: true,
 			flippable: true,
-			indexable: true,
 			drawable: true,
 	  }
 
@@ -217,99 +214,211 @@
 	  }
 
 	  function custom1(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("uploadFiles() callback", res);
 	  }
 
 	  function custom2(err, res) {
-			console.log("uploadUrls callback", res);
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
+			console.log("uploadUrls callback", err, res);
 	  }
 
 	  function custom3(err, res) {
-			console.log("custom callback", res);
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
+			console.log("uploadUrls callback", err, res);
 	  }
 
 	  function custom4(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("draw() callback", res);
 			preview1.src = res.data;
 	  }
 
 	  function custom5(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("captrue() callback", res);
 	  }
 
 	  function custom6(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("download() callback", res);
 	  }
 
 	  function custom7(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("export() callback", res);
 			tmp_states = res;
 	  }
 
 	  function custom8(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 			console.log("import() callback", res);
 	  }
 
 	  var elem = document.getElementById("tester");
 	  canvaaas.init(elem, {
 		focus: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("focus", res);
 		},
 		move: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("move", res);
 		},
 		resize: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("resize", res);
 		},
 		rotate: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("rotate", res);
 		},
 		flip: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("flip", res);
 		},
 		opacity: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("opacity", res);
 		},
 		index: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("index", res);
 		},
 		visibility: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("visibility", res);
 		},
 		state: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("state", res);
 		},
 		remove: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("remove", res);
 		},
 		config: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("config", res);
 		},
 		canvas: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("canvas", res);
 		},
 		upload: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("upload", res);
 		},
 		draw: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("draw", res);
 		},
 		capture: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("capture", res);
 		},
 		download: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("download", res);
 		},
 		export: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("export", res);
 		},
 		import: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("import", res);
 		},
 		redo: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("redo", res);
 		},
 		undo: function(err, res){
+			if (err) {
+	  		console.log(err);
+	  		return;
+	  	}
 		  console.log("undo", res);
 		},
 
