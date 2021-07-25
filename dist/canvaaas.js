@@ -27,6 +27,8 @@
  * 
  * update index
  * 
+ * update arrow key
+ * 
  */
 
 /*!
@@ -330,10 +332,92 @@
 				}
 			},
 
-			onOutsideScroll: function(e) {
+			onScroll: function(e) {
 				if (eventState.target) {
 					var x = getIdByImageElement(eventState.target);
 					setFocusOut(x);
+				}
+			},
+
+			keydown: function(e) {
+				if (!config.editable) {
+					return false;
+				}
+				if (!eventState.target) {
+					return false;
+				}
+
+				var elem = eventState.target;
+				var state = getStateByImageElement(elem);
+				var clone = getCloneElementById(state.id);
+
+				if (!elem || !state || !clone) {
+					return false;
+				}
+
+				if (!state.movable) {
+					return false;
+				}
+
+				var rotatedRect = getRotatedRect(state.width, state.height, state.rotate);
+				var halfWidth = 0.5 * rotatedRect[0];
+				var halfHeight = 0.5 * rotatedRect[1];
+				var magL = halfWidth;
+				var magT = halfHeight;
+				var magR = canvasState.width - halfWidth;
+				var magB = canvasState.height - halfHeight;
+				var x = 0;
+				var y = 0;
+
+				if (e.keyCode == '38') {
+					// up arrow
+					y -= 10;
+				} else if (e.keyCode == '40') {
+					// down arrow
+					y += 10;
+				} else if (e.keyCode == '37') {
+					// left arrow
+					x -= 10;
+				} else if (e.keyCode == '39') {
+					// right arrow
+					x += 10;
+				} else {
+					return false;
+				}
+
+				// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// save state
+				state.x += x;
+				state.y += y;
+
+				// check magnetic option
+				if (config.magnetic) {
+					if (magR - 5 < state.x && magR + 5 > state.x) {
+						state.x = magR;
+					}
+
+					if (magB - 5 < state.y && magB + 5 > state.y) {
+						state.y = magB;
+					}
+
+					if (magL - 5 < state.x && magL + 5 > state.x) {
+						state.x = magL;
+					}
+
+					if (magT - 5 < state.y && magT + 5 > state.y) {
+						state.y = magT;
+					}
+				}
+
+				// adjust state
+				setElement(elem, state);
+				setElement(clone, state);
+
+				if (config.move) {
+					config.move(null, state.id);
 				}
 			},
 
@@ -356,7 +440,7 @@
 					elem = e.target;
 				}
 
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				if (!state.focusable) {
 					return false;
@@ -418,7 +502,7 @@
 				}
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var mouseX;
 				var mouseY;
 				var rotatedRect;
@@ -478,7 +562,7 @@
 
 				var handle = eventState.handle;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var mouseX;
 				var mouseY;
@@ -537,7 +621,7 @@
 				preEvent();
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				// toggle off
 		    	onMove = false;
@@ -570,7 +654,7 @@
 
 				var handle = e.target;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -633,7 +717,7 @@
 				}
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var mouseX;
 				var mouseY;
@@ -681,7 +765,7 @@
 				preEvent();
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				// toggle off
 		    	onRotate = false;
@@ -714,7 +798,7 @@
 
 				var handle = e.target;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var mouseX;
 				var mouseY;
 
@@ -753,7 +837,7 @@
 
 				var handle = eventState.handle;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var mouseX;
 				var mouseY;
@@ -835,7 +919,7 @@
 				e.stopPropagation();
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 
 				if (state.rotateX > 90) {
@@ -884,7 +968,7 @@
 
 				var handle = e.target;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var mouseX;
 				var mouseY;
 				var flipX;
@@ -969,7 +1053,7 @@
 
 				var direction = eventState.direction;
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var aspectRatio;
 				var mouseX;
@@ -1166,7 +1250,7 @@
 				preEvent();
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				// toggle off
 		    	onResize = false;
@@ -1200,7 +1284,7 @@
 				}
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var ratio;
 				var diffX;
@@ -1297,7 +1381,7 @@
 				}
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var diagonal;
 				var mouseX;
@@ -1348,7 +1432,7 @@
 				}
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
 				var diagonal;
 				var mouseX;
@@ -1397,7 +1481,7 @@
 				preEvent();
 
 				var elem = eventState.target;
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				// toggle off
 		    	onZoom = false;
@@ -1637,6 +1721,13 @@
 			elem.addEventListener("touchstart", handlers.startMove, false);
 			elem.addEventListener("wheel", handlers.startWheelZoom, false);
 
+			document.addEventListener("keydown", handlers.keydown, false);
+
+			document.addEventListener("mousedown", handlers.isOutside, false);
+			document.addEventListener("touchstart", handlers.isOutside, false);
+			document.addEventListener("scroll", handlers.onScroll, false);
+
+
 			eventState.target = elem;
 
 			return true;
@@ -1658,6 +1749,12 @@
 
 			elem.addEventListener("mousedown", handlers.startFocusIn, false);
 			elem.addEventListener("touchstart", handlers.startFocusIn, false);
+
+			document.removeEventListener("keydown", handlers.keydown, false);
+
+			document.removeEventListener("mousedown", handlers.isOutside, false);
+			document.removeEventListener("touchstart", handlers.isOutside, false);
+			document.removeEventListener("scroll", handlers.onScroll, false);
 
 			eventState.target = undefined;
 
@@ -1874,7 +1971,7 @@
 			});
 		};
 
-		function getImageStateByImageElement(elem) {
+		function getStateByImageElement(elem) {
 			if (!elem) {
 				return false;
 			}
@@ -3048,10 +3145,10 @@
 	        // window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
-			document.addEventListener("mousedown", handlers.isOutside, false);
-			document.addEventListener("touchstart", handlers.isOutside, false);
+			// document.addEventListener("mousedown", handlers.isOutside, false);
+			// document.addEventListener("touchstart", handlers.isOutside, false);
 
-			document.addEventListener("scroll", handlers.onOutsideScroll, false);
+			// document.addEventListener("scroll", handlers.onScroll, false);
 
 
 			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
@@ -6066,7 +6163,7 @@
 
 				var elem = getImageElementByFilename(candidateState.filename);
 				var clone = getCloneElementByImageElement(elem);
-				var state = getImageStateByImageElement(elem);
+				var state = getStateByImageElement(elem);
 
 				if (!elem || !state || !clone) {
 					results.push({
@@ -6351,7 +6448,7 @@
 			document.addEventListener("mousedown", handlers.isOutside, false);
 			document.addEventListener("touchstart", handlers.isOutside, false);
 
-			document.addEventListener("scroll", handlers.onOutsideScroll, false);
+			document.addEventListener("scroll", handlers.onScroll, false);
 
 			var target = containerElement.parentNode;
 			target.removeChild(containerElement);
