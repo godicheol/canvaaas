@@ -172,7 +172,8 @@
 			FAILLOAD: "Failed to load image from Server",
 			AVAILABILITY: "This action is disabled",
 			ARGUMENT: "Argument error",
-			LIMITED: "Exceed the maximum numbers of images",
+			IMAGE_LIMIT: "Exceed the maximum numbers of images",
+			CACHE_LIMIT: "Exceed the maximum numbers of caches",
 			MIMETYPE: "MimeType not allowed",
 			UNKNOWN: "An unknown error has occurred",
 			INDEXING: "Error creating index"
@@ -2649,7 +2650,7 @@
 
 			if (imageElements.length > config.maxNumberOfImages - 1) {
 				if (cb) {
-					cb(errMsg.LIMITED);
+					cb(errMsg.IMAGE_LIMIT);
 				}
 				return false;
 			}
@@ -6323,6 +6324,12 @@
 
 		myObject.undo = function(cb){
 			if (eventCaches.length < 1) {
+				if (config.undo) {
+					config.undo(errMsg.CACHE_LIMIT);
+				}
+				if (cb) {
+					cb(errMsg.CACHE_LIMIT);
+				}
 				return false;
 			}
 			var recent = eventCaches.pop();
@@ -6360,6 +6367,12 @@
 
 		myObject.redo = function(cb){
 			if (eventSubCaches.length < 1) {
+				if (config.redo) {
+					config.redo(errMsg.CACHE_LIMIT);
+				}
+				if (cb) {
+					cb(errMsg.CACHE_LIMIT);
+				}
 				return false;
 			}
 			var recent = eventSubCaches.pop();
