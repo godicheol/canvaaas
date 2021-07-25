@@ -1582,6 +1582,10 @@
 
 			eventCaches.push(tmp);
 
+			if (eventCaches.length > config.cacheLevels) {
+				eventCaches.shift();
+			}
+
 			return true;
 		}
 
