@@ -2,61 +2,62 @@
  * custom
  */
 
+/* outline */
+/* canvas outside */
+.canvaaas-clone.active{
+	outline: 1px solid red;
+}
+
+/* outline */
+/* canvas inside */
+.canvaaas-image.active{
+	outline: 1px solid #000;
+}
+
+/* overlay */
+/* canvas outside */
+.canvaaas-clone .canvaaas-overlay{
+	background-color: rgba(0,0,0);
+	opacity: 0.5;
+}
+
+/* north rotate handle */
 .canvaaas-rotate-n{
 	top: -24px !important;
 }
 
-/*.canvaaas-rotate-n,*/
+/* rotate handles */
 .canvaaas-rotate-ne,
 .canvaaas-rotate-e,
 .canvaaas-rotate-se,
 .canvaaas-rotate-s,
 .canvaaas-rotate-sw,
 .canvaaas-rotate-w,
-.canvaaas-rotate-nw
-{
+.canvaaas-rotate-nw{
  	display: none !important;
 }
+
+/* 미구현 */
 .canvaaas-flip-handle{
-	/* 미구현 */
 	display: none !important;
 }
-.canvaaas-clone.active{
-	/* canvas outside */
-	outline: 1px solid red;
-}
-.canvaaas-image.active{
-	/* canvas inside */
-	outline: 1px solid #000;
-}
 
-/*!
- * overlay
- */
-
-.canvaaas-clone .canvaaas-overlay{
-	/* canvas outside */
-	background-color: rgba(0,0,0);
-	opacity: 0.5;
-}
-
-/*!
- * handle style
- */
-
-.canvaaas-clone .canvaaas-resize-handle::before,
-.canvaaas-clone .canvaaas-rotate-handle::before,
-.canvaaas-clone .canvaaas-flip-handle::before{
-	/* canvas outside */
+/* handle inner */
+/* canvas outside */
+.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-clone .canvaaas-flip-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
 	border: 1px solid red; 
 	background-color: #fff;
 }
-.canvaaas-image .canvaaas-resize-handle::before,
-.canvaaas-image .canvaaas-rotate-handle::before,
-.canvaaas-image .canvaaas-flip-handle::before{
-	/* canvas inside */
+
+/* handle inner */
+/* canvas inside */
+.canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-image .canvaaas-flip-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
 	border: 1px solid #000; 
@@ -160,6 +161,7 @@
 	right: 0;
 }
 
+/* handle wrapper */
 .canvaaas-resize-handle,
 .canvaaas-rotate-handle,
 .canvaaas-flip-handle{
@@ -175,15 +177,21 @@
 	cursor: default;
 	pointer-events: none;
 }
+.canvaaas-clone.active .canvaaas-resize-handle,
+.canvaaas-clone.active .canvaaas-rotate-handle,
+.canvaaas-clone.active .canvaaas-flip-handle{
+	display: block;
+}
 .canvaaas-image.active .canvaaas-resize-handle,
 .canvaaas-image.active .canvaaas-rotate-handle,
 .canvaaas-image.active .canvaaas-flip-handle{
 	display: block;
 }
 
-.canvaaas-resize-handle::before,
-.canvaaas-rotate-handle::before,
-.canvaaas-flip-handle::before{
+/* handle inner */
+.canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-flip-handle .canvaaas-handle{
 	content: " ";
 	display: block;
 	position: absolute;
@@ -249,6 +257,7 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
+/* capture preview */
 .canvaaas-preview{
 	position: relative;
 	overflow: hidden;

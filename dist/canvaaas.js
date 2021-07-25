@@ -21,13 +21,15 @@
  * 
  * fix all callback error messages
  * 
+ * handle css
+ * 
  */
 
 /*!
  * 
  * 업데이트 예정
  * 
- * 수정 이력, 되돌리기
+ * cache, undo, redo
  * 
  * 단축키
  * 
@@ -106,6 +108,8 @@
 
     		extensions: ["jpg", "jpeg", "png", "webp", "svg"], // upload option
 
+    		cacheLevels: 100,
+
     		focus: undefined, // callback function
 
     		move: undefined, // callback function
@@ -183,32 +187,33 @@
 
 		var imageTemplate = "";
 		imageTemplate += "<img>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-e'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-s'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-w'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-ne'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-nw'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-se'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-sw'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-n'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-e'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-s'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-w'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-ne'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-nw'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-se'></div>";
-		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-sw'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-n'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-e'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-s'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-w'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-ne'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-nw'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-e'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-s'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-w'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-ne'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-nw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-se'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-sw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-n'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-e'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-s'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-w'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-ne'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-nw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-se'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-flip-handle canvaaas-flip-sw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-n'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-e'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-s'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-w'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-ne'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-nw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
 		var eventState = {};
+		var eventHistory = [];
 		var containerState = {};
 		var canvasState = {};
 		var imageStates = [];
@@ -1496,13 +1501,6 @@
 			return true;
 		};
 
-		function preEvent() {
-			// save container offset
-			var offset = containerElement.getBoundingClientRect();
-			containerState.left = offset.left;
-			containerState.top = offset.top;
-		};
-
 		function setObject(srcObj, destiObj) {
 			if (!srcObj || !destiObj) {
 				return false;
@@ -1512,6 +1510,16 @@
 			});
 
 			return true;
+		};
+
+		function setCache(target, state) {
+			var targetElem; // elem
+			var targetState; // state: 
+			var targetClass; // class: {method: add, value}
+
+
+
+
 		};
 
 		function setFocusIn(id) {
@@ -1641,6 +1649,13 @@
 			if (cb) {
 				return cb(null);
 			}
+		};
+
+		function preEvent() {
+			// save container offset
+			var offset = containerElement.getBoundingClientRect();
+			containerState.left = offset.left;
+			containerState.top = offset.top;
 		};
 
 		function getIndexById(id) {
