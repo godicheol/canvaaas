@@ -13,23 +13,23 @@
  *** 
  *** release note
  * 
- * pinch zoom, outside canvas
+ * update pinch zoom - outside canvas
  * 
- * resize handle, shiftKey
+ * update resize handle - onShiftKey
  * 
- * config.disalbe, config.enable => config.state
+ * update config.state
  * 
- * fix all callback error messages
+ * update all callback error messages
  * 
- * handle css
+ * update handle css
+ * 
+ * update undo, redo
  * 
  */
 
 /*!
  * 
  * 업데이트 예정
- * 
- * cache, undo, redo
  * 
  * 단축키
  * 
@@ -5926,7 +5926,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					// recursive
+					// draw image
 					drawImage(canvas, drawables[count].id, function(err) {
 						if (err) {
 							drawResults.push({
@@ -6019,7 +6019,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					// recursive
+					// draw image
 					drawImage(canvas, drawables[count].id, function(err) {
 						if (err) {
 							drawResults.push({
@@ -6170,6 +6170,11 @@
 					continue;
 				}
 
+				// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// save state
 				state.isImported = true;
 				state.index = candidateState.index;
 
@@ -6190,12 +6195,14 @@
 				state.flippable = candidateState.flippable;
 				state.drawable = candidateState.drawable;
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
 				results.push(state);
 			}
 
+			// adjust index
 			setIndex(function(err){
 				if (err) {
 					if (config.import) {
@@ -6401,6 +6408,8 @@
 			setObject(defaultConfiguration, config);
 
 			eventState = {};
+			eventCaches = [];
+			eventSubCaches = [];
 			containerState = {};
 			canvasState = {};
 			imageStates = [];
