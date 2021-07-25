@@ -19,13 +19,13 @@
  * 
  * config.disalbe, config.enable => config.state
  * 
+ * fix all callback error messages
+ * 
  */
 
 /*!
  * 
  * 업데이트 예정
- * 
- * 에러 메세지 정리
  * 
  * 수정 이력, 되돌리기
  * 
@@ -128,8 +128,6 @@
 
     		config: undefined, // callback function
 
-    		container: undefined, // callback function
-
     		canvas: undefined, // callback function
 
     		upload: undefined, // callback function
@@ -137,6 +135,8 @@
     		draw: undefined, // callback function
 
     		capture: undefined, // callback function
+
+    		download: undefined, // callback function
 
     		export: undefined, // callback function
 
@@ -159,38 +159,19 @@
 		var onFlip = false;
 
 		var errMsg = {
-			TARGET: "이미지를 찾을 수 없습니다",
-			EVENT_TARGET: "event.target 을 찾을 수 없습니다.",
-			UNEDITABLE: "config.editable => false",
-			ALREADY_UPLOADED: "이미 업로드 된 파일입니다",
-			ALREADY_UPLOADING: "다른 업로드가 진행 중입니다",
-			HAS_CLASS: "클래스가 존재합니다",
-			HASNOT_CLASS: "클래스를 찾을 수 없습니다",
-			HAS_PROPERTY: "속성이 존재합니다",
-			HASNOT_PROPERTY: "속성을 찾을 수 없습니다",
-			DUPE_PROPERTY: "같은 속성이 이미 존재합니다",
-			DUPE_FILENAME: "같은 파일이름이 존재합니다",
-			IMAGE_LOAD: "이미지를 로드할 수 없습니다",
-			ISNOT_MIMETYPE: "올바른 MimeType 형식이 아닙니다",
-			ELEMENT_FOCUSABLE: "state.focusable => false",
-			ELEMENT_MOVABLE: "state.movable => false",
-			ELEMENT_RESIZABLE: "state.resizable => false",
-			ELEMENT_ROTATABLE: "state.rotatable => false",
-			ELEMENT_FLIPPABLE: "state.flippable => false",
-			ELEMENT_INDEXABLE: "state.indexable => false",
-			ELEMENT_DRAWABLE: "state.drawable => false",
-			ARGUMENT_NOT_FOUND: "인수를 찾을 수 없습니다",
-			ARGUMENT_NO_NUMBER: "인수가 숫자가 아닙니다",
-			ARGUMENT_NO_STRING: "인수가 문자가 아닙니다",
-			ARGUMENT_NO_ARRAY: "인수가 배열이 아닙니다",
-			ARGUMENT_NO_OBJECT: "인수가 오브젝트가 아닙니다",
-			ARGUMENT_IS_NUMBER: "숫자 인수는 허용되지 않습니다",
-			ARGUMENT_IS_STRING: "문자 인수는 허용되지 않습니다",
-			ARGUMENT_IS_ARRAY: "배열 인수는 허용되지 않습니다",
-			ARGUMENT_IS_OBJECT: "오브젝트 인수는 허용되지 않습니다",
-			MAX_UPLOAD_LIMIT: "최대 업로드 파일 개수를 초과했습니다",
-			NO_MIMETYPE: "허용되지 않는 MimeType입니다",
-			UNKNOWN: "알 수 없는 에러가 발생했습니다"
+			ELEMENT: "Element not found",
+			TARGET: "Event target not found",
+			UNEDITABLE: "This canvas is disabled",
+			UPLOADED: "This file is already uploaded",
+			PROGRESS: "Another operation in progress",
+			DUPLICATE: "Found duplicate filename",
+			FAILLOAD: "Failed to load image from Server",
+			AVAILABILITY: "This action is disabled",
+			ARGUMENT: "Argument error",
+			LIMITED: "Exceed the maximum numbers of images",
+			MIMETYPE: "MimeType not allowed",
+			UNKNOWN: "An unknown error has occurred",
+			INDEXING: "Error creating index"
 		}
 
 		var conatinerTemplate = "";
@@ -272,7 +253,7 @@
 
 				if (onUpload === true) {
 					if (config.upload) {
-						config.upload(errMsg.ALREADY_UPLOADING);
+						config.upload(errMsg.PROGRESS);
 					}
 					return false;
 				}
@@ -328,11 +309,7 @@
 				}
 
 				if (eventState.target) {
-
-					if (
-						!e.target.classList.contains("canvaaas-image") &&
-						!e.target.classList.contains("canvaaas-clone")
-					) {
+					if (!e.target.classList.contains("canvaaas-image")) {
 						var x = getIdByImageElement(eventState.target);
 						setFocusOut(x);
 					}
@@ -354,31 +331,26 @@
 					return false;
 				}
 
-
-				var newElem;
-
+				var elem;
 				if (!e.target.classList.contains("canvaaas-image")) {
 					if (!e.target.parentNode.classList.contains("canvaaas-image")) {
 						return false;
 					} else {
-						newElem = e.target.parentNode;
+						elem = e.target.parentNode;
 					}
 				} else {
-					newElem = e.target;
+					elem = e.target;
 				}
 
-
-				var state = getImageStateByImageElement(newElem);
+				var state = getImageStateByImageElement(elem);
 
 				if (!state.focusable) {
 					return false;
 				}
 
-				// preEvent();
-
 				if (eventState.target) {
 
-					if (newElem.isSameNode(eventState.target)) {
+					if (elem.isSameNode(eventState.target)) {
 						return false;
 					}
 
@@ -412,8 +384,6 @@
 					}
 				}
 
-				preEvent();
-
 				var oldId = getIdByImageElement(eventState.target);
 
 				setFocusOut(oldId);
@@ -423,6 +393,8 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				if (!config.editable) {
 					return false;
 				}
@@ -431,15 +403,13 @@
 					return false;
 				}
 
-				preEvent();
-
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
-				var mouseX,
-					mouseY,
-					rotated,
-					halfWidth,
-					halfHeight;
+				var mouseX;
+				var mouseY;
+				var rotatedRect;
+				var halfWidth;
+				var halfHeight;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX;
@@ -455,16 +425,16 @@
 					return false;
 				}
 
-				rotated = getRotatedRect(state.width, state.height, state.rotate);
-				halfWidth = 0.5 * rotated[0];
-				halfHeight = 0.5 * rotated[1];
+				rotatedRect = getRotatedRect(state.width, state.height, state.rotate);
+				halfWidth = 0.5 * rotatedRect[0];
+				halfHeight = 0.5 * rotatedRect[1];
 
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-				eventState.minX = halfWidth;
-				eventState.minY = halfHeight;
-				eventState.maxX = canvasState.width - halfWidth;
-				eventState.maxY = canvasState.height - halfHeight;
+				eventState.magL = halfWidth;
+				eventState.magT = halfHeight;
+				eventState.magR = canvasState.width - halfWidth;
+				eventState.magB = canvasState.height - halfHeight;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 
@@ -489,10 +459,10 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var mouseX,
-					mouseY,
-					axisX,
-					axisY;
+				var mouseX;
+				var mouseY;
+				var axisX;
+				var axisY;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -508,20 +478,20 @@
 				axisY = eventState.initialY + mouseY;
 
 				if (config.magnetic) {
-					if (eventState.maxX - 5 < axisX && eventState.maxX + 5 > axisX) {
-						axisX = eventState.maxX;
+					if (eventState.magR - 5 < axisX && eventState.magR + 5 > axisX) {
+						axisX = eventState.magR;
 					}
 
-					if (eventState.maxY - 5 < axisY && eventState.maxY + 5 > axisY) {
-						axisY = eventState.maxY;
+					if (eventState.magB - 5 < axisY && eventState.magB + 5 > axisY) {
+						axisY = eventState.magB;
 					}
 
-					if (eventState.minX - 5 < axisX && eventState.minX + 5 > axisX) {
-						axisX = eventState.minX;
+					if (eventState.magL - 5 < axisX && eventState.magL + 5 > axisX) {
+						axisX = eventState.magL;
 					}
 
-					if (eventState.minY - 5 < axisY && eventState.minY + 5 > axisY) {
-						axisY = eventState.minY;
+					if (eventState.magT - 5 < axisY && eventState.magT + 5 > axisY) {
+						axisY = eventState.magT;
 					}
 				}
 
@@ -539,6 +509,8 @@
 			endMove: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+
+				preEvent();
 
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
@@ -560,6 +532,8 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				if (!config.editable) {
 					return false;
 				}
@@ -568,16 +542,14 @@
 					return false;
 				}
 
-				preEvent();
-
 				var handle = e.target;
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
-				var mouseX,
-					mouseY,
-					axisX,
-					axisY,
-					deg;
+				var mouseX;
+				var mouseY;
+				var axisX;
+				var axisY;
+				var deg;
 
 				if (!state.rotatable) {
 					return false;
@@ -630,11 +602,11 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var mouseX,
-					mouseY,
-					axisX,
-					axisY,
-					deg;
+				var mouseX;
+				var mouseY;
+				var axisX;
+				var axisY;
+				var deg;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - containerState.left;
@@ -672,6 +644,8 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
@@ -688,9 +662,12 @@
 				}
 			},
 
+			// deprecated
 			startFlip: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
+
+				preEvent();
 
 				if (!config.editable) {
 					return false;
@@ -700,13 +677,11 @@
 					return false;
 				}
 
-				preEvent();
-
 				var handle = e.target;
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
-				var mouseX,
-					mouseY;
+				var mouseX;
+				var mouseY;
 
 				if (!state.flippable) {
 					return false;
@@ -736,6 +711,7 @@
 
 			},
 
+			// deprecated
 			onFlip: function(e) {
 			    e.preventDefault();
 				e.stopPropagation();
@@ -744,12 +720,12 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var mouseX,
-					mouseY,
-					rotateX,
-					rotateY,
-					degX,
-					degY;
+				var mouseX;
+				var mouseY;
+				var rotateX;
+				var rotateY;
+				var degX;
+				var degY;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -818,6 +794,7 @@
 				}
 			},
 
+			// deprecated
 			endFlip: function(e) {
 			    e.preventDefault();
 				e.stopPropagation();
@@ -860,6 +837,8 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				if (!config.editable) {
 					return false;
 				}
@@ -868,19 +847,17 @@
 					return false;
 				}
 
-				preEvent();
-
 				var handle = e.target;
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
-				var mouseX,
-					mouseY,
-					flipX,
-					flipY,
-					dire,
-					direction,
-					minW,
-					minH;
+				var mouseX;
+				var mouseY;
+				var flipX;
+				var flipY;
+				var dire;
+				var direction;
+				var minW;
+				var minH;
 
 				if (!state.resizable) {
 					return false;
@@ -921,7 +898,6 @@
 				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
 				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
 
-				eventState.handle = handle;
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
@@ -939,7 +915,6 @@
 
 				document.addEventListener("touchmove", handlers.onResize, false);
 				document.addEventListener("touchend", handlers.endResize, false);
-
 			},
 
 			onResize: function(e) {
@@ -949,31 +924,26 @@
 				if (!onResize) {
 					return false;
 				}
-				
-				if (!eventState.handle) {
-					return false;
-				}
 
-				var handle = eventState.handle;
 				var direction = eventState.direction;
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var aspectRatio,
-					mouseX,
-					mouseY,
-					width,
-					height,
-					axisX,
-					axisY,
-					diffX,
-					diffY,
-					radians,
-					cosFraction,
-					sinFraction,
-					onShiftKey = false,
-					minW,
-					minH;
+				var aspectRatio;
+				var mouseX;
+				var mouseY;
+				var width;
+				var height;
+				var axisX;
+				var axisY;
+				var diffX;
+				var diffY;
+				var radians;
+				var cosFraction;
+				var sinFraction;
+				var onShiftKey = false;
+				var minW;
+				var minH;
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -1150,11 +1120,12 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
 		    	onResize = false;
-		    	eventState.handle = undefined;
 
 				document.removeEventListener("mousemove", handlers.onResize, false);
 				document.removeEventListener("mouseup", handlers.endResize, false);
@@ -1186,14 +1157,13 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-
-				var ratio,
-					diffX,
-					diffY,
-					width,
-					height,
-					minW,
-					minH;
+				var ratio;
+				var diffX;
+				var diffY;
+				var width;
+				var height;
+				var minW;
+				var minH;
 
 				if (!state.resizable) {
 					return false;
@@ -1213,6 +1183,7 @@
 					preEvent();
 
 					onZoom = true;
+
 				} else {
 					if (config.resize) {
 						config.resize(null, state.id);
@@ -1252,6 +1223,8 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				if (!config.editable) {
 					return false;
 				}
@@ -1268,19 +1241,16 @@
 
 					document.removeEventListener("touchmove", handlers.onMove, false);
 					document.removeEventListener("touchend", handlers.endMove, false);
-
 				}
-
-				preEvent();
 
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var diagonal,
-					mouseX,
-					mouseY,
-					minW,
-					minH;
+				var diagonal;
+				var mouseX;
+				var mouseY;
+				var minW;
+				var minH;
 
 				if (!state.resizable) {
 					return false;
@@ -1303,7 +1273,6 @@
 
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
 				document.addEventListener("touchend", handlers.endPinchZoom, false);
-
 			},
 
 			onPinchZoom: function(e){
@@ -1321,14 +1290,14 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 				var clone = getCloneElementByImageElement(elem);
-				var diagonal,
-					mouseX,
-					mouseY,
-					width,
-					height,
-					ratio,
-					minW,
-					minH;
+				var diagonal;
+				var mouseX;
+				var mouseY;
+				var width;
+				var height;
+				var ratio;
+				var minW;
+				var minH;
 
 				minW = eventState.minW;
 				minH = eventState.minH;
@@ -1364,6 +1333,8 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
+				preEvent();
+
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
@@ -1391,6 +1362,8 @@
 			resizeWindow: function(e){
 			    e.preventDefault();
 				e.stopPropagation();
+
+				preEvent();
 
 				var oldWidth,
 					newWidth,
@@ -1420,13 +1393,11 @@
 
 					setElement(elem, state);
 					setElement(clone, state);
-
 		        });
 
 		        if (config.canvas) {
 					config.canvas(null, canvasState);
 				}
-
 			},
 
 		};
@@ -1441,12 +1412,12 @@
 				return false;
 			}
 
-			var left = "",
-				top = "",
-				width = "",
-				height = "",
-				opacity = "",
-				transform = "";
+			var left = "";
+			var top = "";
+			var width = "";
+			var height = "";
+			var opacity = "";
+			var transform = "";
 
 			if (
 				state.x !== undefined ||
@@ -1491,7 +1462,6 @@
 				transform += "rotate(" + state.rotate + "deg)";
 			}
 
-
 			if (
 				state.width !== undefined ||
 				state.width !== null ||
@@ -1523,10 +1493,11 @@
 			elem.style.opacity = opacity;
 			elem.style.transform = transform;
 
+			return true;
 		};
 
 		function preEvent() {
-			// container
+			// save container offset
 			var offset = containerElement.getBoundingClientRect();
 			containerState.left = offset.left;
 			containerState.top = offset.top;
@@ -1539,6 +1510,8 @@
 			Object.keys(srcObj).forEach(function(key){
 				destiObj[key] = srcObj[key];
 			});
+
+			return true;
 		};
 
 		function setFocusIn(id) {
@@ -1559,6 +1532,8 @@
 			elem.addEventListener("wheel", handlers.startWheelZoom, false);
 
 			eventState.target = elem;
+
+			return true;
 		};
 
 		function setFocusOut(id) {
@@ -1579,9 +1554,11 @@
 			elem.addEventListener("touchstart", handlers.startFocusIn, false);
 
 			eventState.target = undefined;
+
+			return true;
 		};
 
-		function setIndex() {
+		function setIndex(cb) {
 			var tmpStates = [];
 			var tmpImageElements = [];
 			var tmpCloneElements = [];
@@ -1597,59 +1574,73 @@
 				if (a.index < b.index) {
 					return -1;
 				}
-
 				return 0;
 			});
 
 			tmpStates.forEach(function(state){
 				var elem = getImageElementById(state.id);
-
-				if (!lastImageChild) {
-					if (!elem.isSameNode(firstImageChild)) {
-						canvasElement.insertBefore(elem, firstImageChild);
-					} else {
-						if (elem.nextSibling) {
-							lastImageChild = elem.nextSibling;
-						}
-					}
-				} else {
-					if (!elem.isSameNode(lastImageChild)) {
-						canvasElement.insertBefore(elem, lastImageChild);
-					} else {
-						if (elem.nextSibling) {
-							lastImageChild = elem.nextSibling;
-						}
-					}
-				}
-
-				tmpImageElements.push(elem);
-
 				var clone = getCloneElementById(state.id);
 
-				if (!lastCloneChild) {
-					if (!clone.isSameNode(firstCloneChild)) {
-						mirrorElement.insertBefore(clone, firstCloneChild);
+				try {
+					if (!lastImageChild) {
+						if (!elem.isSameNode(firstImageChild)) {
+							canvasElement.insertBefore(elem, firstImageChild);
+						} else {
+							if (elem.nextSibling) {
+								lastImageChild = elem.nextSibling;
+							}
+						}
 					} else {
-						if (clone.nextSibling) {
-							lastCloneChild = clone.nextSibling;
+						if (!elem.isSameNode(lastImageChild)) {
+							canvasElement.insertBefore(elem, lastImageChild);
+						} else {
+							if (elem.nextSibling) {
+								lastImageChild = elem.nextSibling;
+							}
 						}
 					}
-				} else {
-					if (!clone.isSameNode(lastCloneChild)) {
-						mirrorElement.insertBefore(clone, lastCloneChild);
-					} else {
-						if (clone.nextSibling) {
-							lastCloneChild = clone.nextSibling;
-						}
+
+					tmpImageElements.push(elem);
+				} catch (err) {
+					if (cb) {
+						return cb(errMsg.INDEXING);
 					}
 				}
 
-				tmpCloneElements.push(elem);
+				try {
+					if (!lastCloneChild) {
+						if (!clone.isSameNode(firstCloneChild)) {
+							mirrorElement.insertBefore(clone, firstCloneChild);
+						} else {
+							if (clone.nextSibling) {
+								lastCloneChild = clone.nextSibling;
+							}
+						}
+					} else {
+						if (!clone.isSameNode(lastCloneChild)) {
+							mirrorElement.insertBefore(clone, lastCloneChild);
+						} else {
+							if (clone.nextSibling) {
+								lastCloneChild = clone.nextSibling;
+							}
+						}
+					}
+
+					tmpCloneElements.push(elem);
+				} catch (err) {
+					if (cb) {
+						return cb(errMsg.INDEXING);
+					}
+				}
 			});
 
 			imageStates = tmpStates;
 			imageElements = tmpImageElements;
 			cloneElements = tmpCloneElements;
+
+			if (cb) {
+				return cb(null);
+			}
 		};
 
 		function getIndexById(id) {
@@ -1718,10 +1709,14 @@
 					return candidateElement;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			imageElements.splice(seq, 1);
 
 			elem.parentNode.removeChild(elem);
+
+			return true;
 		};
 
 		function removeImageElementByImageElement(elem) {
@@ -1736,10 +1731,14 @@
 					return candidateElement;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			imageElements.splice(seq, 1);
 
 			elem.parentNode.removeChild(elem);
+
+			return true;
 		};
 
 		function getImageStateById(id) {
@@ -1789,8 +1788,12 @@
 					return state;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			imageStates.splice(seq, 1);
+
+			return true;
 		};
 
 		function removeImageStateByImageElement(elem) {
@@ -1806,8 +1809,12 @@
 					return state;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			imageStates.splice(seq, 1);
+
+			return true;
 		};
 
 		function getCloneElementById(id) {
@@ -1839,10 +1846,14 @@
 					return candidateElement;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			cloneElements.splice(seq, 1);
 
 			elem.parentNode.removeChild(elem);
+
+			return true;
 		};
 
 		function removeCloneElementByImageElement(elem) {
@@ -1859,10 +1870,14 @@
 					return candidateElement;
 				}
 			});
-
+			if (!seq) {
+				return false;
+			}
 			cloneElements.splice(seq, 1);
 
 			elem.parentNode.removeChild(elem);
+
+			return true;
 		};
 
 		function getDegrees(x, y) {
@@ -1875,7 +1890,8 @@
 		function getFittedRect(width, height, aspectRatio, fitType) {
 			var t = fitType || "contain";
 			var candidateWidth = height * aspectRatio;
-			var w, h;
+			var w;
+			var h;
 
 			if (
 				t === "contain" && candidateWidth > width ||
@@ -1895,7 +1911,8 @@
 			var radians = angle * Math.PI / 180;
 			var sinFraction = Math.sin(radians);
 			var cosFraction = Math.cos(radians);
-			var w, h;
+			var w;
+			var h;
 
 		    if (sinFraction < 0) { 
 		    	sinFraction = -sinFraction; 
@@ -1916,26 +1933,19 @@
 				angle = 0;
 			}
 
-			// return
-			// [
-			// 	[0],[1],[2], 
-			// 	[3],[4],[5],
-			// 	[6],[7],[8]
-			// ]
-
 			var radians = angle * Math.PI / 180;
 			var sinFraction = Math.sin(radians);
 			var cosFraction = Math.cos(radians);
 
-			var topLeft,
-				topCenter,
-				topRight,
-				middleLeft,
-				middleCenter,
-				middleRight,
-				bottomLeft,
-				bottomCenter,
-				bottomRight;
+			var topLeft;
+			var topCenter;
+			var topRight;
+			var middleLeft;
+			var middleCenter;
+			var middleRight;
+			var bottomLeft;
+			var bottomCenter;
+			var bottomRight;
 
 			topLeft = [
 				((-w/2) * cosFraction) - ((-h/2) * sinFraction) + cx,
@@ -1982,6 +1992,12 @@
 				((w/2) * sinFraction) + ((h/2) * cosFraction) + cy
 			];
 
+			// [
+			// 	[0],[1],[2], 
+			// 	[3],[4],[5],
+			// 	[6],[7],[8]
+			// ]
+
 			return [
 				topLeft,
 				topCenter,
@@ -2000,7 +2016,9 @@
 		};
 
 		function getDirection(candidateDirection, scaleX, scaleY) {
-			var flipX, flipY, direction;
+			var flipX;
+			var flipY;
+			var direction;
 
 			if (scaleX > 0 || scaleX === false) {
 				flipX = false;
@@ -2168,13 +2186,13 @@
 		};
 
 		function isMobile() {
-			let check = false;
+			var check = false;
 			(function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
 			return check;
 		};
 
 		function isMobileOrTablet() {
-			let check = false;
+			var check = false;
 			(function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
 			return check;
 		};
@@ -2247,13 +2265,13 @@
 		};
 
 		function getScrollbarWidth() {
-			var scrollbarWidth;
+
 			var tmp = document.createElement('div');
 			tmp.style.overflow = 'scroll';
 
 			document.body.appendChild(tmp);
 
-			scrollbarWidth = tmp.offsetWidth - tmp.clientWidth;
+			var scrollbarWidth = tmp.offsetWidth - tmp.clientWidth;
 
 			document.body.removeChild(tmp);
 
@@ -2283,8 +2301,18 @@
 		};
 
 		function drawImage(canvas, id, cb){
-			if (!canvas || !id || !cb) {
-				return cb(errMsg.ARGUMENT_NOT_FOUND);
+
+			if (typeof(canvas) !== "object") {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
 			}
 
 			var elem = getImageElementById(id);
@@ -2295,13 +2323,16 @@
 			virtualImg.src = originalImg.src;
 
 			virtualImg.onerror = function(e) {
-				return cb(errMsg.IMAGE_LOAD);
+				if (cb) {
+					cb(errMsg.FAILLOAD);
+				}
+				return false;
 			}
 			virtualImg.onload = function(e) {
-				var maxCanvasWidth,
-					maxCanvasHeight,
-					minCanvasWidth,
-					minCanvasHeight;
+				var maxCanvasWidth;
+				var maxCanvasHeight;
+				var minCanvasWidth;
+				var minCanvasHeight;
 
 				// check mobile
 				if (!isMobile()) {
@@ -2345,11 +2376,9 @@
 					'cover'
 				);
 
-
 				// original > rotate > resize
 				var canvasWidth = Math.min(maxSizes[0], Math.max(minSizes[0], rotatedWidth));
 				var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], rotatedHeight));
-
 
 				// orignal > resize
 				var scaleRatioX = canvasWidth / rotatedWidth;
@@ -2357,12 +2386,15 @@
 				var absWidth = adjW * scaleRatioX;
 				var absHeight = adjH * scaleRatioY;
 
+				// create canvas
 				var tmpCanvas = document.createElement("canvas");
 				var tmpCtx = tmpCanvas.getContext("2d");
 
+				// set canvas sizes
 				tmpCanvas.width = Math.floor(canvasWidth);
 				tmpCanvas.height = Math.floor(canvasHeight);
 
+				// set canvas options
 				tmpCtx.globalAlpha = state.opacity;
 				tmpCtx.fillStyle = "transparent";
 				tmpCtx.fillRect(0, 0, tmpCanvas.width, tmpCanvas.height);
@@ -2372,6 +2404,8 @@
 				tmpCtx.rotate(state.rotate * (Math.PI / 180));
 				tmpCtx.imageSmoothingQuality = config.imageSmoothingQuality;
 				tmpCtx.imageSmoothingEnabled = config.imageSmoothingEnabled;
+
+				// draw
 			    tmpCtx.drawImage(
 			    	virtualImg,
 					-Math.floor(absWidth * 0.5), -Math.floor(absHeight * 0.5),
@@ -2379,17 +2413,16 @@
 			    );
 			 	tmpCtx.restore();
 
-			 	var sx, sy, sw, sh, dx, dy, dw, dh;
+				var sx = 0;
+				var sy = 0;
+				var sw = tmpCanvas.width;
+				var sh = tmpCanvas.height;
+				var dx = rotatedLeft;
+				var dy = rotatedTop;
+				var dw = rotatedWidth;
+				var dh = rotatedHeight;
 
-				sx = 0;
-				sy = 0;
-				sw = tmpCanvas.width;
-				sh = tmpCanvas.height;
-				dx = rotatedLeft;
-				dy = rotatedTop;
-				dw = rotatedWidth;
-				dh = rotatedHeight;
-
+				// draw to main canvas
 				var ctx = canvas.getContext("2d");
 				ctx.drawImage(
 			    	tmpCanvas,
@@ -2400,7 +2433,9 @@
 			    );
 		 		ctx.restore();
 
-	 			return cb(null, true);
+		 		if (cb) {
+	 				return cb(null, true);
+		 		}
 			}
 		};
 
@@ -2453,15 +2488,11 @@
 			var originalWidth = state.originalWidth;
 			var originalHeight = state.originalHeight;
 			var aspectRatio = state.originalWidth / state.originalHeight;
-			var maxWidth,
-				maxHeight,
-				minWidth,
-				minHeight;
 
-			maxWidth = canvasState.width * config.maxImageRenderWidth;
-			maxHeight = canvasState.height * config.maxImageRenderHeight;
-			minWidth = canvasState.width * config.minImageRenderWidth;
-			minHeight = canvasState.height * config.minImageRenderHeight;
+			var maxWidth = canvasState.width * config.maxImageRenderWidth;
+			var maxHeight = canvasState.height * config.maxImageRenderHeight;
+			var minWidth = canvasState.width * config.minImageRenderWidth;
+			var minHeight = canvasState.height * config.minImageRenderHeight;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -2504,8 +2535,18 @@
 
 		function renderImage(file, cb) {
 
+			if (!file) {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
 			if (imageElements.length > config.maxNumberOfImages - 1) {
-				return cb(errMsg.MAX_UPLOAD_LIMIT);
+				if (cb) {
+					cb(errMsg.LIMITED);
+				}
+				return false;
 			}
 
 			var typ,
@@ -2533,7 +2574,10 @@
 
 			// check mimeType
 			if (config.extensions.indexOf(ext) < 0) {
-				return cb(errMsg.NO_MIMETYPE);
+				if (cb) {
+					cb(errMsg.MIMETYPE);
+				}
+				return false;
 			}
 
 			// check filename duplicate
@@ -2544,7 +2588,10 @@
 			});
 
 			if (isDuplicate === true) {
-				return cb(errMsg.DUPE_FILENAME);
+				if (cb) {
+					cb(errMsg.DUPLICATE);
+				}
+				return false;
 			}
 
 			// start load
@@ -2564,17 +2611,15 @@
 
 				var newState = {};
 
-				var newWrap = document.createElement("div");
-				newWrap.classList.add("canvaaas-image");
+				var newElem = document.createElement("div");
+				newElem.classList.add("canvaaas-image");
+				newElem.id = imageId + id;
+				newElem.innerHTML = imageTemplate;
 
-				newWrap.id = imageId + id;
-
-				newWrap.innerHTML = imageTemplate;
-
-				var newImg = newWrap.querySelector("img");
-				var rotateHandles = newWrap.querySelectorAll("div.canvaaas-rotate-handle");
-				var resizeHandles = newWrap.querySelectorAll("div.canvaaas-resize-handle");
-				var flipHandles = newWrap.querySelectorAll("div.canvaaas-flip-handle");
+				var newImg = newElem.querySelector("img");
+				var rotateHandles = newElem.querySelectorAll("div.canvaaas-rotate-handle");
+				var resizeHandles = newElem.querySelectorAll("div.canvaaas-resize-handle");
+				var flipHandles = newElem.querySelectorAll("div.canvaaas-flip-handle");
 
 				newImg.src = newImage.src;
 
@@ -2647,41 +2692,59 @@
 				newState.indexable = true;
 				newState.drawable = true;
 
-				canvasElement.appendChild(newWrap);
+				canvasElement.appendChild(newElem);
 
-				setElement(newWrap, newState);
+				setElement(newElem, newState);
 
 				imageStates.push(newState);
 
-				imageElements.push(newWrap);
+				imageElements.push(newElem);
 
 				// mirror
-				var wrapClone = newWrap.cloneNode();
-				var wrapHTML = newWrap.innerHTML;
-				var overlay = document.createElement("div");
-				overlay.classList.add("canvaaas-overlay");
+				var newClone = newElem.cloneNode();
+				var newElemHTML = newElem.innerHTML;
+				var newOverlay = document.createElement("div");
+				newOverlay.classList.add("canvaaas-overlay");
 
-				wrapClone.innerHTML = wrapHTML;
-				wrapClone.id = cloneId + id;
-				wrapClone.classList.replace("canvaaas-image", "canvaaas-clone");
-				wrapClone.insertBefore(overlay, wrapClone.querySelector("img").nextSibling); // fix index, overlay < handles
-				mirrorElement.appendChild(wrapClone);
-				cloneElements.push(wrapClone);
+				newClone.innerHTML = newElemHTML;
+				newClone.id = cloneId + id;
+				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
+				newClone.insertBefore(newOverlay, newClone.querySelector("img").nextSibling); // fix index, overlay < handles
+				mirrorElement.appendChild(newClone);
+				cloneElements.push(newClone);
 
-				newWrap.addEventListener("mousedown", handlers.startFocusIn, false);
-				newWrap.addEventListener("touchstart", handlers.startFocusIn, false);
+				newElem.addEventListener("mousedown", handlers.startFocusIn, false);
+				newElem.addEventListener("touchstart", handlers.startFocusIn, false);
 
-				setIndex();
-
-				return cb(null, id);
+				setIndex(function(err){
+					if (err) {
+						if (cb) {
+							cb(err);
+						}
+						return false;
+					}
+					if (cb) {
+						return cb(null, id);
+					}
+				});				
 			}
 		}
 
-		function removeImage(id) {
+		function removeImage(id, cb) {
+
+			if (!id) {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
 
 			var elem = getImageElementById(id);
 
 			if (!elem) {
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				}
 				return false;
 			}
 
@@ -2700,7 +2763,10 @@
 			// #3 remove image element
 			removeImageElementById(id);
 
-			return true;
+			if (cb) {
+				cb(null, id);
+			}
+			return id;
 		}
 
 		function initContainer() {
@@ -2710,11 +2776,11 @@
 				return false;
 			}
 
-			var aspectRatio,
-				width,
-				height,
-				left,
-				top;
+			var aspectRatio;
+			var width;
+			var height;
+			var left;
+			var top;
 
 			aspectRatio = config.canvasWidth / config.canvasHeight;
 			width = containerElement.offsetWidth;
@@ -2752,13 +2818,13 @@
 				return false;
 			}
 
-			var left,
-				top,
-				width,
-				height,
-				originalWidth,
-				originalHeight,
-				aspectRatio;
+			var left;
+			var top;
+			var width;
+			var height;
+			var originalWidth;
+			var originalHeight;
+			var aspectRatio;
 
         	originalWidth = config.canvasWidth;
         	originalHeight = config.canvasHeight;
@@ -2822,14 +2888,14 @@
 	        // 
 
 	        initContainer();
-        	console.log("Container initialized", containerState);
+        	// console.log("Container initialized", containerState);
 
 	        // 
 	        // set canvas
 	        // 
 
 	        initCanvas();
-        	console.log("Canvas initialized", canvasState);
+        	// console.log("Canvas initialized", canvasState);
 
         	// 
         	// set style
@@ -2870,10 +2936,10 @@
 
 			if (typeof(self) !== "object") {
 				if (config.upload) {
-					config.upload(errMsg.ARGUMENT_NO_OBJECT);
+					config.upload(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_OBJECT);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -2890,19 +2956,19 @@
 
 			if (onUpload === true) {
 				if (config.upload) {
-					config.upload(errMsg.ALREADY_UPLOADING);
+					config.upload(errMsg.PROGRESS);
 				}
 				if (cb) {
-					cb(errMsg.ALREADY_UPLOADING);
+					cb(errMsg.PROGRESS);
 				} 
 				return false;
 			}
 
 			onUpload = true;
 
-			var results = [],
-				index = files.length,
-				count = 0;
+			var results = [];
+			var index = files.length;
+			var count = 0;
 
 			recursiveFunc();
 
@@ -2940,10 +3006,10 @@
 				typeof(imageUrls) === "undefined"
 			) {
 				if (config.upload) {
-					config.upload(errMsg.ARGUMENT_NO_ARRAY);
+					config.upload(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_ARRAY);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -2960,16 +3026,16 @@
 
 			if (onUpload === true) {
 				if (config.upload) {
-					config.upload(errMsg.ALREADY_UPLOADING);
+					config.upload(errMsg.PROGRESS);
 				}
 				if (cb) {
-					cb(errMsg.ALREADY_UPLOADING);
+					cb(errMsg.PROGRESS);
 				} 
 				return false;
 			}
 
-			var arr = [],
-				results = [];
+			var arr = [];
+			var results = [];
 
 			if (!Array.isArray(imageUrls)) {
 				arr = [imageUrls]
@@ -3011,6 +3077,7 @@
 			}
 		}
 
+		// deprecated
 		myObject.setPreview = function(target){
 
       		target.innerHTML = "";
@@ -3022,7 +3089,7 @@
 			target.style.overflow = "hidden";
 			target.style.backgroundColor = config.fillColor;
 			target.style.fontSize = "0px";
-			// target.style.width = previewWidth + "px";
+			target.style.width = previewWidth + "px";
 			target.style.height = previewHeight + "px";
 
 			var states = [];
@@ -3069,27 +3136,27 @@
 		// image
 		// 
 
-		myObject.moveX = function(id, num, cb) {
+		myObject.moveX = function(id, x, cb) {
 			var elem = getImageElementById(id);
 			var state = getImageStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_STRING);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
-			if (typeof(num) !== "number") {
+			if (typeof(x) !== "number") {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_NUMBER);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3106,25 +3173,25 @@
 
 			if (!elem) {
 				if (config.move) {
-					config.move(errMsg.TARGET);
+					config.move(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.movable) {
 				if (config.move) {
-					config.move(errMsg.ELEMENT_MOVABLE);
+					config.move(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_MOVABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
 
-			state.x -= num;
+			state.x -= x;
 
 			setElement(elem, state);
 			setElement(clone, state);
@@ -3137,27 +3204,27 @@
 			}
 		}
 
-		myObject.moveY = function(id, num, cb) {
+		myObject.moveY = function(id, y, cb) {
 			var elem = getImageElementById(id);
 			var state = getImageStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_STRING);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
-			if (typeof(num) !== "number") {
+			if (typeof(y) !== "number") {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_NUMBER);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3174,25 +3241,25 @@
 
 			if (!elem) {
 				if (config.move) {
-					config.move(errMsg.TARGET);
+					config.move(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.movable) {
 				if (config.move) {
-					config.move(errMsg.ELEMENT_MOVABLE);
+					config.move(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_MOVABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
 
-			state.y -= num;
+			state.y -= y;
 
 			setElement(elem, state);
 			setElement(clone, state);
@@ -3212,10 +3279,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_STRING);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3225,10 +3292,10 @@
 				typeof(y) === "object"
 			) {
 				if (config.move) {
-					config.move(errMsg.ARGUMENT_NO_NUMBER);
+					config.move(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3245,10 +3312,10 @@
 
 			if (!elem) {
 				if (config.move) {
-					config.move(errMsg.TARGET);
+					config.move(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 
 				return false;
@@ -3256,10 +3323,10 @@
 
 			if (!state.movable) {
 				if (config.move) {
-					config.move(errMsg.ELEMENT_MOVABLE);
+					config.move(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_MOVABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3302,20 +3369,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.resize) {
-					config.resize(errMsg.ARGUMENT_NO_STRING);
+					config.resize(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(ratio) !== "number") {
 				if (config.resize) {
-					config.resize(errMsg.ARGUMENT_NO_NUMBER);
+					config.resize(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3332,20 +3399,20 @@
 
 			if (!elem) {
 				if (config.resize) {
-					config.resize(errMsg.TARGET);
+					config.resize(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.resizable) {
 				if (config.resize) {
-					config.resize(errMsg.ELEMENT_RESIZABLE);
+					config.resize(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_RESIZABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3371,10 +3438,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.resize) {
-					config.resize(errMsg.ARGUMENT_NO_STRING);
+					config.resize(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3384,10 +3451,10 @@
 				typeof(ratio) === "undefined"
 			) {
 				if (config.resize) {
-					config.resize(errMsg.ARGUMENT_NO_NUMBER);
+					config.resize(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3404,27 +3471,30 @@
 
 			if (!elem) {
 				if (config.resize) {
-					config.resize(errMsg.TARGET);
+					config.resize(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.resizable) {
 				if (config.resize) {
-					config.resize(errMsg.ELEMENT_RESIZABLE);
+					config.resize(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_RESIZABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
 
-			var width, height, left, top, fittedSizes, aspectRatio;
-
-			aspectRatio = state.originalWidth / state.originalHeight;
+			var width;
+			var height;
+			var left;
+			var top;
+			var fittedSizes;
+			var aspectRatio = state.originalWidth / state.originalHeight;
 
 			if (typeof(ratio) === "string") {
 				if (ratio === "cover") {
@@ -3451,10 +3521,10 @@
 					top = canvasState.height * 0.5;
 				} else {
 					if (config.resize) {
-						config.resize(errMsg.ARGUMENT_NO_NUMBER);
+						config.resize(errMsg.ARGUMENT);
 					}
 					if (cb) {
-						cb(errMsg.ARGUMENT_NO_NUMBER);
+						cb(errMsg.ARGUMENT);
 					} 
 					return false;
 				}
@@ -3478,8 +3548,7 @@
 			}
 			if (cb) {
 				cb(null, state.id);
-			} 
-
+			}
 		}
 
 		myObject.rotate = function(id, deg, cb){
@@ -3489,20 +3558,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.rotate) {
-					config.rotate(errMsg.ARGUMENT_NO_STRING);
+					config.rotate(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(deg) !== "number") {
 				if (config.rotate) {
-					config.rotate(errMsg.ARGUMENT_NO_NUMBER);
+					config.rotate(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3519,24 +3588,23 @@
 
 			if (!elem) {
 				if (config.rotate) {
-					config.rotate(errMsg.TARGET);
+					config.rotate(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.rotatable) {
 				if (config.rotate) {
-					config.rotate(errMsg.ELEMENT_ROTATABLE);
+					config.rotate(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_ROTATABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
-
 
 			if (state.scaleX === -1) {
 				deg *= -1;
@@ -3566,20 +3634,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.rotate) {
-					config.rotate(errMsg.ARGUMENT_NO_STRING);
+					config.rotate(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(deg) !== "number") {
 				if (config.rotate) {
-					config.rotate(errMsg.ARGUMENT_NO_NUMBER);
+					config.rotate(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3596,20 +3664,20 @@
 
 			if (!elem) {
 				if (config.rotate) {
-					config.rotate(errMsg.TARGET);
+					config.rotate(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.rotatable) {
 				if (config.rotate) {
-					config.rotate(errMsg.ELEMENT_ROTATABLE);
+					config.rotate(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_ROTATABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3642,10 +3710,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.flip) {
-					config.flip(errMsg.ARGUMENT_NO_STRING);
+					config.flip(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3662,20 +3730,20 @@
 
 			if (!elem) {
 				if (config.flip) {
-					config.flip(errMsg.TARGET);
+					config.flip(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.flippable) {
 				if (config.flip) {
-					config.flip(errMsg.ELEMENT_FLIPPABLE);
+					config.flip(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_FLIPPABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3701,10 +3769,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.flip) {
-					config.flip(errMsg.ARGUMENT_NO_STRING);
+					config.flip(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3721,20 +3789,20 @@
 
 			if (!elem) {
 				if (config.flip) {
-					config.flip(errMsg.TARGET);
+					config.flip(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.flippable) {
 				if (config.flip) {
-					config.flip(errMsg.ELEMENT_FLIPPABLE);
+					config.flip(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_FLIPPABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3760,10 +3828,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.flip) {
-					config.flip(errMsg.ARGUMENT_NO_STRING);
+					config.flip(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3773,10 +3841,10 @@
 				typeof(y) !== "number"
 			) {
 				if (config.flip) {
-					config.flip(errMsg.ARGUMENT_NO_NUMBER);
+					config.flip(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3793,20 +3861,20 @@
 
 			if (!elem) {
 				if (config.flip) {
-					config.flip(errMsg.TARGET);
+					config.flip(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.flippable) {
 				if (config.flip) {
-					config.flip(errMsg.ELEMENT_FLIPPABLE);
+					config.flip(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_FLIPPABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3851,20 +3919,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.opacity) {
-					config.opacity(errMsg.ARGUMENT_NO_STRING);
+					config.opacity(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(num) !== "number") {
 				if (config.opacity) {
-					config.opacity(errMsg.ARGUMENT_NO_NUMBER);
+					config.opacity(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3881,10 +3949,10 @@
 
 			if (!elem) {
 				if (config.opacity) {
-					config.opacity(errMsg.TARGET);
+					config.opacity(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -3916,20 +3984,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_STRING);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(num) !== "number") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_NUMBER);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -3946,20 +4014,20 @@
 
 			if (!elem) {
 				if (config.index) {
-					config.index(errMsg.TARGET);
+					config.index(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.indexable) {
 				if (config.index) {
-					config.index(errMsg.ELEMENT_INDEXABLE);
+					config.index(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_INDEXABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -3969,15 +4037,23 @@
 			setElement(elem, state);
 			setElement(clone, state);
 
-			setIndex();
-
-			if (config.index) {
-				config.index(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-
+			setIndex(function(err){
+				if (err) {
+					if (config.index) {
+						config.index(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.index) {
+					config.index(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
 		}
 
 		myObject.indexDown = function(id, num, cb) {
@@ -3987,20 +4063,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_STRING);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(num) !== "number") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_NUMBER);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4017,20 +4093,20 @@
 
 			if (!elem) {
 				if (config.index) {
-					config.index(errMsg.TARGET);
+					config.index(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.indexable) {
 				if (config.index) {
-					config.index(errMsg.ELEMENT_INDEXABLE);
+					config.index(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_INDEXABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
@@ -4040,15 +4116,23 @@
 			setElement(elem, state);
 			setElement(clone, state);
 
-			setIndex();
-
-			if (config.index) {
-				config.index(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-
+			setIndex(function(err){
+				if (err) {
+					if (config.index) {
+						config.index(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.index) {
+					config.index(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
 		}
 
 		myObject.indexTo = function(id, num, cb) {
@@ -4058,10 +4142,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_STRING);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4078,30 +4162,30 @@
 
 			if (!elem) {
 				if (config.index) {
-					config.index(errMsg.TARGET);
+					config.index(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.indexable) {
 				if (config.index) {
-					config.index(errMsg.ELEMENT_INDEXABLE);
+					config.index(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_INDEXABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
 
 			if (typeof(num) !== "number") {
 				if (config.index) {
-					config.index(errMsg.ARGUMENT_NO_NUMBER);
+					config.index(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4111,14 +4195,23 @@
 			setElement(elem, state);
 			setElement(clone, state);
 
-			setIndex();
-
-			if (config.index) {
-				config.index(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
+			setIndex(function(err){
+				if (err) {
+					if (config.index) {
+						config.index(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.index) {
+					config.index(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
 		}
 
 		myObject.show = function(id, cb) {
@@ -4128,10 +4221,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.visibility) {
-					config.visibility(errMsg.ARGUMENT_NO_STRING);
+					config.visibility(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4148,10 +4241,10 @@
 
 			if (!elem) {
 				if (config.visibility) {
-					config.visibility(errMsg.TARGET);
+					config.visibility(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -4174,10 +4267,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.visibility) {
-					config.visibility(errMsg.ARGUMENT_NO_STRING);
+					config.visibility(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4194,10 +4287,10 @@
 
 			if (!elem) {
 				if (config.visibility) {
-					config.visibility(errMsg.TARGET);
+					config.visibility(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -4242,10 +4335,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.focus) {
-					config.focus(errMsg.ARGUMENT_NO_STRING);
+					config.focus(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4262,27 +4355,27 @@
 
 			if (!elem) {
 				if (config.focus) {
-					config.focus(errMsg.TARGET);
+					config.focus(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			if (!state.focusable) {
 				if (config.focus) {
-					config.focus(errMsg.ELEMENT_FOCUSABLE);
+					config.focus(errMsg.AVAILABILITY);
 				}
 				if (cb) {
-					cb(errMsg.ELEMENT_FOCUSABLE);
+					cb(errMsg.AVAILABILITY);
 				} 
 				return false;
 			}
 
 			if (eventState.target) {
-				var x = getIdByImageElement(eventState.target);
-				setFocusOut(x);
+				var oldId = getIdByImageElement(eventState.target);
+				setFocusOut(oldId);
 			}
 
 			setFocusIn(id);
@@ -4298,9 +4391,6 @@
 		myObject.focusOut = function(cb) {
 
 			if (!config.editable) {
-				if (config.focus) {
-					config.focus(errMsg.UNEDITABLE);
-				}
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
@@ -4308,11 +4398,8 @@
 			}
 
 			if (!eventState.target) {
-				if (config.focus) {
-					config.focus(errMsg.TARGET);
-				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -4321,9 +4408,6 @@
 
 			setFocusOut(id);
 
-			if (config.focus) {
-				config.focus(null, id);
-			}
 			if (cb) {
 				cb(null, id);
 			}
@@ -4335,10 +4419,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4355,17 +4439,16 @@
 
 			if (!elem) {
 				if (config.state) {
-					config.state(errMsg.TARGET);
+					config.state(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
 			state.focusable = true;
-
-			elem.classList.remove("disabled");
+			elem.classList.remove("unclickable");
 
 			if (config.state) {
 				config.state(null, state.id);
@@ -4381,10 +4464,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4396,6 +4479,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4415,10 +4508,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4430,6 +4523,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4449,10 +4552,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4464,6 +4567,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4483,10 +4596,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4498,6 +4611,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4517,10 +4640,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4532,6 +4655,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4551,10 +4684,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4566,6 +4699,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4585,10 +4728,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4605,10 +4748,10 @@
 
 			if (!elem) {
 				if (config.state) {
-					config.state(errMsg.TARGET);
+					config.state(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -4620,8 +4763,7 @@
 			}
 
 			state.focusable = false;
-
-			elem.classList.add("disabled");
+			elem.classList.add("unclickable");
 
 			if (config.state) {
 				config.state(null, state.id);
@@ -4637,10 +4779,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4652,6 +4794,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4671,10 +4823,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4686,6 +4838,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4705,10 +4867,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4720,6 +4882,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4739,10 +4911,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4754,6 +4926,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4773,10 +4955,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4788,6 +4970,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4807,10 +4999,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4822,6 +5014,16 @@
 				if (cb) {
 					cb(errMsg.UNEDITABLE);
 				}
+				return false;
+			}
+
+			if (!elem) {
+				if (config.state) {
+					config.state(errMsg.ELEMENT);
+				}
+				if (cb) {
+					cb(errMsg.ELEMENT);
+				} 
 				return false;
 			}
 
@@ -4842,20 +5044,20 @@
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_STRING);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
 
 			if (typeof(obj) !== "object") {
 				if (config.state) {
-					config.state(errMsg.ARGUMENT_NO_OBJECT);
+					config.state(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_OBJECT);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4872,10 +5074,10 @@
 
 			if (!elem) {
 				if (config.state) {
-					config.state(errMsg.TARGET);
+					config.state(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
@@ -4883,14 +5085,24 @@
 			setObject(obj, state);
 			setElement(elem, state);
 			setElement(clone, state);
-			setIndex();
 
-			if (config.state) {
-				config.state(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
+			setIndex(function(err){
+				if (err) {
+					if (config.state) {
+						config.state(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.state) {
+					config.state(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
 		}
 
 		myObject.removeOne = function(id, cb) {
@@ -4898,10 +5110,10 @@
 
 			if (typeof(id) !== "string") {
 				if (config.remove) {
-					config.remove(errMsg.ARGUMENT_NO_STRING);
+					config.remove(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				} 
 				return false;
 			}
@@ -4918,22 +5130,31 @@
 
 			if (!elem) {
 				if (config.remove) {
-					config.remove(errMsg.TARGET);
+					config.remove(errMsg.ELEMENT);
 				}
 				if (cb) {
-					cb(errMsg.TARGET);
+					cb(errMsg.ELEMENT);
 				} 
 				return false;
 			}
 
-			var res = removeImage(id);
-
-			if (config.remove) {
-				config.remove(null, res);
-			}
-			if (cb) {
-				cb(null, res);
-			}
+			removeImage(id, function(err, res) {
+				if (err) {
+					if (config.remove) {
+						config.remove(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.remove) {
+					config.remove(null, res);
+				}
+				if (cb) {
+					cb(null, res);
+				}
+			});
 		}
 
 		myObject.removeAll = function(cb) {
@@ -4949,59 +5170,35 @@
 			}
 
 			var tmp = [];
-			var results = [];
 
 			for (var i = imageStates.length - 1; i >= 0; i--) {
-				tmp.push(imageStates[i].id) ;
+				tmp.push(imageStates[i].id);
 			}
 
 			for (var i = 0; i < tmp.length; i++) {
-				var res = removeImage(tmp[i]);
-
-				if (config.remove) {
-					config.remove(null, res);
-				}
-
-				results.push(res);
-			}
-
-			if (cb) {
-				cb(null, results);
+				removeImage(id, function(err, res) {
+					if (err) {
+						if (config.remove) {
+							config.remove(err);
+						}
+						if (cb) {
+							cb(err);
+						}
+						return false;
+					}
+					if (config.remove) {
+						config.remove(null, res);
+					}
+					if (cb) {
+						cb(null, res);
+					}
+				});
 			}
 		}
 
 		// 
-		// config
+		// container & canvas
 		// 
-
-		myObject.setConfig = function(obj, cb) {
-
-			if (typeof(obj) !== "object") {
-				if (config.config) {
-					config.config(errMsg.ARGUMENT_NO_OBJECT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT_NO_OBJECT);
-				}
-				return false;
-			}
-
-			var oldConfig = {};
-			var newConfig = {};
-
-			setObject(config, oldConfig);
-			setObject(config, newConfig);
-			setObject(obj, newConfig);
-
-			config = newConfig;
-
-			if (config.config) {
-				config.config(null, newConfig);
-			}
-			if (cb) {
-				cb(null, newConfig);
-			}
-		}
 
 		myObject.setCanvas = function(w, h, cb) {
 
@@ -5010,10 +5207,10 @@
 				typeof(h) !== "number"
 			) {
 				if (config.canvas) {
-					config.canvas(errMsg.ARGUMENT_NO_NUMBER);
+					config.canvas(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5024,17 +5221,11 @@
         	imageStates.forEach(function(state){
         		var elem = getImageElementById(state.id);
         		var clone = getImageElementById(state.id);
-       			var maxLeft,
-        			maxTop,
-        			minLeft,
-        			minTop;
-
+				var minLeft = 0;
+				var minTop = 0;
+				var maxLeft = canvasState.width;
+				var maxTop = canvasState.height;
         		// var isOutside = false;
-
-				minLeft = 0;
-				minTop = 0;
-				maxLeft = canvasState.width;
-				maxTop = canvasState.height;
 
 				if (state.x > maxLeft) {
 					state.x = maxLeft;
@@ -5059,7 +5250,6 @@
 
 				setElement(elem, state);
 				setElement(clone, state);
-
         	});
 
         	if (config.canvas) {
@@ -5094,15 +5284,41 @@
 			}
 		}
 
+		// 
+		// config
+		// 
+
+		myObject.setConfig = function(obj, cb) {
+
+			if (typeof(obj) !== "object") {
+				if (config.config) {
+					config.config(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			setObject(obj, config);
+
+			if (config.config) {
+				config.config(null, config);
+			}
+			if (cb) {
+				cb(null, config);
+			}
+		}
+
 		myObject.setEditable = function(cb) {
 
 			config.editable = true;
 
 			if (config.config) {
-				config.config(null);
+				config.config(null, config);
 			}
         	if (cb) {
-				cb(null, config.editable);
+				cb(null, config);
 			}
 		}
 
@@ -5111,10 +5327,10 @@
 			config.editable = false;
 
 			if (config.config) {
-				config.config(null);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.editable);
+				cb(null, config);
 			}
 		}
 
@@ -5122,10 +5338,10 @@
 
 			if (typeof(colour) !== "string") {
 				if (config.config) {
-					config.config(errMsg.ARGUMENT_NO_STRING);
+					config.config(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5141,10 +5357,10 @@
 			config.fillColor = colour;
 
 			if (config.config) {
-				config.config(null, colour);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, colour);
+				cb(null, config);
 			}
 		}
 
@@ -5153,10 +5369,10 @@
 			config.fillColor = defaultConfiguration.fillColor;
 
 			if (config.config) {
-				config.config(null, config.fillColor);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.fillColor);
+				cb(null, config);
 			}
 		}
 
@@ -5164,20 +5380,20 @@
 
 			if (typeof(typ) !== "string") {
 				if (config.config) {
-					config.config(errMsg.ARGUMENT_NO_STRING);
+					config.config(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_STRING);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
 
 			if (typ.indexOf("/") < 0) {
 				if (config.config) {
-					config.config(errMsg.ISNOT_MIMETYPE);
+					config.config(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ISNOT_MIMETYPE);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5185,10 +5401,10 @@
 			config.mimeType = typ.toLowerCase();
 
 			if (config.config) {
-				config.config(null, config.mimeType);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.mimeType);
+				cb(null, config);
 			}
 		}
 
@@ -5197,10 +5413,10 @@
 			config.mimeType = defaultConfiguration.mimeType;
 
 			if (config.config) {
-				config.config(null, config.mimeType);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.mimeType);
+				cb(null, config);
 			}
 		}
 
@@ -5208,10 +5424,10 @@
 
 			if (!Array.isArray(exts)) {
 				if (config.config) {
-					config.config(errMsg.ARGUMENT_NO_ARRAY);
+					config.config(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_ARRAY);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5219,10 +5435,10 @@
 			config.extensions = exts;
 
 			if (config.config) {
-				config.config(null, config.extensions);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.extensions);
+				cb(null, config);
 			}
 		}
 
@@ -5231,7 +5447,7 @@
 			config.extensions = defaultConfiguration.extensions;
 
 			if (cb) {
-				cb(null, config.extensions);
+				cb(null, config);
 			}
 		}
 
@@ -5239,10 +5455,10 @@
 
 			if (typeof(num) !== "number") {
 				if (config.config) {
-					config.config(errMsg.ARGUMENT_NO_NUMBER);
+					config.config(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_NUMBER);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5250,10 +5466,10 @@
 			config.maxNumberOfImages = num;
 
 			if (config.config) {
-				config.config(null, config.maxNumberOfImages);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.maxNumberOfImages);
+				cb(null, config);
 			}
 		}
 
@@ -5264,10 +5480,10 @@
 			mirrorElement.classList.add("active");
 
 			if (config.config) {
-				config.config(null, config.overlay);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.overlay);
+				cb(null, config);
 			}
 		}
 
@@ -5278,10 +5494,10 @@
 			mirrorElement.classList.remove("active");
 
 			if (config.config) {
-				config.config(null, config.overlay);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.overlay);
+				cb(null, config);
 			}
 		}
 
@@ -5290,10 +5506,10 @@
 			config.magnetic = true;
 
 			if (config.config) {
-				config.config(null, config.magnetic);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.magnetic);
+				cb(null, config);
 			}
 		}
 
@@ -5302,10 +5518,10 @@
 			config.magnetic = false;
 
 			if (config.config) {
-				config.config(null, config.magnetic);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.magnetic);
+				cb(null, config);
 			}
 		}
 
@@ -5314,10 +5530,10 @@
 			config.editableAspectRatio = false;
 
 			if (config.config) {
-				config.config(null, config.editableAspectRatio);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.editableAspectRatio);
+				cb(null, config);
 			}
 		}
 
@@ -5326,10 +5542,10 @@
 			config.editableAspectRatio = true;
 			
 			if (config.config) {
-				config.config(null, config.editableAspectRatio);
+				config.config(null, config);
 			}
 			if (cb) {
-				cb(null, config.editableAspectRatio);
+				cb(null, config);
 			}
 		}
 
@@ -5344,10 +5560,10 @@
 				}
 			}
 
-			var index = drawables.length,
-				count = 0,
-				result = {},
-				drawResults = [];
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
 
 			result.width = config.canvasWidth;
 			result.height = config.canvasHeight;
@@ -5397,8 +5613,8 @@
 		myObject.capture = function(cb){
 
 			if (eventState.target) {
-				var x = getIdByImageElement(eventState.target);
-				setFocusOut(x);
+				var oldId = getIdByImageElement(eventState.target);
+				setFocusOut(oldId);
 			}
 
 			previewElement.innerHTML = "";
@@ -5415,10 +5631,10 @@
 				}
 			}
 
-			var index = drawables.length,
-				count = 0,
-				result = {},
-				drawResults = [];
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
 
 			result.width = config.canvasWidth;
 			result.height = config.canvasHeight;
@@ -5508,10 +5724,10 @@
 				}
 			}
 
-			var index = drawables.length,
-				count = 0,
-				result = {},
-				drawResults = [];
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
 
 			result.width = config.canvasWidth;
 			result.height = config.canvasHeight;
@@ -5563,8 +5779,8 @@
 
 					document.body.removeChild(link);
 
-					if (config.draw) {
-						config.draw(null, result);
+					if (config.download) {
+						config.download(null, result);
 					}
 					if (cb) {
 						cb(null, result);
@@ -5617,10 +5833,10 @@
 
 			if (!Array.isArray(states)) {
 				if (config.import) {
-					config.import(errMsg.ARGUMENT_NO_ARRAY);
+					config.import(errMsg.ARGUMENT);
 				}
 				if (cb) {
-					cb(errMsg.ARGUMENT_NO_ARRAY);
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -5703,31 +5919,35 @@
 				results.push(state);
 			}
 
-			setIndex();
-
-			if (config.import) {
-				config.import(null, results);
-			}
-			if (cb) {
-				cb(null, results);
-			}
-
+			setIndex(function(err){
+				if (err) {
+					if (config.import) {
+						config.import(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.import) {
+					config.import(null, results);
+				}
+				if (cb) {
+					cb(null, results);
+				}
+			});
 		}
 
 		myObject.this = function(cb){
 
 			if (!eventState.target) {
+				if (cb) {
+					cb(errMsg.TARGET);
+				}
 				return false;
 			}
 
 			var id = getIdByImageElement(eventState.target);
-
-			if (!id) {
-				if (cb) {
-					cb(errMsg.ARGUMENT_NOT_FOUND);
-				}
-				return false;
-			}
 
 			if (cb) {
 				cb(null, id);
@@ -5738,39 +5958,31 @@
 		myObject.getThis = function(cb){
 
 			if (!eventState.target) {
-				return false;
-			}
-
-			var id = getIdByImageElement(eventState.target);
-
-			if (!id) {
 				if (cb) {
-					cb(errMsg.ARGUMENT_NOT_FOUND);
+					cb(errMsg.TARGET);
 				}
 				return false;
 			}
 
+			var id = getIdByImageElement(eventState.target);
+			var state = getImageStateById(id);
+
 			if (cb) {
-				cb(null, id);
+				cb(null, state);
 			}
-			return id;
+			return state;
 		}
 
 		myObject.getThisData = function(cb){
 
 			if (!eventState.target) {
-				return false;
-			}
-
-			var id = getIdByImageElement(eventState.target);
-
-			if (!id) {
 				if (cb) {
-					cb(errMsg.ARGUMENT_NOT_FOUND);
+					cb(errMsg.TARGET);
 				}
 				return false;
 			}
 
+			var id = getIdByImageElement(eventState.target);
 			var state = getImageStateById(id);
 
 			if (cb) {
@@ -5817,7 +6029,6 @@
 			document.addEventListener("scroll", handlers.onOutsideScroll, false);
 
 			var target = containerElement.parentNode;
-
 			target.removeChild(containerElement);
 
 			config = {};

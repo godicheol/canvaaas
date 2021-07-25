@@ -2,17 +2,6 @@
  * custom
  */
 
-/*.canvaaas-resize-n,*/
-/*.canvaaas-resize-ne,*/
-/*.canvaaas-resize-e,*/
-/*.canvaaas-resize-s,*/
-/*.canvaaas-resize-sw,*/
-/*.canvaaas-resize-w*/
-/*.canvaaas-resize-nw*/
-{
-	/* 현재 대각만 적용됨 */
- 	display: none !important;
-}
 .canvaaas-rotate-n{
 	top: -24px !important;
 }
@@ -149,7 +138,7 @@
 .canvaaas-image.hidden{
 	display: none;
 }
-.canvaaas-image.disabled{
+.canvaaas-image.unclickable{
 	pointer-events: none;
 }
 .canvaaas-clone{
@@ -162,6 +151,7 @@
 .canvaaas-clone.hidden{
 	display: none;
 }
+
 .canvaaas-clone .canvaaas-overlay{
 	position: absolute;
 	top: 0;
@@ -190,7 +180,6 @@
 .canvaaas-image.active .canvaaas-flip-handle{
 	display: block;
 }
-
 
 .canvaaas-resize-handle::before,
 .canvaaas-rotate-handle::before,
