@@ -1562,14 +1562,6 @@
 			return true;
 		};
 
-		function copyObject(srcObj) {
-			var tmpObj = {};
-			Object.keys(srcObj).forEach(function(key){
-				tmpObj[key] = srcObj[key];
-			});
-			return tmpObj;
-		}
-
 		function pushCache(id) {
 			if (!id) {
 				return false;
@@ -1578,7 +1570,8 @@
 			var elem = getImageElementById(id);
 			var clone = getCloneElementById(id);
 			var state = getStateById(id);
-			var tmpState = copyObject(state);
+			var tmpState = {};
+			setObject(state, tmpState);
 
 			var tmp = {};
 			tmp.id = id;
@@ -1600,7 +1593,8 @@
 			var elem = getImageElementById(id);
 			var clone = getCloneElementById(id);
 			var state = getStateById(id);
-			var tmpState = copyObject(state);
+			var tmpState = {};
+			setObject(state, tmpState);
 
 			var tmp = {};
 			tmp.id = id;
@@ -3298,8 +3292,14 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.x -= x;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3366,8 +3366,14 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.y -= y;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3438,6 +3444,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			if (x === 0 || x === "l" || x === "left") {
 				state.x = (canvasState.width * 0) + (state.width * 0.5);
 			} else if (x === 0.5 || x === "c" || x === "center") {
@@ -3458,6 +3469,7 @@
 				state.y = y;
 			}
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3524,9 +3536,15 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.width *= 1 + ratio;
 			state.height *= 1 + ratio;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3642,11 +3660,17 @@
 				top = state.top;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.width = width;
 			state.height = height;
 			state.left = left;
 			state.top = top;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3721,8 +3745,14 @@
 				deg *= -1;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.rotate += deg;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3797,8 +3827,14 @@
 				deg *= -1;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.rotate = deg;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3855,9 +3891,15 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.scaleX *= -1;
 			state.rotate *= -1;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -3914,9 +3956,15 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.scaleY *= -1;
 			state.rotate *= -1;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -4005,9 +4053,15 @@
 				state.rotate *= -1;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.scaleX = x;
 			state.scaleY = x;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -4071,8 +4125,14 @@
 				num = 0;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.opacity = num;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
@@ -4139,11 +4199,18 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.index += num;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
+			// adjust index
 			setIndex(function(err){
 				if (err) {
 					if (config.index) {
@@ -4218,11 +4285,18 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.index -= num;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
+			// adjust index
 			setIndex(function(err){
 				if (err) {
 					if (config.index) {
@@ -4297,11 +4371,18 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.index = num;
 
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
+			// adjust index
 			setIndex(function(err){
 				if (err) {
 					if (config.index) {
@@ -4356,6 +4437,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// remove class
 			elem.classList.remove("hidden");
 			clone.classList.remove("hidden");
 
@@ -4402,6 +4488,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// add class
 			elem.classList.add("hidden");
 			clone.classList.add("hidden");
 
@@ -4554,7 +4645,14 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.focusable = true;
+
+			// remove class
 			elem.classList.remove("unclickable");
 
 			if (config.state) {
@@ -4599,6 +4697,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.movable = true;
 
 			if (config.state) {
@@ -4643,6 +4746,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.resizable = true;
 
 			if (config.state) {
@@ -4687,6 +4795,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.rotatable = true;
 
 			if (config.state) {
@@ -4731,6 +4844,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.flippable = true;
 
 			if (config.state) {
@@ -4775,6 +4893,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.indexable = true;
 
 			if (config.state) {
@@ -4819,6 +4942,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.drawable = true;
 
 			if (config.state) {
@@ -4869,7 +4997,14 @@
 				}	
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.focusable = false;
+
+			// add class
 			elem.classList.add("unclickable");
 
 			if (config.state) {
@@ -4914,6 +5049,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.movable = false;
 
 			if (config.state) {
@@ -4958,6 +5098,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.resizable = false;
 
 			if (config.state) {
@@ -5046,6 +5191,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.flippable = false;
 
 			if (config.state) {
@@ -5090,6 +5240,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.indexable = false;
 
 			if (config.state) {
@@ -5134,6 +5289,11 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			state.drawable = false;
 
 			if (config.state) {
@@ -5189,10 +5349,18 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
 			setObject(obj, state);
+
+			// adjust state
 			setElement(elem, state);
 			setElement(clone, state);
 
+			// adjust index
 			setIndex(function(err){
 				if (err) {
 					if (config.state) {
@@ -5245,6 +5413,7 @@
 				return false;
 			}
 
+			// remove element
 			removeImage(id, function(err, res) {
 				if (err) {
 					if (config.remove) {
@@ -5283,6 +5452,7 @@
 			}
 
 			for (var i = 0; i < tmp.length; i++) {
+				// remove element
 				removeImage(id, function(err, res) {
 					if (err) {
 						if (config.remove) {
@@ -6144,9 +6314,7 @@
 			if (eventCaches.length < 1) {
 				return false;
 			}
-
 			var recent = eventCaches.pop();
-
 			var elem = getImageElementById(recent.id);
 			var clone = getCloneElementById(recent.id);
 			var state = getStateById(recent.id);
@@ -6155,7 +6323,7 @@
 
 			elem.className = recent.imageClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
-			state = copyObject(recent.state);
+			setObject(recent.state, state);
 
 			setElement(elem, state);
 			setElement(clone, state);
@@ -6184,7 +6352,6 @@
 				return false;
 			}
 			var recent = eventSubCaches.pop();
-
 			var elem = getImageElementById(recent.id);
 			var clone = getCloneElementById(recent.id);
 			var state = getStateById(recent.id);
@@ -6193,7 +6360,7 @@
 
 			elem.className = recent.imageClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
-			state = copyObject(recent.state);
+			setObject(recent.state, state);
 
 			setElement(elem, state);
 			setElement(clone, state);
