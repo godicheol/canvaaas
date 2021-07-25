@@ -74,7 +74,7 @@
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1)</button>
 		  <button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000)</button>
 		  //
-		  <button type="button" onclick="canvaaas.show(canvaaas.this())">show(id)</button>
+		  <button type="button" onclick="canvaaas.show(window.prompt())">show(id)</button>
 		  <button type="button" onclick="canvaaas.hide(canvaaas.this())">hide(id)</button>
 		  <button type="button" onclick="console.log(canvaaas.getHiddens())">getHiddens()</button>
 		  //
@@ -148,7 +148,7 @@
 		  <button type="button" onclick="canvaaas.download(custom6)">download(func)</button>
 		  //
 		  <button type="button" onclick="canvaaas.export(custom7)">export(func)</button>
-		  <button type="button" onclick="canvaaas.import(exportedStates, custom8)">import(states, func)</button>
+		  <button type="button" onclick="canvaaas.import(tmp_states, custom8)">import(states, func)</button>
 		  //
 		  <button type="button" onclick="console.log(canvaaas.this())">this()</button>
 		  <button type="button" onclick="console.log(canvaaas.thisData())">thisData()</button>
@@ -178,7 +178,12 @@
 
 	<script>
 
-	  var exportedStates;
+		var tmp_id;
+		var tmp_states;
+
+		function saveRecent(err, x) {
+			tmp_id = x;
+		}
 
 	  var tmpState1 = {
 			// setState
@@ -234,7 +239,7 @@
 
 	  function custom7(err, res) {
 			console.log("export() callback", res);
-			exportedStates = res;
+			tmp_states = res;
 	  }
 
 	  function custom8(err, res) {
