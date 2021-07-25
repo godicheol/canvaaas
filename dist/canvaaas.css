@@ -192,12 +192,12 @@
 .canvaaas-resize-handle .canvaaas-handle,
 .canvaaas-rotate-handle .canvaaas-handle,
 .canvaaas-flip-handle .canvaaas-handle{
-	content: " ";
 	display: block;
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
+	pointer-events: none;
 }
 
 .canvaaas-resize-n,

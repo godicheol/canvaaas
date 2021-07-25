@@ -213,7 +213,8 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
 		var eventState = {};
-		var eventHistory = [];
+		var eventCaches = [];
+		var eventSubCaches = [];
 		var containerState = {};
 		var canvasState = {};
 		var imageStates = [];
@@ -434,6 +435,7 @@
 				halfWidth = 0.5 * rotatedRect[0];
 				halfHeight = 0.5 * rotatedRect[1];
 
+				// save initial data
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
 				eventState.magL = halfWidth;
@@ -443,8 +445,14 @@
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 
+				// toggle
 				onMove = true;
 
+		    	// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// add event handles
 				document.addEventListener("mousemove", handlers.onMove, false);
 				document.addEventListener("mouseup", handlers.endMove, false);
 
@@ -482,6 +490,7 @@
 				axisX = eventState.initialX + mouseX;
 				axisY = eventState.initialY + mouseY;
 
+				// check magnetic option
 				if (config.magnetic) {
 					if (eventState.magR - 5 < axisX && eventState.magR + 5 > axisX) {
 						axisX = eventState.magR;
@@ -500,9 +509,11 @@
 					}
 				}
 
+				// save state
 				state.x = axisX;
 				state.y = axisY;
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
@@ -520,8 +531,10 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
+				// toggle off
 		    	onMove = false;
 
+		    	// remove event handles
 				document.removeEventListener("mousemove", handlers.onMove, false);
 				document.removeEventListener("mouseup", handlers.endMove, false);
 
@@ -582,13 +595,20 @@
 					deg = 180 - deg;
 				}
 
+				// save initial data
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 				eventState.initialR = state.rotate;
 				eventState.initialD = deg;
 
+				// toggle on
 				onRotate = true;
 
+				// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// add event handles
 				document.addEventListener("mousemove", handlers.onRotate, false);
 				document.addEventListener("mouseup", handlers.endRotate, false);
 
@@ -637,6 +657,7 @@
 
 				state.rotate = eventState.initialR + (deg - eventState.initialD);
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
@@ -654,6 +675,7 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
+				// toggle off
 		    	onRotate = false;
 
 				document.removeEventListener("mousemove", handlers.onRotate, false);
@@ -903,6 +925,7 @@
 				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
 				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
 
+				// save initial data
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
@@ -913,8 +936,14 @@
 				eventState.minW = minW;
 				eventState.minH = minH;
 
+				// toggle on
 				onResize = true;
 
+				// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// add event handles
 				document.addEventListener("mousemove", handlers.onResize, false);
 				document.addEventListener("mouseup", handlers.endResize, false);
 
@@ -1113,6 +1142,7 @@
 				state.x = axisX;
 				state.y = axisY;
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
@@ -1130,8 +1160,10 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
+				// toggle off
 		    	onResize = false;
 
+		    	// remove event handles
 				document.removeEventListener("mousemove", handlers.onResize, false);
 				document.removeEventListener("mouseup", handlers.endResize, false);
 
@@ -1187,7 +1219,12 @@
 
 					preEvent();
 
+					// toggle on
 					onZoom = true;
+
+					// save cache
+					pushCache(state.id);
+					eventSubCaches = [];
 
 				} else {
 					if (config.resize) {
@@ -1195,6 +1232,7 @@
 					}
 				}
 
+				// add timer
 				clearTimeout(eventState.wheeling);
 
 				if (minW > width) {
@@ -1208,19 +1246,20 @@
 				state.width = width;
 				state.height = height;
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
 				eventState.wheeling = setTimeout(function() {
-
+					// remove timer
 					eventState.wheeling = undefined;
 
+					// toggle off
 					onZoom = false;
 
 					if (config.resize) {
 						config.resize(null, state.id);
 					}
-
 				}, 300);
 			},
 
@@ -1238,6 +1277,7 @@
 					return false;
 				}
 
+				// check move toggle on
 				if (onMove) {
 					onMove = false;
 
@@ -1268,14 +1308,21 @@
 				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
 				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
 
+				// save initial data
 				eventState.diagonal = diagonal;
 				eventState.initialW = state.width;
 				eventState.initialH = state.height;
 				eventState.minW = minW;
 				eventState.minH = minH;
 
+				// toggle on
 				onZoom = true;
 
+				// save cache
+				pushCache(state.id);
+				eventSubCaches = [];
+
+				// add event handles
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
 				document.addEventListener("touchend", handlers.endPinchZoom, false);
 			},
@@ -1326,6 +1373,7 @@
 				state.width = width;
 				state.height = height;
 
+				// adjust state
 				setElement(elem, state);
 				setElement(clone, state);
 
@@ -1343,8 +1391,10 @@
 				var elem = eventState.target;
 				var state = getImageStateByImageElement(elem);
 
+				// toggle off
 		    	onZoom = false;
 
+		    	// remove event handles
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
 				document.removeEventListener("touchend", handlers.endPinchZoom, false);
 
@@ -1512,15 +1562,57 @@
 			return true;
 		};
 
-		function setCache(target, state) {
-			var targetElem; // elem
-			var targetState; // state: 
-			var targetClass; // class: {method: add, value}
+		function copyObject(srcObj) {
+			var tmpObj = {};
+			Object.keys(srcObj).forEach(function(key){
+				tmpObj[key] = srcObj[key];
+			});
+			return tmpObj;
+		}
 
+		function pushCache(id) {
+			if (!id) {
+				return false;
+			}
 
+			var elem = getImageElementById(id);
+			var clone = getCloneElementById(id);
+			var state = getStateById(id);
+			var tmpState = copyObject(state);
 
+			var tmp = {};
+			tmp.id = id;
+			tmp.state = tmpState;
+			tmp.imageClass = elem.className.split(' ');
+			tmp.cloneClass = clone.className.split(' ');
+			tmp.updatedAt = Date.now();
 
-		};
+			eventCaches.push(tmp);
+
+			return true;
+		}
+
+		function pushSubCache(id) {
+			if (!id) {
+				return false;
+			}
+
+			var elem = getImageElementById(id);
+			var clone = getCloneElementById(id);
+			var state = getStateById(id);
+			var tmpState = copyObject(state);
+
+			var tmp = {};
+			tmp.id = id;
+			tmp.state = tmpState;
+			tmp.imageClass = elem.className.split(' ');
+			tmp.cloneClass = clone.className.split(' ');
+			tmp.updatedAt = Date.now();
+
+			eventSubCaches.push(tmp);
+
+			return true;
+		}
 
 		function setFocusIn(id) {
 			if (!id) {
@@ -1756,7 +1848,7 @@
 			return true;
 		};
 
-		function getImageStateById(id) {
+		function getStateById(id) {
 			if (!id) {
 				return false;
 			}
@@ -2331,7 +2423,7 @@
 			}
 
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var originalImg = elem.querySelector("img");
 
 			var virtualImg = new Image();
@@ -2497,7 +2589,7 @@
 
 		function initImage(id) {
 			var elem = getImageElementById(id)
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementByIid(id);
 
 			var originalWidth = state.originalWidth;
@@ -3153,7 +3245,7 @@
 
 		myObject.moveX = function(id, x, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3221,7 +3313,7 @@
 
 		myObject.moveY = function(id, y, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3289,7 +3381,7 @@
 
 		myObject.moveTo = function(id, x, y, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3379,7 +3471,7 @@
 
 		myObject.zoom = function(id, ratio, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3448,7 +3540,7 @@
 
 		myObject.zoomTo = function(id, ratio, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3568,7 +3660,7 @@
 
 		myObject.rotate = function(id, deg, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3644,7 +3736,7 @@
 
 		myObject.rotateTo = function(id, deg, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3720,7 +3812,7 @@
 
 		myObject.flipX = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3779,7 +3871,7 @@
 
 		myObject.flipY = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3838,7 +3930,7 @@
 
 		myObject.flipTo = function(id, x, y, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3929,7 +4021,7 @@
 
 		myObject.opacityTo = function(id, num, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -3994,7 +4086,7 @@
 
 		myObject.indexUp = function(id, num, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -4073,7 +4165,7 @@
 
 		myObject.indexDown = function(id, num, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -4152,7 +4244,7 @@
 
 		myObject.indexTo = function(id, num, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -4231,7 +4323,7 @@
 
 		myObject.show = function(id, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -4277,7 +4369,7 @@
 
 		myObject.hide = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -4346,7 +4438,7 @@
 
 		myObject.focusIn = function(id, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.focus) {
@@ -4430,7 +4522,7 @@
 
 		myObject.enableFocus = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4475,7 +4567,7 @@
 
 		myObject.enableMove = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4519,7 +4611,7 @@
 
 		myObject.enableResize = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4563,7 +4655,7 @@
 
 		myObject.enableRotate = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4607,7 +4699,7 @@
 
 		myObject.enableFlip = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4651,7 +4743,7 @@
 
 		myObject.enableIndex = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4695,7 +4787,7 @@
 
 		myObject.enableDraw = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4739,7 +4831,7 @@
 
 		myObject.disableFocus = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4790,7 +4882,7 @@
 
 		myObject.disableMove = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4834,7 +4926,7 @@
 
 		myObject.disableResize = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4878,7 +4970,7 @@
 
 		myObject.disableRotate = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4922,7 +5014,7 @@
 
 		myObject.disableFlip = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -4966,7 +5058,7 @@
 
 		myObject.disableIndex = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -5010,7 +5102,7 @@
 
 		myObject.disableDraw = function(id, cb){
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.state) {
@@ -5054,7 +5146,7 @@
 
 		myObject.setState = function(id, obj, cb) {
 			var elem = getImageElementById(id);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 			var clone = getCloneElementById(id);
 
 			if (typeof(id) !== "string") {
@@ -5980,7 +6072,7 @@
 			}
 
 			var id = getIdByImageElement(eventState.target);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (cb) {
 				cb(null, state);
@@ -5998,7 +6090,7 @@
 			}
 
 			var id = getIdByImageElement(eventState.target);
-			var state = getImageStateById(id);
+			var state = getStateById(id);
 
 			if (cb) {
 				cb(null, state);
@@ -6032,6 +6124,97 @@
 				cb(null, imageStates);
 			}
 			return imageStates;
+		}
+
+		myObject.getUndoData = function(cb){
+			if (cb) {
+				cb(null, eventCaches);
+			}
+			return eventCaches;
+		}
+
+		myObject.getRedoData = function(cb){
+			if (cb) {
+				cb(null, eventSubCaches);
+			}
+			return eventSubCaches;
+		}
+
+		myObject.undo = function(cb){
+			if (eventCaches.length < 1) {
+				return false;
+			}
+
+			var recent = eventCaches.pop();
+
+			var elem = getImageElementById(recent.id);
+			var clone = getCloneElementById(recent.id);
+			var state = getStateById(recent.id);
+
+			pushSubCache(recent.id);
+
+			elem.className = recent.imageClass.join(" ");
+			clone.className = recent.cloneClass.join(" ");
+			state = copyObject(recent.state);
+
+			setElement(elem, state);
+			setElement(clone, state);
+
+			setIndex(function(err){
+				if (err) {
+					if (config.undo) {
+						config.undo(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.undo) {
+					config.undo(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
+		}
+
+		myObject.redo = function(cb){
+			if (eventSubCaches.length < 1) {
+				return false;
+			}
+			var recent = eventSubCaches.pop();
+
+			var elem = getImageElementById(recent.id);
+			var clone = getCloneElementById(recent.id);
+			var state = getStateById(recent.id);
+
+			pushCache(recent.id);
+
+			elem.className = recent.imageClass.join(" ");
+			clone.className = recent.cloneClass.join(" ");
+			state = copyObject(recent.state);
+
+			setElement(elem, state);
+			setElement(clone, state);
+
+			setIndex(function(err){
+				if (err) {
+					if (config.redo) {
+						config.redo(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.redo) {
+					config.redo(null, state.id);
+				}
+				if (cb) {
+					cb(null, state.id);
+				}
+			});
 		}
 
 		myObject.reset = function(preConfig, cb){
