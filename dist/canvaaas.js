@@ -5671,6 +5671,11 @@
 
 		myObject.unsetEditable = function(cb) {
 
+			if (eventState.target) {
+				var oldId = getIdByImageElement(eventState.target);
+				setFocusOut(oldId);
+			}
+
 			config.editable = false;
 
 			if (config.config) {
