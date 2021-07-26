@@ -1933,7 +1933,7 @@
 					return candidateElement;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			imageElements.splice(seq, 1);
@@ -1955,7 +1955,7 @@
 					return candidateElement;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			imageElements.splice(seq, 1);
@@ -2012,7 +2012,7 @@
 					return state;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			imageStates.splice(seq, 1);
@@ -2033,7 +2033,7 @@
 					return state;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			imageStates.splice(seq, 1);
@@ -2070,7 +2070,7 @@
 					return candidateElement;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			cloneElements.splice(seq, 1);
@@ -2094,7 +2094,7 @@
 					return candidateElement;
 				}
 			});
-			if (!seq) {
+			if (seq === undefined || seq === null) {
 				return false;
 			}
 			cloneElements.splice(seq, 1);
@@ -2950,7 +2950,6 @@
 		}
 
 		function removeImage(id, cb) {
-
 			if (!id) {
 				if (cb) {
 					cb(errMsg.ARGUMENT);
@@ -2973,14 +2972,34 @@
 				}
 			}
 
+			var res;
 			// #1 remove clone element
-			removeCloneElementById(id);
+			res = removeCloneElementById(id);
+			if (!res) {
+				if (cb) {
+					cb("removeCloneElementById() error");
+				}
+				return false;
+			}
 
-			// #2 remove state
-			removeImageStateById(id);
+			// #2 remove image element
+			res = removeImageElementById(id);
+			if (!res) {
+				if (cb) {
+					cb("removeImageElementById() error");
+				}
+				return false;
+			}
 
-			// #3 remove image element
-			removeImageElementById(id);
+			// #3 remove image state
+			res = removeImageStateById(id);
+			if (!res) {
+				if (cb) {
+					cb("removeImageStateById() error");
+				}
+				return false;
+			}
+			
 
 			if (cb) {
 				cb(null, id);
@@ -5486,15 +5505,14 @@
 				return false;
 			}
 
-			var tmp = [];
-
+			var arr = [];
 			for (var i = imageStates.length - 1; i >= 0; i--) {
-				tmp.push(imageStates[i].id);
+				arr.push(imageStates[i].id);
 			}
 
-			for (var i = 0; i < tmp.length; i++) {
+			for (var i = 0; i < arr.length; i++) {
 				// remove element
-				removeImage(id, function(err, res) {
+				removeImage(arr[i], function(err, res) {
 					if (err) {
 						if (config.remove) {
 							config.remove(err);
