@@ -6173,33 +6173,52 @@
 			}
 		}
 
-		myObject.export = function(cb) {
-			var states = [];
+		myObject.export = function(keys, cb) {
+			var requireKeys = [
+				"filename"
+			];
 
+			if (!Array.isArray(keys)) {
+				keys = [
+					"index",
+					"filename",
+					"x",
+					"y",
+					"width",
+					"height",
+					"rotate",
+					"scaleX",
+					"scaleY",
+					"opacity",
+					"focusable",
+					"movable",
+					"resizable",
+					"rotatable",
+					"flippable",
+					"drawable"
+				];
+			} else {
+				requireKeys.forEach(function(k){
+					if (keys.indexOf(k) < 0) {
+						keys.push(k);
+					}
+				});
+			}
+
+			var states = [];
 			imageStates.forEach(function(state){
 				var tmp = {};
 
-				tmp.index = state.index;
-				tmp.filename = state.filename;
+				keys.forEach(function(k){
+					tmp[k] = state[k];
+				});
 
-				tmp.canvasWidth = canvasState.width;
-				tmp.canvasHeight = canvasState.height;
-
-				tmp.x = state.x;
-				tmp.y = state.y;
-				tmp.width = state.width;
-				tmp.height = state.height;
-				tmp.rotate = state.rotate;
-				tmp.scaleX = state.scaleX;
-				tmp.scaleY = state.scaleY;
-				tmp.opacity = state.opacity;
-
-				tmp.focusable = state.focusable;
-				tmp.movable = state.movable;
-				tmp.resizable = state.resizable;
-				tmp.rotatable = state.rotatable;
-				tmp.flippable = state.flippable;
-				tmp.drawable = state.drawable;
+				tmp.canvasState = {
+					originalWidth: canvasState.originalWidth,
+					originalHeight: canvasState.originalHeight,
+					width: canvasState.width,
+					height: canvasState.height
+				};
 
 				states.push(tmp);
 			});
@@ -6213,6 +6232,16 @@
 		}
 
 		myObject.import = function(states, cb) {
+
+			if (!config.editable) {
+				if (config.import) {
+					config.import(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
 
 			if (!Array.isArray(states)) {
 				if (config.import) {
@@ -6228,50 +6257,29 @@
 
 			for (var i = 0; i < states.length; i++){
 
-				if (!states[i].filename) {
-					results.push({
-						key: i,
-						err: "filename not found"
-					})
-					continue;
-				}
-				if (!states[i].canvasWidth) {
-					results.push({
-						key: i,
-						err: "canvas width not found"
-					})
-					continue;
-				}
+				var exportedState = states[i];
+				var exportedCanvasState = states[i].canvasState;
 
-				var candidateState = states[i],
-					scaleRatio,
-					aspectRatio;
-
-				var elem = getImageElementByFilename(candidateState.filename);
+				var elem = getImageElementByFilename(exportedState.filename);
 				var clone = getCloneElementByImageElement(elem);
 				var state = getStateByImageElement(elem);
 
 				if (!elem || !state || !clone) {
 					results.push({
 						key: i,
-						err: "image not found"
+						err: "Image not found"
 					})
 					continue;
 				}
 
-				scaleRatio = canvasState.width / candidateState.canvasWidth;
-				aspectRatio = candidateState.width / candidateState.height;
+				var aspectRatioA = exportedCanvasState.originalWidth / exportedCanvasState.originalHeight;
+				var aspectRatioB = canvasState.originalWidth / canvasState.originalHeight;
 
 				// check aspect ratio
-				if (
-					Math.abs(
-						(candidateState.canvasWidth/candidateState.canvasHeight)-
-						(canvasState.originalWidth/canvasState.originalHeight)
-					) > 0.01
-				) {
+				if (Math.abs(aspectRatioA - aspectRatioB) > 0.01) {
 					results.push({
 						key: i,
-						err: "apsect ratio not match"
+						err: "Canvas apsect ratio mismatch"
 					})
 					continue;
 				}
@@ -6280,44 +6288,107 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
+				var scaleRatio = canvasState.width / exportedCanvasState.width;
+				var aspectRatioC = exportedState.width / exportedState.height;
+
 				// save state
-				state.isImported = true;
 				if (
-					candidateState.index < config.minAutoIndex ||
-					candidateState.index > config.maxAutoIndex
+					exportedState.index !== undefined &&
+					exportedState.index !== null
 				) {
-					state.index = candidateState.index;
-				} else {
-					var nextIndex = 0;
-					imageStates.forEach(function(state){
-						if (
-							state.index > config.minAutoIndex - 1 &&
-							state.index < config.maxAutoIndex
-						) {
-							if (nextIndex < state.index) {
-								nextIndex = state.index;
-							}
-						}
-					});
-					state.index = nextIndex;
+					state.index = exportedState.index;
 				}
 
-				state.x = candidateState.x * scaleRatio;
-				state.y = candidateState.y * scaleRatio;
-				state.width = candidateState.width * scaleRatio;
-				state.height = state.width / aspectRatio;
+				if (
+					exportedState.x !== undefined &&
+					exportedState.x !== null
+				) {
+					state.x = exportedState.x * scaleRatio;
+				}
+				if (
+					exportedState.y !== undefined &&
+					exportedState.y !== null
+				) {
+					state.y = exportedState.y * scaleRatio;
+				}
+				if (
+					exportedState.width !== undefined &&
+					exportedState.width !== null
+				) {
+					state.width = exportedState.width * scaleRatio;
+				}
+				if (
+					exportedState.height !== undefined &&
+					exportedState.height !== null
+				) {
+					state.height = exportedState.width * scaleRatio / aspectRatioC;
+				}
+				if (
+					exportedState.rotate !== undefined &&
+					exportedState.rotate !== null
+				) {
+					state.rotate = exportedState.rotate;
+				}
+				if (
+					exportedState.scaleX !== undefined &&
+					exportedState.scaleX !== null
+				) {
+					state.scaleX = exportedState.scaleX;
+				}
+				if (
+					exportedState.scaleY !== undefined &&
+					exportedState.scaleY !== null
+				) {
+					state.scaleY = exportedState.scaleY;
+				}
+				if (
+					exportedState.opacity !== undefined &&
+					exportedState.opacity !== null
+				) {
+					state.opacity = exportedState.opacity;
+				}
 
-				state.rotate = candidateState.rotate;
-				state.scaleX = candidateState.scaleX;
-				state.scaleY = candidateState.scaleY;
-				state.opacity = candidateState.opacity;
+				if (
+					exportedState.focusable === true ||
+					exportedState.focusable === false
+				) {
+					state.focusable = exportedState.focusable;
+				}
 
-				state.focusable = candidateState.focusable;
-				state.movable = candidateState.movable;
-				state.resizable = candidateState.resizable;
-				state.rotatable = candidateState.rotatable;
-				state.flippable = candidateState.flippable;
-				state.drawable = candidateState.drawable;
+				if (
+					exportedState.movable === true ||
+					exportedState.movable === false
+				) {
+					state.movable = exportedState.movable;
+				}
+
+				if (
+					exportedState.resizable === true ||
+					exportedState.resizable === false
+				) {
+					state.resizable = exportedState.resizable;
+				}
+
+				if (
+					exportedState.rotatable === true ||
+					exportedState.rotatable === false
+				) {
+					state.rotatable = exportedState.rotatable;
+				}
+
+				if (
+					exportedState.flippable === true ||
+					exportedState.flippable === false
+				) {
+					state.flippable = exportedState.flippable;
+				}
+
+				if (
+					exportedState.drawable === true ||
+					exportedState.drawable === false
+				) {
+					state.drawable = exportedState.drawable;
+				}
 
 				// adjust state
 				setElement(elem, state);

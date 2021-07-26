@@ -145,10 +145,11 @@
 		  <button type="button" onclick="canvaaas.preview()">preview()</button>
 		  <button type="button" onclick="canvaaas.escapePreview()">escapePreview()</button>
 		  //
-		  <button type="button" onclick="canvaaas.download(custom6)">download(func)</button>
+		  <button type="button" onclick="canvaaas.download()">download()</button>
 		  //
-		  <button type="button" onclick="canvaaas.export(custom7)">export(func)</button>
-		  <button type="button" onclick="canvaaas.import(tmp_states, custom8)">import(states, func)</button>
+		  <button type="button" onclick="canvaaas.export()">export()</button>
+		  <button type="button" onclick="canvaaas.export(['width', 'height', 'x', 'y'])">export(array)</button>
+		  <button type="button" onclick="canvaaas.import(tmp_states)">import(states)</button>
 		  //
 		  <button type="button" onclick="console.log(canvaaas.this())">this()</button>
 		  <button type="button" onclick="console.log(canvaaas.thisData())">thisData()</button>
@@ -238,32 +239,6 @@
 	  	}
 			console.log("uploadUrls()", err, res);
 	  }
-
-	  function custom6(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("download()", res);
-	  }
-
-	  function custom7(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("export()", res);
-			tmp_states = res;
-	  }
-
-	  function custom8(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("import()", res);
-	  }
-
 	  var elem = document.getElementById("tester");
 	  canvaaas.init(elem, {
 		focus: function(err, res){
@@ -384,6 +359,7 @@
 	  		return false;
 	  	}
 		  console.log("export", res);
+		  tmp_states = res;
 		},
 		import: function(err, res){
 			if (err) {
