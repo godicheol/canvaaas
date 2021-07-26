@@ -114,8 +114,8 @@
 		  <button type="button" onclick="canvaaas.hideContainer()">hideContainer()</button>
 		  <button type="button" onclick="canvaaas.showContainer()">showContainer()</button>
 		  //
-		  <button type="button" onclick="canvaaas.setEditable()">setEditable()</button>
-		  <button type="button" onclick="canvaaas.unsetEditable()">unsetEditable()</button>
+		  <button type="button" onclick="canvaaas.editable()">editable()</button>
+		  <button type="button" onclick="canvaaas.uneditable()">uneditable()</button>
 		  //
 		  <button type="button" onclick="canvaaas.setFillColor('#000000')">setFillColor("000000")</button>
 		  <button type="button" onclick="canvaaas.setFillColor('FFFFFF')">setFillColor('FFFFFF')</button>
@@ -241,149 +241,169 @@
 	  }
 	  var elem = document.getElementById("tester");
 	  canvaaas.init(elem, {
-		focus: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("focus", res);
-		},
-		move: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("move", res);
-		},
-		resize: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("resize", res);
-		},
-		rotate: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("rotate", res);
-		},
-		flip: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("flip", res);
-		},
-		opacity: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("opacity", res);
-		},
-		index: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("index", res);
-		},
-		visibility: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("visibility", res);
-		},
-		state: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("state", res);
-		},
-		remove: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("remove", res);
-		},
-		config: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("config", res);
-		},
-		canvas: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("canvas", res);
-		},
-		upload: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("upload", res);
-		},
-		draw: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("draw", res);
-		},
-		preview: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("preview", res);
-		},
-		download: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("download", res);
-		},
-		export: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("export", res);
-		  tmp_states = res;
-		},
-		import: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("import", res);
-		},
-		redo: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("redo", res);
-		},
-		undo: function(err, res){
-			if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-		  console.log("undo", res);
-		},
-
+			focus: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("focus", res);
+			},
+			move: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("move", res);
+			},
+			resize: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("resize", res);
+			},
+			rotate: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("rotate", res);
+			},
+			flip: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("flip", res);
+			},
+			opacity: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("opacity", res);
+			},
+			index: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("index", res);
+			},
+			visibility: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("visibility", res);
+			},
+			state: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("state", res);
+			},
+			remove: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("remove", res);
+			},
+			config: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("config", res);
+			},
+			canvas: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("canvas", res);
+			},
+			upload: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("upload", res);
+			},
+			draw: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("draw", res);
+			},
+			preview: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("preview", res);
+			},
+			download: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("download", res);
+			},
+			export: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("export", res);
+			  tmp_states = res;
+			},
+			import: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("import", res);
+			},
+			redo: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("redo", res);
+			},
+			undo: function(err, res){
+				if (err) {
+		  		console.log(err);
+		  		return false;
+		  	}
+			  console.log("undo", res);
+			},
 	  });
+
+	  // test 1
+		canvaaas.uploadUrls('/img/2.jpeg', function(err, res){
+			if (err) {
+				console.log(err);
+			}
+			var id = res[0];
+			var tmp = {
+				filename: undefined,
+				// editable: false,
+				maxNumberOfImages: 1,
+				containerAspectRatio: 1,
+				canvasWidth: 1920, // number, px
+				canvasHeight: 1080, // number, px
+			}
+			canvaaas.setConfig(tmp, function(err, res){
+				canvaaas.zoomTo(id, "contain");
+				canvaaas.moveTo(id, 0.5, 0.5);
+				canvaaas.preview();
+			});
+		})
 	</script>
  </body>
 </html>

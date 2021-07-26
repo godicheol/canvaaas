@@ -68,8 +68,6 @@
 
 			editable: true, // boolean
 
-			checker: true, // boolean
-
 			overlay: true, // boolean
 
 			magnetic: true, // boolean
@@ -202,7 +200,7 @@
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
-		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
+		conatinerTemplate += "<div class='canvaaas-canvas checker'></div>";
 		conatinerTemplate += "<div class='canvaaas-preview hidden'></div>";
 		conatinerTemplate += "</div>";
 
@@ -2675,18 +2673,10 @@
 
 		function setCanvas(w, h) {
 
-			var oldWidth = canvasState.originalWidth;
-			var oldHeight = canvasState.originalHeight;
-			var oldAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-
-			var newWidth = w;
-			var newHeight = h;
-			var newAspectRatio = w / h;
-
 			// config
 			var newObj = {
-				canvasWidth: newWidth,
-				canvasHeight: newHeight
+				canvasWidth: w,
+				canvasHeight: h
 			}
 
 			setObject(newObj, config);
@@ -3203,10 +3193,6 @@
         	// 
         	// set style
         	// 
-
-			if (config.checker === true) {
-				canvasElement.classList.add("checker");
-			}
 
 			if (config.overlay === true) {
 				mirrorElement.classList.add("active");
@@ -5667,7 +5653,28 @@
 				return false;
 			}
 
+			var isCanvasResize = false;
+
+			if (
+				obj.canvasWidth || 
+				obj.canvasHeight ||
+				obj.minContainerWidth ||
+				obj.minContainerHeight ||
+				obj.maxContainerWidth ||
+				obj.maxContainerHeight
+			) {
+				isCanvasResize = true
+			}
+
 			setObject(obj, config);
+
+			if (isCanvasResize) {
+				// container
+				initContainer();
+
+	        	// canvas
+				initCanvas();
+			}
 
 			if (config.config) {
 				config.config(null, config);
@@ -5677,7 +5684,7 @@
 			}
 		}
 
-		myObject.setEditable = function(cb) {
+		myObject.editable = function(cb) {
 
 			config.editable = true;
 
@@ -5689,7 +5696,7 @@
 			}
 		}
 
-		myObject.unsetEditable = function(cb) {
+		myObject.uneditable = function(cb) {
 
 			if (eventState.target) {
 				var oldId = getIdByImageElement(eventState.target);
