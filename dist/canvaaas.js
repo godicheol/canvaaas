@@ -31,13 +31,13 @@
  * 
  * update canvas, container
  * 
+ * update preview
+ * 
  */
 
 /*!
  * 
  * 업데이트 예정
- * 
- * capture 후 resize window
  * 
  */
 
@@ -154,7 +154,7 @@
 
     		draw: undefined, // callback function
 
-    		capture: undefined, // callback function
+    		preview: undefined, // callback function
 
     		download: undefined, // callback function
 
@@ -177,6 +177,7 @@
 		var onResize = false;
 		var onRotate = false;
 		var onFlip = false;
+		var onPreview = false;
 
 		var errMsg = {
 			ELEMENT: "Element not found",
@@ -184,9 +185,8 @@
 			CACHE: "Cache not found",
 			TARGET: "Event target not found",
 			UNEDITABLE: "This canvas is disabled",
-			UPLOADED: "This file is already uploaded",
 			PROGRESS: "Another operation in progress",
-			DUPLICATE: "Found duplicate filename",
+			DUPLICATE: "This file is already uploaded",
 			FAILLOAD: "Failed to load image from Server",
 			AVAILABILITY: "This action is disabled",
 			ARGUMENT: "Argument error",
@@ -195,7 +195,8 @@
 			INDEX_LIMIT: "Exceed the maximum numbers of index",
 			MIMETYPE: "MimeType not allowed",
 			UNKNOWN: "An unknown error has occurred",
-			INDEXING: "Error creating index"
+			INDEXING: "Error creating index",
+			ALREADY_PREVIEW: "Already in preview mode",
 		}
 
 		var conatinerTemplate = "";
@@ -1545,6 +1546,10 @@
 					setElement(elem, state);
 					setElement(clone, state);
 		        });
+
+		        if (onPreview) {
+					setElement(previewElement, canvasState);
+		        }
 
 		        if (config.canvas) {
 					config.canvas(null, canvasState);
@@ -2982,7 +2987,7 @@
 			res = removeCloneElementById(id);
 			if (!res) {
 				if (cb) {
-					cb("removeCloneElementById() error");
+					cb(errMsg.UNKNOWN);
 				}
 				return false;
 			}
@@ -2991,7 +2996,7 @@
 			res = removeImageElementById(id);
 			if (!res) {
 				if (cb) {
-					cb("removeImageElementById() error");
+					cb(errMsg.UNKNOWN);
 				}
 				return false;
 			}
@@ -3000,7 +3005,7 @@
 			res = removeImageStateById(id);
 			if (!res) {
 				if (cb) {
-					cb("removeImageStateById() error");
+					cb(errMsg.UNKNOWN);
 				}
 				return false;
 			}
@@ -5981,16 +5986,24 @@
 			}
 		}
 
-		myObject.capture = function(cb){
+		myObject.preview = function(cb){
+
+			if (onPreview === true) {
+				if (config.preview) {
+					config.preview(errMsg.ALREADY_PREVIEW);
+				}
+				if (cb) {
+					cb(errMsg.ALREADY_PREVIEW);
+				}
+				return;
+			}
+
+			previewElement.innerHTML = "";
 
 			if (eventState.target) {
 				var oldId = getIdByImageElement(eventState.target);
 				setFocusOut(oldId);
 			}
-
-			previewElement.innerHTML = "";
-
-			config.editable = false;
 
 			var canvas = drawCanvas();
 			var ctx = canvas.getContext("2d");
@@ -6042,18 +6055,9 @@
 					result.states = drawResults;
 					result.data = canvas.toDataURL(config.mimeType, config.quality);
 
-					setElement(previewElement, containerState);
-
-					var width = canvasState.width;
-					var height = canvasState.height;
-					var left = canvasState.x - (0.5 * canvasState.width);
-					var top = canvasState.y - (0.5 * canvasState.height);
+					setElement(previewElement, canvasState);
 
 					var newImage = document.createElement("img");
-					newImage.style.width = width + "px";
-					newImage.style.height =  height + "px";
-					newImage.style.left = left + "px";
-					newImage.style.top = top + "px";
 					newImage.src = result.data;
 
 					previewElement.appendChild(newImage);
@@ -6062,8 +6066,11 @@
 					mirrorElement.classList.add("hidden");
 					previewElement.classList.remove("hidden");
 
-					if (config.capture) {
-						config.capture(null, result);
+					config.editable = false;
+					onPreview = true;
+
+					if (config.preview) {
+						config.preview(null, result);
 					}
 					if (cb) {
 						cb(null, result);
@@ -6072,7 +6079,7 @@
 			}
 		}
 
-		myObject.escapeCapture = function(cb){
+		myObject.escapePreview = function(cb){
 
 			previewElement.innerHTML = "";
 			previewElement.style.width = "";
@@ -6083,6 +6090,7 @@
 			previewElement.classList.add("hidden");
 
 			config.editable = true;
+			onPreview = false;
 
 			if (cb) {
 				cb(null);

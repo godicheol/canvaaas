@@ -140,10 +140,10 @@
 		  <button type="button" onclick="canvaaas.lockAspectRatio()">lockAspectRatio()</button>
 		  <button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio()</button>
 		  //
-		  <button type="button" onclick="canvaaas.draw(custom4)">draw(func)</button>
+		  <button type="button" onclick="canvaaas.draw()">draw()</button>
 		  //
-		  <button type="button" onclick="canvaaas.capture(custom5)">capture(func)</button>
-		  <button type="button" onclick="canvaaas.escapeCapture()">escapeCapture()</button>
+		  <button type="button" onclick="canvaaas.preview()">preview()</button>
+		  <button type="button" onclick="canvaaas.escapePreview()">escapePreview()</button>
 		  //
 		  <button type="button" onclick="canvaaas.download(custom6)">download(func)</button>
 		  //
@@ -237,23 +237,6 @@
 	  		return false;
 	  	}
 			console.log("uploadUrls()", err, res);
-	  }
-
-	  function custom4(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("draw()", res);
-			preview1.src = res.data;
-	  }
-
-	  function custom5(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("capture()", res);
 	  }
 
 	  function custom6(err, res) {
@@ -381,12 +364,12 @@
 	  	}
 		  console.log("draw", res);
 		},
-		capture: function(err, res){
+		preview: function(err, res){
 			if (err) {
 	  		console.log(err);
 	  		return false;
 	  	}
-		  console.log("capture", res);
+		  console.log("preview", res);
 		},
 		download: function(err, res){
 			if (err) {
