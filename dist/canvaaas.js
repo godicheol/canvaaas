@@ -86,7 +86,7 @@
 
     		cacheLevels: 999,
 
-			containerAspectRatio: 1, // width / height
+			containerAspectRatio: undefined, // width / height
 
 			minContainerWidth: undefined, // number, px
 
@@ -108,9 +108,9 @@
 
 			maxImageHeight: 4096, // number, px, for Mobile
 
-			minImageRenderWidth: 0.1, // 0 ~ 1
+			minImageRenderWidth: 0.2, // 0 ~ 1
 
-			minImageRenderHeight: 0.1, // 0 ~ 1
+			minImageRenderHeight: 0.2, // 0 ~ 1
 
 			maxImageRenderWidth: 0.9, // 0 ~ 1
 
@@ -2488,6 +2488,12 @@
 			return (contentOverflows && overflowShown) || (alwaysShowScroll);
 		};
 
+		function getViewportSizes() {
+			var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+			var h = window.innerHeight|| document.documentElement.clientHeight || document.body.clientHeight;
+			return [w, h]
+		}
+
 		function getScrollbarWidth() {
 
 			var tmp = document.createElement('div');
@@ -3025,26 +3031,20 @@
 			}
 
 			var scrollbarWidth = getScrollbarWidth();
-			var maxWidth = config.maxContainerWidth || 9999;
-			var maxHeight = config.maxContainerHeight || 9999;
+			var maxWidth = config.maxContainerWidth;
+			var maxHeight = config.maxContainerHeight;
 
-			// adjust element style
-			// if (!maxWidth) {
-			// 	if (containerElement.parentNode.style.width !== "") {
-			// 		maxWidth = parseInt(containerElement.parentNode.style.width.replace("px", ""), 10);
-			// 	} else {
-			// 		maxWidth = 9999;
-			// 	}
-			// }
+			var viewportSizes = getViewportSizes();
+			var viewportWidth = viewportSizes[0];
+			var viewportHeight = viewportSizes[1];
 
-			// adjust element style
-			// if (!maxHeight) {
-			// 	if (containerElement.parentNode.style.height !== "") {
-			// 		maxHeight = parseInt(containerElement.parentNode.style.height.replace("px", ""), 10);
-			// 	} else {
-			// 		maxHeight = 9999;
-			// 	}
-			// }
+			if (!maxWidth) {
+				maxWidth = viewportWidth;
+			}
+
+			if (!maxHeight) {
+				maxHeight = viewportHeight;
+			}
 
 			var minWidth = config.minContainerWidth || 0;
 			var minHeight = config.minContainerHeight || 0;
@@ -3080,13 +3080,13 @@
 
         	setElement(containerElement, containerState);
 
-			if (hasScrollbar()) {
-				var tmp = containerState.width / containerState.height;
-				containerState.width -= scrollbarWidth;
- 				containerState.height = containerState.width / tmp;
+			// if (hasScrollbar()) {
+			// 	var tmp = containerState.width / containerState.height;
+			// 	containerState.width -= scrollbarWidth;
+			// 	containerState.height = containerState.width / tmp;
 
-	        	setElement(containerElement, containerState);
-			}
+			// 	setElement(containerElement, containerState);
+			// }
 
 			var offset = containerElement.getBoundingClientRect();
 			containerState.left = offset.left;
