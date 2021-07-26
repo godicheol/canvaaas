@@ -29,11 +29,15 @@
  * 
  * update arrow key
  * 
+ * update canvas, container
+ * 
  */
 
 /*!
  * 
  * 업데이트 예정
+ * 
+ * container하고 canvas분리, config.containerAspectRatio 만들기
  * 
  * 단축키
  * 
@@ -80,21 +84,29 @@
 
 			maxNumberOfImages: 999,
 
+    		cacheLevels: 100,
+
+			containerAspectRatio: 16 / 9,
+
+			minContainerWidth: undefined,
+
+			minContainerHeight: undefined,
+
+			maxContainerWidth: undefined,
+
+			maxContainerHeight: 500,
+
 			canvasWidth: 1920,
 
 			canvasHeight: 1080,
 
-			minCanvasWidth: 256,
-
-			minCanvasHeight: 256,
-
-			maxCanvasWidth: 4096, // for Mobile
-
-			maxCanvasHeight: 4096, // for Mobile
-
 			minImageWidth: 64, // number, px
 
 			minImageHeight: 64, // number, px
+
+			maxImageWidth: 4096, // number, px, for Mobile
+
+			maxImageHeight: 4096, // number, px, for Mobile
 
 			minImageRenderWidth: 0.1, // 0 ~ 1
 
@@ -115,8 +127,6 @@
     		quality: 0.8, // 0 ~ 1
 
     		extensions: ["jpg", "jpeg", "png", "webp", "svg"], // upload option
-
-    		cacheLevels: 100,
 
     		focus: undefined, // callback function
 
@@ -172,6 +182,7 @@
 
 		var errMsg = {
 			ELEMENT: "Element not found",
+			STATE: "State not found",
 			TARGET: "Event target not found",
 			UNEDITABLE: "This canvas is disabled",
 			UPLOADED: "This file is already uploaded",
@@ -666,11 +677,11 @@
 				}
 
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - containerState.left;
-					mouseY = e.clientY - containerState.top;
+					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
+					mouseY = e.clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - containerState.left;
-					mouseY = e.touches[0].clientY - containerState.top;
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
 				} else {
 					return false;
 				}
@@ -726,11 +737,11 @@
 				var deg;
 
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - containerState.left;
-					mouseY = e.clientY - containerState.top;
+					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
+					mouseY = e.clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - containerState.left;
-					mouseY = e.touches[0].clientY - containerState.top;
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
 				} else {
 					return false;
 				}
@@ -747,6 +758,7 @@
 					deg = 180 - deg;
 				}
 
+				// save state
 				state.rotate = eventState.initialR + (deg - eventState.initialD);
 
 				// adjust state
@@ -1014,8 +1026,8 @@
 
 				direction = getDirection(dire, state.scaleX, state.scaleY);
 
-				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
-				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
+				minW = config.minImageWidth;
+				minH = config.minImageHeight;
 
 				// save initial data
 				eventState.direction = direction;
@@ -1298,8 +1310,8 @@
 					return false;
 				}
 
-				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
-				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
+				minW = config.minImageWidth;
+				minH = config.minImageHeight;
 
 				ratio = e.deltaY * 0.002;
 				diffX = state.width * ratio;
@@ -1397,8 +1409,8 @@
 				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
 				diagonal = getDiagonal(mouseX, mouseY);
 
-				minW = config.minImageWidth * canvasState.width / canvasState.originalWidth;
-				minH = config.minImageHeight * canvasState.height / canvasState.originalHeight;
+				minW = config.minImageWidth;
+				minH = config.minImageHeight;
 
 				// save initial data
 				eventState.diagonal = diagonal;
@@ -1510,21 +1522,14 @@
 			    e.preventDefault();
 				e.stopPropagation();
 
-				preEvent();
-
-				var oldWidth,
-					newWidth,
-					scaleRatio;
-
-				oldWidth = containerElement.offsetWidth;
+				var oldWidth = containerElement.offsetWidth;
 
 				containerElement.style.width = ""; // auto
 
-				newWidth = containerElement.offsetWidth;
-
-				scaleRatio = newWidth / oldWidth;
-
 		        initContainer();
+
+				var newWidth = containerState.width;
+				var scaleRatio = newWidth / oldWidth;
 
 		        initCanvas();
 
@@ -2558,11 +2563,11 @@
 					maxCanvasWidth = 9999;
 					maxCanvasHeight = 9999;
 				} else {
-					maxCanvasWidth = config.maxCanvasWidth;
-					maxCanvasHeight = config.maxCanvasHeight;
+					maxCanvasWidth = config.maxImageWidth;
+					maxCanvasHeight = config.maxImageHeight;
 				}
-				minCanvasWidth = config.minCanvasWidth;
-				minCanvasHeight = config.minCanvasHeight;
+				minCanvasWidth = config.minImageWidth;
+				minCanvasHeight = config.minImageHeight;
 
 				// original
 				var scaleRatio = canvasState.width / canvasState.originalWidth;
@@ -2660,20 +2665,13 @@
 
 		function setCanvas(w, h) {
 
-			var oldWidth = config.canvasWidth;
-			var oldHeight = config.canvasHeight;
-			var oldAspectRatio = config.canvasWidth / config.canvasHeight;
+			var oldWidth = canvasState.originalWidth;
+			var oldHeight = canvasState.originalHeight;
+			var oldAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
 
 			var newWidth = w;
 			var newHeight = h;
 			var newAspectRatio = w / h;
-
-			if (
-				oldWidth === newWidth && 
-				oldHeight === newHeight
-			) {
-				return false;
-			}
 
 			// config
 			var newObj = {
@@ -2687,13 +2685,6 @@
 			initContainer();
 
         	// canvas
-			canvasState.originalWidth = newWidth;
-			canvasState.originalHeight = newHeight;
-			canvasState.width = containerState.width;
-			canvasState.height = containerState.height;
-			canvasState.left = 0;
-			canvasState.top = 0;
-
 			initCanvas();
 
 			return true;
@@ -2701,8 +2692,8 @@
 
 		function initImage(id) {
 			var elem = getImageElementById(id)
+			var clone = getCloneElementById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementByIid(id);
 
 			var originalWidth = state.originalWidth;
 			var originalHeight = state.originalHeight;
@@ -2745,7 +2736,6 @@
 			state.resizable = true;
 			state.rotatable = true;
 			state.flippable = true;
-			state.indexable = true;
 			state.drawable = true;
 
 			setElement(elem, state);
@@ -3005,33 +2995,60 @@
 				return false;
 			}
 
-			var aspectRatio;
-			var width;
-			var height;
-			var left;
-			var top;
+			if (!config.canvasWidth) {
+				console.log("Canvas width not found");
+				return false;
+			}
 
-			aspectRatio = config.canvasWidth / config.canvasHeight;
-			width = containerElement.offsetWidth;
-			height = containerElement.offsetWidth / aspectRatio;
+			if (!config.canvasHeight) {
+				console.log("Canvas height not found");
+				return false;
+			}
 
- 			containerState.width = width;
- 			containerState.height = height;
+			var scrollbarWidth = getScrollbarWidth();
+			var maxWidth = config.maxContainerWidth || 99999;
+			var maxHeight = config.maxContainerHeight || 99999;
+			var minWidth = config.minContainerWidth || 0;
+			var minHeight = config.minContainerHeight || 0;
+			var width = containerElement.offsetWidth;
+			var height = containerElement.offsetHeight;
+			var aspectRatio = config.containerAspectRatio || 1;
+			var canvasAspectRatio = config.canvasWidth / config.canvasHeight;
+
+			var maxSizes = getFittedRect(
+				maxWidth,
+				maxHeight,
+				aspectRatio
+			);
+
+			var minSizes = getFittedRect(
+				minWidth,
+				minHeight,
+				aspectRatio,
+				"cover"
+			);
+
+			var sizes = getFittedRect(
+				width,
+				width / canvasAspectRatio,
+				aspectRatio
+			);
+
+			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], sizes[0]));
+			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], sizes[1]));
+
+ 			containerState.width = adjWidth;
+ 			containerState.height = adjHeight;
 
         	setElement(containerElement, containerState);
 
-        	if (hasScrollbar()) {
-
-        		containerElement.style.width = "";
-
-				width = containerElement.offsetWidth;
-				height = width / aspectRatio;
-
-	 			containerState.width = width;
-	 			containerState.height = height;
+			if (hasScrollbar()) {
+				var tmp = containerState.width / containerState.height;
+				containerState.width -= scrollbarWidth;
+ 				containerState.height = containerState.width / tmp;
 
 	        	setElement(containerElement, containerState);
-        	}
+			}
 
 			var offset = containerElement.getBoundingClientRect();
 			containerState.left = offset.left;
@@ -3047,35 +3064,40 @@
 				return false;
 			}
 
-			var left;
-			var top;
-			var width;
-			var height;
-			var originalWidth;
-			var originalHeight;
-			var aspectRatio;
+			if (!containerState.width) {
+				console.log("Container width not found");
+				return false;
+			}
 
-        	originalWidth = config.canvasWidth;
-        	originalHeight = config.canvasHeight;
-			aspectRatio = originalWidth / originalHeight;
+			if (!containerState.height) {
+				console.log("Container height not found");
+				return false;
+			}
+
+        	var originalWidth = config.canvasWidth;
+        	var originalHeight = config.canvasHeight;
+			var aspectRatio = originalWidth / originalHeight;
 
 			var fittedSizes = getFittedRect(
 				containerState.width,
 				containerState.height,
-				aspectRatio,
+				aspectRatio
 			);
 
-			width = fittedSizes[0];
-			height = fittedSizes[1];
-			left = canvasElement.offsetLeft;
-			top = canvasElement.offsetTop;
+			var width = fittedSizes[0];
+			var height = fittedSizes[1];
+			var axisX = 0.5 * containerState.width;
+			var axisY = 0.5 * containerState.height;
 
 			canvasState.originalWidth = originalWidth;
 			canvasState.originalHeight = originalHeight;
 			canvasState.width = width;
 			canvasState.height = height;
+			canvasState.x = axisX;
+			canvasState.y = axisY;
 
         	setElement(canvasElement, canvasState);
+        	setElement(mirrorElement, canvasState);
 
         	return true;
 		}
@@ -3117,21 +3139,19 @@
 	        // 
 
 	        initContainer();
-        	// console.log("Container initialized", containerState);
 
 	        // 
 	        // set canvas
 	        // 
 
 	        initCanvas();
-        	// console.log("Canvas initialized", canvasState);
 
         	// 
         	// set style
         	// 
 
 			if (config.checker === true) {
-				containerElement.classList.add("checker");
+				canvasElement.classList.add("checker");
 			}
 
 			if (config.overlay === true) {
@@ -5513,41 +5533,37 @@
 				return false;
 			}
 
+			var oldW = canvasState.width;
+			var oldH = canvasState.height;
+
 			setCanvas(w, h);
 
-	      	// check image in canvas
+			var newW = canvasState.width;
+			var newH = canvasState.height;
+			var diffW = newW - oldW;
+			var diffH = newH - newH;
+
+			var scaleRatio = 1;
+			if (diffW !== 0) {
+				scaleRatio = newW / oldW;
+			} else if (diffH !== 0) {
+				scaleRatio = newH / oldH;
+			}
+
+			// new state adjust to images
         	imageStates.forEach(function(state){
         		var elem = getImageElementById(state.id);
-        		var clone = getImageElementById(state.id);
-				var minLeft = 0;
-				var minTop = 0;
-				var maxLeft = canvasState.width;
-				var maxTop = canvasState.height;
-        		// var isOutside = false;
+        		var clone = getCloneElementById(state.id);
 
-				if (state.x > maxLeft) {
-					state.x = maxLeft;
-					// isOutside = true;
-				}
-				if (state.x < minLeft) {
-					state.x = minLeft;
-					// isOutside = true;
-				}
-				if (state.y > maxTop) {
-					state.y = maxTop;
-					// isOutside = true;
-				}
-				if (state.y < minTop) {
-					state.y = minTop;
-					// isOutside = true;
-				}
+        		state.width *= scaleRatio;
+        		state.height *= scaleRatio;
 
-				// if (isOutside === true) {
-				// 	resetImage(state.id);
-				// }
-
-				setElement(elem, state);
-				setElement(clone, state);
+        		if (diffW !== 0 || diffH !== 0) {
+					initImage(state.id);
+				} else {
+					setElement(elem, state);
+					setElement(clone, state);	
+				}
         	});
 
         	if (config.canvas) {
@@ -5971,11 +5987,16 @@
 
 					setElement(previewElement, containerState);
 
+					var width = canvasState.width;
+					var height = canvasState.height;
+					var left = canvasState.x - (0.5 * canvasState.width);
+					var top = canvasState.y - (0.5 * canvasState.height);
+
 					var newImage = document.createElement("img");
-					newImage.style.width = "100%";
-					newImage.style.height = "auto";
-					newImage.style.left = "0px";
-					newImage.style.top = "0px";
+					newImage.style.width = width + "px";
+					newImage.style.height =  height + "px";
+					newImage.style.left = left + "px";
+					newImage.style.top = top + "px";
 					newImage.src = result.data;
 
 					previewElement.appendChild(newImage);
@@ -6334,11 +6355,38 @@
 			return canvasState;
 		}
 
-		myObject.getImageData = function(cb){
-			if (cb) {
-				cb(null, imageStates);
+		myObject.getImageData = function(id, cb){
+			if (!id) {
+				if (cb) {
+					cb(null, imageStates);
+				}
+				return imageStates;
+			} else {
+
+				var arr = [];
+				var results = [];
+				var errors = [];
+
+				if (!Array.isArray(id)) {
+					arr[0] = id;
+				} else {
+					arr = id;
+				}
+
+				arr.forEach(function(candidateId){
+					var state = getStateById(id);
+					if (state) {
+						results.push(state);
+					} else {
+						errors.push(errMsg.STATE);
+					}
+				});
+
+				if (cb) {
+					cb(errors, results);
+				}
+				return results;	
 			}
-			return imageStates;
 		}
 
 		myObject.getUndoData = function(cb){
