@@ -37,10 +37,6 @@
  * 
  * 업데이트 예정
  * 
- * container하고 canvas분리, config.containerAspectRatio 만들기
- * 
- * 단축키
- * 
  */
 
 
