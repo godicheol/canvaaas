@@ -84,21 +84,21 @@
 
 			maxNumberOfImages: 999,
 
-    		cacheLevels: 100,
+    		cacheLevels: 999,
 
-			containerAspectRatio: 16 / 9,
+			containerAspectRatio: 1, // width / height
 
-			minContainerWidth: undefined,
+			minContainerWidth: undefined, // number, px
 
-			minContainerHeight: undefined,
+			minContainerHeight: undefined, // number, px
 
-			maxContainerWidth: undefined,
+			maxContainerWidth: undefined, // number, px
 
-			maxContainerHeight: 500,
+			maxContainerHeight: undefined, // number, px
 
-			canvasWidth: 1920,
+			canvasWidth: 1920, // number, px
 
-			canvasHeight: 1080,
+			canvasHeight: 1080, // number, px
 
 			minImageWidth: 64, // number, px
 
@@ -3025,13 +3025,32 @@
 			}
 
 			var scrollbarWidth = getScrollbarWidth();
-			var maxWidth = config.maxContainerWidth || 99999;
-			var maxHeight = config.maxContainerHeight || 99999;
+			var maxWidth = config.maxContainerWidth || 9999;
+			var maxHeight = config.maxContainerHeight || 9999;
+
+			// adjust element style
+			// if (!maxWidth) {
+			// 	if (containerElement.parentNode.style.width !== "") {
+			// 		maxWidth = parseInt(containerElement.parentNode.style.width.replace("px", ""), 10);
+			// 	} else {
+			// 		maxWidth = 9999;
+			// 	}
+			// }
+
+			// adjust element style
+			// if (!maxHeight) {
+			// 	if (containerElement.parentNode.style.height !== "") {
+			// 		maxHeight = parseInt(containerElement.parentNode.style.height.replace("px", ""), 10);
+			// 	} else {
+			// 		maxHeight = 9999;
+			// 	}
+			// }
+
 			var minWidth = config.minContainerWidth || 0;
 			var minHeight = config.minContainerHeight || 0;
-			var width = containerElement.offsetWidth;
-			var height = containerElement.offsetHeight;
 			var aspectRatio = config.containerAspectRatio || 1;
+			var width = containerElement.offsetWidth;
+			var height = containerElement.offsetWidth / aspectRatio;
 			var canvasAspectRatio = config.canvasWidth / config.canvasHeight;
 
 			var maxSizes = getFittedRect(
@@ -3049,7 +3068,7 @@
 
 			var sizes = getFittedRect(
 				width,
-				width / canvasAspectRatio,
+				height,
 				aspectRatio
 			);
 
