@@ -68,8 +68,6 @@
 
 		var defaultConfiguration = {
 
-			mode: 1, // number, 1 = edit, 2 = view, 3 = draw
-
 			filename: undefined, // string
 
 			editable: true, // boolean
@@ -96,7 +94,7 @@
 
 			maxContainerWidth: 1, // number, px, if 0 ~ 1 => viewportWidth * x
 
-			maxContainerHeight: 0.5, // number, px, if 0 ~ 1 => viewportHeight * x
+			maxContainerHeight: 0.7, // number, px, if 0 ~ 1 => viewportHeight * x
 
 			canvasWidth: 1920, // number, px
 
@@ -206,7 +204,7 @@
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
-		conatinerTemplate += "<div class='canvaaas-canvas checker'></div>";
+		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "<div class='canvaaas-preview hidden'></div>";
 		conatinerTemplate += "</div>";
 
@@ -2783,6 +2781,7 @@
 				// url
 				typ = "url";
 				ext = getExtension(file);
+				// src = file;
 				src = file + "?" + new Date().getTime(); // fix ios refresh cache error, cachebreaker
 				filename = getFilename(file);
 			}
@@ -3156,7 +3155,7 @@
 		// exports
 		// 
 
-		myObject.init = function(target, preConfig) {
+		myObject.init = function(target, preConfig, cb) {
 
 			if (!target || typeof(target) !== "object") {
 				alert("canvaaas.init( /* target */ ) error");
@@ -3194,6 +3193,9 @@
 
 	        // set canvas
 	        initCanvas();
+
+	        // hide container
+	        containerElement.classList.add("hidden");
 
         	// set style
 			if (config.overlay === true) {
@@ -3242,10 +3244,16 @@
 					});
 				} else {
 					onUpload = false;
+
+        			containerElement.classList.remove("hidden");
+
+					if (cb) {
+						cb(null, config);
+					}
+
+					console.log("canvaaas.js initialized", config);
 				}
 			}
-
-			console.log("canvaaas.js initialized", config);
 		}
 
 		myObject.uploadFiles = function(self, cb) {
@@ -5995,7 +6003,7 @@
 				if (cb) {
 					cb(errMsg.ALREADY_PREVIEW);
 				}
-				return;
+				return false;
 			}
 
 			previewElement.innerHTML = "";

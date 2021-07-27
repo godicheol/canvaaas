@@ -36,19 +36,22 @@
   	<!-- main -->
 		<!-- <div id="container"></div> -->
 		<div id="container">
-			<img src="/img/1.png" alt="">
+			<img src="/img/1.jpeg" alt="">
+			<img src="/img/2.jpeg" alt="">
+			<img src="/img/3.jpeg" alt="">
+			<img src="/img/4.jpeg" alt="">
 		</div>
 
 		<div id="logger" style=""></div>
 
 		<div id="buttons">
 		  <!-- buttons -->
-		  <input type="file" onchange="canvaaas.uploadFiles(this, custom1)" multiple>
-		  <button type="button" onclick="canvaaas.uploadUrls('/img/1.jpeg', custom2)">uploadUrls(string, func)</button>
+		  <input type="file" onchange="canvaaas.uploadFiles(this)" multiple>
+		  <button type="button" onclick="canvaaas.uploadUrls('/img/1.jpeg')">uploadUrls(string)</button>
 		  <button type="button" onclick="canvaaas.uploadUrls(
-			['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'], custom3
-		  )">uploadUrls(array, func)</button>
-		  <button type="button" onclick="canvaaas.uploadUrls('/img/1.svg', custom2)">uploadUrls(string, func)</button>
+			['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png']
+		  )">uploadUrls(array)</button>
+		  <button type="button" onclick="canvaaas.uploadUrls('/img/1.svg')">uploadUrls(string)</button>
 
 		  //
 		  <br>
@@ -222,10 +225,13 @@
 	  var elem = document.getElementById("container");
 	  canvaaas.init(elem, {
 	  	filename: undefined,
-			maxNumberOfImages: 1,
+			// maxNumberOfImages: 1,
 			containerAspectRatio: 1,
+			maxContainerHeight: 0.7,
 			canvasWidth: 1920, // number, px
-			canvasHeight: 1080, // number, px
+			canvasHeight: 1920, // number, px
+			maxImageRenderWidth: 1, // number, 0 ~ 1
+			maxImageRenderHeight: 1, // number, 0 ~ 1
 			focus: function(err, res){
 				if (err) {
 		  		console.log(err);
@@ -367,6 +373,12 @@
 		  	}
 			  console.log("undo", res);
 			},
+	  }, function(err){
+	  	if (err) {
+	  		console.log(err);
+	  	}
+	  	// after init
+			// canvaaas.preview();
 	  });
 
 	  // test 1
