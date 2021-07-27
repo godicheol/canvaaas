@@ -143,6 +143,7 @@
 	-ms-user-select: none;
 	user-select: none;
 }
+.canvaaas-clone.active,
 .canvaaas-image.active{
 	cursor: move;
 }
@@ -181,12 +182,7 @@
 	height: 24px; /* click space */
 	cursor: grab;
 }
-.canvaaas-clone .canvaaas-resize-handle,
-.canvaaas-clone .canvaaas-rotate-handle,
-.canvaaas-clone .canvaaas-flip-handle{
-	cursor: default;
-	pointer-events: none;
-}
+
 .canvaaas-clone.active .canvaaas-resize-handle,
 .canvaaas-clone.active .canvaaas-rotate-handle,
 .canvaaas-clone.active .canvaaas-flip-handle{
@@ -209,7 +205,6 @@
 	transform: translateX(-50%) translateY(-50%);
 	pointer-events: none;
 }
-
 .canvaaas-resize-n,
 .canvaaas-rotate-n,
 .canvaaas-flip-n{

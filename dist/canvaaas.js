@@ -33,6 +33,10 @@
  * 
  * update preview
  * 
+ * remove cache breaker from renderImage()
+ * 
+ * add clone eventHandles
+ * 
  */
 
 /*!
@@ -40,7 +44,6 @@
  * 업데이트 예정
  * 
  */
-
 
 /*!
  * 
@@ -1732,6 +1735,13 @@
 			elem.addEventListener("touchstart", handlers.startMove, false);
 			elem.addEventListener("wheel", handlers.startWheelZoom, false);
 
+			clone.removeEventListener("mousedown", handlers.startFocusIn, false);
+			clone.removeEventListener("touchstart", handlers.startFocusIn, false);
+
+			clone.addEventListener("mousedown", handlers.startMove, false);
+			clone.addEventListener("touchstart", handlers.startMove, false);
+			clone.addEventListener("wheel", handlers.startWheelZoom, false);
+
 			document.addEventListener("keydown", handlers.keydown, false);
 
 			document.addEventListener("mousedown", handlers.isOutside, false);
@@ -1760,6 +1770,13 @@
 
 			elem.addEventListener("mousedown", handlers.startFocusIn, false);
 			elem.addEventListener("touchstart", handlers.startFocusIn, false);
+
+			clone.removeEventListener("mousedown", handlers.startMove, false);
+			clone.removeEventListener("touchstart", handlers.startMove, false);
+			clone.removeEventListener("wheel", handlers.startWheelZoom, false);
+
+			clone.addEventListener("mousedown", handlers.startFocusIn, false);
+			clone.addEventListener("touchstart", handlers.startFocusIn, false);
 
 			document.removeEventListener("keydown", handlers.keydown, false);
 
@@ -2781,8 +2798,8 @@
 				// url
 				typ = "url";
 				ext = getExtension(file);
-				// src = file;
-				src = file + "?" + new Date().getTime(); // fix ios refresh cache error, cachebreaker
+				src = file;
+				// src = file + "?" + new Date().getTime(); // fix ios refresh cache error, cachebreaker
 				filename = getFilename(file);
 			}
 
@@ -2840,26 +2857,9 @@
 				newElem.innerHTML = imageTemplate;
 
 				var newImg = newElem.querySelector("img");
-				var rotateHandles = newElem.querySelectorAll("div.canvaaas-rotate-handle");
-				var resizeHandles = newElem.querySelectorAll("div.canvaaas-resize-handle");
-				var flipHandles = newElem.querySelectorAll("div.canvaaas-flip-handle");
+
 
 				newImg.src = newImage.src;
-
-				rotateHandles.forEach(function(handleElem){
-					handleElem.addEventListener("mousedown", handlers.startRotate, false);
-					handleElem.addEventListener("touchstart", handlers.startRotate, false);
-				});
-
-				resizeHandles.forEach(function(handleElem){
-					handleElem.addEventListener("mousedown", handlers.startResize, false);
-					handleElem.addEventListener("touchstart", handlers.startResize, false);
-				});
-
-				flipHandles.forEach(function(handleElem){
-					handleElem.addEventListener("mousedown", handlers.startFlip, false);
-					handleElem.addEventListener("touchstart", handlers.startFlip, false);
-				});
 
 				// image
 				var originalWidth = newImage.width;
@@ -2934,11 +2934,55 @@
 				newClone.id = cloneId + id;
 				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
 				newClone.insertBefore(newOverlay, newClone.querySelector("img").nextSibling); // fix index, overlay < handles
-				mirrorElement.appendChild(newClone);
-				cloneElements.push(newClone);
+
+				newImg.src = newImage.src;
+
+				var rotateHandlesA = newElem.querySelectorAll("div.canvaaas-rotate-handle");
+				var resizeHandlesA = newElem.querySelectorAll("div.canvaaas-resize-handle");
+				var flipHandlesA = newElem.querySelectorAll("div.canvaaas-flip-handle");
+				
+				rotateHandlesA.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startRotate, false);
+					handleElem.addEventListener("touchstart", handlers.startRotate, false);
+				});
+
+				resizeHandlesA.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startResize, false);
+					handleElem.addEventListener("touchstart", handlers.startResize, false);
+				});
+
+				flipHandlesA.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startFlip, false);
+					handleElem.addEventListener("touchstart", handlers.startFlip, false);
+				});
 
 				newElem.addEventListener("mousedown", handlers.startFocusIn, false);
 				newElem.addEventListener("touchstart", handlers.startFocusIn, false);
+
+				var rotateHandlesB = newClone.querySelectorAll("div.canvaaas-rotate-handle");
+				var resizeHandlesB = newClone.querySelectorAll("div.canvaaas-resize-handle");
+				var flipHandlesB = newClone.querySelectorAll("div.canvaaas-flip-handle");
+
+				rotateHandlesB.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startRotate, false);
+					handleElem.addEventListener("touchstart", handlers.startRotate, false);
+				});
+
+				resizeHandlesB.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startResize, false);
+					handleElem.addEventListener("touchstart", handlers.startResize, false);
+				});
+
+				flipHandlesB.forEach(function(handleElem){
+					handleElem.addEventListener("mousedown", handlers.startFlip, false);
+					handleElem.addEventListener("touchstart", handlers.startFlip, false);
+				});
+
+				newClone.addEventListener("mousedown", handlers.startFocusIn, false);
+				newClone.addEventListener("touchstart", handlers.startFocusIn, false);
+
+				mirrorElement.appendChild(newClone);
+				cloneElements.push(newClone);
 
 				setIndex(function(err){
 					if (err) {
@@ -3206,18 +3250,11 @@
 	        // window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
-			// document.addEventListener("mousedown", handlers.isOutside, false);
-			// document.addEventListener("touchstart", handlers.isOutside, false);
-
-			// document.addEventListener("scroll", handlers.onScroll, false);
-
-
 			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
 			containerElement.addEventListener('dragleave', handlers.preventDefaults, false);
 			containerElement.addEventListener('dragover', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.dropImages, false);
-
 
 			// recover target inner
 			var index = tmpUrls.length;
