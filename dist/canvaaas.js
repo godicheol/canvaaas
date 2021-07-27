@@ -55,10 +55,6 @@
  * 
  * 테스트 예정
  * 
- * 엄청 작은 사진 32px x 32px
- * 
- * 엄청 큰 사진
- * 
  * index 1000 이상
  * 
  * import 로 index 겹치기
@@ -89,15 +85,15 @@
 
 			magnetic: true, // boolean
 
-    		editableAspectRatio: true, // boolean
+			editableAspectRatio: true, // boolean
 
-    		minAutoIndex: 0, // number
+			minAutoIndex: 0, // number
 
-    		maxAutoIndex: 999, // number
+			maxAutoIndex: 999, // number
 
 			maxNumberOfImages: 999, // number
 
-    		cacheLevels: 999, // number
+			cacheLevels: 999, // number
 
 			containerAspectRatio: undefined, // width / height
 
@@ -135,51 +131,51 @@
 
 			imageSmoothingEnabled: false, // boolean
 			
-    		imageSmoothingQuality: "low", // string, low, medium, high
+			imageSmoothingQuality: "low", // string, low, medium, high
 			
-    		fillColor: "#FFFFFF", // string, RGB
+			fillColor: "#FFFFFF", // string, RGB
 			
-    		mimeType: "image/jpeg", // image/jpeg, image/png, image/webp...
+			mimeType: "image/jpeg", // image/jpeg, image/png, image/webp...
 
-    		quality: 0.8, // number, 0 ~ 1
+			quality: 0.8, // number, 0 ~ 1
 
-    		extensions: ["jpg", "jpeg", "png", "webp", "svg"], // upload option
+			extensions: ["jpg", "jpeg", "png", "webp", "svg"], // upload option
 
-    		focus: undefined, // callback function
+			focus: undefined, // callback function
 
-    		move: undefined, // callback function
+			move: undefined, // callback function
 
-    		resize: undefined, // callback function
+			resize: undefined, // callback function
 
-    		rotate: undefined, // callback function
+			rotate: undefined, // callback function
 
-    		flip: undefined, // callback function
+			flip: undefined, // callback function
 
-    		opacity: undefined, // callback function
+			opacity: undefined, // callback function
 
-    		index: undefined, // callback function
+			index: undefined, // callback function
 
-    		visibility: undefined, // callback function
+			visibility: undefined, // callback function
 
-    		state: undefined, // callback function
+			state: undefined, // callback function
 
-    		remove: undefined, // callback function
+			remove: undefined, // callback function
 
-    		config: undefined, // callback function
+			config: undefined, // callback function
 
-    		canvas: undefined, // callback function
+			canvas: undefined, // callback function
 
-    		upload: undefined, // callback function
+			upload: undefined, // callback function
 
-    		draw: undefined, // callback function
+			draw: undefined, // callback function
 
-    		preview: undefined, // callback function
+			preview: undefined, // callback function
 
-    		download: undefined, // callback function
+			download: undefined, // callback function
 
-    		export: undefined, // callback function
+			export: undefined, // callback function
 
-    		import: undefined, // callback function
+			import: undefined, // callback function
 
 		};
 
@@ -582,7 +578,7 @@
 				// toggle
 				onMove = true;
 
-		    	// save cache
+				// save cache
 				pushCache(state.id);
 				eventSubCaches = [];
 
@@ -595,7 +591,7 @@
 			},
 
 			onMove: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				if (!onMove) {
@@ -666,9 +662,9 @@
 				var state = getStateByImageElement(elem);
 
 				// toggle off
-		    	onMove = false;
+				onMove = false;
 
-		    	// remove event handles
+				// remove event handles
 				document.removeEventListener("mousemove", handlers.onMove, false);
 				document.removeEventListener("mouseup", handlers.endMove, false);
 
@@ -802,7 +798,7 @@
 			},
 
 			endRotate: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				preEvent();
@@ -811,7 +807,7 @@
 				var state = getStateByImageElement(elem);
 
 				// toggle off
-		    	onRotate = false;
+				onRotate = false;
 
 				document.removeEventListener("mousemove", handlers.onRotate, false);
 				document.removeEventListener("mouseup", handlers.endRotate, false);
@@ -875,7 +871,7 @@
 
 			// deprecated
 			onFlip: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				var handle = eventState.handle;
@@ -958,7 +954,7 @@
 
 			// deprecated
 			endFlip: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				var elem = eventState.target;
@@ -975,11 +971,11 @@
 					state.rotate *= -1;
 				}
 
-		    	onFlip = false;
-		    	eventState.handle = undefined;
+				onFlip = false;
+				eventState.handle = undefined;
 
-		    	state.rotateX = undefined;
-		    	state.rotateY = undefined;
+				state.rotateX = undefined;
+				state.rotateY = undefined;
 
 				setElement(elem, state);
 				setElement(clone, state);
@@ -996,7 +992,7 @@
 			},
 
 			startResize: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				preEvent();
@@ -1287,7 +1283,7 @@
 			},
 
 			endResize: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				preEvent();
@@ -1296,9 +1292,9 @@
 				var state = getStateByImageElement(elem);
 
 				// toggle off
-		    	onResize = false;
+				onResize = false;
 
-		    	// remove event handles
+				// remove event handles
 				document.removeEventListener("mousemove", handlers.onResize, false);
 				document.removeEventListener("mouseup", handlers.endResize, false);
 
@@ -1311,7 +1307,7 @@
 			},
 
 			startWheelZoom: function(e){
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				if (!config.editable) {
@@ -1399,7 +1395,7 @@
 			},
 
 			startPinchZoom: function(e){
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				preEvent();
@@ -1463,7 +1459,7 @@
 			},
 
 			onPinchZoom: function(e){
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				if (!onZoom) {
@@ -1518,7 +1514,7 @@
 			},
 
 			endPinchZoom: function(e) {
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				preEvent();
@@ -1527,9 +1523,9 @@
 				var state = getStateByImageElement(elem);
 
 				// toggle off
-		    	onZoom = false;
+				onZoom = false;
 
-		    	// remove event handles
+				// remove event handles
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
 				document.removeEventListener("touchend", handlers.endPinchZoom, false);
 
@@ -1539,35 +1535,35 @@
 			},
 
 			debounce: function(cb, time){
-			    var timer;
-			    return function(e){
-			        if (timer) {
-			        	clearTimeout(timer);
-			        };
+				var timer;
+				return function(e){
+					if (timer) {
+						clearTimeout(timer);
+					};
 
-			        timer = setTimeout(cb, time, e);
-			    };
+					timer = setTimeout(cb, time, e);
+				};
 			},
 
 			resizeWindow: function(e){
-			    e.preventDefault();
+				e.preventDefault();
 				e.stopPropagation();
 
 				var oldWidth = containerElement.offsetWidth;
 
 				containerElement.style.width = ""; // auto
 
-		        initContainer();
+				initContainer();
 
 				var newWidth = containerState.width;
 				var scaleRatio = newWidth / oldWidth;
 
-		        initCanvas();
+				initCanvas();
 
-		        imageStates.forEach(function(state){
+				imageStates.forEach(function(state){
 
-		        	var elem = getImageElementById(state.id);
-		        	var clone = getCloneElementById(state.id);
+					var elem = getImageElementById(state.id);
+					var clone = getCloneElementById(state.id);
 
 					state.width *= scaleRatio;
 					state.height *= scaleRatio;
@@ -1576,13 +1572,13 @@
 
 					setElement(elem, state);
 					setElement(clone, state);
-		        });
+				});
 
-		        if (onPreview) {
+				if (onPreview) {
 					setElement(previewElement, canvasState);
-		        }
+				}
 
-		        if (config.canvas) {
+				if (config.canvas) {
 					config.canvas(null, canvasState);
 				}
 			},
@@ -2187,13 +2183,13 @@
 			var w;
 			var h;
 
-		    if (sinFraction < 0) { 
-		    	sinFraction = -sinFraction; 
-		    }
+			if (sinFraction < 0) { 
+				sinFraction = -sinFraction; 
+			}
 
-		    if (cosFraction < 0) {
-		    	cosFraction = -cosFraction;
-		    }
+			if (cosFraction < 0) {
+				cosFraction = -cosFraction;
+			}
 
 			w = (width * cosFraction) + (height * sinFraction);
 			h = (width * sinFraction) + (height * cosFraction);
@@ -2447,11 +2443,11 @@
 		}
 
 		function getShortId() {
-		    var firstPart = (Math.random() * 46656) | 0;
-		    var secondPart = (Math.random() * 46656) | 0;
-		    firstPart = ("000" + firstPart.toString(36)).slice(-3);
-		    secondPart = ("000" + secondPart.toString(36)).slice(-3);
-		    return firstPart + secondPart;
+			var firstPart = (Math.random() * 46656) | 0;
+			var secondPart = (Math.random() * 46656) | 0;
+			firstPart = ("000" + firstPart.toString(36)).slice(-3);
+			secondPart = ("000" + secondPart.toString(36)).slice(-3);
+			return firstPart + secondPart;
 		};
 
 		function isNumeric(n) {
@@ -2705,12 +2701,12 @@
 				tmpCtx.imageSmoothingEnabled = config.imageSmoothingEnabled;
 
 				// draw
-			    tmpCtx.drawImage(
-			    	virtualImg,
+				tmpCtx.drawImage(
+					virtualImg,
 					-Math.floor(absWidth * 0.5), -Math.floor(absHeight * 0.5),
-			    	Math.floor(absWidth), Math.floor(absHeight)
-			    );
-			 	tmpCtx.restore();
+					Math.floor(absWidth), Math.floor(absHeight)
+				);
+				tmpCtx.restore();
 
 				var sx = 0;
 				var sy = 0;
@@ -2724,17 +2720,17 @@
 				// draw to main canvas
 				var ctx = canvas.getContext("2d");
 				ctx.drawImage(
-			    	tmpCanvas,
-			    	sx, sy,
-			    	sw, sh,
-			    	dx, dy,
-			    	dw, dh
-			    );
-		 		ctx.restore();
+					tmpCanvas,
+					sx, sy,
+					sw, sh,
+					dx, dy,
+					dw, dh
+				);
+				ctx.restore();
 
-		 		if (cb) {
-	 				return cb(null, true);
-		 		}
+				if (cb) {
+					return cb(null, true);
+				}
 			}
 		};
 
@@ -2751,7 +2747,7 @@
 			// container
 			initContainer();
 
-        	// canvas
+			// canvas
 			initCanvas();
 
 			return true;
@@ -3170,10 +3166,10 @@
 			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
 			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
 
- 			containerState.width = adjWidth;
- 			containerState.height = adjHeight;
+			containerState.width = adjWidth;
+			containerState.height = adjHeight;
 
-        	setElement(containerElement, containerState);
+			setElement(containerElement, containerState);
 
 			// if (hasScrollbar()) {
 			// 	var tmp = containerState.width / containerState.height;
@@ -3187,7 +3183,7 @@
 			containerState.left = offset.left;
 			containerState.top = offset.top;
 
-        	return true;
+			return true;
 		}
 
 		function initCanvas() {
@@ -3225,10 +3221,10 @@
 			canvasState.x = axisX;
 			canvasState.y = axisY;
 
-        	setElement(canvasElement, canvasState);
-    		setElement(mirrorElement, canvasState);
+			setElement(canvasElement, canvasState);
+			setElement(mirrorElement, canvasState);
 
-        	return true;
+			return true;
 		}
 
 		// 
@@ -3265,18 +3261,18 @@
 			// set template
 			target.innerHTML = conatinerTemplate;
 
-	        containerElement = target.querySelector("div.canvaaas");
-	        canvasElement = target.querySelector("div.canvaaas-canvas");
-	        mirrorElement = target.querySelector("div.canvaaas-mirror");
-	        previewElement = target.querySelector("div.canvaaas-preview");
+			containerElement = target.querySelector("div.canvaaas");
+			canvasElement = target.querySelector("div.canvaaas-canvas");
+			mirrorElement = target.querySelector("div.canvaaas-mirror");
+			previewElement = target.querySelector("div.canvaaas-preview");
 
-	        // set container
-	        initContainer();
+			// set container
+			initContainer();
 
-	        // set canvas
-	        initCanvas();
+			// set canvas
+			initCanvas();
 
-        	// set style
+			// set style
 			if (config.displayBeforeLoad === false) {
 				containerElement.classList.add("hidden");
 			}
@@ -3285,8 +3281,8 @@
 				mirrorElement.classList.add("active");
 			}
 
-	        // set events
-	        // window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
+			// set events
+			// window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
 			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
@@ -5659,25 +5655,25 @@
 			}
 
 			// new state adjust to images
-        	imageStates.forEach(function(state){
-        		var elem = getImageElementById(state.id);
-        		var clone = getCloneElementById(state.id);
+			imageStates.forEach(function(state){
+				var elem = getImageElementById(state.id);
+				var clone = getCloneElementById(state.id);
 
-        		state.width *= scaleRatio;
-        		state.height *= scaleRatio;
+				state.width *= scaleRatio;
+				state.height *= scaleRatio;
 
-        		if (diffW !== 0 || diffH !== 0) {
+				if (diffW !== 0 || diffH !== 0) {
 					initImage(state.id);
 				} else {
 					setElement(elem, state);
 					setElement(clone, state);	
 				}
-        	});
+			});
 
-        	if (config.canvas) {
+			if (config.canvas) {
 				config.canvas(null, canvasState);
 			}
-        	if (cb) {
+			if (cb) {
 				cb(null, canvasState);
 			}
 		}
@@ -5701,7 +5697,7 @@
 			if (config.canvas) {
 				config.canvas(null, canvasState);
 			}
-        	if (cb) {
+			if (cb) {
 				cb(null, canvasState);
 			}
 		}
@@ -5738,7 +5734,7 @@
 			// container
 			initContainer();
 
-        	// canvas
+			// canvas
 			initCanvas();
 
 			if (config.config) {
@@ -5756,7 +5752,7 @@
 			if (config.config) {
 				config.config(null, config);
 			}
-        	if (cb) {
+			if (cb) {
 				cb(null, config);
 			}
 		}
@@ -6415,7 +6411,7 @@
 		myObject.downloadTo = function(options, cb){
 			/*!
 			 * options = {
-		 	 *  filename: ?
+			 *  filename: ?
 			 * 	drawWidth: ?,
 			 * 	quality: ?,
 			 * 	mimeType: ?,
@@ -6519,6 +6515,26 @@
 		}
 
 		myObject.export = function(cb) {
+			var keys = [
+				"filename",
+				"x",
+				"y",
+				"width",
+				"height",
+				"rotate",
+				"scaleX",
+				"scaleY",
+				"opacity",
+				"index",
+				"focusable",
+				"movable",
+				"resizable",
+				"rotatable",
+				"flippable",
+				"drawable",
+				"uploadedAt"
+			];
+
 			var data = {};
 
 			var tmpConfig = {};
@@ -6530,7 +6546,10 @@
 			var tmpImagesStates = [];
 			imageStates.forEach(function(state){
 				var tmp = {};
-				setObject(state, tmp);
+
+				keys.forEach(function(k){
+					tmp[k] = state[k];
+				});
 
 				tmpImagesStates.push(tmp);
 			});
