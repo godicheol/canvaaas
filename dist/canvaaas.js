@@ -39,6 +39,8 @@
  * 
  * update drawCanvas, drawImage, preview, download :: adjust argument "width"
  * 
+ * fix exceed max canvas size
+ * 
  */
 
 /*!
@@ -101,17 +103,21 @@
 
 			maxContainerHeight: 0.7, // number, px, if 0 ~ 1 => viewportHeight * x
 
-			canvasWidth: 1920, // number, px
+			drawWidth: 6000, // number, px
 
-			canvasHeight: 1080, // number, px
+			drawHeight: 4000, // number, px
 
 			minImageWidth: 64, // number, px
 
 			minImageHeight: 64, // number, px
 
-			maxImageWidth: 4096, // number, px, for Mobile
+			minDrawWidth: 64, // number, px
 
-			maxImageHeight: 4096, // number, px, for Mobile
+			minDrawHeight: 64, // number, px
+
+			maxDrawWidth: 4096, // number, px, for Mobile
+
+			maxDrawHeight: 4096, // number, px, for Mobile
 
 			minImageRenderWidth: 0.2, //number,  0 ~ 1
 
@@ -2548,8 +2554,27 @@
 		function drawCanvas(width) {
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
-			canvas.width = Math.floor(width);
-			canvas.height = Math.floor(width / (config.canvasWidth / config.canvasHeight));
+
+			var aspectRatio = config.drawWidth / config.drawHeight;
+
+			var maxSizes = getFittedRect(
+				config.maxDrawWidth,
+				config.maxDrawHeight,
+				aspectRatio
+			);
+
+			var minSizes = getFittedRect(
+				config.minDrawWidth,
+				config.minDrawHeight,
+				aspectRatio,
+				'cover'
+			);
+
+			var canvasWidth = Math.min(maxSizes[0], Math.max(minSizes[0], width));
+			var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], width / aspectRatio));
+
+			canvas.width = Math.floor(canvasWidth);
+			canvas.height = Math.floor(canvasHeight);
 			ctx.fillStyle = config.fillColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
@@ -2598,11 +2623,11 @@
 					maxCanvasWidth = 9999;
 					maxCanvasHeight = 9999;
 				} else {
-					maxCanvasWidth = config.maxImageWidth;
-					maxCanvasHeight = config.maxImageHeight;
+					maxCanvasWidth = config.maxDrawWidth;
+					maxCanvasHeight = config.maxDrawHeight;
 				}
-				minCanvasWidth = config.minImageWidth;
-				minCanvasHeight = config.minImageHeight;
+				minCanvasWidth = config.minDrawWidth;
+				minCanvasHeight = config.minDrawHeight;
 
 				// original
 				var scaleRatio = canvasState.width / canvas.width;
@@ -2702,8 +2727,8 @@
 
 			// config
 			var newObj = {
-				canvasWidth: w,
-				canvasHeight: h
+				drawWidth: w,
+				drawHeight: h
 			}
 
 			setObject(newObj, config);
@@ -3069,13 +3094,13 @@
 				return false;
 			}
 
-			if (!config.canvasWidth) {
-				console.log("Canvas width not found");
+			if (!config.drawWidth) {
+				console.log("Draw width not found");
 				return false;
 			}
 
-			if (!config.canvasHeight) {
-				console.log("Canvas height not found");
+			if (!config.drawHeight) {
+				console.log("Draw height not found");
 				return false;
 			}
 
@@ -3109,10 +3134,10 @@
 				maxHeight = config.maxContainerHeight;
 			}
 
-			var aspectRatio = config.containerAspectRatio || config.canvasWidth / config.canvasHeight;
+			var aspectRatio = config.containerAspectRatio || config.drawWidth / config.drawHeight;
 			var width = containerElement.offsetWidth;
 			var height = containerElement.offsetWidth / aspectRatio;
-			var canvasAspectRatio = config.canvasWidth / config.canvasHeight;
+			var canvasAspectRatio = config.drawWidth / config.drawHeight;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -3173,8 +3198,8 @@
 				return false;
 			}
 
-        	var originalWidth = config.canvasWidth;
-        	var originalHeight = config.canvasHeight;
+        	var originalWidth = config.drawWidth;
+        	var originalHeight = config.drawHeight;
 			var aspectRatio = originalWidth / originalHeight;
 
 			var fittedSizes = getFittedRect(
@@ -5990,7 +6015,7 @@
 				return false;
 			}
 
-			var canvasWidth = config.canvasWidth;
+			var canvasWidth = config.drawWidth;
 			if (typeof(w) === "number") {
 				canvasWidth = w;
 			}
@@ -6079,7 +6104,7 @@
 				return false;
 			}
 
-			var canvasWidth = config.canvasWidth;
+			var canvasWidth = config.drawWidth;
 			if (typeof(w) === "number") {
 				canvasWidth = w;
 			}
@@ -6199,7 +6224,7 @@
 				return false;
 			}
 
-			var canvasWidth = config.canvasWidth;
+			var canvasWidth = config.drawWidth;
 			if (typeof(w) === "number") {
 				canvasWidth = w;
 			}
