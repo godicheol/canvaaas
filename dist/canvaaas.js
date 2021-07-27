@@ -43,6 +43,8 @@
  * 
  * add freeze mode
  * 
+ * update drawCanvas()
+ * 
  */
 
 /*!
@@ -169,9 +171,11 @@
 
 			draw: undefined, // callback function
 
-			preview: undefined, // callback function
-
 			download: undefined, // callback function
+
+			freeze: undefined, // callback function
+
+			preview: undefined, // callback function
 
 			export: undefined, // callback function
 
@@ -2562,11 +2566,18 @@
 			// return str.substring(url.lastIndexOf('/')+1);
 		};
 
-		function drawCanvas(width) {
+		function drawCanvas(options) {
+			if (!options || typeof(options) !== "object") {
+				return false;
+			}
+
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
 
-			var aspectRatio = config.drawWidth / config.drawHeight;
+			var width = options.width;
+			var height = options.height;
+			var aspectRatio = options.width / options.height;
+			var fillColor = options.fillColor || config.fillColor;
 
 			var maxSizes = getFittedRect(
 				config.maxDrawWidth,
@@ -2582,15 +2593,15 @@
 			);
 
 			var canvasWidth = Math.min(maxSizes[0], Math.max(minSizes[0], width));
-			var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], width / aspectRatio));
+			var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], height));
 
-			canvas.width = Math.floor(canvasWidth);
-			canvas.height = Math.floor(canvasHeight);
-			ctx.fillStyle = config.fillColor;
+			canvas.width = canvasWidth;
+			canvas.height = canvasHeight;
+
+			ctx.fillStyle = fillColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
-			// ctx.imageSmoothingQuality = config.imageSmoothingQuality;
-			// ctx.imageSmoothingEnabled = config.imageSmoothingEnabled;
+
 			return canvas;
 		};
 
@@ -2624,21 +2635,10 @@
 				return false;
 			}
 			virtualImg.onload = function(e) {
-				var maxCanvasWidth;
-				var maxCanvasHeight;
-				var minCanvasWidth;
-				var minCanvasHeight;
-
-				// check mobile
-				if (!isMobile()) {
-					maxCanvasWidth = 9999;
-					maxCanvasHeight = 9999;
-				} else {
-					maxCanvasWidth = config.maxDrawWidth;
-					maxCanvasHeight = config.maxDrawHeight;
-				}
-				minCanvasWidth = config.minDrawWidth;
-				minCanvasHeight = config.minDrawHeight;
+				var maxCanvasWidth = config.maxDrawWidth;
+				var maxCanvasHeight = config.maxDrawHeight;
+				var minCanvasWidth = config.minDrawWidth;
+				var minCanvasHeight = config.minDrawHeight;
 
 				// original
 				var scaleRatio = canvasState.width / canvas.width;
@@ -2653,10 +2653,10 @@
 					adjH,
 					state.rotate
 				);
-				var rotatedWidth = Math.floor( adjSizes[0] );
-				var rotatedHeight = Math.floor( adjSizes[1] );
-				var rotatedLeft = Math.floor( adjX - (adjSizes[0] * 0.5) );
-				var rotatedTop = Math.floor( adjY - (adjSizes[1] * 0.5) );
+				var rotatedWidth = Math.floor(adjSizes[0]);
+				var rotatedHeight = Math.floor(adjSizes[1]);
+				var rotatedLeft = Math.floor(adjX - (adjSizes[0] * 0.5));
+				var rotatedTop = Math.floor(adjY - (adjSizes[1] * 0.5));
 
 				var maxSizes = getFittedRect(
 					maxCanvasWidth,
@@ -2676,6 +2676,7 @@
 				var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], rotatedHeight));
 
 				// orignal > resize
+
 				var scaleRatioX = canvasWidth / rotatedWidth;
 				var scaleRatioY = canvasHeight / rotatedHeight;
 				var absWidth = adjW * scaleRatioX;
@@ -5994,11 +5995,32 @@
 		// 
 
 		myObject.draw = function(cb){
-			var canvasWidth = config.drawWidth;
-			var canvas = drawCanvas(canvasWidth);
-			var ctx = canvas.getContext("2d");
-			var drawables = [];
+			var drawWidth = config.drawWidth;
+			var quality = config.quality;
+			var mimeType = config.mimeType;
+			var imageSmoothingQuality = config.imageSmoothingQuality;
+			var imageSmoothingEnabled = config.imageSmoothingEnabled;
+			var fillColor = config.fillColor;
 
+			var drawOption = {
+				width: drawWidth,
+				height: drawWidth / (config.drawWidth / config.drawHeight),
+				fileColor: fillColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.draw) {
+					config.draw("drawCanvas() error");
+				}
+				if (cb) {
+					cb("drawCanvas() error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawable) {
 					drawables.push(imageStates[i]);
@@ -6009,12 +6031,6 @@
 			var count = 0;
 			var result = {};
 			var drawResults = [];
-
-			var quality = config.quality;
-			var mimeType = config.mimeType;
-			var fillColor = config.fillColor;
-			var imageSmoothingQuality = config.imageSmoothingQuality;
-			var imageSmoothingEnabled = config.imageSmoothingEnabled;
 
 			result.width = canvas.width;
 			result.height = canvas.height;
@@ -6029,7 +6045,6 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					// recursive
 					drawImage(canvas, drawables[count].id, function(err) {
 						if (err) {
 							drawResults.push({
@@ -6043,7 +6058,6 @@
 						recursiveFunc();
 					});
 				} else {
-					// end
 					ctx.imageSmoothingQuality = imageSmoothingQuality;
 					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
 					ctx.restore();
@@ -6062,7 +6076,6 @@
 		}
 
 		myObject.drawTo = function(options, cb){
-
 			/*!
 			 * options = {
 			 * 	drawWidth: ?,
@@ -6073,7 +6086,7 @@
 			 * }
 			 */
 
-			if (typeof(w) !== "object") {
+			if (typeof(options) !== "object") {
 				if (config.draw) {
 					config.draw(errMsg.ARGUMENT);
 				}
@@ -6083,11 +6096,32 @@
 				return false;
 			}
 
-			var canvasWidth = options.drawWidth || config.drawWidth;
-			var canvas = drawCanvas(canvasWidth);
-			var ctx = canvas.getContext("2d");
-			var drawables = [];
+			var drawWidth = options.width || config.drawWidth;
+			var quality = options.quality || config.quality;
+			var mimeType = options.mimeType || config.mimeType;
+			var fillColor = options.fillColor || config.fillColor;
+			var imageSmoothingQuality = options.imageSmoothingQuality || config.imageSmoothingQuality;
+			var imageSmoothingEnabled = options.imageSmoothingEnabled || config.imageSmoothingEnabled;
 
+			var drawOption = {
+				width: drawWidth,
+				height: drawWidth / (config.drawWidth / config.drawHeight),
+				fileColor: fillColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.draw) {
+					config.draw("drawCanvas() error");
+				}
+				if (cb) {
+					cb("drawCanvas() error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawable) {
 					drawables.push(imageStates[i]);
@@ -6099,16 +6133,9 @@
 			var result = {};
 			var drawResults = [];
 
-			var quality = options.quality || config.quality;
-			var mimeType = options.mimeType || config.mimeType;
-			var fillColor = config.fillColor;
-			var imageSmoothingQuality = options.imageSmoothingQuality || config.imageSmoothingQuality;
-			var imageSmoothingEnabled = options.imageSmoothingEnabled || config.imageSmoothingEnabled;
-
 			result.width = canvas.width;
 			result.height = canvas.height;
 			result.numberOfImages = drawables.length;
-
 			result.fillColor = fillColor;
 			result.mimeType = mimeType;
 			result.quality = quality;
@@ -6151,204 +6178,45 @@
 			}
 		}
 
-		myObject.preview = function(cb){
-
-			if (onPreview === true) {
-				if (config.preview) {
-					config.preview(errMsg.ALREADY_PREVIEW);
-				}
-				if (cb) {
-					cb(errMsg.ALREADY_PREVIEW);
-				}
-				return false;
-			}
-
-			previewElement.innerHTML = "";
-
-			if (eventState.target) {
-				var oldId = getIdByImageElement(eventState.target);
-				setFocusOut(oldId);
-			}
-
-			var canvasWidth = config.drawWidth;
-			var canvas = drawCanvas(canvasWidth);
-			var ctx = canvas.getContext("2d");
-			var drawables = [];
-
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
-			var quality = config.quality;
-			var mimeType = config.mimeType;
-			var fillColor = config.fillColor;
-			var imageSmoothingQuality = config.imageSmoothingQuality;
-			var imageSmoothingEnabled = config.imageSmoothingEnabled;
-
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// draw image
-					drawImage(canvas, drawables[count].id, function(err) {
-						if (err) {
-							drawResults.push({
-								id: drawables[count].id,
-								err: err
-							});
-						} else {
-							drawResults.push(drawables[count]);
-						}
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					var file = canvas.toDataURL(mimeType, quality);
-
-					result.states = drawResults;
-					// result.file = file;
-
-					setElement(previewElement, canvasState);
-
-					var newImage = document.createElement("img");
-					newImage.src = file;
-
-					previewElement.appendChild(newImage);
-
-					canvasElement.classList.add("hidden");
-					mirrorElement.classList.add("hidden");
-					previewElement.classList.remove("hidden");
-
-					config.editable = false;
-					onPreview = true;
-
-					if (config.preview) {
-						config.preview(null, result);
-					}
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
-		myObject.escapePreview = function(cb){
-			if (onPreview === false) {
-				if (cb) {
-					cb(errMsg.NO_PREVIEW);
-				}
-				return false;
-			}
-
-			previewElement.innerHTML = "";
-			previewElement.style.width = "";
-			previewElement.style.height = "";
-
-			canvasElement.classList.remove("hidden");
-			mirrorElement.classList.remove("hidden");
-			previewElement.classList.add("hidden");
-
-			config.editable = true;
-			onPreview = false;
-
-			if (cb) {
-				cb(null);
-			}
-		}
-
-		myObject.freeze = function(cb){
-			if (onFreeze === true) {
-				if (cb) {
-					cb(errMsg.ALREADY_FREEZE);
-				}
-				return false;
-			}
-
-			var newConfig = {
-				editable: false,
-			}
-
-			setObject(newConfig, config);
-
-			canvasElement.style.backgroundColor = config.fillColor;
-			canvasElement.classList.remove("checker");
-
-			onFreeze = true;
-
-			if (cb) {
-				cb(null);
-			}
-		}
-
-		myObject.escapeFreeze = function(cb){
-			if (onFreeze === false) {
-				if (cb) {
-					cb(errMsg.NO_FREEZE);
-				}
-				return false;
-			}
-
-			var newConfig = {
-				editable: true,
-			}
-			setObject(newConfig, config);
-
-			canvasElement.style.backgroundColor = "";
-			canvasElement.classList.add("checker");
-
-			onFreeze = false;
-
-			if (cb) {
-				cb(null);
-			}
-		}
-
 		myObject.download = function(cb){
-			var canvasWidth = config.drawWidth;
-			var canvas = drawCanvas(canvasWidth);
-			var ctx = canvas.getContext("2d");
-			var drawables = [];
-
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
+			var drawWidth = config.drawWidth;
 			var quality = config.quality;
 			var mimeType = config.mimeType;
 			var imageSmoothingQuality = config.imageSmoothingQuality;
 			var imageSmoothingEnabled = config.imageSmoothingEnabled;
 			var fillColor = config.fillColor;
-
 			var filename = config.filename || "Untitled";
 			filename += "." + mimeType.split("/")[1];
+
+			var drawOption = {
+				width: drawWidth,
+				height: drawWidth / (config.drawWidth / config.drawHeight),
+				fileColor: fillColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.download) {
+					config.download("drawCanvas() error");
+				}
+				if (cb) {
+					cb("drawCanvas() error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					drawables.push(imageStates[i]);
+				}
+			}
+
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
 
 			result.filename = filename;
 			result.width = canvas.width;
@@ -6412,6 +6280,7 @@
 			/*!
 			 * options = {
 			 *  filename: ?
+			 * 	fillColor: ?,
 			 * 	drawWidth: ?,
 			 * 	quality: ?,
 			 * 	mimeType: ?,
@@ -6419,9 +6288,7 @@
 			 * 	imageSmoothingEnabled: ?
 			 * }
 			 */
-			if (
-				typeof(options) !== "object"
-			) {
+			if (typeof(options) !== "object") {
 				if (config.download) {
 					config.download(errMsg.ARGUMENT);
 				}
@@ -6430,11 +6297,35 @@
 				}
 				return false;
 			}
-			var canvasWidth = options.drawWidth || config.drawWidth;
-			var canvas = drawCanvas(canvasWidth);
-			var ctx = canvas.getContext("2d");
-			var drawables = [];
 
+			var drawWidth = options.width || config.drawWidth;
+			var quality = options.quality || config.quality;
+			var mimeType = options.mimeType || config.mimeType;
+			var fillColor = options.fillColor || config.fillColor;
+			var imageSmoothingQuality = options.imageSmoothingQuality || config.imageSmoothingQuality;
+			var imageSmoothingEnabled = options.imageSmoothingEnabled || config.imageSmoothingEnabled;
+			var filename = options.filename || config.filename || "Untitled";
+			filename += "." + mimeType.split("/")[1];
+
+			var drawOption = {
+				width: drawWidth,
+				height: drawWidth / (config.drawWidth / config.drawHeight),
+				fileColor: fillColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.download) {
+					config.download("drawCanvas() error");
+				}
+				if (cb) {
+					cb("drawCanvas() error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawable) {
 					drawables.push(imageStates[i]);
@@ -6445,16 +6336,6 @@
 			var count = 0;
 			var result = {};
 			var drawResults = [];
-
-			var quality = options.quality || config.quality;
-			var mimeType = options.mimeType || config.mimeType;
-			var fillColor = config.fillColor;
-			var imageSmoothingQuality = options.imageSmoothingQuality || config.imageSmoothingQuality;
-			var imageSmoothingEnabled = options.imageSmoothingEnabled || config.imageSmoothingEnabled;
-
-
-			var filename = options.filename || config.filename || "Untitled";
-			filename += "." + mimeType.split("/")[1];
 
 			result.filename = filename;
 			result.width = canvas.width;
@@ -6514,6 +6395,212 @@
 			}
 		}
 
+		myObject.preview = function(cb){
+			if (onPreview === true) {
+				if (config.preview) {
+					config.preview(errMsg.ALREADY_PREVIEW);
+				}
+				if (cb) {
+					cb(errMsg.ALREADY_PREVIEW);
+				}
+				return false;
+			}
+			if (onFreeze === true) {
+				if (config.preview) {
+					config.preview(errMsg.ALREADY_FREEZE);
+				}
+				if (cb) {
+					cb(errMsg.ALREADY_FREEZE);
+				}
+				return false;
+			}
+
+			previewElement.innerHTML = "";
+
+			if (eventState.target) {
+				var oldId = getIdByImageElement(eventState.target);
+				setFocusOut(oldId);
+			}
+
+			var drawWidth = config.drawWidth;
+			var quality = config.quality;
+			var mimeType = config.mimeType;
+			var imageSmoothingQuality = config.imageSmoothingQuality;
+			var imageSmoothingEnabled = config.imageSmoothingEnabled;
+			var fillColor = config.fillColor;
+
+			var drawOption = {
+				width: drawWidth,
+				height: drawWidth / (config.drawWidth / config.drawHeight),
+				fileColor: fillColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.preview) {
+					config.preview("drawCanvas() error");
+				}
+				if (cb) {
+					cb("drawCanvas() error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					drawables.push(imageStates[i]);
+				}
+			}
+
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
+
+			result.width = canvas.width;
+			result.height = canvas.height;
+			result.numberOfImages = drawables.length;
+			result.fillColor = fillColor;
+			result.mimeType = mimeType;
+			result.quality = quality;
+			result.imageSmoothingQuality = imageSmoothingQuality;
+			result.imageSmoothingEnabled = imageSmoothingEnabled;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					// draw image
+					drawImage(canvas, drawables[count].id, function(err) {
+						if (err) {
+							drawResults.push({
+								id: drawables[count].id,
+								err: err
+							});
+						} else {
+							drawResults.push(drawables[count]);
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					// end
+					ctx.imageSmoothingQuality = imageSmoothingQuality;
+					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
+					ctx.restore();
+
+					var file = canvas.toDataURL(mimeType, quality);
+
+					result.states = drawResults;
+
+					setElement(previewElement, canvasState);
+
+					var newImage = document.createElement("img");
+					newImage.src = file;
+
+					previewElement.appendChild(newImage);
+
+					canvasElement.classList.add("hidden");
+					mirrorElement.classList.add("hidden");
+					previewElement.classList.remove("hidden");
+
+					config.editable = false;
+					onPreview = true;
+
+					if (config.preview) {
+						config.preview(null, result);
+					}
+					if (cb) {
+						cb(null, result);
+					}
+				}
+			}
+		}
+
+		myObject.escapePreview = function(cb){
+			if (onPreview === false) {
+				if (cb) {
+					cb(errMsg.NO_PREVIEW);
+				}
+				return false;
+			}
+
+			previewElement.innerHTML = "";
+			previewElement.style.width = "";
+			previewElement.style.height = "";
+
+			canvasElement.classList.remove("hidden");
+			mirrorElement.classList.remove("hidden");
+			previewElement.classList.add("hidden");
+
+			config.editable = true;
+			onPreview = false;
+
+			if (cb) {
+				cb(null);
+			}
+		}
+
+		myObject.freeze = function(cb){
+			if (onPreview === false) {
+				if (config.freeze) {
+					config.freeze(ALREADY_PREVIEW);
+				}
+				if (cb) {
+					cb(errMsg.ALREADY_PREVIEW);
+				}
+				return false;
+			}
+			if (onFreeze === true) {
+				if (config.freeze) {
+					config.freeze(ALREADY_FREEZE);
+				}
+				if (cb) {
+					cb(errMsg.ALREADY_FREEZE);
+				}
+				return false;
+			}
+
+			var newConfig = {
+				editable: false,
+			}
+
+			setObject(newConfig, config);
+
+			canvasElement.style.backgroundColor = config.fillColor;
+			canvasElement.classList.remove("checker");
+
+			onFreeze = true;
+
+			if (cb) {
+				cb(null);
+			}
+		}
+
+		myObject.escapeFreeze = function(cb){
+			if (onFreeze === false) {
+				if (cb) {
+					cb(errMsg.NO_FREEZE);
+				}
+				return false;
+			}
+
+			var newConfig = {
+				editable: true,
+			}
+			setObject(newConfig, config);
+
+			canvasElement.style.backgroundColor = "";
+			canvasElement.classList.add("checker");
+
+			onFreeze = false;
+
+			if (cb) {
+				cb(null);
+			}
+		}
 		myObject.export = function(cb) {
 			var keys = [
 				"filename",

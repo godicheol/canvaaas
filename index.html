@@ -151,7 +151,7 @@
 		  <button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio()</button>
 		  //
 		  <button type="button" onclick="canvaaas.draw()">draw()</button>
-		  <button type="button" onclick="canvaaas.drawTo(256)">drawTo(256)</button>
+		  <button type="button" onclick="canvaaas.drawTo({width: 256})">drawTo({width: 256})</button>
 		  //
 		  <button type="button" onclick="canvaaas.preview()">preview()</button>
 		  <button type="button" onclick="canvaaas.escapePreview()">escapePreview()</button>
@@ -533,7 +533,7 @@
 	  		}
 	  	});
 
-
+	  	// test import
 	  	canvaaas.import(exportedData, function(err, res){
 	  		if (err) {
 	  			console.log(err);
@@ -541,7 +541,6 @@
 	  		console.log(res)
 				canvaaas.showContainer();
 	  		canvaaas.freeze();
-
 	  	});
 
 
