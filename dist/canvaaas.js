@@ -5,7 +5,7 @@
  * eeecheol@gmail.com
  * 
  * 
- * 0.0.1
+ * 0.0.2
  * 
  */
 
@@ -103,13 +103,9 @@
 
 			maxContainerHeight: 0.7, // number, px, if 0 ~ 1 => viewportHeight * x
 
-			drawWidth: 6000, // number, px
+			drawWidth: 4096, // number, px
 
-			drawHeight: 4000, // number, px
-
-			minImageWidth: 64, // number, px
-
-			minImageHeight: 64, // number, px
+			drawHeight: 2304, // number, px
 
 			minDrawWidth: 64, // number, px
 
@@ -118,6 +114,10 @@
 			maxDrawWidth: 4096, // number, px, for Mobile
 
 			maxDrawHeight: 4096, // number, px, for Mobile
+
+			minImageWidth: 64, // number, px
+
+			minImageHeight: 64, // number, px
 
 			minImageRenderWidth: 0.2, //number,  0 ~ 1
 
@@ -3198,9 +3198,7 @@
 				return false;
 			}
 
-        	var originalWidth = config.drawWidth;
-        	var originalHeight = config.drawHeight;
-			var aspectRatio = originalWidth / originalHeight;
+			var aspectRatio = config.drawWidth / config.drawHeight;
 
 			var fittedSizes = getFittedRect(
 				containerState.width,
@@ -3213,8 +3211,6 @@
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
-			canvasState.originalWidth = originalWidth;
-			canvasState.originalHeight = originalHeight;
 			canvasState.width = width;
 			canvasState.height = height;
 			canvasState.x = axisX;
@@ -3233,7 +3229,9 @@
 		myObject.init = function(target, preConfig, cb) {
 
 			if (!target || typeof(target) !== "object") {
-				alert("canvaaas.init( /* target */ ) error");
+				if (cb) {
+					cb("canvaaas.init() error");
+				}
 				return false;
 			}
 
@@ -3268,9 +3266,6 @@
 
 	        // set canvas
 	        initCanvas();
-
-	        // hide container
-	        containerElement.classList.add("hidden");
 
         	// set style
 			if (config.overlay === true) {
@@ -3313,8 +3308,6 @@
 				} else {
 					onUpload = false;
 
-        			containerElement.classList.remove("hidden");
-
 					if (cb) {
 						cb(null, config);
 					}
@@ -3322,6 +3315,62 @@
 					console.log("canvaaas.js initialized", config);
 				}
 			}
+		}
+
+		myObject.view = function(target, exportedStates, cb) {
+			if (!target || typeof(target) !== "object") {
+				if (cb) {
+					cb("canvaaas.view() error");
+				}
+				return false;
+			}
+
+			if (!Array.isArray(exportedStates)) {
+				exportedStates = [exportedStates];
+			}
+
+			// check target inner
+			var tmpUrls = [];
+			if (target.querySelectorAll("img").length > 0) {
+				target.querySelectorAll("img").forEach(function(img){
+					tmpUrls.push(img.src);
+				});
+			}
+
+			// recover target inner
+			var index = tmpUrls.length;
+			var count = 0;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					var filename = tmpUrls[count];
+					var newImage = document.createElement("img");
+					newImage.src = tmpUrls[count];
+					var newImg = new Image();
+					newImg.src = tmpUrls[count];
+					newImg.onerror = function(e) {}
+					newImg.onload = function(e) {
+
+						var state;
+						exportedStates.forEach(function(candidateState){
+							if (filename === candidateState) {
+								state = candidateState;
+							}
+						});
+
+						var canvasState = 
+
+						target.appendChild(newImage);
+					}
+				} else {
+					console.log("canvaaas.js view initialized");
+
+					return false;
+				}
+			}
+
 		}
 
 		myObject.uploadFiles = function(self, cb) {
@@ -5639,7 +5688,7 @@
 			var newW = canvasState.width;
 			var newH = canvasState.height;
 			var diffW = newW - oldW;
-			var diffH = newH - newH;
+			var diffH = newH - oldH;
 
 			var scaleRatio = 1;
 			if (diffW !== 0) {
@@ -5700,6 +5749,7 @@
 		// config
 		// 
 
+		// deprecated
 		myObject.setConfig = function(obj, cb) {
 
 			if (!config.editable) {
@@ -5722,28 +5772,13 @@
 				return false;
 			}
 
-			var isCanvasResize = false;
-
-			if (
-				obj.canvasWidth || 
-				obj.canvasHeight ||
-				obj.minContainerWidth ||
-				obj.minContainerHeight ||
-				obj.maxContainerWidth ||
-				obj.maxContainerHeight
-			) {
-				isCanvasResize = true
-			}
-
 			setObject(obj, config);
 
-			if (isCanvasResize) {
-				// container
-				initContainer();
+			// container
+			initContainer();
 
-	        	// canvas
-				initCanvas();
-			}
+        	// canvas
+			initCanvas();
 
 			if (config.config) {
 				config.config(null, config);
@@ -6305,65 +6340,36 @@
 			}
 		}
 
-		myObject.export = function(keys, cb) {
-			var requireKeys = [
-				"filename"
-			];
+		myObject.export = function(cb) {
+			var data = {};
 
-			if (!Array.isArray(keys)) {
-				keys = [
-					"index",
-					"filename",
-					"x",
-					"y",
-					"width",
-					"height",
-					"rotate",
-					"scaleX",
-					"scaleY",
-					"opacity",
-					"focusable",
-					"movable",
-					"resizable",
-					"rotatable",
-					"flippable",
-					"drawable"
-				];
-			} else {
-				requireKeys.forEach(function(k){
-					if (keys.indexOf(k) < 0) {
-						keys.push(k);
-					}
-				});
-			}
+			var tmpConfig = {};
+			setObject(config, tmpConfig);
 
-			var states = [];
+			var tmpCanvasState = {};
+			setObject(canvasState, tmpCanvasState);
+
+			var tmpImagesStates = [];
 			imageStates.forEach(function(state){
 				var tmp = {};
+				setObject(state, tmp);
 
-				keys.forEach(function(k){
-					tmp[k] = state[k];
-				});
-
-				tmp.canvasState = {
-					originalWidth: canvasState.originalWidth,
-					originalHeight: canvasState.originalHeight,
-					width: canvasState.width,
-					height: canvasState.height
-				};
-
-				states.push(tmp);
+				tmpImagesStates.push(tmp);
 			});
 
+			data.config = tmpConfig;
+			data.canvasState = tmpCanvasState;
+			data.imageStates = tmpImagesStates;
+
 			if (config.export) {
-				config.export(null, states);
+				config.export(null, data);
 			}
 			if (cb) {
-				cb(null, states);
+				cb(null, data);
 			}
 		}
 
-		myObject.import = function(states, cb) {
+		myObject.import = function(exportedData, cb) {
 
 			if (!config.editable) {
 				if (config.import) {
@@ -6375,7 +6381,7 @@
 				return false;
 			}
 
-			if (!Array.isArray(states)) {
+			if (!exportedData) {
 				if (config.import) {
 					config.import(errMsg.ARGUMENT);
 				}
@@ -6385,14 +6391,46 @@
 				return false;
 			}
 
+			var oldImageStates = exportedData.imageStates;
+			var oldConfig = exportedData.config;
+			var oldCanvasState = exportedData.canvasState;
+
+			if (
+				!oldCanvasState ||
+				!oldImageStates ||
+				oldImageStates.length < 1 ||
+				!oldCanvasState.width ||
+				!oldCanvasState.height
+			) {
+				if (config.import) {
+					config.import(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			var aspectRatioA = oldCanvasState.width / oldCanvasState.height;
+			var aspectRatioB = canvasState.width / canvasState.height;
+
+			// check aspect ratio
+			if (Math.abs(aspectRatioA - aspectRatioB) > 0.01) {
+				if (config.import) {
+					config.import("Canvas aspect ratio mismatch");
+				}
+				if (cb) {
+					cb("Canvas aspect ratio mismatch");
+				}
+				return false;
+			}
+			
 			var results = [];
+			for (var i = 0; i < oldImageStates.length; i++){
 
-			for (var i = 0; i < states.length; i++){
+				var oldState = oldImageStates[i];
 
-				var exportedState = states[i];
-				var exportedCanvasState = states[i].canvasState;
-
-				var elem = getImageElementByFilename(exportedState.filename);
+				var elem = getImageElementByFilename(oldState.filename);
 				var clone = getCloneElementByImageElement(elem);
 				var state = getStateByImageElement(elem);
 
@@ -6404,122 +6442,110 @@
 					continue;
 				}
 
-				var aspectRatioA = exportedCanvasState.originalWidth / exportedCanvasState.originalHeight;
-				var aspectRatioB = canvasState.originalWidth / canvasState.originalHeight;
-
-				// check aspect ratio
-				if (Math.abs(aspectRatioA - aspectRatioB) > 0.01) {
-					results.push({
-						key: i,
-						err: "Canvas apsect ratio mismatch"
-					})
-					continue;
-				}
-
 				// save cache
 				pushCache(state.id);
 				eventSubCaches = [];
 
-				var scaleRatio = canvasState.width / exportedCanvasState.width;
-				var aspectRatioC = exportedState.width / exportedState.height;
+				var scaleRatio = canvasState.width / oldCanvasState.width;
+				var aspectRatio = oldState.width / oldState.height;
 
 				// save state
 				if (
-					exportedState.index !== undefined &&
-					exportedState.index !== null
+					oldState.index !== undefined &&
+					oldState.index !== null
 				) {
-					state.index = exportedState.index;
+					state.index = oldState.index;
 				}
 
 				if (
-					exportedState.x !== undefined &&
-					exportedState.x !== null
+					oldState.x !== undefined &&
+					oldState.x !== null
 				) {
-					state.x = exportedState.x * scaleRatio;
+					state.x = oldState.x * scaleRatio;
 				}
 				if (
-					exportedState.y !== undefined &&
-					exportedState.y !== null
+					oldState.y !== undefined &&
+					oldState.y !== null
 				) {
-					state.y = exportedState.y * scaleRatio;
+					state.y = oldState.y * scaleRatio;
 				}
 				if (
-					exportedState.width !== undefined &&
-					exportedState.width !== null
+					oldState.width !== undefined &&
+					oldState.width !== null
 				) {
-					state.width = exportedState.width * scaleRatio;
+					state.width = oldState.width * scaleRatio;
 				}
 				if (
-					exportedState.height !== undefined &&
-					exportedState.height !== null
+					oldState.height !== undefined &&
+					oldState.height !== null
 				) {
-					state.height = exportedState.width * scaleRatio / aspectRatioC;
+					state.height = oldState.width * scaleRatio / aspectRatio;
 				}
 				if (
-					exportedState.rotate !== undefined &&
-					exportedState.rotate !== null
+					oldState.rotate !== undefined &&
+					oldState.rotate !== null
 				) {
-					state.rotate = exportedState.rotate;
+					state.rotate = oldState.rotate;
 				}
 				if (
-					exportedState.scaleX !== undefined &&
-					exportedState.scaleX !== null
+					oldState.scaleX !== undefined &&
+					oldState.scaleX !== null
 				) {
-					state.scaleX = exportedState.scaleX;
+					state.scaleX = oldState.scaleX;
 				}
 				if (
-					exportedState.scaleY !== undefined &&
-					exportedState.scaleY !== null
+					oldState.scaleY !== undefined &&
+					oldState.scaleY !== null
 				) {
-					state.scaleY = exportedState.scaleY;
+					state.scaleY = oldState.scaleY;
 				}
 				if (
-					exportedState.opacity !== undefined &&
-					exportedState.opacity !== null
+					oldState.opacity !== undefined &&
+					oldState.opacity !== null
 				) {
-					state.opacity = exportedState.opacity;
-				}
-
-				if (
-					exportedState.focusable === true ||
-					exportedState.focusable === false
-				) {
-					state.focusable = exportedState.focusable;
+					state.opacity = oldState.opacity;
 				}
 
 				if (
-					exportedState.movable === true ||
-					exportedState.movable === false
+					oldState.focusable === true ||
+					oldState.focusable === false
 				) {
-					state.movable = exportedState.movable;
+					state.focusable = oldState.focusable;
 				}
 
 				if (
-					exportedState.resizable === true ||
-					exportedState.resizable === false
+					oldState.movable === true ||
+					oldState.movable === false
 				) {
-					state.resizable = exportedState.resizable;
+					state.movable = oldState.movable;
 				}
 
 				if (
-					exportedState.rotatable === true ||
-					exportedState.rotatable === false
+					oldState.resizable === true ||
+					oldState.resizable === false
 				) {
-					state.rotatable = exportedState.rotatable;
+					state.resizable = oldState.resizable;
 				}
 
 				if (
-					exportedState.flippable === true ||
-					exportedState.flippable === false
+					oldState.rotatable === true ||
+					oldState.rotatable === false
 				) {
-					state.flippable = exportedState.flippable;
+					state.rotatable = oldState.rotatable;
 				}
 
 				if (
-					exportedState.drawable === true ||
-					exportedState.drawable === false
+					oldState.flippable === true ||
+					oldState.flippable === false
 				) {
-					state.drawable = exportedState.drawable;
+					state.flippable = oldState.flippable;
+				}
+
+				if (
+					oldState.drawable === true ||
+					oldState.drawable === false
+				) {
+					state.drawable = oldState.drawable;
 				}
 
 				// adjust state
@@ -6527,6 +6553,10 @@
 				setElement(clone, state);
 
 				results.push(state);
+			}
+
+			if (oldConfig) {
+				setObject(oldConfig, config);
 			}
 
 			// adjust index

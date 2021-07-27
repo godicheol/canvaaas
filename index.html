@@ -161,8 +161,7 @@
 		  <button type="button" onclick="canvaaas.download(256)">download(256)</button>
 		  //
 		  <button type="button" onclick="canvaaas.export()">export()</button>
-		  <button type="button" onclick="canvaaas.export(['width', 'height', 'x', 'y'])">export(array)</button>
-		  <button type="button" onclick="canvaaas.import(tmp_states)">import(states)</button>
+		  <button type="button" onclick="canvaaas.import(tmp_exported)">import(data)</button>
 		  //
 		  <button type="button" onclick="console.log(canvaaas.this())">this()</button>
 		  <button type="button" onclick="console.log(canvaaas.thisData())">thisData()</button>
@@ -195,7 +194,7 @@
 	<script>
 
 		var tmp_id;
-		var tmp_states;
+		var tmp_exported;
 
 		function saveRecent(err, x) {
 			tmp_id = x;
@@ -356,7 +355,7 @@
 		  		return false;
 		  	}
 			  console.log("export", res);
-			  tmp_states = res;
+			  tmp_exported = res;
 			},
 			import: function(err, res){
 				if (err) {
