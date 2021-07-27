@@ -12,12 +12,14 @@
 	<!-- ! -->
 
 	<style>
-		html,body,div{
+		html,
+		body,
+		div{
 			margin: 0;
 			padding: 0;
 		}
 
-		#tester{
+		#container{
 			/*padding: 24px;*/
 			overflow: hidden;
 		}
@@ -32,7 +34,10 @@
   <body style="">
 
   	<!-- main -->
-		<div id="tester"></div>
+		<!-- <div id="container"></div> -->
+		<div id="container">
+			<img src="/img/1.png" alt="">
+		</div>
 
 		<div id="logger" style=""></div>
 
@@ -178,8 +183,6 @@
 		<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		  <img id="preview3" style="width: 100%;" src="" alt="">
 		</div>
-		<div id="preview4" style="width: 30%;"></div>
-
 
 	<script>
 
@@ -216,31 +219,13 @@
 			// editable: false
 	  }
 
-	  function custom1(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("uploadFiles()", res);
-	  }
-
-	  function custom2(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("uploadUrls()", err, res);
-	  }
-
-	  function custom3(err, res) {
-	  	if (err) {
-	  		console.log(err);
-	  		return false;
-	  	}
-			console.log("uploadUrls()", err, res);
-	  }
-	  var elem = document.getElementById("tester");
+	  var elem = document.getElementById("container");
 	  canvaaas.init(elem, {
+	  	filename: undefined,
+			maxNumberOfImages: 1,
+			containerAspectRatio: 1,
+			canvasWidth: 1920, // number, px
+			canvasHeight: 1080, // number, px
 			focus: function(err, res){
 				if (err) {
 		  		console.log(err);
@@ -385,25 +370,18 @@
 	  });
 
 	  // test 1
-		canvaaas.uploadUrls('/img/2.jpeg', function(err, res){
-			if (err) {
-				console.log(err);
-			}
-			var id = res[0];
-			var tmp = {
-				filename: undefined,
-				// editable: false,
-				maxNumberOfImages: 1,
-				containerAspectRatio: 1,
-				canvasWidth: 1920, // number, px
-				canvasHeight: 1080, // number, px
-			}
-			canvaaas.setConfig(tmp, function(err, res){
-				canvaaas.zoomTo(id, "contain");
-				canvaaas.moveTo(id, 0.5, 0.5);
-				canvaaas.preview();
-			});
-		})
+		// canvaaas.uploadUrls('/img/2.jpeg', function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}
+		// 	var id = res[0];
+			
+		// 	canvaaas.zoomTo(id, "contain");
+		// 	canvaaas.moveTo(id, 0.5, 0.5);
+		// 	canvaaas.preview();
+		// });
+		
+
 	</script>
  </body>
 </html>

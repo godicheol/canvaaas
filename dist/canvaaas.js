@@ -50,6 +50,10 @@
  * 
  * 엄청 큰 사진
  * 
+ * index 1000 이상
+ * 
+ * import 로 index 겹치기
+ * 
  * 
  * 
  * 
@@ -64,6 +68,8 @@
 
 		var defaultConfiguration = {
 
+			mode: 1, // number, 1 = edit, 2 = view, 3 = draw
+
 			filename: undefined, // string
 
 			editable: true, // boolean
@@ -74,13 +80,13 @@
 
     		editableAspectRatio: true, // boolean
 
-    		minAutoIndex: 0,
+    		minAutoIndex: 0, // number
 
-    		maxAutoIndex: 999,
+    		maxAutoIndex: 999, // number
 
-			maxNumberOfImages: 999,
+			maxNumberOfImages: 999, // number
 
-    		cacheLevels: 999,
+    		cacheLevels: 999, // number
 
 			containerAspectRatio: undefined, // width / height
 
@@ -104,23 +110,23 @@
 
 			maxImageHeight: 4096, // number, px, for Mobile
 
-			minImageRenderWidth: 0.2, // 0 ~ 1
+			minImageRenderWidth: 0.2, //number,  0 ~ 1
 
-			minImageRenderHeight: 0.2, // 0 ~ 1
+			minImageRenderHeight: 0.2, // number, 0 ~ 1
 
-			maxImageRenderWidth: 0.9, // 0 ~ 1
+			maxImageRenderWidth: 0.9, // number, 0 ~ 1
 
-			maxImageRenderHeight: 0.9, // 0 ~ 1
+			maxImageRenderHeight: 0.9, // number, 0 ~ 1
 
 			imageSmoothingEnabled: false, // boolean
 			
-    		imageSmoothingQuality: "low", // low, medium, high
+    		imageSmoothingQuality: "low", // string, low, medium, high
 			
-    		fillColor: "#FFFFFF", // RGB
+    		fillColor: "#FFFFFF", // string, RGB
 			
     		mimeType: "image/jpeg", // image/jpeg, image/png, image/webp...
 
-    		quality: 0.8, // 0 ~ 1
+    		quality: 0.8, // number, 0 ~ 1
 
     		extensions: ["jpg", "jpeg", "png", "webp", "svg"], // upload option
 
@@ -3167,10 +3173,15 @@
 				}
 			}
 
-			// 
-			// set template
-			// 
+			// check target inner
+			var tmpUrls = [];
+			if (target.querySelectorAll("img").length > 0) {
+				target.querySelectorAll("img").forEach(function(img){
+					tmpUrls.push(img.src);
+				});
+			}
 
+			// set template
 			target.innerHTML = conatinerTemplate;
 
 	        containerElement = target.querySelector("div.canvaaas");
@@ -3178,30 +3189,18 @@
 	        mirrorElement = target.querySelector("div.canvaaas-mirror");
 	        previewElement = target.querySelector("div.canvaaas-preview");
 
-	        // 
 	        // set container
-	        // 
-
 	        initContainer();
 
-	        // 
 	        // set canvas
-	        // 
-
 	        initCanvas();
 
-        	// 
         	// set style
-        	// 
-
 			if (config.overlay === true) {
 				mirrorElement.classList.add("active");
 			}
 
-	        // 
 	        // set events
-	        // 
-
 	        // window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
@@ -3216,6 +3215,35 @@
 			containerElement.addEventListener('dragover', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.dropImages, false);
+
+
+			// recover target inner
+			var index = tmpUrls.length;
+			var count = 0;
+
+			onUpload = true;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					renderImage(tmpUrls[count], function(err, id) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+						} else {
+							if (config.upload) {
+								config.upload(null, id);
+							}
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					onUpload = false;
+				}
+			}
 
 			console.log("canvaaas.js initialized", config);
 		}
@@ -3362,61 +3390,6 @@
 						cb(null, results);
 					}
 				}
-			}
-		}
-
-		// deprecated
-		myObject.setPreview = function(target){
-
-      		target.innerHTML = "";
-
-      		var previewWidth = target.offsetWidth;
-      		var previewHeight = previewWidth / (canvasState.width / canvasState.height);
-
-			target.style.position = "relative";
-			target.style.overflow = "hidden";
-			target.style.backgroundColor = config.fillColor;
-			target.style.fontSize = "0px";
-			target.style.width = previewWidth + "px";
-			target.style.height = previewHeight + "px";
-
-			var states = [];
-
-			for (var i = 0; i < imageStates.length; i++) {
-				var id = imageStates[i].id;
-
-				if (imageStates[i].drawable) {
-					states.push(imageStates[i]);
-				}
-			}
-
-			for (var i = 0; i < states.length; i++) {
-				var newImage = document.createElement("img");
-				newImage.style.display = "block";
-				newImage.style.position = "absolute";
-				newImage.style.transformOrigin = "center center";
-
-				var scaleRatio,
-					aspectRatio,
-					newState = {};
-
-				scaleRatio = previewWidth / canvasState.width;
-				aspectRatio = states[i].width / states[i].height;
-
-				newState.width = states[i].width * scaleRatio;
-				newState.height = newState.width / aspectRatio;
-				newState.x = states[i].x * scaleRatio;
-				newState.y = states[i].y * scaleRatio;
-				newState.rotate = states[i].rotate;
-				newState.scaleX = states[i].scaleX;
-				newState.scaleY = states[i].scaleY;
-				newState.opacity = states[i].opacity;
-
-				setElement(newImage, newState);
-
-				newImage.src = states[i].src;
-
-				target.appendChild(newImage);
 			}
 		}
 
@@ -5559,6 +5532,16 @@
 
 		myObject.setCanvas = function(w, h, cb) {
 
+			if (!config.editable) {
+				if (config.canvas) {
+					config.canvas(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
+
 			if (
 				typeof(w) !== "number" ||
 				typeof(h) !== "number"
@@ -5642,6 +5625,16 @@
 		// 
 
 		myObject.setConfig = function(obj, cb) {
+
+			if (!config.editable) {
+				if (config.config) {
+					config.config(errMsg.UNEDITABLE);
+				}
+				if (cb) {
+					cb(errMsg.UNEDITABLE);
+				}
+				return false;
+			}
 
 			if (typeof(obj) !== "object") {
 				if (config.config) {
@@ -6059,13 +6052,15 @@
 					ctx.imageSmoothingEnabled = config.imageSmoothingEnabled;
 					ctx.restore();
 
+					var data = canvas.toDataURL(config.mimeType, config.quality);
+
 					result.states = drawResults;
-					result.data = canvas.toDataURL(config.mimeType, config.quality);
+					// result.data = data;
 
 					setElement(previewElement, canvasState);
 
 					var newImage = document.createElement("img");
-					newImage.src = result.data;
+					newImage.src = data;
 
 					previewElement.appendChild(newImage);
 
