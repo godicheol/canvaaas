@@ -160,6 +160,7 @@
 		  <button type="button" onclick="canvaaas.escapeFreeze()">escapeFreeze()</button>
 		  //
 		  <button type="button" onclick="canvaaas.download()">download()</button>
+		  <button type="button" onclick="canvaaas.downloadTo({mimeType: 'image/png'})">download(options)</button>
 		  //
 		  <button type="button" onclick="canvaaas.export()">export()</button>
 		  <button type="button" onclick="canvaaas.import(tmp_exported)">import(data)</button>
@@ -279,7 +280,7 @@
           "src": "http://192.168.123.103:3000/img/1.jpeg",
           "type": "url",
           "filename": "1.jpeg",
-          "index": 0,
+          "index": 4,
           "originalWidth": 5472,
           "originalHeight": 3648,
           "width": 317.3114953843282,
@@ -303,7 +304,7 @@
           "src": "http://192.168.123.103:3000/img/2.jpeg",
           "type": "url",
           "filename": "2.jpeg",
-          "index": 1,
+          "index": 3,
           "originalWidth": 4032,
           "originalHeight": 3024,
           "width": 292.59192035083055,
@@ -327,7 +328,7 @@
           "src": "http://192.168.123.103:3000/img/3.jpeg",
           "type": "url",
           "filename": "3.jpeg",
-          "index": 2,
+          "index": 1,
           "originalWidth": 3024,
           "originalHeight": 4032,
           "width": 271.05996174633043,
@@ -539,7 +540,10 @@
 	  		}
 	  		console.log(res)
 				canvaaas.showContainer();
+	  		canvaaas.freeze();
+
 	  	});
+
 
 			// canvaaas.preview(function(err, res){
 			// 	if (err) {
