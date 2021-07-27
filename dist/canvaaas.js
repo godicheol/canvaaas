@@ -37,6 +37,8 @@
  * 
  * add clone event handles
  * 
+ * update drawCanvas, drawImage, preview, download :: adjust argument "width"
+ * 
  */
 
 /*!
@@ -203,6 +205,9 @@
 			INDEXING: "Error creating index",
 			ALREADY_PREVIEW: "Already in preview mode",
 		}
+
+		Object.freeze(errMsg);
+
 
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
@@ -2540,11 +2545,11 @@
 			// return str.substring(url.lastIndexOf('/')+1);
 		};
 
-		function drawCanvas() {
+		function drawCanvas(width) {
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
-			canvas.width = Math.floor(canvasState.originalWidth);
-			canvas.height = Math.floor(canvasState.originalHeight);
+			canvas.width = Math.floor(width);
+			canvas.height = Math.floor(width / (config.canvasWidth / config.canvasHeight));
 			ctx.fillStyle = config.fillColor;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
@@ -2561,6 +2566,7 @@
 				}
 				return false;
 			}
+
 			if (typeof(id) !== "string") {
 				if (cb) {
 					cb(errMsg.ARGUMENT);
@@ -2599,7 +2605,7 @@
 				minCanvasHeight = config.minImageHeight;
 
 				// original
-				var scaleRatio = canvasState.width / canvasState.originalWidth;
+				var scaleRatio = canvasState.width / canvas.width;
 				var adjW = state.width / scaleRatio;
 				var adjH = state.height / scaleRatio;
 				var adjX = state.x / scaleRatio;
@@ -5970,8 +5976,25 @@
 		// draw
 		// 
 
-		myObject.draw = function(cb){
-			var canvas = drawCanvas();
+		myObject.draw = function(w, cb){
+			if (
+				typeof(w) === "string" ||
+				typeof(w) === "object"
+			) {
+				if (config.draw) {
+					config.draw(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			var canvasWidth = config.canvasWidth;
+			if (typeof(w) === "number") {
+				canvasWidth = w;
+			}
+			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
 
@@ -5986,8 +6009,8 @@
 			var result = {};
 			var drawResults = [];
 
-			result.width = config.canvasWidth;
-			result.height = config.canvasHeight;
+			result.width = canvas.width;
+			result.height = canvas.height;
 			result.numberOfImages = drawables.length;
 			result.fillColor = config.fillColor;
 			result.mimeType = config.mimeType;
@@ -6031,7 +6054,7 @@
 			}
 		}
 
-		myObject.preview = function(cb){
+		myObject.preview = function(w, cb){
 
 			if (onPreview === true) {
 				if (config.preview) {
@@ -6043,6 +6066,24 @@
 				return false;
 			}
 
+			if (
+				typeof(w) === "string" ||
+				typeof(w) === "object"
+			) {
+				if (config.draw) {
+					config.draw(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			var canvasWidth = config.canvasWidth;
+			if (typeof(w) === "number") {
+				canvasWidth = w;
+			}
+
 			previewElement.innerHTML = "";
 
 			if (eventState.target) {
@@ -6050,7 +6091,7 @@
 				setFocusOut(oldId);
 			}
 
-			var canvas = drawCanvas();
+			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
 
@@ -6065,8 +6106,8 @@
 			var result = {};
 			var drawResults = [];
 
-			result.width = config.canvasWidth;
-			result.height = config.canvasHeight;
+			result.width = canvas.width;
+			result.height = canvas.height;
 			result.numberOfImages = drawables.length;
 			result.fillColor = config.fillColor;
 			result.mimeType = config.mimeType;
@@ -6144,8 +6185,26 @@
 			}
 		}
 
-		myObject.download = function(cb){
-			var canvas = drawCanvas();
+		myObject.download = function(w, cb){
+			if (
+				typeof(w) === "string" ||
+				typeof(w) === "object"
+			) {
+				if (config.draw) {
+					config.draw(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			var canvasWidth = config.canvasWidth;
+			if (typeof(w) === "number") {
+				canvasWidth = w;
+			}
+
+			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
 
@@ -6160,8 +6219,8 @@
 			var result = {};
 			var drawResults = [];
 
-			result.width = config.canvasWidth;
-			result.height = config.canvasHeight;
+			result.width = canvas.width;
+			result.height = canvas.height;
 			result.numberOfImages = drawables.length;
 			result.fillColor = config.fillColor;
 			result.mimeType = config.mimeType;
@@ -6483,7 +6542,6 @@
 		}
 
 		myObject.getThis = function(cb){
-
 			if (!eventState.target) {
 				if (cb) {
 					cb(errMsg.TARGET);
@@ -6494,10 +6552,13 @@
 			var id = getIdByImageElement(eventState.target);
 			var state = getStateById(id);
 
+			var tmp = {};
+			setObject(state, tmp);
+
 			if (cb) {
-				cb(null, state);
+				cb(null, tmp);
 			}
-			return state;
+			return tmp;
 		}
 
 		myObject.getThisData = function(cb){
@@ -6519,24 +6580,30 @@
 		}
 
 		myObject.getConfigData = function(cb){
+			var tmp = {};
+			setObject(config, tmp);
 			if (cb) {
-				cb(null, config);
+				cb(null, tmp);
 			}
-			return config;
+			return tmp;
 		}
 
 		myObject.getContainerData = function(cb){
+			var tmp = {};
+			setObject(containerState, tmp);
 			if (cb) {
-				cb(null, containerState);
+				cb(null, tmp);
 			}
-			return containerState;
+			return tmp;
 		}
 
 		myObject.getCanvasData = function(cb){
+			var tmp = {};
+			setObject(canvasState, tmp);
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, tmp);
 			}
-			return canvasState;
+			return tmp;
 		}
 
 		myObject.getImageData = function(id, cb){
@@ -6574,17 +6641,21 @@
 		}
 
 		myObject.getUndoData = function(cb){
+			var tmp = {};
+			setObject(eventCaches, tmp);
 			if (cb) {
-				cb(null, eventCaches);
+				cb(null, tmp);
 			}
-			return eventCaches;
+			return tmp;
 		}
 
 		myObject.getRedoData = function(cb){
+			var tmp = {};
+			setObject(eventSubCaches, tmp);
 			if (cb) {
-				cb(null, eventSubCaches);
+				cb(null, tmp);
 			}
-			return eventSubCaches;
+			return tmp;
 		}
 
 		myObject.undo = function(cb){
