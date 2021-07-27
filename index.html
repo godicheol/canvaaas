@@ -226,7 +226,131 @@
 			// editable: false
 	  }
 
+	  var initViewData = {
+	    "config": {
+        "editable": true,
+        "overlay": true,
+        "magnetic": true,
+        "editableAspectRatio": true,
+        "minAutoIndex": 0,
+        "maxAutoIndex": 999,
+        "maxNumberOfImages": 999,
+        "cacheLevels": 999,
+        "containerAspectRatio": 1,
+        "maxContainerWidth": 1,
+        "maxContainerHeight": 0.7,
+        "drawWidth": 4096,
+        "drawHeight": 2304,
+        "minDrawWidth": 64,
+        "minDrawHeight": 64,
+        "maxDrawWidth": 4096,
+        "maxDrawHeight": 4096,
+        "minImageWidth": 64,
+        "minImageHeight": 64,
+        "minImageRenderWidth": 0.2,
+        "minImageRenderHeight": 0.2,
+        "maxImageRenderWidth": 1,
+        "maxImageRenderHeight": 1,
+        "imageSmoothingEnabled": false,
+        "imageSmoothingQuality": "low",
+        "fillColor": "#FFFFFF",
+        "mimeType": "image/jpeg",
+        "quality": 0.8,
+        "extensions": [
+          "jpg",
+          "jpeg",
+          "png",
+          "webp",
+          "svg"
+        ],
+        "canvasWidth": 1920,
+        "canvasHeight": 1080
+	    },
+	    "canvasState": {
+        "width": 646.0999999999999,
+        "height": 363.43125,
+        "x": 323.04999999999995,
+        "y": 323.04999999999995
+	    },
+	    "imageStates": [
+        {
+          "id": "egrmfz",
+          "src": "http://192.168.123.103:3000/img/1.jpeg",
+          "type": "url",
+          "filename": "1.jpeg",
+          "index": 0,
+          "originalWidth": 5472,
+          "originalHeight": 3648,
+          "width": 317.3114953843282,
+          "height": 211.54099692288563,
+          "x": 181.2562509586138,
+          "y": 87.70664116422026,
+          "rotate": 337.59092764439924,
+          "scaleX": 1,
+          "scaleY": 1,
+          "opacity": 1,
+          "focusable": true,
+          "movable": true,
+          "resizable": true,
+          "rotatable": true,
+          "flippable": true,
+          "drawable": true,
+          "uploadedAt": 1627385368396
+        },
+        {
+          "id": "v2q6lc",
+          "src": "http://192.168.123.103:3000/img/2.jpeg",
+          "type": "url",
+          "filename": "2.jpeg",
+          "index": 1,
+          "originalWidth": 4032,
+          "originalHeight": 3024,
+          "width": 292.59192035083055,
+          "height": 219.4439402631228,
+          "x": 197.48909768022662,
+          "y": 308.2599517150989,
+          "rotate": -159.03691807679155,
+          "scaleX": 1,
+          "scaleY": 1,
+          "opacity": 0.5,
+          "focusable": true,
+          "movable": true,
+          "resizable": true,
+          "rotatable": true,
+          "flippable": true,
+          "drawable": true,
+          "uploadedAt": 1627385368398
+        },
+        {
+          "id": "ogp7j5",
+          "src": "http://192.168.123.103:3000/img/3.jpeg",
+          "type": "url",
+          "filename": "3.jpeg",
+          "index": 2,
+          "originalWidth": 3024,
+          "originalHeight": 4032,
+          "width": 271.05996174633043,
+          "height": 357.8437684289003,
+          "x": 599.5700191268347,
+          "y": 278.70244019605644,
+          "rotate": 27.140294077234387,
+          "scaleX": 1,
+          "scaleY": 1,
+          "opacity": 1,
+          "focusable": true,
+          "movable": true,
+          "resizable": true,
+          "rotatable": true,
+          "flippable": true,
+          "drawable": true,
+          "uploadedAt": 1627385368399
+        }
+	    ]
+		}
+
 	  var elem = document.getElementById("container");
+
+	  /*
 	  canvaaas.init(elem, {
 	  	filename: undefined,
 			// maxNumberOfImages: 1,
@@ -385,6 +509,14 @@
 	  	// after init
 			canvaaas.preview();
 	  });
+	  */
+
+	  canvaaas.view(elem, initViewData, function(err, res) {
+	  	if (err) {
+	  		console.log(err);
+	  	}
+	  	console.log("view()", res);
+	  })
 
 	  // test 1
 		// canvaaas.uploadUrls('/img/2.jpeg', function(err, res){

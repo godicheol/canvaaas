@@ -218,7 +218,7 @@
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
-		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
+		conatinerTemplate += "<div class='canvaaas-canvas checker'></div>";
 		conatinerTemplate += "<div class='canvaaas-preview hidden'></div>";
 		conatinerTemplate += "</div>";
 
@@ -248,6 +248,11 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-nw'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
+
+		var viewTemplate = "";
+		viewTemplate += "<div class='canvaaas'>";
+		viewTemplate += "<div class='canvaaas-canvas'></div>";
+		viewTemplate += "</div>";
 
 		var eventState = {};
 		var eventCaches = [];
@@ -2830,7 +2835,7 @@
 				typ = "url";
 				ext = getExtension(file);
 				src = file;
-				// src = file + "?" + new Date().getTime(); // fix ios refresh cache error, cachebreaker
+				// src = file + "?" + new Date().getTime(); // fix ios refresh error, cachebreaker
 				filename = getFilename(file);
 			}
 
@@ -3135,8 +3140,8 @@
 			}
 
 			var aspectRatio = config.containerAspectRatio || config.drawWidth / config.drawHeight;
-			var width = containerElement.offsetWidth;
-			var height = containerElement.offsetWidth / aspectRatio;
+			var containerWidth = containerElement.offsetWidth;
+			var containerHeight = containerElement.offsetWidth / aspectRatio;
 			var canvasAspectRatio = config.drawWidth / config.drawHeight;
 
 			var maxSizes = getFittedRect(
@@ -3152,14 +3157,8 @@
 				"cover"
 			);
 
-			var sizes = getFittedRect(
-				width,
-				height,
-				aspectRatio
-			);
-
-			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], sizes[0]));
-			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], sizes[1]));
+			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
+			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
 
  			containerState.width = adjWidth;
  			containerState.height = adjHeight;
@@ -3217,7 +3216,10 @@
 			canvasState.y = axisY;
 
         	setElement(canvasElement, canvasState);
-        	setElement(mirrorElement, canvasState);
+
+        	if (mirrorElement) {
+        		setElement(mirrorElement, canvasState);
+        	}
 
         	return true;
 		}
@@ -3317,7 +3319,7 @@
 			}
 		}
 
-		myObject.view = function(target, exportedStates, cb) {
+		myObject.view = function(target, exportedData, cb) {
 			if (!target || typeof(target) !== "object") {
 				if (cb) {
 					cb("canvaaas.view() error");
@@ -3325,8 +3327,28 @@
 				return false;
 			}
 
-			if (!Array.isArray(exportedStates)) {
-				exportedStates = [exportedStates];
+			if (!exportedData || typeof(exportedData) !== "object") {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				} 
+				return false;
+			}
+
+			var oldConfig = exportedData.config;
+			var oldCanvasState = exportedData.canvasState;
+			var oldImageStates = exportedData.imageStates;
+
+			if (
+				!oldCanvasState ||
+				!oldImageStates ||
+				oldImageStates.length < 1 ||
+				!oldCanvasState.width ||
+				!oldCanvasState.height
+			) {
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
 			}
 
 			// check target inner
@@ -3337,37 +3359,110 @@
 				});
 			}
 
-			// recover target inner
+			// set config
+			if (oldConfig) {
+				setObject(oldConfig, config);
+			}
+
+			// set template
+			target.innerHTML = viewTemplate;
+
+	        containerElement = target.querySelector("div.canvaaas");
+	        canvasElement = target.querySelector("div.canvaaas-canvas");
+
+	        // set container
+	        initContainer();
+
+	        // set canvas
+	        initCanvas();
+
+	        // set style
+	        canvasElement.style.backgroundColor = config.fillColor;
+
+			// reset container inners
 			var index = tmpUrls.length;
 			var count = 0;
+			var results = [];
 
 			recursiveFunc();
 
 			function recursiveFunc() {
 				if (count < index) {
-					var filename = tmpUrls[count];
-					var newImage = document.createElement("img");
-					newImage.src = tmpUrls[count];
+					var typ = "url";
+					var ext = getExtension(tmpUrls[count]);
+					var src = tmpUrls[count];
+					var filename = getFilename(tmpUrls[count]);
+
 					var newImg = new Image();
-					newImg.src = tmpUrls[count];
-					newImg.onerror = function(e) {}
+					newImg.src = src;
+
+					// check mimeType
+					if (config.extensions.indexOf(ext) < 0) {
+						results.push({
+							index: count,
+							err: errMsg.MIMETYPE
+						});
+						count++;
+						recursiveFunc();
+					}
+
+					newImg.onerror = function(e) {
+						results.push({
+							index: count,
+							err: errMsg.FAILLOAD
+						});
+						count++;
+						recursiveFunc();
+						return false;
+					}
+
 					newImg.onload = function(e) {
 
-						var state;
-						exportedStates.forEach(function(candidateState){
-							if (filename === candidateState) {
-								state = candidateState;
+						var newImage = document.createElement("img");
+						newImage.src = src;
+
+						var oldState;
+						oldImageStates.forEach(function(candidateState){
+							if (filename === candidateState.filename) {
+								oldState = candidateState;
 							}
 						});
 
-						var canvasState = 
+						if (!oldState) {
+							results.push({
+								index: count,
+								err: errMsg.STATE
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						}
 
-						target.appendChild(newImage);
+						// calc scaleRatio, aspectRatio
+						var scaleRatio = canvasState.width / oldCanvasState.width;
+						var aspectRatio = oldState.width / oldState.height;
+
+						// save state
+						oldState.x *= scaleRatio;
+						oldState.y *= scaleRatio;
+						oldState.width *= scaleRatio;
+						oldState.height *= scaleRatio / aspectRatio;
+
+						// adjust state
+						setElement(newImage, oldState);
+						canvasElement.appendChild(newImage);
+
+						results.push(oldState);
+						count++;
+						recursiveFunc();
 					}
 				} else {
-					console.log("canvaaas.js view initialized");
 
-					return false;
+					if (cb) {
+						cb(null, results);
+					}
+
+					console.log("canvaaas.js view initialized");
 				}
 			}
 
@@ -6424,7 +6519,7 @@
 				}
 				return false;
 			}
-			
+
 			var results = [];
 			for (var i = 0; i < oldImageStates.length; i++){
 
