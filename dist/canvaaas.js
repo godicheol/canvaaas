@@ -35,7 +35,7 @@
  * 
  * remove cache breaker from renderImage()
  * 
- * add clone eventHandles
+ * add clone event handles
  * 
  */
 
@@ -6019,7 +6019,7 @@
 					ctx.restore();
 
 					result.states = drawResults;
-					result.data = canvas.toDataURL(config.mimeType, config.quality);
+					result.file = canvas.toDataURL(config.mimeType, config.quality);
 
 					if (config.draw) {
 						config.draw(null, result);
@@ -6097,15 +6097,15 @@
 					ctx.imageSmoothingEnabled = config.imageSmoothingEnabled;
 					ctx.restore();
 
-					var data = canvas.toDataURL(config.mimeType, config.quality);
+					var file = canvas.toDataURL(config.mimeType, config.quality);
 
 					result.states = drawResults;
-					// result.data = data;
+					// result.file = file;
 
 					setElement(previewElement, canvasState);
 
 					var newImage = document.createElement("img");
-					newImage.src = data;
+					newImage.src = file;
 
 					previewElement.appendChild(newImage);
 
@@ -6193,14 +6193,15 @@
 					ctx.restore();
 
 					result.states = drawResults;
-					result.data = canvas.toDataURL(config.mimeType, config.quality);
+
+					var file = canvas.toDataURL(config.mimeType, config.quality);
 
 					var filename = config.filename || "Untitled";
 					filename += "." + config.mimeType.split("/")[1];
 					result.filename = filename;
 
 					var link = document.createElement('a');
-					link.setAttribute('href', result.data);
+					link.setAttribute('href', file);
 					link.setAttribute('download', filename);
 					link.style.display = "none";
 
