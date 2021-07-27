@@ -41,6 +41,8 @@
  * 
  * fix exceed max canvas size
  * 
+ * add freeze mode
+ * 
  */
 
 /*!
@@ -76,6 +78,10 @@
 		var defaultConfiguration = {
 
 			filename: undefined, // string
+
+			displayBeforeLoad: false, // boolean
+
+			displayAfterLoad: false, // boolean
 
 			editable: true, // boolean
 
@@ -191,6 +197,7 @@
 		var onRotate = false;
 		var onFlip = false;
 		var onPreview = false;
+		var onFreeze = false;
 
 		var errMsg = {
 			ELEMENT: "Element not found",
@@ -209,7 +216,10 @@
 			MIMETYPE: "MimeType not allowed",
 			UNKNOWN: "An unknown error has occurred",
 			INDEXING: "Error creating index",
-			ALREADY_PREVIEW: "Already in preview mode",
+			ALREADY_PREVIEW: "Already in preview",
+			ALREADY_FREEZE: "Already in freeze",
+			NO_PREVIEW: "Preview is turned off",
+			NO_FREEZE: "Freeze is turned off",
 		}
 
 		Object.freeze(errMsg);
@@ -3216,10 +3226,7 @@
 			canvasState.y = axisY;
 
         	setElement(canvasElement, canvasState);
-
-        	if (mirrorElement) {
-        		setElement(mirrorElement, canvasState);
-        	}
+    		setElement(mirrorElement, canvasState);
 
         	return true;
 		}
@@ -3232,7 +3239,7 @@
 
 			if (!target || typeof(target) !== "object") {
 				if (cb) {
-					cb("canvaaas.init() error");
+					cb(errMsg.ARGUMENT);
 				}
 				return false;
 			}
@@ -3270,6 +3277,10 @@
 	        initCanvas();
 
         	// set style
+			if (config.displayBeforeLoad === false) {
+				containerElement.classList.add("hidden");
+			}
+
 			if (config.overlay === true) {
 				mirrorElement.classList.add("active");
 			}
@@ -3310,6 +3321,10 @@
 				} else {
 					onUpload = false;
 
+					if (config.displayAfterLoad === true) {
+						containerElement.classList.remove("hidden");
+					}
+
 					if (cb) {
 						cb(null, config);
 					}
@@ -3317,155 +3332,6 @@
 					console.log("canvaaas.js initialized", config);
 				}
 			}
-		}
-
-		myObject.view = function(target, exportedData, cb) {
-			if (!target || typeof(target) !== "object") {
-				if (cb) {
-					cb("canvaaas.view() error");
-				}
-				return false;
-			}
-
-			if (!exportedData || typeof(exportedData) !== "object") {
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				} 
-				return false;
-			}
-
-			var oldConfig = exportedData.config;
-			var oldCanvasState = exportedData.canvasState;
-			var oldImageStates = exportedData.imageStates;
-
-			if (
-				!oldCanvasState ||
-				!oldImageStates ||
-				oldImageStates.length < 1 ||
-				!oldCanvasState.width ||
-				!oldCanvasState.height
-			) {
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				}
-				return false;
-			}
-
-			// check target inner
-			var tmpUrls = [];
-			if (target.querySelectorAll("img").length > 0) {
-				target.querySelectorAll("img").forEach(function(img){
-					tmpUrls.push(img.src);
-				});
-			}
-
-			// set config
-			if (oldConfig) {
-				setObject(oldConfig, config);
-			}
-
-			// set template
-			target.innerHTML = viewTemplate;
-
-	        containerElement = target.querySelector("div.canvaaas");
-	        canvasElement = target.querySelector("div.canvaaas-canvas");
-
-	        // set container
-	        initContainer();
-
-	        // set canvas
-	        initCanvas();
-
-	        // set style
-	        canvasElement.style.backgroundColor = config.fillColor;
-
-			// reset container inners
-			var index = tmpUrls.length;
-			var count = 0;
-			var results = [];
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					var typ = "url";
-					var ext = getExtension(tmpUrls[count]);
-					var src = tmpUrls[count];
-					var filename = getFilename(tmpUrls[count]);
-
-					var newImg = new Image();
-					newImg.src = src;
-
-					// check mimeType
-					if (config.extensions.indexOf(ext) < 0) {
-						results.push({
-							index: count,
-							err: errMsg.MIMETYPE
-						});
-						count++;
-						recursiveFunc();
-					}
-
-					newImg.onerror = function(e) {
-						results.push({
-							index: count,
-							err: errMsg.FAILLOAD
-						});
-						count++;
-						recursiveFunc();
-						return false;
-					}
-
-					newImg.onload = function(e) {
-
-						var newImage = document.createElement("img");
-						newImage.src = src;
-
-						var oldState;
-						oldImageStates.forEach(function(candidateState){
-							if (filename === candidateState.filename) {
-								oldState = candidateState;
-							}
-						});
-
-						if (!oldState) {
-							results.push({
-								index: count,
-								err: errMsg.STATE
-							});
-							count++;
-							recursiveFunc();
-							return false;
-						}
-
-						// calc scaleRatio, aspectRatio
-						var scaleRatio = canvasState.width / oldCanvasState.width;
-						var aspectRatio = oldState.width / oldState.height;
-
-						// save state
-						oldState.x *= scaleRatio;
-						oldState.y *= scaleRatio;
-						oldState.width *= scaleRatio;
-						oldState.height *= scaleRatio / aspectRatio;
-
-						// adjust state
-						setElement(newImage, oldState);
-						canvasElement.appendChild(newImage);
-
-						results.push(oldState);
-						count++;
-						recursiveFunc();
-					}
-				} else {
-
-					if (cb) {
-						cb(null, results);
-					}
-
-					console.log("canvaaas.js view initialized");
-				}
-			}
-
 		}
 
 		myObject.uploadFiles = function(self, cb) {
@@ -6131,24 +5997,8 @@
 		// draw
 		// 
 
-		myObject.draw = function(w, cb){
-			if (
-				typeof(w) === "string" ||
-				typeof(w) === "object"
-			) {
-				if (config.draw) {
-					config.draw(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				}
-				return false;
-			}
-
+		myObject.draw = function(cb){
 			var canvasWidth = config.drawWidth;
-			if (typeof(w) === "number") {
-				canvasWidth = w;
-			}
 			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
@@ -6209,7 +6059,79 @@
 			}
 		}
 
-		myObject.preview = function(w, cb){
+		myObject.drawTo = function(w, cb){
+			if (typeof(w) !== "number") {
+				if (config.draw) {
+					config.draw(errMsg.ARGUMENT);
+				}
+				if (cb) {
+					cb(errMsg.ARGUMENT);
+				}
+				return false;
+			}
+
+			var canvasWidth = w;
+			var canvas = drawCanvas(canvasWidth);
+			var ctx = canvas.getContext("2d");
+			var drawables = [];
+
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					drawables.push(imageStates[i]);
+				}
+			}
+
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
+
+			result.width = canvas.width;
+			result.height = canvas.height;
+			result.numberOfImages = drawables.length;
+			result.fillColor = config.fillColor;
+			result.mimeType = config.mimeType;
+			result.quality = config.quality;
+			result.imageSmoothingQuality = config.imageSmoothingQuality;
+			result.imageSmoothingEnabled = config.imageSmoothingEnabled;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					// recursive
+					drawImage(canvas, drawables[count].id, function(err) {
+						if (err) {
+							drawResults.push({
+								id: drawables[count].id,
+								err: err
+							});
+						} else {
+							drawResults.push(drawables[count]);
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					// end
+					ctx.imageSmoothingQuality = config.imageSmoothingQuality;
+					ctx.imageSmoothingEnabled = config.imageSmoothingEnabled;
+					ctx.restore();
+
+					result.states = drawResults;
+					result.file = canvas.toDataURL(config.mimeType, config.quality);
+
+					if (config.draw) {
+						config.draw(null, result);
+					}
+					if (cb) {
+						cb(null, result);
+					}
+				}
+			}
+		}
+
+		myObject.preview = function(cb){
 
 			if (onPreview === true) {
 				if (config.preview) {
@@ -6221,24 +6143,6 @@
 				return false;
 			}
 
-			if (
-				typeof(w) === "string" ||
-				typeof(w) === "object"
-			) {
-				if (config.draw) {
-					config.draw(errMsg.ARGUMENT);
-				}
-				if (cb) {
-					cb(errMsg.ARGUMENT);
-				}
-				return false;
-			}
-
-			var canvasWidth = config.drawWidth;
-			if (typeof(w) === "number") {
-				canvasWidth = w;
-			}
-
 			previewElement.innerHTML = "";
 
 			if (eventState.target) {
@@ -6246,6 +6150,7 @@
 				setFocusOut(oldId);
 			}
 
+			var canvasWidth = config.drawWidth;
 			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
@@ -6323,6 +6228,12 @@
 		}
 
 		myObject.escapePreview = function(cb){
+			if (onPreview === false) {
+				if (cb) {
+					cb(errMsg.NO_PREVIEW);
+				}
+				return false;
+			}
 
 			previewElement.innerHTML = "";
 			previewElement.style.width = "";
@@ -6340,25 +6251,56 @@
 			}
 		}
 
-		myObject.download = function(w, cb){
-			if (
-				typeof(w) === "string" ||
-				typeof(w) === "object"
-			) {
-				if (config.draw) {
-					config.draw(errMsg.ARGUMENT);
-				}
+		myObject.freeze = function(cb){
+			if (onFreeze === true) {
 				if (cb) {
-					cb(errMsg.ARGUMENT);
+					cb(errMsg.ALREADY_FREEZE);
 				}
 				return false;
 			}
 
-			var canvasWidth = config.drawWidth;
-			if (typeof(w) === "number") {
-				canvasWidth = w;
+			var newConfig = {
+				editable: false,
 			}
 
+			setObject(newConfig, config);
+
+			canvasElement.style.backgroundColor = config.fillColor;
+			canvasElement.classList.remove("checker");
+
+			onFreeze = true;
+
+			if (cb) {
+				cb(null);
+			}
+		}
+
+		myObject.escapeFreeze = function(cb){
+			if (onFreeze === false) {
+				if (cb) {
+					cb(errMsg.NO_FREEZE);
+				}
+				return false;
+			}
+
+			var newConfig = {
+				editable: true,
+			}
+			setObject(newConfig, config);
+
+			canvasElement.style.backgroundColor = "";
+			canvasElement.classList.add("checker");
+
+			onFreeze = false;
+
+			if (cb) {
+				cb(null);
+			}
+		}
+
+
+		myObject.download = function(cb){
+			var canvasWidth = config.drawWidth;
 			var canvas = drawCanvas(canvasWidth);
 			var ctx = canvas.getContext("2d");
 			var drawables = [];
@@ -6486,9 +6428,9 @@
 				return false;
 			}
 
-			var oldImageStates = exportedData.imageStates;
 			var oldConfig = exportedData.config;
 			var oldCanvasState = exportedData.canvasState;
+			var oldImageStates = exportedData.imageStates;
 
 			if (
 				!oldCanvasState ||

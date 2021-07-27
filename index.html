@@ -22,7 +22,7 @@
 		#container{
 			/*padding: 24px;*/
 			overflow: hidden;
-			background-color: #000;
+			/*background-color: #000;*/
 		}
 
 		#logger{
@@ -151,14 +151,15 @@
 		  <button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio()</button>
 		  //
 		  <button type="button" onclick="canvaaas.draw()">draw()</button>
-		  <button type="button" onclick="canvaaas.draw(256)">draw(256)</button>
+		  <button type="button" onclick="canvaaas.drawTo(256)">drawTo(256)</button>
 		  //
 		  <button type="button" onclick="canvaaas.preview()">preview()</button>
-		  <button type="button" onclick="canvaaas.preview(256)">preview(256)</button>
 		  <button type="button" onclick="canvaaas.escapePreview()">escapePreview()</button>
 		  //
+		  <button type="button" onclick="canvaaas.freeze()">freeze()</button>
+		  <button type="button" onclick="canvaaas.escapeFreeze()">escapeFreeze()</button>
+		  //
 		  <button type="button" onclick="canvaaas.download()">download()</button>
-		  <button type="button" onclick="canvaaas.download(256)">download(256)</button>
 		  //
 		  <button type="button" onclick="canvaaas.export()">export()</button>
 		  <button type="button" onclick="canvaaas.import(tmp_exported)">import(data)</button>
@@ -226,7 +227,7 @@
 			// editable: false
 	  }
 
-	  var initViewData = {
+	  var exportedData = {
 	    "config": {
         "editable": true,
         "overlay": true,
@@ -236,7 +237,7 @@
         "maxAutoIndex": 999,
         "maxNumberOfImages": 999,
         "cacheLevels": 999,
-        "containerAspectRatio": 1,
+        "containerAspectRatio": undefined,
         "maxContainerWidth": 1,
         "maxContainerHeight": 0.7,
         "drawWidth": 4096,
@@ -351,13 +352,13 @@
 	  var elem = document.getElementById("container");
 
 	  /*
+	  // test 1, full version
 	  canvaaas.init(elem, {
 	  	filename: undefined,
 			// maxNumberOfImages: 1,
 			containerAspectRatio: 1,
+			maxContainerWidth: 1,
 			maxContainerHeight: 0.7,
-			canvasWidth: 1920, // number, px
-			canvasHeight: 1080, // number, px
 			maxImageRenderWidth: 1, // number, 0 ~ 1
 			maxImageRenderHeight: 1, // number, 0 ~ 1
 			focus: function(err, res){
@@ -510,15 +511,46 @@
 			canvaaas.preview();
 	  });
 	  */
-
-	  canvaaas.view(elem, initViewData, function(err, res) {
+	  
+	  // test 2
+	  canvaaas.init(elem, exportedData.config, function(err){
 	  	if (err) {
 	  		console.log(err);
 	  	}
-	  	console.log("view()", res);
-	  })
 
-	  // test 1
+	  	// 
+	  	// after init
+	  	// 
+
+	  	// test add callback
+	  	canvaaas.setConfig({
+	  		draw: function(err, res) {
+	  			if (err) {
+	  				console.log(err);
+	  			}
+	  			document.getElementById("preview3").src = res.file;
+	  		}
+	  	});
+
+
+	  	canvaaas.import(exportedData, function(err, res){
+	  		if (err) {
+	  			console.log(err);
+	  		}
+	  		console.log(res)
+				canvaaas.showContainer();
+	  	});
+
+			// canvaaas.preview(function(err, res){
+			// 	if (err) {
+			// 		console.log(err);
+			// 	}
+			// 	console.log(res);
+			// });
+
+		});
+
+	  // test 3
 		// canvaaas.uploadUrls('/img/2.jpeg', function(err, res){
 		// 	if (err) {
 		// 		console.log(err);
