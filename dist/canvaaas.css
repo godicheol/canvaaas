@@ -1,3 +1,27 @@
+/*
+<div> ### init(target) ###
+	<div class="canvaaas">
+		<div class="canvaaas-mirror">
+			<div class="canvaaas-clone">
+				<img>
+				<div class="canvaaas-overlay"></div>
+				<div> all handles </div>
+			</div>
+		</div>
+		<div class="canvaaas-canvas">
+			<div class="canvaaas-image">
+				<img>
+				<div> all handles </div>
+			</div>
+		</div>
+		<div class="canvaaas-preview">
+			<img>
+		</div>
+	</div>
+</div>
+*/
+
+
 /*!
  * custom
  */
@@ -8,23 +32,71 @@
 	margin-right: auto;
 }
 
-/* outline */
-/* canvas outside */
-.canvaaas-clone.active{
-	outline: 1px solid red;
-}
-
-/* outline */
-/* canvas inside */
-.canvaaas-image.active{
-	outline: 1px solid #000;
+/* hide container after init() */
+.canvaaas.hidden{
+	position: fixed;
+	top: -100%;
+	left: 0;
+	z-index: -1;
+	visibility: hidden;
 }
 
 /* overlay */
-/* canvas outside */
+.canvaaas-canvas .canvaaas-overlay{
+	background-color: rgba(255,255,255);
+	opacity: 0.4;
+}
 .canvaaas-clone .canvaaas-overlay{
 	background-color: rgba(0,0,0);
 	opacity: 0.5;
+}
+
+/* image outline */
+.canvaaas-image .canvaaas-outline{
+	border-color: #000;
+}
+.canvaaas-clone .canvaaas-outline{
+	border-color: red;
+}
+.canvaaas-outline-top{
+	border-top-width: 1px;
+	border-top-style: solid;
+}
+.canvaaas-outline-bottom{
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+.canvaaas-outline-left{
+	border-left-width: 1px;
+	border-left-style: solid;
+}
+.canvaaas-outline-right{
+	border-right-width: 1px;
+	border-right-style: solid;
+}
+
+/* image innerline */
+.canvaaas-image .canvaaas-innerline{
+	border-color: #888;
+}
+.canvaaas-clone .canvaaas-innerline{
+	border-color: red;
+}
+.canvaaas-innerline-top{
+	border-top-width: 1px;
+	border-top-style: dashed;
+}
+.canvaaas-innerline-bottom{
+	border-bottom-width: 1px;
+	border-bottom-style: dashed;
+}
+.canvaaas-innerline-left{
+	border-left-width: 1px;
+	border-left-style: dashed;
+}
+.canvaaas-innerline-right{
+	border-right-width: 1px;
+	border-right-style: dashed;
 }
 
 /* north rotate handle */
@@ -43,33 +115,22 @@
  	display: none !important;
 }
 
-/* 미구현 */
-.canvaaas-flip-handle{
-	display: none !important;
-}
-
-/* handle inner */
-/* canvas outside */
+/* handle innerbox */
 .canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-flip-handle .canvaaas-handle{
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
 	border: 1px solid red; 
 	background-color: #fff;
 }
 
-/* handle inner */
-/* canvas inside */
 .canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-image .canvaaas-flip-handle .canvaaas-handle{
+.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
 	border: 1px solid #000; 
 	background-color: #fff;
 }
-
 
 /*!
  * initial
@@ -80,21 +141,25 @@
 	position: relative;
 	line-height: 0;
 	font-size: 0;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
-.canvaaas.hidden{
-	position: fixed;
-	top: -100%;
-	left: 0;
-	z-index: -1;
-	visibility: hidden;
-}
-.canvaaas-mirror,
 .canvaaas-canvas{
 	display: block;
 	position: absolute;
 	top: 0;
 	left: 0;
 	overflow: hidden;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 .canvaaas-canvas.checker{
 	background-image: 
@@ -104,24 +169,56 @@
 		linear-gradient(-45deg, transparent 75%, #aaa 75%);
 	background-size: 20px 20px;
 	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+
 }
 .canvaaas-canvas.hidden{
 	display: none;
 }
-.canvaaas-mirror.active{
+.canvaaas-mirror{
+	position: absolute;
+	top: 0;
+	left: 0;
 	overflow: visible;
-}
-.canvaaas-mirror.hidden{
-	display: none;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
-.canvaaas-clone,
+/* image & clone */
 .canvaaas-image{
 	display: block;
 	position: absolute;
 	top: 0;
 	left: 0;
 	transform-origin: center center !important;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.canvaaas-image.focused{
+	z-index: 1;
+}
+.canvaaas-clone{
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	transform-origin: center center !important;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.canvaaas-clone.focused{
+	display: block;
 }
 .canvaaas-clone img,
 .canvaaas-image img{
@@ -140,39 +237,116 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-.canvaaas-clone.active,
-.canvaaas-image.active{
+.canvaaas-image.focused,
+.canvaaas-clone.focused{
 	cursor: move;
 }
-.canvaaas-image.hidden{
-	display: none;
-}
+
 .canvaaas-image.unclickable{
 	pointer-events: none;
 }
-.canvaaas-clone{
-	display: none;
-	/*pointer-events: none;*/
-}
-.canvaaas-clone.active{
-	display: block;
-}
-.canvaaas-clone.hidden{
-	display: none;
+
+.canvaaas-clone.unclickable{
+	pointer-events: none;
 }
 
+/* overlay */
+.canvaaas-image .canvaaas-overlay,
 .canvaaas-clone .canvaaas-overlay{
+	display: none;
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
 }
+.canvaaas-canvas.focused .canvaaas-image .canvaaas-overlay{
+	display: block;
+}
+.canvaaas-canvas.focused .canvaaas-image.focused .canvaaas-overlay{
+	display: none;
+}
+.canvaaas-clone.focused .canvaaas-overlay{
+	display: block;
+}
+/* outlines */
+.canvaaas-image .canvaaas-outline,
+.canvaaas-clone .canvaaas-outline{
+	position: absolute;
+	display: none;
+	pointer-events: none;
+}
+.canvaaas-image.focused .canvaaas-outline,
+.canvaaas-clone.focused .canvaaas-outline{
+	display: block;
+}
+
+.canvaaas-outline-top{
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 0;
+}
+.canvaaas-outline-bottom{
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 0;
+}
+.canvaaas-outline-left{
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 100%;
+}
+.canvaaas-outline-right{
+	top: 0;
+	right: 0;
+	width: 0;
+	height: 100%;
+}
+
+
+/* innerlines */
+.canvaaas-image .canvaaas-innerline,
+.canvaaas-clone .canvaaas-innerline{
+	position: absolute;
+	display: none;
+	pointer-events: none;
+}
+.canvaaas-image.focused .canvaaas-innerline,
+.canvaaas-clone.focused .canvaaas-innerline{
+	display: block;
+}
+
+.canvaaas-innerline-top{
+	top: 33%;
+	left: 0;
+	width: 100%;
+	height: 0;
+}
+.canvaaas-innerline-bottom{
+	bottom: 33%;
+	left: 0;
+	width: 100%;
+	height: 0;
+}
+.canvaaas-innerline-left{
+	top: 0;
+	left: 33%;
+	width: 0;
+	height: 100%;
+}
+.canvaaas-innerline-right{
+	top: 0;
+	right: 33%;
+	width: 0;
+	height: 100%;
+}
 
 /* handle wrapper */
 .canvaaas-resize-handle,
-.canvaaas-rotate-handle,
-.canvaaas-flip-handle{
+.canvaaas-rotate-handle{
 	position: absolute;
 	display: none;
 	width: 24px; /* click space */
@@ -180,21 +354,18 @@
 	cursor: grab;
 }
 
-.canvaaas-clone.active .canvaaas-resize-handle,
-.canvaaas-clone.active .canvaaas-rotate-handle,
-.canvaaas-clone.active .canvaaas-flip-handle{
+.canvaaas-clone.focused .canvaaas-resize-handle,
+.canvaaas-clone.focused .canvaaas-rotate-handle{
 	display: block;
 }
-.canvaaas-image.active .canvaaas-resize-handle,
-.canvaaas-image.active .canvaaas-rotate-handle,
-.canvaaas-image.active .canvaaas-flip-handle{
+.canvaaas-image.focused .canvaaas-resize-handle,
+.canvaaas-image.focused .canvaaas-rotate-handle{
 	display: block;
 }
 
 /* handle inner */
 .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-flip-handle .canvaaas-handle{
+.canvaaas-rotate-handle .canvaaas-handle{
 	display: block;
 	position: absolute;
 	top: 50%;
@@ -203,57 +374,49 @@
 	pointer-events: none;
 }
 .canvaaas-resize-n,
-.canvaaas-rotate-n,
-.canvaaas-flip-n{
+.canvaaas-rotate-n{
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-ne,
-.canvaaas-rotate-ne,
-.canvaaas-flip-ne{
+.canvaaas-rotate-ne{
 	top: 0;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-e,
-.canvaaas-rotate-e,
-.canvaaas-flip-e{
+.canvaaas-rotate-e{
 	top: 50%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-se,
-.canvaaas-rotate-se,
-.canvaaas-flip-se{
+.canvaaas-rotate-se{
 	top: 100%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-s,
-.canvaaas-rotate-s,
-.canvaaas-flip-s{
+.canvaaas-rotate-s{
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-sw,
-.canvaaas-rotate-sw,
-.canvaaas-flip-sw{
+.canvaaas-rotate-sw{
 	top: 100%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-w,
-.canvaaas-rotate-w,
-.canvaaas-flip-w{
+.canvaaas-rotate-w{
 	top: 50%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-resize-nw,
-.canvaaas-rotate-nw,
-.canvaaas-flip-nw{
+.canvaaas-rotate-nw{
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
@@ -284,8 +447,7 @@
 @media only screen and (max-width: 768px) {
 
 	.canvaaas-resize-handle,
-	.canvaaas-rotate-handle,
-	.canvaaas-flip-handle{
+	.canvaaas-rotate-handle{
 		width: 36px; /* touch space */
 		height: 36px; /* touch space */
 	}
