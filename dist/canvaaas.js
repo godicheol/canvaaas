@@ -4,7 +4,7 @@
  * 
  * eeecheol@gmail.com
  * 
- * 0.0.5
+ * 0.0.6
  * 
  */
 
@@ -59,6 +59,13 @@
 /*!
  * 
  * 업데이트 예정
+ * 
+ * init() & reset() 통합, init() 시 이미 존재하면 삭제 후 진행
+ * 
+ * initImage() 추가, 중앙으로 가져오기
+ * 
+ * config.canvasWidth & canvasHeight 를 canvasState에 이동
+ * 시작할 때 canvasSize 입력 받기?
  * 
  */
 
@@ -2579,7 +2586,7 @@
 				// file
 				typ = "file";
 				ext = file.type.split("/")[1];
-				// src = URL.createObjectURL(file);
+				src = URL.createObjectURL(file);
 				filename = file.name;
 			} else if (typeof(file) === "string") {
 				// url
@@ -5588,9 +5595,6 @@
 				var oldId = getIdByImageElement(eventState.target);
 				var res = setFocusOut(oldId);
 				if (!res) {
-					if (config.draw) {
-						config.draw("`setFocusOut()` error");
-					}
 					if (cb) {
 						cb("`setFocusOut()` error");
 					}
@@ -5618,9 +5622,6 @@
 
 			var canvas = drawCanvas(drawOption);
 			if (!canvas) {
-				if (config.draw) {
-					config.draw("`drawCanvas()` error");
-				}
 				if (cb) {
 					cb("`drawCanvas()` error");
 				}
@@ -5686,9 +5687,6 @@
 					config.editable = false;
 					onPreview = true;
 
-					if (config.draw) {
-						config.draw(null, result);
-					}
 					if (cb) {
 						cb(null, result);
 					}
