@@ -4,15 +4,7 @@
  * 
  * eeecheol@gmail.com
  * 
- * 0.0.6
- * 
- */
-
-/***!
- *** 
- *** caution
- * 
- * if use `canvaaas.init()` callback, you should insert `canvaaas.showContainer()` into callback
+ * 0.0.7
  * 
  */
 
@@ -20,39 +12,24 @@
  *** 
  *** release note
  * 
- * update pinch zoom - outside canvas
+ * remove preview
  * 
- * update resize handle - onShiftKey
+ * reset(container) => reset(image)
  * 
- * update config.state
+ * typeof() === object <= add null check
  * 
- * update all callback error messages
+ * config.drawWidth => config.initDrawWidth
+ * config.drawHeight => config.initDrawHeight
  * 
- * update handle css
+ * draw() width, height => canvasState.originalWidth, canvasState.originalHeight
+ * drawTo() width, height => canvasState.originalWidth, canvasState.originalHeight
+ * download() width, height => canvasState.originalWidth, canvasState.originalHeight
+ * downloadTo() width, height => canvasState.originalWidth, canvasState.originalHeight
  * 
- * update undo, redo
+ * remove export
+ * remove import 
  * 
- * update index
- * 
- * update arrow key
- * 
- * update canvas, container
- * 
- * update preview
- * 
- * remove cache breaker from renderImage()
- * 
- * add clone event handles
- * 
- * update drawCanvas, drawImage, preview, download :: adjust argument "width"
- * 
- * fix exceed max canvas size
- * 
- * add freeze mode
- * 
- * update drawCanvas()
- * 
- * update all methods
+ * uploadUrls, uploadFiles add argument `imageStates`
  * 
  */
 
@@ -60,12 +37,6 @@
  * 
  * 업데이트 예정
  * 
- * init() & reset() 통합, init() 시 이미 존재하면 삭제 후 진행
- * 
- * initImage() 추가, 중앙으로 가져오기
- * 
- * config.canvasWidth & canvasHeight 를 canvasState에 이동
- * 시작할 때 canvasSize 입력 받기?
  * 
  */
 
@@ -75,7 +46,7 @@
  * 
  * index 1000 이상
  * 
- * import 로 index 겹치기
+ * index 겹치기
  * 
  * 
  * 
@@ -129,9 +100,9 @@
 			
 			imageSmoothingQuality: "low", // string, low, medium, high
 
-			drawWidth: 4096, // number, px
+			initDrawWidth: undefined, // number, px
 
-			drawHeight: 2304, // number, px
+			initDrawHeight: undefined, // number, px
 
 			minDrawWidth: 64, // number, px
 
@@ -149,9 +120,9 @@
 
 			minImageRenderHeight: 0.2, // number, 0 ~ 1
 
-			maxImageRenderWidth: 0.9, // number, 0 ~ 1
+			maxImageRenderWidth: 1, // number, 0 ~ 1
 
-			maxImageRenderHeight: 0.9, // number, 0 ~ 1
+			maxImageRenderHeight: 1, // number, 0 ~ 1
 
 			focus: undefined, // callback function
 
@@ -165,10 +136,6 @@
 
 			draw: undefined, // callback function
 
-			export: undefined, // callback function
-
-			import: undefined, // callback function
-
 		};
 
 		Object.freeze(defaultConfiguration);
@@ -178,20 +145,20 @@
 		var imageId = "canvaaas-" + getShortId() + "-";
 		var cloneId = "canvaaas-" + getShortId() + "-";
 
+		var isInitialized = false;
+
 		var onUpload = false;
 		var onMove = false;
 		var onZoom = false;
 		var onResize = false;
 		var onRotate = false;
 		var onFlip = false;
-		var onPreview = false;
 		var onFreeze = false;
 
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
 		conatinerTemplate += "<div class='canvaaas-canvas checker'></div>";
-		conatinerTemplate += "<div class='canvaaas-preview hidden'></div>";
 		conatinerTemplate += "</div>";
 
 		var imageTemplate = "";
@@ -237,7 +204,6 @@
 		var containerElement;
 		var canvasElement;
 		var mirrorElement;
-		var previewElement;
 
 		var imageElements = [];
 		var cloneElements = [];
@@ -285,7 +251,7 @@
 
 				function recursiveFunc() {
 					if (count < index) {
-						renderImage(files[count], function(err, id) {
+						renderImage(files[count], null, function(err, id) {
 							if (err) {
 								if (config.upload) {
 									config.upload(err);
@@ -1342,14 +1308,18 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				if (!isInitialized) {
+					return false;
+				}
+
 				var oldWidth = containerElement.offsetWidth;
 
-				initContainer();
+				initContainer(canvasState.originalWidth, canvasState.originalHeight);
 
 				var newWidth = containerState.width;
 				var scaleRatio = newWidth / oldWidth;
 
-				initCanvas();
+				initCanvas(canvasState.originalWidth, canvasState.originalHeight);
 
 				imageStates.forEach(function(state){
 					var elem = getImageElementById(state.id);
@@ -1364,9 +1334,6 @@
 					setElement(clone, state);
 				});
 
-				if (onPreview) {
-					setElement(previewElement, canvasState);
-				}
 			},
 
 		};
@@ -1468,10 +1435,16 @@
 		};
 
 		function copyObject(srcObj, destiObj) {
-			if (typeof(srcObj) !== "object") {
+			if (
+				typeof(srcObj) !== "object" ||
+				srcObj === null
+			) {
 				return false;
 			}
-			if (typeof(destiObj) !== "object") {
+			if (
+				typeof(destiObj) !== "object" ||
+				destiObj === null
+			) {
 				return false;
 			}
 
@@ -2318,7 +2291,10 @@
 		}
 
 		function drawCanvas(options) {
-			if (typeof(options) !== "object") {
+			if (
+				typeof(options) !== "object" ||
+				options === null
+			) {
 				return false;
 			}
 
@@ -2373,7 +2349,10 @@
 
 		// callback
 		function drawImage(canvas, id, cb){
-			if (typeof(canvas) !== "object") {
+			if (
+				typeof(canvas) !== "object" ||
+				canvas === null
+			) {
 				return cb("Argument error");
 			}
 			if (typeof(id) !== "string") {
@@ -2499,6 +2478,7 @@
 			}
 		}
 
+		// deprecated
 		function initImage(id) {
 			if (!id) {
 				return false;
@@ -2558,7 +2538,7 @@
 		}
 
 		// callback
-		function renderImage(file, cb) {
+		function renderImage(file, oldState, cb) {
 			if (!file) {
 				if (cb) {
 					cb("File not found");
@@ -2573,28 +2553,24 @@
 				return false;
 			}
 
-			var typ,
-				ext,
-				src,
-				filename,
-				newImage = new Image(),
-				isDuplicate = false,
-				id = getShortId();
+			var ext;
+			var src;
+			var newImage = new Image();
+			var id = getShortId();
 
 			// check file or url
-			if (typeof(file) === "object") {
+			if (
+				typeof(file) === "object" &&
+				file !== null
+			) {
 				// file
-				typ = "file";
-				ext = file.type.split("/")[1];
+				ext = file.type.split("/").pop();
 				src = URL.createObjectURL(file);
-				filename = file.name;
 			} else if (typeof(file) === "string") {
 				// url
-				typ = "url";
 				ext = getExtension(file);
 				src = file;
 				// src = file + "?" + new Date().getTime(); // fix ios refresh error, cachebreaker
-				filename = getFilename(file);
 			} else {
 				if (cb) {
 					cb("File not found");
@@ -2610,20 +2586,6 @@
 				return false;
 			}
 
-			// check filename duplicate
-			imageStates.forEach(function(state){
-				if (state.filename === filename) {
-					isDuplicate = true;
-				}
-			});
-
-			if (isDuplicate === true) {
-				if (cb) {
-					cb("This file has been already uploaded");
-				}
-				return false;
-			}
-
 			// start load
 			newImage.src = src;
 
@@ -2634,7 +2596,26 @@
 				return false;
 			}
 
-			newImage.onload = function(e){
+			newImage.onload = function(e) {
+				if (!isInitialized) {
+					var resA = initContainer(newImage.width, newImage.height);
+					if (!resA) {
+
+						if (cb) {
+							cb("`initContainer()` error");
+						}
+						return false;
+					}
+					var resB = initCanvas(newImage.width, newImage.height);
+					if (!resB) {
+						if (cb) {
+							cb("`initCanvas()` error");
+						}
+						return false;
+					}
+
+					isInitialized = true;
+				}
 
 				var nextIndex = config.minAutoIndexing;
 				imageStates.forEach(function(state){
@@ -2656,7 +2637,9 @@
 				// image
 				var originalWidth = newImage.width;
 				var originalHeight = newImage.height;
-				var aspectRatio = newImage.width / newImage.height;
+
+				var aspectRatio = originalWidth / originalHeight;
+				var scaleRatio = canvasState.width / canvasState.originalWidth;
 
 				var maxWidth = canvasState.width * config.maxImageRenderWidth;
 				var maxHeight = canvasState.height * config.maxImageRenderHeight;
@@ -2676,35 +2659,89 @@
 					"cover"
 				);
 
+				var index = nextIndex + 1;
 				var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
 				var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
 				var axisX = canvasState.width * 0.5;
 				var axisY = canvasState.height * 0.5;
+				var rotate = 0;
+				var scaleX = 1;
+				var scaleY = 1;
+				var opacity = 1;
+				var focusable = true;
+				var editable = true;
+				var drawable = true;
+
+				if (
+					typeof(oldState) === "object" &&
+					oldState !== null
+				) {
+					if (
+						oldState.width !== undefined &&
+						oldState.height !== undefined 
+					) {
+						// from same canvas.originalWidth & canvas.originalHeight
+						width = oldState.width * scaleRatio;
+						height = width / (oldState.width / oldState.height);
+					}
+
+					if (
+						oldState.x !== undefined &&
+						oldState.y !== undefined
+					) {
+						axisX = oldState.x * scaleRatio;
+						axisY = oldState.y * scaleRatio;
+					}
+
+					if (oldState.index !== undefined) {
+						index = oldState.index;
+					}
+
+					if (oldState.opacity !== undefined) {
+						opacity = oldState.opacity;
+					}
+
+					if (oldState.rotate !== undefined) {
+						rotate = oldState.rotate;
+					}
+
+					if (oldState.scaleX !== undefined) {
+						scaleX = oldState.scaleX;
+					}
+
+					if (oldState.scaleY !== undefined) {
+						scaleY = oldState.scaleY;
+					}
+
+					if (oldState.focusable !== undefined) {
+						focusable = oldState.focusable;
+					}
+
+					if (oldState.editable !== undefined) {
+						editable = oldState.editable;
+					}
+
+					if (oldState.drawable !== undefined) {
+						drawable = oldState.drawable;
+					}
+				}
 
 				var newState = {};
 				newState.id = id;
-				newState.src = src;
-				newState.type = typ;
-				newState.filename = filename;
-
-				newState.index = nextIndex + 1;
-
+				newState.index = index;
 				newState.originalWidth = originalWidth;
 				newState.originalHeight = originalHeight;
 				newState.width = width;
 				newState.height = height;
 				newState.x = axisX;
 				newState.y = axisY;
-				newState.rotate = 0;
-				newState.scaleX = 1;
-				newState.scaleY = 1;
-				newState.opacity = 1;
-
-				newState.focusable = true;
-				newState.editable = true;
-				newState.drawable = true;
-
-				newState.uploadedAt = Date.now();
+				newState.rotate = rotate;
+				newState.scaleX = scaleX;
+				newState.scaleY = scaleY;
+				newState.opacity = opacity;
+				newState.focusable = focusable;
+				newState.editable = editable;
+				newState.drawable = drawable;
 
 				setElement(newElem, newState);
 
@@ -2769,26 +2806,21 @@
 			}
 		}
 
-		function initContainer() {
+		function initContainer(width, height) {
 			if (
 				containerElement === false ||
 				containerElement === undefined ||
-				config.drawWidth === false ||
-				config.drawWidth === undefined ||
-				config.drawHeight === false ||
-				config.drawHeight === undefined
+				typeof(width) !== "number" ||
+				typeof(height) !== "number"
 			) {
 				return false;
 			}
 
-			var scrollbarWidth = getScrollbarWidth();
 			var viewportSizes = getViewportSizes();
 			var viewportWidth = viewportSizes[0];
 			var viewportHeight = viewportSizes[1];
 
 			if (
-				scrollbarWidth === false ||
-				scrollbarWidth === undefined ||
 				viewportSizes === false ||
 				viewportSizes === undefined
 			) {
@@ -2799,10 +2831,10 @@
 			containerElement.style.width = "";
 			containerElement.style.height = "";
 
-			var maxWidth;
-			var maxHeight;
 			var minWidth = config.minContainerWidth || 0;
 			var minHeight = config.minContainerHeight || 0;
+			var maxWidth;
+			var maxHeight;
 
 			if (!config.maxContainerWidth) {
 				maxWidth = viewportWidth;
@@ -2824,10 +2856,10 @@
 				maxHeight = config.maxContainerHeight;
 			}
 
-			var aspectRatio = config.containerAspectRatio || config.drawWidth / config.drawHeight;
+			var aspectRatio = config.containerAspectRatio || width / height;
+
 			var containerWidth = containerElement.offsetWidth;
 			var containerHeight = containerElement.offsetWidth / aspectRatio;
-			var canvasAspectRatio = config.drawWidth / config.drawHeight;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -2865,18 +2897,18 @@
 			return true;
 		}
 
-		function initCanvas() {
+		function initCanvas(width, height) {
 			if (
 				!canvasElement ||
 				!containerState.width ||
 				!containerState.height ||
-				!config.drawWidth ||
-				!config.drawHeight
+				typeof(width) !== "number" ||
+				typeof(height) !== "number"
 			) {
 				return false;
 			}
 
-			var aspectRatio = config.drawWidth / config.drawHeight;
+			var aspectRatio = width / height;
 
 			var fittedSizes = getFittedRect(
 				containerState.width,
@@ -2884,13 +2916,13 @@
 				aspectRatio
 			);
 
-			var width = fittedSizes[0];
-			var height = fittedSizes[1];
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
-			canvasState.width = width;
-			canvasState.height = height;
+			canvasState.originalWidth = width;
+			canvasState.originalHeight = height;
+			canvasState.width = fittedSizes[0];
+			canvasState.height = fittedSizes[1];
 			canvasState.x = axisX;
 			canvasState.y = axisY;
 
@@ -2905,14 +2937,32 @@
 		// 
 
 		myObject.init = function(target, preConfig, cb) {
-			if (typeof(target) !== "object") {
+			if (
+				containerElement ||
+				canvasElement ||
+				imageElements.length > 0 ||
+				isInitialized === true
+			) {
+				if (cb) {
+					cb("Already initialized");
+				}
+				return false;
+			}
+
+			if (
+				typeof(target) !== "object" ||
+				target === null
+			) {
 				if (cb) {
 					cb("Argument error");
 				}
 				return false;
 			}
 
-			if (typeof(preConfig) === "object") {
+			if (
+				typeof(preConfig) === "object" &&
+				preConfig !== null
+			) {
 				var copyRes = copyObject(preConfig, config);
 				if (!copyRes) {
 					if (cb) {
@@ -2935,28 +2985,38 @@
 			containerElement = target.querySelector("div.canvaaas");
 			canvasElement = target.querySelector("div.canvaaas-canvas");
 			mirrorElement = target.querySelector("div.canvaaas-mirror");
-			previewElement = target.querySelector("div.canvaaas-preview");
 
-			// set container
-			var containerRes = initContainer();
-			if (!containerRes) {
-				if (cb) {
-					cb("`initContainer()` error");
+			// check config.initDrawWidth, config.initDrawHeight
+			var hasCanvasSizes = false;
+			if (
+				config.initDrawWidth !== undefined &&
+				config.initDrawHeight !== undefined
+			) {
+				// set container
+				var resA = initContainer(config.initDrawWidth, config.initDrawHeight);
+				if (!resA) {
+					if (cb) {
+						cb("`initContainer()` error");
+					}
+					return false;
 				}
-				return false;
+
+				// set canvas
+				var resB = initCanvas(config.initDrawWidth, config.initDrawHeight);
+				if (!resB) {
+					if (cb) {
+						cb("`initCanvas()` error");
+					}
+					return false;
+				}
+
+				hasCanvasSizes = true;
+				isInitialized = true;
+
+				containerElement.classList.add("hidden");
 			}
 
-			// set canvas
-			var canvasRes = initCanvas();
-			if (!canvasRes) {
-				if (cb) {
-					cb("`initCanvas()` error");
-				}
-				return false;
-			}
-
-			// set style
-			containerElement.classList.add("hidden");
+			// set styles
 
 			// set events
 			// window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
@@ -2978,7 +3038,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(tmpUrls[count], function(err, id) {
+					renderImage(tmpUrls[count], null, function(err, id) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -2994,7 +3054,9 @@
 				} else {
 					onUpload = false;
 
-					containerElement.classList.remove("hidden");
+					if (hasCanvasSizes === true) {
+						containerElement.classList.remove("hidden");
+					}
 
 					if (cb) {
 						cb(null, config);
@@ -3004,8 +3066,11 @@
 			}
 		}
 
-		myObject.uploadFiles = function(self, cb) {
-			if (typeof(self) !== "object") {
+		myObject.uploadFiles = function(self, imageStates, cb) {
+			if (
+				typeof(self) !== "object" ||
+				self === null
+			) {
 				if (config.upload) {
 					config.upload("Argument error");
 				}
@@ -3013,6 +3078,30 @@
 					cb("Argument error");
 				} 
 				return false;
+			}
+
+			var files = self.files;
+			if (files.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				} 
+				return false;
+			}
+
+			var states = [];
+			for (var i = 0; i < files.length; i++) {
+				states[i] = null;
+			}
+
+			if (imageStates) {
+				if (Array.isArray(imageStates)) {
+					for (var i = 0; i < imageStates.length; i++) {
+						states.push(imageStates[i]);
+					}
+				}
 			}
 
 			if (!config.editable) {
@@ -3035,17 +3124,6 @@
 				return false;
 			}
 
-			var files = self.files;
-			if (files.length < 1) {
-				if (config.upload) {
-					config.upload("File not found");
-				}
-				if (cb) {
-					cb("File not found");
-				} 
-				return false;
-			}
-
 			onUpload = true;
 
 			var index = files.length;
@@ -3056,7 +3134,10 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(files[count], function(err, id) {
+					var thisUrl = files[count];
+					var thisState = states[count];
+
+					renderImage(thisUrl, thisState, function(err, id) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3081,11 +3162,8 @@
 			}
 		}
 
-		myObject.uploadUrls = function(imageUrls, cb) {
-			if (
-				typeof(imageUrls) === "number" ||
-				typeof(imageUrls) === "undefined"
-			) {
+		myObject.uploadUrls = function(imageURLs, imageStates, cb) {
+			if (!Array.isArray(imageURLs)) {
 				if (config.upload) {
 					config.upload("Argument error");
 				}
@@ -3093,6 +3171,19 @@
 					cb("Argument error");
 				} 
 				return false;
+			}
+
+			var states = [];
+			for (var i = 0; i < imageURLs.length; i++) {
+				states[i] = null;
+			}
+
+			if (imageStates) {
+				if (Array.isArray(imageStates)) {
+					for (var i = 0; i < imageStates.length; i++) {
+						states.push(imageStates[i]);
+					}
+				}
 			}
 
 			if (!config.editable) {
@@ -3115,14 +3206,7 @@
 				return false;
 			}
 
-			var arr = [];
-			if (!Array.isArray(imageUrls)) {
-				arr.push(imageUrls);
-			} else {
-				arr = imageUrls;
-			}
-
-			var index = arr.length;
+			var index = imageURLs.length;
 			var count = 0;
 			var results = [];
 
@@ -3132,7 +3216,10 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(arr[count], function(err, id) {
+					var thisUrl = imageURLs[count];
+					var thisState = states[count];
+
+					renderImage(thisUrl, thisState, function(err, id) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3325,8 +3412,8 @@
 			}
 
 			if (
-				typeof(x) === "object" ||
-				typeof(y) === "object"
+				(typeof(x) !== "number" && typeof(x) !== "string") ||
+				(typeof(y) !== "number" && typeof(y) !== "string")
 			) {
 				if (config.edit) {
 					config.edit("Argument error");
@@ -3526,8 +3613,8 @@
 			}
 
 			if (
-				typeof(ratio) === "object" || 
-				typeof(ratio) === "undefined"
+				typeof(ratio) !== "number" &&
+				typeof(ratio) !== "string" 
 			) {
 				if (config.edit) {
 					config.edit("Argument error");
@@ -4396,16 +4483,6 @@
 				return false;
 			}
 
-			// if (!config.editable) {
-			// 	if (config.focus) {
-			// 		config.focus("Editing has been disabled");
-			// 	}
-			// 	if (cb) {
-			// 		cb("Editing has been disabled");
-			// 	}
-			// 	return false;
-			// }
-
 			if (!elem || !state) {
 				if (config.focus) {
 					config.focus("Image not found");
@@ -4450,13 +4527,6 @@
 			}
 
 			var id = getIdByImageElement(eventState.target);
-
-			// if (!config.editable) {
-			// 	if (cb) {
-			// 		cb("Editing has been disabled");
-			// 	}
-			// 	return false;
-			// }
 			
 			if (!id) {
 				if (cb) {
@@ -4966,13 +5036,101 @@
 			}
 		}
 
+		myObject.reset = function(id, cb) {
+			var elem = getImageElementById(id);
+			var state = getStateById(id);
+			var clone = getCloneElementById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!elem || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			var originalWidth = state.originalWidth;
+			var originalHeight = state.originalHeight;
+			var aspectRatio = state.originalWidth / state.originalHeight;
+
+			var maxWidth = canvasState.width * config.maxImageRenderWidth;
+			var maxHeight = canvasState.height * config.maxImageRenderHeight;
+			var minWidth = canvasState.width * config.minImageRenderWidth;
+			var minHeight = canvasState.height * config.minImageRenderHeight;
+
+			var maxSizes = getFittedRect(
+				maxWidth,
+				maxHeight,
+				aspectRatio,
+			);
+
+			var minSizes = getFittedRect(
+				minWidth,
+				minHeight,
+				aspectRatio,
+				"cover"
+			);
+
+			var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
+			var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
+			var axisX = canvasState.width * 0.5;
+			var axisY = canvasState.height * 0.5;
+
+			state.width = width;
+			state.height = height;
+			state.x = axisX;
+			state.y = axisY;
+			state.rotate = 0;
+			state.scaleX = 1;
+			state.scaleY = 1;
+			state.opacity = 1;
+
+			state.focusable = true;
+			state.editable = true;
+			state.drawable = true;
+
+			setElement(elem, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
 		// 
 		// config
 		// 
 
-		// deprecated
 		myObject.config = function(newConfig, cb) {
-			if (typeof(newConfig) !== "object") {
+			if (
+				typeof(newConfig) !== "object" ||
+				newConfig === null
+			) {
 				if (config.config) {
 					config.config("Argument error");
 				}
@@ -4992,17 +5150,8 @@
 				return false;
 			}
 
-			var oldW = canvasState.width;
-			var oldH = canvasState.height;
-
 			// set config
 			copyObject(newConfig, config);
-
-			// container
-			initContainer();
-
-			// canvas
-			initCanvas();
 
 			if (config.config) {
 				config.config(null, config);
@@ -5036,19 +5185,14 @@
 				return false;
 			}
 
-			var updates = {
-				drawWidth: w,
-				drawHeight: h
-			};
-
-			// set config
-			copyObject(updates, config);
+			var oldW = canvasState.width;
+			var oldH = canvasState.height;
 
 			// set container
-			initContainer();
+			initContainer(w, h);
 
 			// set canvas
-			initCanvas();
+			initCanvas(w, h);
 
 			// set images
 			var newW = canvasState.width;
@@ -5198,8 +5342,8 @@
 		// 
 
 		myObject.draw = function(cb){
-			var drawWidth = config.drawWidth;
-			var drawHeight = config.drawHeight;
+			var drawWidth = canvasState.originalWidth;
+			var drawHeight = canvasState.originalHeight;
 			var quality = config.drawQuality;
 			var mimeType = config.drawMimeType;
 			var imageSmoothingQuality = config.imageSmoothingQuality;
@@ -5284,7 +5428,10 @@
 			 * options keys => width, quality, mimeType, fillColor, filename, smoothingQuality, smoothingEnabled
 			 */
 
-			if (typeof(options) !== "object") {
+			if (
+				typeof(options) !== "object" ||
+				options === null
+			) {
 				if (config.draw) {
 					config.draw("Argument error");
 				}
@@ -5294,8 +5441,8 @@
 				return false;
 			}
 
-			var drawAspectRatio = config.drawWidth / config.drawHeight;
-			var drawWidth = options.drawWidth || options.width || config.drawWidth;
+			var drawAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var drawWidth = options.width || options.drawWidth || canvasState.originalWidth;
 			var drawHeight = drawWidth / drawAspectRatio;
 			var quality = options.quality || options.drawQuality || config.drawQuality;
 			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
@@ -5379,8 +5526,8 @@
 		}
 
 		myObject.download = function(cb){
-			var drawWidth = config.drawWidth;
-			var drawHeight = config.drawHeight;
+			var drawWidth = canvasState.originalWidth;
+			var drawHeight = canvasState.originalHeight;
 			var quality = config.drawQuality;
 			var mimeType = config.drawMimeType;
 			var imageSmoothingQuality = config.imageSmoothingQuality;
@@ -5475,15 +5622,18 @@
 			/*!
 			 * options keys => width, quality, mimeType, fillColor, filename, smoothingQuality, smoothingEnabled
 			 */
-			if (typeof(options) !== "object") {
+			if (
+				typeof(options) !== "object" ||
+				options === null
+			) {
 				if (cb) {
 					cb("Argument error");
 				}
 				return false;
 			}
 
-			var drawAspectRatio = config.drawWidth / config.drawHeight;
-			var drawWidth = options.drawWidth || options.width || config.drawWidth;
+			var drawAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var drawWidth = options.width || options.drawWidth || canvasState.originalWidth;
 			var drawHeight = drawWidth / drawAspectRatio;
 			var quality = options.quality || options.drawQuality || config.drawQuality;
 			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
@@ -5491,7 +5641,7 @@
 			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.imageSmoothingQuality;
 			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.imageSmoothingEnabled;
 			var filename = options.filename || config.filename || "Untitled";
-			filename += "." + mimeType.split("/")[1];
+			filename += "." + mimeType.split("/").pop();
 
 			var drawOption = {
 				width: drawWidth,
@@ -5575,154 +5725,8 @@
 			}
 		}
 
-		myObject.preview = function(cb){
-			if (
-				onPreview === true ||
-				onFreeze === true
-			) {
-				if (config.draw) {
-					config.draw("Already in progress");
-				}
-				if (cb) {
-					cb("Already in progress");
-				}
-				return false;
-			}
-
-			previewElement.innerHTML = "";
-
-			if (eventState.target) {
-				var oldId = getIdByImageElement(eventState.target);
-				var res = setFocusOut(oldId);
-				if (!res) {
-					if (cb) {
-						cb("`setFocusOut()` error");
-					}
-					return false;
-				}
-			}
-
-			var drawWidth = config.drawWidth;
-			var drawHeight = config.drawHeight;
-			var quality = config.drawQuality;
-			var mimeType = config.drawMimeType;
-			var imageSmoothingQuality = config.imageSmoothingQuality;
-			var imageSmoothingEnabled = config.imageSmoothingEnabled;
-			var fillColor = config.drawFillColor;
-
-			var drawOption = {
-				width: drawWidth,
-				height: drawHeight,
-				maxWidth: config.maxDrawWidth || 9999,
-				maxHeight: config.maxDrawHeight || 9999,
-				minWidth: config.minDrawWidth || 0,
-				minHeight: config.minDrawHeight || 0,
-				fillColor: fillColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// draw image
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					var file = canvas.toDataURL(mimeType, quality);
-
-					result.states = drawResults;
-
-					setElement(previewElement, canvasState);
-
-					var newImage = document.createElement("img");
-					newImage.src = file;
-
-					previewElement.appendChild(newImage);
-
-					canvasElement.classList.add("hidden");
-					mirrorElement.classList.add("hidden");
-					previewElement.classList.remove("hidden");
-
-					config.editable = false;
-					onPreview = true;
-
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
-		myObject.escapePreview = function(cb){
-			if (onPreview === false) {
-				if (cb) {
-					cb("No progress");
-				}
-				return false;
-			}
-
-			previewElement.innerHTML = "";
-			previewElement.style.width = "";
-			previewElement.style.height = "";
-
-			canvasElement.classList.remove("hidden");
-			mirrorElement.classList.remove("hidden");
-			previewElement.classList.add("hidden");
-
-			config.editable = true;
-			onPreview = false;
-
-			if (cb) {
-				cb(null);
-			}
-		}
-
 		myObject.freeze = function(cb){
-			if (
-				onPreview === true ||
-				onFreeze === true
-			) {
+			if (onFreeze === true) {
 				if (cb) {
 					cb("Already in progress");
 				}
@@ -5755,7 +5759,7 @@
 		myObject.escapeFreeze = function(cb){
 			if (onFreeze === false) {
 				if (cb) {
-					cb("No progress");
+					cb("No progress in");
 				}
 				return false;
 			}
@@ -5770,246 +5774,6 @@
 			if (cb) {
 				cb(null);
 			}
-		}
-		myObject.export = function(cb) {
-			var keys = [
-				"filename",
-				"x",
-				"y",
-				"width",
-				"height",
-				"rotate",
-				"scaleX",
-				"scaleY",
-				"opacity",
-				"index",
-				"focusable",
-				"editable",
-				"drawable",
-				"uploadedAt"
-			];
-
-			var data = {};
-
-			var tmpConfig = {};
-			copyObject(config, tmpConfig);
-
-			var tmpCanvasState = {};
-			copyObject(canvasState, tmpCanvasState);
-
-			var tmpImagesStates = [];
-			imageStates.forEach(function(state){
-				var tmp = {};
-
-				keys.forEach(function(k){
-					tmp[k] = state[k];
-				});
-
-				tmpImagesStates.push(tmp);
-			});
-
-			data.config = tmpConfig;
-			data.canvasState = tmpCanvasState;
-			data.imageStates = tmpImagesStates;
-
-			if (config.export) {
-				config.export(null, data);
-			}
-			if (cb) {
-				cb(null, data);
-			}
-			return data;
-		}
-
-		myObject.import = function(exportedData, cb) {
-			if (!config.editable) {
-				if (config.import) {
-					config.import("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (typeof(exportedData) !== "object") {
-				if (config.import) {
-					config.import("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			var oldConfig = exportedData.config;
-			var oldCanvasState = exportedData.canvasState;
-			var oldImageStates = exportedData.imageStates;
-
-			if (
-				!oldCanvasState ||
-				!oldCanvasState.width ||
-				!oldCanvasState.height ||
-				!oldImageStates ||
-				oldImageStates.length < 1
-			) {
-				if (config.import) {
-					config.import("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			var aspectRatioA = oldCanvasState.width / oldCanvasState.height;
-			var aspectRatioB = canvasState.width / canvasState.height;
-
-			// check aspect ratio
-			if (Math.abs(aspectRatioA - aspectRatioB) > 0.01) {
-				if (config.import) {
-					config.import("Canvas aspect ratio mismatch");
-				}
-				if (cb) {
-					cb("Canvas aspect ratio mismatch");
-				}
-				return false;
-			}
-
-			var results = [];
-			for (var i = 0; i < oldImageStates.length; i++){
-				var oldState = oldImageStates[i];
-
-				var elem = getImageElementByFilename(oldState.filename);
-				var clone = getCloneElementByImageElement(elem);
-				var state = getStateByImageElement(elem);
-
-				if (!elem || !state || !clone) {
-					results.push({
-						filename: oldState.filename,
-						err: "Image not found"
-					})
-					continue;
-				}
-
-				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
-
-				var scaleRatio = canvasState.width / oldCanvasState.width;
-				var aspectRatio = oldState.width / oldState.height;
-
-				// save state
-				if (
-					oldState.index !== undefined &&
-					oldState.index !== null
-				) {
-					state.index = oldState.index;
-				}
-
-				if (
-					oldState.x !== undefined &&
-					oldState.x !== null
-				) {
-					state.x = oldState.x * scaleRatio;
-				}
-				if (
-					oldState.y !== undefined &&
-					oldState.y !== null
-				) {
-					state.y = oldState.y * scaleRatio;
-				}
-				if (
-					oldState.width !== undefined &&
-					oldState.width !== null
-				) {
-					state.width = oldState.width * scaleRatio;
-				}
-				if (
-					oldState.height !== undefined &&
-					oldState.height !== null
-				) {
-					state.height = oldState.width * scaleRatio / aspectRatio;
-				}
-				if (
-					oldState.rotate !== undefined &&
-					oldState.rotate !== null
-				) {
-					state.rotate = oldState.rotate;
-				}
-				if (
-					oldState.scaleX !== undefined &&
-					oldState.scaleX !== null
-				) {
-					state.scaleX = oldState.scaleX;
-				}
-				if (
-					oldState.scaleY !== undefined &&
-					oldState.scaleY !== null
-				) {
-					state.scaleY = oldState.scaleY;
-				}
-				if (
-					oldState.opacity !== undefined &&
-					oldState.opacity !== null
-				) {
-					state.opacity = oldState.opacity;
-				}
-
-				if (
-					oldState.focusable === true ||
-					oldState.focusable === false
-				) {
-					state.focusable = oldState.focusable;
-				}
-
-				if (
-					oldState.editable === true ||
-					oldState.editable === false
-				) {
-					state.editable = oldState.editable;
-				}
-
-				if (
-					oldState.drawable === true ||
-					oldState.drawable === false
-				) {
-					state.drawable = oldState.drawable;
-				}
-
-				// adjust state
-				setElement(elem, state);
-				setElement(clone, state);
-
-				var tmp = {};
-				copyObject(state, tmp);
-
-				results.push(tmp);
-			}
-
-			if (oldConfig) {
-				copyObject(oldConfig, config);
-				initContainer();
-				initCanvas();
-			}
-
-			var res = setIndex();
-			if (!res) {
-				if (config.import) {
-					config.import("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
-			if (config.import) {
-				config.import(null, results);
-			}
-			if (cb) {
-				cb(null, results);
-			}
-			return results;
 		}
 
 		myObject.this = function(cb){
@@ -6059,8 +5823,23 @@
 			var id = getIdByImageElement(eventState.target);
 			var state = getStateById(id);
 
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var aspectRatio = state.width / state.height;
 			var tmp = {};
-			copyObject(state, tmp);
+			tmp.width = state.width / scaleRatio;
+			tmp.height = tmp.width / aspectRatio;
+			tmp.x = state.x / scaleRatio;
+			tmp.y = state.y / scaleRatio;
+			tmp.left = tmp.x - (tmp.width / 2);
+			tmp.top = tmp.y - (tmp.height / 2);
+			tmp.rotate = state.rotate;
+			tmp.scaleX = state.scaleX;
+			tmp.scaleY = state.scaleY;
+			tmp.opacity = state.opacity;
+			tmp.index = state.index;
+			tmp.focusable = state.focusable;
+			tmp.editable = state.editable;
+			tmp.drawable = state.drawable;
 
 			if (cb) {
 				cb(null, tmp);
@@ -6096,53 +5875,65 @@
 		}
 
 		myObject.getImageData = function(id, cb){
-			if (!id) {
+			var state = getStateById(id);
+			if (!state) {
+				if (cb) {
+					cb("Image not found")
+				}
+				return false;
+			}
+
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var aspectRatio = state.width / state.height;
+			var tmp = {};
+			tmp.width = state.width / scaleRatio;
+			tmp.height = tmp.width / aspectRatio;
+			tmp.x = state.x / scaleRatio;
+			tmp.y = state.y / scaleRatio;
+			tmp.left = tmp.x - (tmp.width / 2);
+			tmp.top = tmp.y - (tmp.height / 2);
+			tmp.rotate = state.rotate;
+			tmp.scaleX = state.scaleX;
+			tmp.scaleY = state.scaleY;
+			tmp.opacity = state.opacity;
+			tmp.index = state.index;
+			tmp.focusable = state.focusable;
+			tmp.editable = state.editable;
+			tmp.drawable = state.drawable;
+
+			if (cb) {
+				cb(null, tmp);
+			}
+			return tmp;
+		}
+
+		myObject.getImageDataAll = function(cb){
+			var tmpStates = [];
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			imageStates.forEach(function(state){
+				var aspectRatio = state.width / state.height;
 				var tmp = {};
-				copyObject(imageStates, tmp);
-				if (cb) {
-					cb(null, tmp);
-				}
-				return tmp;
-			} else {
-				var arr = [];
-				if (!Array.isArray(id)) {
-					arr[0] = id;
-				} else {
-					arr = id;
-				}
+				tmp.width = state.width / scaleRatio;
+				tmp.height = tmp.width / aspectRatio;
+				tmp.x = state.x / scaleRatio;
+				tmp.y = state.y / scaleRatio;
+				tmp.left = tmp.x - (tmp.width / 2);
+				tmp.top = tmp.y - (tmp.height / 2);
+				tmp.rotate = state.rotate;
+				tmp.scaleX = state.scaleX;
+				tmp.scaleY = state.scaleY;
+				tmp.opacity = state.opacity;
+				tmp.index = state.index;
+				tmp.focusable = state.focusable;
+				tmp.editable = state.editable;
+				tmp.drawable = state.drawable;
+				tmpStates.push(tmp);
+			});
 
-				var results = [];
-				arr.forEach(function(candidateId){
-					var state = getStateById(candidateId);
-					var err;
-					if (!state) {
-						err = "State not found";
-					}
-					results.push({
-						err: err,
-						res: state
-					})
-				});
-
-				if (cb) {
-					cb(null, results);
-				}
-				return results;
-			}
-		}
-
-		myObject.getUndoData = function(cb){
 			if (cb) {
-				cb(null, eventCaches);
+				cb(null, tmpStates);
 			}
-			return eventCaches;
-		}
-
-		myObject.getRedoData = function(cb){
-			if (cb) {
-				cb(null, eventSubCaches);
-			}
-			return eventSubCaches;
+			return tmpStates;
 		}
 
 		myObject.undo = function(cb){
@@ -6214,17 +6005,11 @@
 			}
 		}
 
-		myObject.reset = function(preConfig, cb){
+		myObject.destroy = function(cb){
 
 			window.removeEventListener("resize", handlers.resizeWindow, false);
 
-			document.addEventListener("mousedown", handlers.isOutside, false);
-			document.addEventListener("touchstart", handlers.isOutside, false);
-
-			document.addEventListener("scroll", handlers.onScroll, false);
-
-			var target = containerElement.parentNode;
-			target.removeChild(containerElement);
+			containerElement.parentNode.removeChild(containerElement);
 
 			config = {};
 
@@ -6237,16 +6022,14 @@
 			canvasState = {};
 			imageStates = [];
 
-			containerElement;
-			canvasElement;
-			mirrorElement;
-			previewElement;
+			containerElement = undefined;
+			canvasElement = undefined;
+			mirrorElement = undefined;
 
 			imageElements = [];
 			cloneElements = [];
-
-			imageId = "canvaaas-" + getShortId() + "-";
-			cloneId = "canvaaas-" + getShortId() + "-";
+				
+			isInitialized = false;
 
 			onUpload = false;
 			onMove = false;
@@ -6254,23 +6037,14 @@
 			onResize = false;
 			onRotate = false;
 			onFlip = false;
-			onPreview = false;
 			onFreeze = false;
 
-			myObject.init(target, preConfig);
+			imageId = "canvaaas-" + getShortId() + "-";
+			cloneId = "canvaaas-" + getShortId() + "-";
 
 			if (cb) {
 				cb(null, true);
 			}
-			return true
-		}
-
-		myObject.destroy = function(cb){
-			containerElement.parentNode.removeChild(containerElement);
-			if (cb) {
-				cb(null, true);
-			}
-			return true;
 		}
 
 		// 
