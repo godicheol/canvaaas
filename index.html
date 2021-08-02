@@ -195,12 +195,13 @@
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview1" style="width: 100%;" src="" alt="">
 	</div>
-	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
+	<div style="position: relative; display: inline-block; width: 30%; overflow: hidden; border: 1px solid; font-size: 0px;">
 		<img id="preview2" style="width: 100%;" src="" alt="">
 	</div>
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview3" style="width: 100%;" src="" alt="">
 	</div>
+	
 
 <script>
 	var inputs = {
@@ -248,7 +249,7 @@
 	// 			return false;
 	// 		}
 	// 		console.log("draw", res);
-	// 		document.getElementById("preview2").src = res.file;
+	// 		document.getElementById("preview1").src = res.file;
 	// 	},
 	// }, function(err){
 	// 	if (err) {
@@ -265,8 +266,26 @@
 				console.log(err);
 				return false;
 			}
-			console.log("edit", res);
+			// console.log("edit", res);
+			var canvasState = canvaaas.getCanvasData();
+			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var preview = document.getElementById("preview2");
+			var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
 			var state = canvaaas.getImageData(res);
+
+			preview.src = '/img/1.jpeg';
+			preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
+			preview.style.position = "absolute";
+			preview.style.width = state.width * scaleRatio + "px";
+			preview.style.height = state.height * scaleRatio + "px";
+			preview.style.left = state.left * scaleRatio + "px";
+			preview.style.top = state.top * scaleRatio + "px";
+			var transform = "";
+			transform += "scaleX(" + state.scaleX + ")";
+			transform += "scaleY(" + state.scaleY + ")";
+			transform += "rotate(" + state.rotate + "deg)";
+			preview.style.transform = transform;
+
 			inputs.width.value = state.width;
 			inputs.height.value = state.height;
 			inputs.top.value = state.top;
@@ -281,6 +300,7 @@
 			inputs.focusable.value = state.focusable;
 			inputs.editable.value = state.editable;
 			inputs.drawable.value = state.drawable;
+
 		},
 		draw: function(err, res){
 			if (err) {
@@ -288,7 +308,7 @@
 				return false;
 			}
 			console.log("draw", res);
-			document.getElementById("preview2").src = res.file;
+			document.getElementById("preview1").src = res.file;
 		},
 	}, function(err){
 		if (err) {
