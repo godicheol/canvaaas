@@ -43,7 +43,7 @@
  * 
  * handle 사용 중 scroll
  * 
- * handle 사용 중 active
+ * handle 사용 중 active => 실패 (clone.handle 접근 불가)
  * 
  * 
  */
