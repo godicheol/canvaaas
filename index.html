@@ -360,7 +360,9 @@
 		// 	}	
 		// })
 
+			
 		var test1 = {
+			// canvaaas.getImageData()
 		    "canvasWidth": 5472,
 		    "canvasHeight": 3648,
 		    "width": 3768.2920643991088,
@@ -380,29 +382,88 @@
 		}
 
 		// test 4
-		canvaaas.init(elem, {
-			initDrawWidth: 2000,
-			initDrawHeight: 2073,
-			edit: function(err, res){
-				console.log(canvaaas.getImageData(res));
-			},
-			draw: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("draw", res);
-				document.getElementById("preview1").src = res.file;
-			},
+		// canvaaas.init(elem, {
+		// 	initDrawWidth: 2000,
+		// 	initDrawHeight: 2073,
+		// 	edit: function(err, res){
+		// 		var state = canvaaas.getImageData(res);
+		// 		inputs.width.value = state.width;
+		// 		inputs.height.value = state.height;
+		// 		inputs.x.value = state.x;
+		// 		inputs.y.value = state.y;
+		// 		inputs.index.value = state.index;
+		// 		inputs.rotate.value = state.rotate;
+		// 		inputs.scaleX.value = state.scaleX;
+		// 		inputs.scaleY.value = state.scaleY;
+		// 		inputs.opacity.value = state.opacity;
+		// 		inputs.focusable.value = state.focusable;
+		// 		inputs.editable.value = state.editable;
+		// 		inputs.drawable.value = state.drawable;
+		// 	},
+		// 	draw: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		console.log("draw", res);
+		// 		document.getElementById("preview1").src = res.file;
+		// 	},
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}
+		// 	canvaaas.uploadUrls(['/img/1.jpeg'], test1, function(err){
+		// 		if (err) {
+		// 			console.log(err)
+		// 		}
+		// 	})
+		// })
+
+		// test 5
+		canvaaas.preview(elem, {
+			url: '/img/1.jpeg',
+			state: {
+				"canvasWidth": 5472,
+			    "canvasHeight": 3648,
+			    "width": 3768.2920643991088,
+			    "height": 596.832113102849,
+			    "left": 1831.0551775752149,
+			    "top": 2099.6462515004105,
+			    "x": 3715.2012097747693,
+			    "y": 2398.062308051835,
+			    "rotate": 328.0627994428064,
+			    "scaleX": 1,
+			    "scaleY": 1,
+			    "opacity": 1,
+			}
 		}, function(err){
 			if (err) {
 				console.log(err);
 			}
-			canvaaas.uploadUrls(['/img/1.jpeg'], test1, function(err){
-				if (err) {
-					console.log(err)
-				}
-			})
+		})
+
+		// test 6
+		canvaaas.preview(
+			elem,
+			['/img/1.jpeg'],
+			[{
+				"canvasWidth": 5472,
+			    "canvasHeight": 3648,
+			    "width": 3768.2920643991088,
+			    "height": 596.832113102849,
+			    "left": 1831.0551775752149,
+			    "top": 2099.6462515004105,
+			    "x": 3715.2012097747693,
+			    "y": 2398.062308051835,
+			    "rotate": 328.0627994428064,
+			    "scaleX": 1,
+			    "scaleY": 1,
+			    "opacity": 1,
+			}], function(err, res){
+			if (err) {
+				console.log(err);
+			}
+			console.log(res)
 		})
 		
 

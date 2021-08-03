@@ -192,6 +192,11 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
+		var previewTemplate = "";
+		previewTemplate += "<div class='canvaaas'>";
+		previewTemplate += "<div class='canvaaas-canvas'></div>";
+		previewTemplate += "</div>";
+
 		var eventState = {};
 		var eventCaches = [];
 		var eventSubCaches = [];
@@ -2659,7 +2664,7 @@
 						if (oldState.canvasHeight !== undefined) {
 							scaleRatioY = canvasState.height / oldState.canvasHeight;
 						}
-						
+
 						if (oldState.width !== undefined){
 							width = oldState.width * scaleRatioX;
 						}
@@ -2779,6 +2784,148 @@
 				return false;
 			}
 		}
+
+		function renderPreview(file, state, cb) {
+			if (!file) {
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			if (typeof(file) !== "string") {
+				if (cb) {
+					cb("File not `String`");
+				}
+				return false;
+			}
+
+			var id = getShortId();
+			var newImage = new Image();
+			newImage.src = file;
+
+			newImage.onerror = function(e) {
+				if (cb) {
+					cb("Image load failed");
+				}
+				return false;
+			}
+
+			newImage.onload = function(e) {
+
+				// check initialized canvas
+				if (isInitialized === true) {
+					if (cb) {
+						cb("This canvas has been initialized");
+					}
+					return false;
+				}
+
+				var nextIndex = 0;
+				imageStates.forEach(function(s){
+					if (nextIndex < s.index) {
+						nextIndex = s.index;
+					}
+				});
+
+				// create element
+				var newSource = document.createElement("div");
+				newSource.id = sourceId + id;
+				newSource.classList.add("canvaaas-image");
+
+				var newImg = document.createElement("img");
+				newImg.src = newImage.src;
+
+				newSource.appendChild(newImg);
+
+				var originalWidth = newImage.width;
+				var originalHeight = newImage.height;
+				var index = nextIndex + 1;
+				var width;
+				var height;
+				var axisX;
+				var axisY;
+				var rotate = 0;
+				var scaleX = 1;
+				var scaleY = 1;
+				var opacity = 1;
+
+				if (
+					typeof(state) !== "object" ||
+					state === null
+				) {
+					if (cb) {
+						cb("State not `object`");
+					}
+					return false;
+				}
+
+				if (
+					state.canvasWidth === undefined ||
+					state.width === undefined ||
+					state.height === undefined ||
+					state.x === undefined ||
+					state.y === undefined
+				) {
+					if (cb) {
+						cb("`state` error");
+					}
+					return false;
+				}
+
+				var scaleRatioX = canvasState.width / state.canvasWidth;
+				var scaleRatioY = canvasState.width / state.canvasWidth;
+
+				if (state.canvasHeight !== undefined) {
+					scaleRatioY = canvasState.height / state.canvasHeight;
+				}
+
+				width = state.width * scaleRatioX;
+				height = state.height * scaleRatioX;
+				axisX = state.x * scaleRatioX;
+				axisY = state.y * scaleRatioY;
+
+				if (state.rotate !== undefined){
+					rotate = state.rotate;
+				}
+				if (state.scaleX !== undefined){
+					scaleX = state.scaleX;
+				}
+				if (state.scaleY !== undefined){
+					scaleY = state.scaleY;
+				}
+				if (state.opacity !== undefined){
+					opacity = state.opacity;
+				}
+
+				var newState = {};
+				newState.id = id;
+				newState.index = index;
+				newState.originalWidth = originalWidth;
+				newState.originalHeight = originalHeight;
+				newState.width = width;
+				newState.height = height;
+				newState.x = axisX;
+				newState.y = axisY;
+				newState.rotate = rotate;
+				newState.scaleX = scaleX;
+				newState.scaleY = scaleY;
+				newState.opacity = opacity;
+
+				setElement(newSource, newState);
+
+				imageStates.push(newState);
+
+				canvasElement.appendChild(newSource);
+				sourceElements.push(newSource);
+
+				if (cb) {
+					cb(null, id);
+				}		
+				return false;
+			}
+		}
+
 
 		function initContainer(width, height) {
 			if (
@@ -3040,6 +3187,215 @@
 			}
 		}
 
+		myObject.preview = function(target, imageURLs, imageStates, cb) {
+			// 
+			// imageURLs => [{url, state}] or [url...] or {url, state}
+			// 
+			// imageStates => [{x, y, w, h...}] or {x, y, w, h...} or function(err, res) or undefined
+			// 
+			// require state => {canvasWidth, canvasHeight, width, height, x, y}
+			// 
+
+			var thisTarget,
+				thisURLs = [],
+				thisStates = [],
+				thisCb,
+				hasState = false;
+
+			if (cb) {
+				if (typeof(imageStates) === "function") {
+					if (thisCb) {
+						thisCb("Argument error");
+					}
+					return false;
+				}
+				if (typeof(cb) === "function") {
+					thisCb = cb;
+				}
+			} else {
+				if (typeof(imageStates) === "function") {
+					thisCb = imageStates;
+				}
+			}
+
+			if (
+				typeof(target) === "object" &&
+				target !== null
+			) {
+				thisTarget = target;
+			} else {
+				if (thisCb) {
+					thisCb("Argument error");
+				}
+				return false;
+			}
+
+			if (Array.isArray(imageStates)) {
+				for (var i = 0; i < imageStates.length; i++) {
+					if (
+						typeof(imageStates[i]) === "object" &&
+						imageStates[i] !== null
+					) {
+						thisStates[i] = imageStates[i];
+					} else {
+						if (thisCb) {
+							thisCb("Argument error");
+						} 
+						return false;
+					}
+				}
+				hasState = true;
+			} else if (
+				typeof(imageStates) === "object" &&
+				imageStates !== null
+			) {
+				thisStates[0] = imageStates;
+				hasState = true;
+			} else {
+				hasState = false;
+			}	
+
+			if (Array.isArray(imageURLs)) {
+				for (var i = 0; i < imageURLs.length; i++) {
+					if (hasState === false) {
+						if (
+							typeof(imageURLs[i]) === "object" &&
+							imageURLs[i] !== null
+						) {
+							if (imageURLs[i].src !== undefined) {
+								thisURLs[i] = imageURLs[i].src;
+							} else if (imageURLs.url !== undefined) {
+								thisURLs[i] = imageURLs[i].url;
+							} else if (imageURLs.path !== undefined) {
+								thisURLs[i] = imageURLs[i].path;
+							} else {
+								if (thisCb) {
+									thisCb("Argument error");
+								} 
+								return false;
+							}
+
+							if (
+								typeof(imageURLs[i].state) === "object" &&
+								imageURLs[i].state !== null
+							) {
+								thisStates[i] = imageURLs[i].state;
+							} else {
+								if (thisCb) {
+									thisCb("Argument error");
+								} 
+								return false;
+							}
+						} else {
+							if (thisCb) {
+								thisCb("Argument error");
+							} 
+							return false;
+						}
+					} else {
+						if (typeof(imageURLs[i]) === "string") {
+							thisURLs[i] = imageURLs[i];
+						} else {
+							if (thisCb) {
+								thisCb("Argument error");
+							} 
+							return false;
+						}
+					}
+				}
+				hasState = true;
+			} else if (
+				typeof(imageURLs) === "object" &&
+				imageURLs !== null
+			) {
+				if (imageURLs.src !== undefined) {
+					thisURLs[0] = imageURLs.src;
+				} else if (imageURLs.url !== undefined) {
+					thisURLs[0] = imageURLs.url;
+				} else if (imageURLs.path !== undefined) {
+					thisURLs[0] = imageURLs.path;
+				} else {
+					if (thisCb) {
+						thisCb("Argument error");
+					} 
+					return false;
+				}
+
+				if (hasState === false) {
+					if (
+						typeof(imageURLs.state) === "object" &&
+						imageURLs.state !== null
+					) {
+						thisStates[0] = imageURLs.state;
+						hasState = true;
+					} else {
+						if (thisCb) {
+							thisCb("Argument error");
+						} 
+						return false;
+					}
+				}
+			} else {
+				if (thisCb) {
+					thisCb("Argument error");
+				} 
+				return false
+			}
+
+			if (thisURLs.length !== thisStates.length) {
+				if (thisCb) {
+					thisCb("Argument error");
+				} 
+				return false;
+			}
+
+			if (
+				thisStates[0].canvasWidth === undefined ||
+				thisStates[0].canvasHeight === undefined
+			) {
+				if (thisCb) {
+					thisCb("Argument error");
+				} 
+				return false;
+			}
+
+			// set template
+			thisTarget.innerHTML = previewTemplate;
+			containerElement = thisTarget.querySelector("div.canvaaas");
+			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
+
+			initContainer(thisStates[0].canvasWidth, thisStates[0].canvasHeight);
+			initCanvas(thisStates[0].canvasWidth, thisStates[0].canvasHeight);
+
+			window.addEventListener("resize", handlers.resizeWindow, false);
+
+			var index = thisURLs.length;
+			var count = 0;
+			var results = [];
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					renderPreview(thisURLs[count], thisStates[count], function(err, id) {
+						results.push({
+							err: err,
+							id: id
+						});
+						count++;
+						recursiveFunc();
+					});
+				} else {
+
+					isInitialized = true;
+					
+					if (cb) {
+						cb(null, results);
+					}
+				}
+			}
+		}
+
 		myObject.uploadFiles = function(self, imageStates, cb) {
 			if (
 				typeof(self) !== "object" ||
@@ -3235,7 +3591,7 @@
 		}
 
 		// 
-		// image
+		// edit image
 		// 
 
 		myObject.moveX = function(id, x, cb) {
@@ -5111,7 +5467,7 @@
 		}
 
 		// 
-		// config
+		// edit config
 		// 
 
 		myObject.config = function(newConfig, cb) {
