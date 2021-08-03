@@ -25,14 +25,10 @@
 		/*background-color: #000;*/
 	}
 
-	ul{
+	table{
 		margin: 0 auto;
-		list-style: none;
+		text-align: right;
 	}
-	li{
-		display: inline-block;
-	}
-
 </style>
 </head>
 <body style="">
@@ -48,22 +44,38 @@
 		<img src="/img/4.jpeg" alt=""> -->
 	</div>
 
-	<ul>
-		<li>X:<input id="axisX" name="axisX" type="text"></li>
-		<li>Y:<input id="axisY" name="axisY" type="text"></li>
-		<li>Left:<input id="left" name="left" type="text"></li>
-		<li>Top:<input id="top" name="top" type="text"></li>
-		<li>Width:<input id="width" name="width" type="text"></li>
-		<li>Height:<input id="height" name="height" type="text"></li>
-		<li>Rotate:<input id="rotate" name="rotate" type="text"></li>
-		<li>ScaleX<input id="scaleX" name="scaleX" type="text"></li>
-		<li>ScaleY<input id="scaleY" name="scaleY" type="text"></li>
-		<li>Opacity<input id="opacity" name="opacity" type="text"></li>
-		<li>Index<input id="index" name="index" type="text"></li>
-		<li>Focusable<input id="focusable" name="focusable" type="text"></li>
-		<li>Editable<input id="editable" name="editable" type="text"></li>
-		<li>Drawable<input id="drawable" name="drawable" type="text"></li>
-	</ul>
+	<table>
+		<tr>
+			<td>X:<input id="axisX" name="axisX" type="text"></td>
+			<td>Y:<input id="axisY" name="axisY" type="text"></td>
+		</tr>
+		<tr>
+			<td>Left:<input id="left" name="left" type="text"></td>
+			<td>Top:<input id="top" name="top" type="text"></td>
+		</tr>
+		<tr>
+			<td>Width:<input id="width" name="width" type="text"></td>
+			<td>Height:<input id="height" name="height" type="text"></td>
+		</tr>
+		<tr>
+			<td>Rotate:<input id="rotate" name="rotate" type="text"></td>
+		</tr>
+		<tr>
+			<td>ScaleX<input id="scaleX" name="scaleX" type="text"></td>
+			<td>ScaleY<input id="scaleY" name="scaleY" type="text"></td>
+		</tr>
+		<tr>
+			<td>Opacity<input id="opacity" name="opacity" type="text"></td>
+			<td>Index<input id="index" name="index" type="text"></td>
+		</tr>
+		<tr>
+			<td>Focusable<input id="focusable" name="focusable" type="text"></td>
+			<td>Editable<input id="editable" name="editable" type="text"></td>
+		</tr>
+		<tr>
+			<td>Drawable<input id="drawable" name="drawable" type="text"></td>
+		</tr>
+	</table>
 
 	<div id="buttons">
 		<!-- buttons -->
@@ -261,6 +273,47 @@
 	canvaaas.init(elem, {
 		initDrawWidth: 4000,
 		initDrawHeight: 4000,
+		focus: function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+			// console.log("edit", res);
+			var canvasState = canvaaas.getCanvasData();
+			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var preview = document.getElementById("preview2");
+			var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
+			var state = canvaaas.getImageData(res);
+
+			preview.src = '/img/1.jpeg';
+			preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
+			preview.style.position = "absolute";
+			preview.style.width = state.width * scaleRatio + "px";
+			preview.style.height = state.height * scaleRatio + "px";
+			preview.style.left = state.left * scaleRatio + "px";
+			preview.style.top = state.top * scaleRatio + "px";
+			var transform = "";
+			transform += "scaleX(" + state.scaleX + ")";
+			transform += "scaleY(" + state.scaleY + ")";
+			transform += "rotate(" + state.rotate + "deg)";
+			preview.style.transform = transform;
+
+			inputs.width.value = state.width;
+			inputs.height.value = state.height;
+			inputs.top.value = state.top;
+			inputs.left.value = state.left;
+			inputs.x.value = state.x;
+			inputs.y.value = state.y;
+			inputs.index.value = state.index;
+			inputs.rotate.value = state.rotate;
+			inputs.scaleX.value = state.scaleX;
+			inputs.scaleY.value = state.scaleY;
+			inputs.opacity.value = state.opacity;
+			inputs.focusable.value = state.focusable;
+			inputs.editable.value = state.editable;
+			inputs.drawable.value = state.drawable;
+
+		},
 		edit: function(err, res){
 			if (err) {
 				console.log(err);

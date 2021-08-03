@@ -31,6 +31,8 @@
  * 
  * uploadUrls, uploadFiles add argument `imageStates`
  * 
+ * elem => source
+ * 
  */
 
 /*!
@@ -418,7 +420,6 @@
 				}
 
 				if (eventState.target) {
-
 					if (elem.isSameNode(eventState.target)) {
 						if (config.focus) {
 							config.focus("Already focused");
@@ -459,7 +460,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				if (!config.editable) {
 					return false;
@@ -584,7 +585,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				var elem = eventState.target;
 				var state = getStateByImageElement(elem);
@@ -608,7 +609,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				if (!config.editable) {
 					return false;
@@ -731,7 +732,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				var elem = eventState.target;
 				var state = getStateByImageElement(elem);
@@ -754,7 +755,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				if (!config.editable) {
 					return false;
@@ -1045,7 +1046,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				var elem = eventState.target;
 				var state = getStateByImageElement(elem);
@@ -1107,7 +1108,7 @@
 
 				if (!onZoom) {
 
-					calcContainerState();
+					setContainerCoordinates();
 
 					// toggle on
 					onZoom = true;
@@ -1157,7 +1158,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				if (!config.editable) {
 					return false;
@@ -1276,7 +1277,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				calcContainerState();
+				setContainerCoordinates();
 
 				var elem = eventState.target;
 				var state = getStateByImageElement(elem);
@@ -1724,12 +1725,33 @@
 			return true;
 		}
 
-		function calcContainerState() {
+		function setContainerCoordinates() {
 			var offset = containerElement.getBoundingClientRect();
 			containerState.left = offset.left;
 			containerState.top = offset.top;
 
 			return true;
+		}
+
+		function getCalculatedState(state) {
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var aspectRatio = state.width / state.height;
+			var tmp = {};
+			tmp.width = state.width / scaleRatio;
+			tmp.height = tmp.width / aspectRatio;
+			tmp.x = state.x / scaleRatio;
+			tmp.y = state.y / scaleRatio;
+			tmp.left = (state.x / scaleRatio) - ((state.width / scaleRatio) / 2);
+			tmp.top = (state.y / scaleRatio) - ((state.height / scaleRatio) / 2);
+			tmp.rotate = state.rotate;
+			tmp.scaleX = state.scaleX;
+			tmp.scaleY = state.scaleY;
+			tmp.opacity = state.opacity;
+			tmp.index = state.index;
+			tmp.focusable = state.focusable;
+			tmp.editable = state.editable;
+			tmp.drawable = state.drawable;
+			return tmp;
 		}
 
 		function getIdByImageElement(elem) {
@@ -1806,7 +1828,7 @@
 			});
 		}
 
-		function getImageStateByFilename(str) {
+		function getStateByFilename(str) {
 			if (!str) {
 				return false;
 			}
@@ -2488,65 +2510,6 @@
 			}
 		}
 
-		// deprecated
-		function initImage(id) {
-			if (!id) {
-				return false;
-			}
-			var elem = getImageElementById(id)
-			var clone = getCloneElementById(id);
-			var state = getStateById(id);
-
-			if (!elem || !clone || !state) {
-				return false;
-			}
-
-			var originalWidth = state.originalWidth;
-			var originalHeight = state.originalHeight;
-			var aspectRatio = state.originalWidth / state.originalHeight;
-
-			var maxWidth = canvasState.width * config.maxImageRenderWidth;
-			var maxHeight = canvasState.height * config.maxImageRenderHeight;
-			var minWidth = canvasState.width * config.minImageRenderWidth;
-			var minHeight = canvasState.height * config.minImageRenderHeight;
-
-			var maxSizes = getFittedRect(
-				maxWidth,
-				maxHeight,
-				aspectRatio,
-			);
-
-			var minSizes = getFittedRect(
-				minWidth,
-				minHeight,
-				aspectRatio,
-				"cover"
-			);
-
-			var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
-			var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
-			var axisX = canvasState.width * 0.5;
-			var axisY = canvasState.height * 0.5;
-
-			state.width = width;
-			state.height = height;
-			state.x = axisX;
-			state.y = axisY;
-			state.rotate = 0;
-			state.scaleX = 1;
-			state.scaleY = 1;
-			state.opacity = 1;
-
-			state.focusable = true;
-			state.editable = true;
-			state.drawable = true;
-
-			setElement(elem, state);
-			setElement(clone, state);
-
-			return true;
-		}
-
 		// callback
 		function renderImage(file, oldState, cb) {
 			if (!file) {
@@ -2737,6 +2700,7 @@
 				}
 
 				var newState = {};
+				newState.src = src;
 				newState.id = id;
 				newState.index = index;
 				newState.originalWidth = originalWidth;
@@ -5835,21 +5799,7 @@
 
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 			var aspectRatio = state.width / state.height;
-			var tmp = {};
-			tmp.width = state.width / scaleRatio;
-			tmp.height = tmp.width / aspectRatio;
-			tmp.x = state.x / scaleRatio;
-			tmp.y = state.y / scaleRatio;
-			tmp.left = tmp.x - (tmp.width / 2);
-			tmp.top = tmp.y - (tmp.height / 2);
-			tmp.rotate = state.rotate;
-			tmp.scaleX = state.scaleX;
-			tmp.scaleY = state.scaleY;
-			tmp.opacity = state.opacity;
-			tmp.index = state.index;
-			tmp.focusable = state.focusable;
-			tmp.editable = state.editable;
-			tmp.drawable = state.drawable;
+			var tmp = getCalculatedState(state);
 
 			if (cb) {
 				cb(null, tmp);
@@ -5895,23 +5845,7 @@
 				return false;
 			}
 
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
-			var aspectRatio = state.width / state.height;
-			var tmp = {};
-			tmp.width = state.width / scaleRatio;
-			tmp.height = tmp.width / aspectRatio;
-			tmp.x = state.x / scaleRatio;
-			tmp.y = state.y / scaleRatio;
-			tmp.left = tmp.x - (tmp.width / 2);
-			tmp.top = tmp.y - (tmp.height / 2);
-			tmp.rotate = state.rotate;
-			tmp.scaleX = state.scaleX;
-			tmp.scaleY = state.scaleY;
-			tmp.opacity = state.opacity;
-			tmp.index = state.index;
-			tmp.focusable = state.focusable;
-			tmp.editable = state.editable;
-			tmp.drawable = state.drawable;
+			var tmp = getCalculatedState(state);
 
 			if (cb) {
 				cb(null, tmp);
@@ -5923,23 +5857,7 @@
 			var tmpStates = [];
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 			imageStates.forEach(function(state){
-				var aspectRatio = state.width / state.height;
-				var tmp = {};
-				tmp.width = state.width / scaleRatio;
-				tmp.height = tmp.width / aspectRatio;
-				tmp.x = state.x / scaleRatio;
-				tmp.y = state.y / scaleRatio;
-				tmp.left = tmp.x - (tmp.width / 2);
-				tmp.top = tmp.y - (tmp.height / 2);
-				tmp.rotate = state.rotate;
-				tmp.scaleX = state.scaleX;
-				tmp.scaleY = state.scaleY;
-				tmp.opacity = state.opacity;
-				tmp.index = state.index;
-				tmp.focusable = state.focusable;
-				tmp.editable = state.editable;
-				tmp.drawable = state.drawable;
-				tmpStates.push(tmp);
+				tmpStates.push(getCalculatedState(state));
 			});
 
 			if (cb) {
