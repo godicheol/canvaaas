@@ -39,6 +39,8 @@
  * 
  * 업데이트 예정
  * 
+ * handle 사용 중 scroll
+ * 
  * 
  */
 
@@ -148,7 +150,6 @@
 		var cloneId = "canvaaas-" + getShortId() + "-";
 
 		var isInitialized = false;
-
 		var onUpload = false;
 		var onMove = false;
 		var onZoom = false;
@@ -203,7 +204,6 @@
 		var mirrorElement;
 
 		var sourceElements = [];
-		var cloneElements = [];
 
 		copyObject(defaultConfiguration, config);
 
@@ -1076,7 +1076,11 @@
 					return false;
 				}
 
-				if (onMove || onResize || onRotate) {
+				if (
+					onMove === true || 
+					onResize === true || 
+					onRotate === true 
+				) {
 					return false;
 				}
 
@@ -1575,7 +1579,6 @@
 				document.addEventListener("mousedown", handlers.isOutside, false);
 				document.addEventListener("touchstart", handlers.isOutside, false);
 
-
 				document.addEventListener("scroll", handlers.onScroll, false);
 			} catch(err) {
 				console.log(err);
@@ -1642,7 +1645,6 @@
 		function setIndex() {
 			var tmpStates = [];
 			var tmpSourceElements = [];
-			var tmpCloneElements = [];
 			var firstSourceChild = canvasElement.firstChild;
 			var lastSourceChild = undefined;
 			var firstCloneChild = mirrorElement.firstChild;
@@ -1689,7 +1691,6 @@
 							}
 						}
 					}
-
 					tmpSourceElements.push(source);
 				} catch (err) {
 					return false;
@@ -1714,8 +1715,6 @@
 							}
 						}
 					}
-
-					tmpCloneElements.push(clone);
 				} catch (err) {
 					return false;
 				}
@@ -1723,7 +1722,6 @@
 
 			imageStates = tmpStates;
 			sourceElements = tmpSourceElements;
-			cloneElements = tmpCloneElements;
 
 			return true;
 		}
@@ -1736,16 +1734,17 @@
 			return true;
 		}
 
-		function getCalculatedState(state) {
+		function getAbsoluteData(state) {
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
-			var aspectRatio = state.width / state.height;
 			var tmp = {};
+			tmp.canvasWidth = canvasState.originalWidth;
+			tmp.canvasHeight = canvasState.originalHeight;
 			tmp.width = state.width / scaleRatio;
-			tmp.height = tmp.width / aspectRatio;
+			tmp.height = state.height / scaleRatio;
+			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
-			// tmp.left = (state.x / scaleRatio) - ((state.width / scaleRatio) / 2);
-			// tmp.top = (state.y / scaleRatio) - ((state.height / scaleRatio) / 2);
 			tmp.rotate = state.rotate;
 			tmp.scaleX = state.scaleX;
 			tmp.scaleY = state.scaleY;
@@ -2573,10 +2572,11 @@
 			}
 
 			newImage.onload = function(e) {
+
+				// check initialized canvas
 				if (!isInitialized) {
 					var resA = initContainer(newImage.width, newImage.height);
 					if (!resA) {
-
 						if (cb) {
 							cb("`initContainer()` error");
 						}
@@ -2589,10 +2589,10 @@
 						}
 						return false;
 					}
-
 					isInitialized = true;
 				}
 
+				// get last index
 				var nextIndex = config.minAutoIndexing;
 				imageStates.forEach(function(state){
 					if (state.index < config.maxAutoIndexing) {
@@ -2602,6 +2602,7 @@
 					}
 				});
 
+				// create element
 				var newSource = document.createElement("div");
 				newSource.classList.add("canvaaas-image");
 				newSource.id = sourceId + id;
@@ -2610,12 +2611,11 @@
 				var newImg = newSource.querySelector("img");
 				newImg.src = newImage.src;
 
-				// image
+				// create states
 				var originalWidth = newImage.width;
 				var originalHeight = newImage.height;
 
 				var aspectRatio = originalWidth / originalHeight;
-				var scaleRatio = canvasState.width / canvasState.originalWidth;
 
 				var maxWidth = canvasState.width * config.maxImageRenderWidth;
 				var maxHeight = canvasState.height * config.maxImageRenderHeight;
@@ -2652,52 +2652,49 @@
 					typeof(oldState) === "object" &&
 					oldState !== null
 				) {
-					if (
-						oldState.width !== undefined &&
-						oldState.height !== undefined 
-					) {
-						// from same canvas.originalWidth & canvas.originalHeight
-						width = oldState.width * scaleRatio;
-						height = width / (oldState.width / oldState.height);
-					}
+					if (oldState.canvasWidth !== undefined) {
+						var scaleRatioX = canvasState.width / oldState.canvasWidth;
+						var scaleRatioY = canvasState.width / oldState.canvasWidth;
 
-					if (
-						oldState.x !== undefined &&
-						oldState.y !== undefined
-					) {
-						axisX = oldState.x * scaleRatio;
-						axisY = oldState.y * scaleRatio;
+						if (oldState.canvasHeight !== undefined) {
+							scaleRatioY = canvasState.height / oldState.canvasHeight;
+						}
+						
+						if (oldState.width !== undefined){
+							width = oldState.width * scaleRatioX;
+						}
+						if (oldState.height !== undefined ){
+							height = oldState.height * scaleRatioX;
+						}
+						if (oldState.x !== undefined){
+							axisX = oldState.x * scaleRatioX;
+						}
+						if (oldState.y !== undefined){
+							axisY = oldState.y * scaleRatioY;
+						}
 					}
-
-					if (oldState.index !== undefined) {
+					if (oldState.index !== undefined){
 						index = oldState.index;
 					}
-
-					if (oldState.opacity !== undefined) {
+					if (oldState.opacity !== undefined){
 						opacity = oldState.opacity;
 					}
-
-					if (oldState.rotate !== undefined) {
+					if (oldState.rotate !== undefined){
 						rotate = oldState.rotate;
 					}
-
-					if (oldState.scaleX !== undefined) {
+					if (oldState.scaleX !== undefined){
 						scaleX = oldState.scaleX;
 					}
-
-					if (oldState.scaleY !== undefined) {
+					if (oldState.scaleY !== undefined){
 						scaleY = oldState.scaleY;
 					}
-
-					if (oldState.focusable !== undefined) {
+					if (oldState.focusable !== undefined){
 						focusable = oldState.focusable;
 					}
-
-					if (oldState.editable !== undefined) {
+					if (oldState.editable !== undefined){
 						editable = oldState.editable;
 					}
-
-					if (oldState.drawable !== undefined) {
+					if (oldState.drawable !== undefined){
 						drawable = oldState.drawable;
 					}
 				}
@@ -2768,7 +2765,6 @@
 				newClone.addEventListener("touchstart", handlers.startFocusIn, false);
 
 				mirrorElement.appendChild(newClone);
-				cloneElements.push(newClone);
 
 				var res = setIndex();
 				if (!res) {
@@ -3077,7 +3073,15 @@
 			if (imageStates) {
 				if (Array.isArray(imageStates)) {
 					for (var i = 0; i < imageStates.length; i++) {
-						states.push(imageStates[i]);
+						states[i] = imageStates[i];
+					}
+				} else {
+					if (
+						files.length === 1 &&
+						typeof(imageStates) === "object" &&
+						imageStates !== null
+					) {
+						states[0] = imageStates;
 					}
 				}
 			}
@@ -3159,7 +3163,15 @@
 			if (imageStates) {
 				if (Array.isArray(imageStates)) {
 					for (var i = 0; i < imageStates.length; i++) {
-						states.push(imageStates[i]);
+						states[i] = imageStates[i];
+					}
+				} else {
+					if (
+						imageURLs.length === 1 &&
+						typeof(imageStates) === "object" &&
+						imageStates !== null
+					) {
+						states[0] = imageStates;
 					}
 				}
 			}
@@ -4241,6 +4253,14 @@
 				) {
 					imageStates[state.index + 1].index = state.index;
 				}
+			} else {
+				if (config.edit) {
+					config.edit("Exceed max number of index");
+				}
+				if (cb) {
+					cb("Exceed max number of index");
+				}
+				return false;
 			}
 
 			// save state
@@ -5395,7 +5415,6 @@
 			/*!
 			 * options keys => width, quality, mimeType, fillColor, filename, smoothingQuality, smoothingEnabled
 			 */
-
 			if (
 				typeof(options) !== "object" ||
 				options === null
@@ -5768,11 +5787,8 @@
 				return false;
 			}
 
-			var id = getIdBySource(eventState.target);
-			var state = getStateById(id);
-
-			var tmp = {};
-			copyObject(state, tmp);
+			var state = getStateBySource(eventState.target);
+			var tmp = getAbsoluteData(state);
 
 			if (cb) {
 				cb(null, tmp);
@@ -5788,12 +5804,8 @@
 				return false;
 			}
 
-			var id = getIdBySource(eventState.target);
-			var state = getStateById(id);
-
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
-			var aspectRatio = state.width / state.height;
-			var tmp = getCalculatedState(state);
+			var state = getStateBySource(eventState.target);
+			var tmp = getAbsoluteData(state);
 
 			if (cb) {
 				cb(null, tmp);
@@ -5839,7 +5851,7 @@
 				return false;
 			}
 
-			var tmp = getCalculatedState(state);
+			var tmp = getAbsoluteData(state);
 
 			if (cb) {
 				cb(null, tmp);
@@ -5848,16 +5860,15 @@
 		}
 
 		myObject.getImageDataAll = function(cb){
-			var tmpStates = [];
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var tmp = [];
 			imageStates.forEach(function(state){
-				tmpStates.push(getCalculatedState(state));
+				tmp.push(getAbsoluteData(state));
 			});
 
 			if (cb) {
-				cb(null, tmpStates);
+				cb(null, tmp);
 			}
-			return tmpStates;
+			return tmp;
 		}
 
 		myObject.undo = function(cb){
@@ -5951,10 +5962,8 @@
 			mirrorElement = undefined;
 
 			sourceElements = [];
-			cloneElements = [];
 				
 			isInitialized = false;
-
 			onUpload = false;
 			onMove = false;
 			onZoom = false;

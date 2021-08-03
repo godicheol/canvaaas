@@ -34,15 +34,15 @@
 <body style="">
 
 	<!-- main 1, empty -->
-	<!-- <div id="container"></div> -->
+	<div id="container"></div>
 
 	<!-- main 2, has inner -->
-	<div id="container">
-		<!-- <img src="/img/3.jpeg" alt="">
+	<!-- <div id="container">
+		<img src="/img/3.jpeg" alt="">
 		<img src="/img/2.jpeg" alt="">
 		<img src="/img/1.jpeg" alt="">
-		<img src="/img/4.jpeg" alt=""> -->
-	</div>
+		<img src="/img/4.jpeg" alt="">
+	</div> -->
 
 	<table>
 		<tr>
@@ -75,13 +75,18 @@
 
 	<div id="buttons">
 		<!-- buttons -->
-		<input type="file" onchange="canvaaas.uploadFiles(this)" multiple>
-		<button type="button" onclick="canvaaas.uploadUrls(['/img/1.jpeg'])">uploadUrls(url, cb)</button>
-		<button type="button" onclick="canvaaas.uploadUrls(
-		['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'],
-		null
-		)">uploadUrls(array, cb)</button>
-		<button type="button" onclick="canvaaas.uploadUrls(['/img/1.svg'], null)">uploadUrls(url, cb)</button>
+		<input type="file" onchange="
+			canvaaas.uploadFiles(this)
+		" multiple>
+		<button type="button" onclick="
+			canvaaas.uploadUrls(['/img/1.jpeg'])
+		">uploadUrls(url, cb)</button>
+		<button type="button" onclick="
+			canvaaas.uploadUrls(['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'], null)
+		">uploadUrls(array, cb)</button>
+		<button type="button" onclick="
+			canvaaas.uploadUrls(['/img/1.svg'], null)
+		">uploadUrls(url, cb)</button>
 		//
 		<button type="button" onclick="canvaaas.moveX(canvaaas.this(), 10)">moveX(id, 10, cb)</button>
 		<button type="button" onclick="canvaaas.moveX(canvaaas.this(), -10)">moveX(id, -10, cb)</button>
@@ -130,9 +135,7 @@
 		//
 		<script>
 			var tmp1 = {
-				containerAspectRatio: 1,
-				drawWidth: 512,
-				drawHeight: 512
+				lockAspectRatio: false
 			}
 		</script>
 		<button type="button" onclick="canvaaas.config(tmp1)">setConfig(object, cb)</button>
@@ -161,8 +164,8 @@
 				fillColor: "#123456",
 				mimeType: "image/png",
 				quality: 1,
-				imageSmoothingQuality: "high",
-				imageSmoothingEnabled: true,
+				smoothingQuality: "high",
+				smoothingEnabled: true,
 			}
 		</script>
 		<button type="button" onclick="canvaaas.draw()">draw(cb)</button>
@@ -177,8 +180,8 @@
 				fillColor: "#123456",
 				mimeType: "image/png",
 				quality: 1,
-				imageSmoothingQuality: "high",
-				imageSmoothingEnabled: true,
+				smoothingQuality: "high",
+				smoothingEnabled: true,
 			}
 		</script>
 		<button type="button" onclick="canvaaas.download()">download(cb)</button>
@@ -211,154 +214,198 @@
 	</div>
 	
 
-<script>
-	var inputs = {
-		width: document.getElementById("width"),
-		height: document.getElementById("height"),
-		x: document.getElementById("axisX"),
-		y: document.getElementById("axisY"),
-		rotate: document.getElementById("rotate"),
-		scaleX: document.getElementById("scaleX"),
-		scaleY: document.getElementById("scaleY"),
-		opacity: document.getElementById("opacity"),
-		index: document.getElementById("index"),
-		focusable: document.getElementById("focusable"),
-		editable: document.getElementById("editable"),
-		drawable: document.getElementById("drawable"),
-	}
-	var elem = document.getElementById("container");
-	
+	<script>
 
-	// test 1
-	// canvaaas.init(elem, {
-	// 	draw: function(err, res){
-	// 		if (err) {
-	// 			console.log(err);
-	// 			return false;
-	// 		}
-	// 		console.log("draw", res);
-	// 		document.getElementById("preview2").src = res.file;
-	// 	},
-	// }, function(err){
-	// 	if (err) {
-	// 		console.log(err);
-	// 	}	
-	// })
+		var inputs = {
+			width: document.getElementById("width"),
+			height: document.getElementById("height"),
+			x: document.getElementById("axisX"),
+			y: document.getElementById("axisY"),
+			rotate: document.getElementById("rotate"),
+			scaleX: document.getElementById("scaleX"),
+			scaleY: document.getElementById("scaleY"),
+			opacity: document.getElementById("opacity"),
+			index: document.getElementById("index"),
+			focusable: document.getElementById("focusable"),
+			editable: document.getElementById("editable"),
+			drawable: document.getElementById("drawable"),
+		}
+		var elem = document.getElementById("container");
+		
 
-	// test 2
-	// canvaaas.init(elem, {
-	// 	initDrawWidth: 1000,
-	// 	initDrawHeight: 1000,
-	// 	draw: function(err, res){
-	// 		if (err) {
-	// 			console.log(err);
-	// 			return false;
-	// 		}
-	// 		console.log("draw", res);
-	// 		document.getElementById("preview1").src = res.file;
-	// 	},
-	// }, function(err){
-	// 	if (err) {
-	// 		console.log(err);
-	// 	}	
-	// })
+		// test 1
+		// canvaaas.init(elem, {
+		// 	draw: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		console.log("draw", res);
+		// 		document.getElementById("preview2").src = res.file;
+		// 	},
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}	
+		// })
 
-	// test 3
-	canvaaas.init(elem, {
-		initDrawWidth: 4000,
-		initDrawHeight: 4000,
-		focus: function(err, res){
+		// test 2
+		// canvaaas.init(elem, {
+		// 	initDrawWidth: 1000,
+		// 	initDrawHeight: 1000,
+		// 	draw: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		console.log("draw", res);
+		// 		document.getElementById("preview1").src = res.file;
+		// 	},
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}	
+		// })
+
+		// test 3
+		// canvaaas.init(elem, {
+		// 	// initDrawWidth: 4000,
+		// 	// initDrawHeight: 4000,
+		// 	focus: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		var canvasState = canvaaas.getCanvasData();
+		// 		var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+		// 		var preview = document.getElementById("preview2");
+		// 		var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
+		// 		var state = canvaaas.getImageData(res);
+
+		// 		preview.src = '/img/1.jpeg';
+		// 		preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
+		// 		preview.style.position = "absolute";
+		// 		preview.style.width = state.width * scaleRatio + "px";
+		// 		preview.style.height = state.height * scaleRatio + "px";
+		// 		preview.style.left = (state.x - (state.width * 0.5)) * scaleRatio + "px";
+		// 		preview.style.top = (state.y - (state.height * 0.5)) * scaleRatio + "px";
+		// 		var transform = "";
+		// 		transform += "scaleX(" + state.scaleX + ")";
+		// 		transform += "scaleY(" + state.scaleY + ")";
+		// 		transform += "rotate(" + state.rotate + "deg)";
+		// 		preview.style.transform = transform;
+
+		// 		inputs.width.value = state.width;
+		// 		inputs.height.value = state.height;
+		// 		inputs.x.value = state.x;
+		// 		inputs.y.value = state.y;
+		// 		inputs.index.value = state.index;
+		// 		inputs.rotate.value = state.rotate;
+		// 		inputs.scaleX.value = state.scaleX;
+		// 		inputs.scaleY.value = state.scaleY;
+		// 		inputs.opacity.value = state.opacity;
+		// 		inputs.focusable.value = state.focusable;
+		// 		inputs.editable.value = state.editable;
+		// 		inputs.drawable.value = state.drawable;
+		// 	},
+		// 	edit: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		// console.log("edit", res);
+		// 		var canvasState = canvaaas.getCanvasData();
+		// 		var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+		// 		var preview = document.getElementById("preview2");
+		// 		var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
+		// 		var state = canvaaas.getImageData(res);
+
+		// 		preview.src = '/img/1.jpeg';
+		// 		preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
+		// 		preview.style.position = "absolute";
+		// 		preview.style.width = state.width * scaleRatio + "px";
+		// 		preview.style.height = state.height * scaleRatio + "px";
+		// 		preview.style.left = (state.x - (state.width * 0.5)) * scaleRatio + "px";
+		// 		preview.style.top = (state.y - (state.height * 0.5)) * scaleRatio + "px";
+		// 		var transform = "";
+		// 		transform += "scaleX(" + state.scaleX + ")";
+		// 		transform += "scaleY(" + state.scaleY + ")";
+		// 		transform += "rotate(" + state.rotate + "deg)";
+		// 		preview.style.transform = transform;
+
+		// 		inputs.width.value = state.width;
+		// 		inputs.height.value = state.height;
+		// 		inputs.x.value = state.x;
+		// 		inputs.y.value = state.y;
+		// 		inputs.index.value = state.index;
+		// 		inputs.rotate.value = state.rotate;
+		// 		inputs.scaleX.value = state.scaleX;
+		// 		inputs.scaleY.value = state.scaleY;
+		// 		inputs.opacity.value = state.opacity;
+		// 		inputs.focusable.value = state.focusable;
+		// 		inputs.editable.value = state.editable;
+		// 		inputs.drawable.value = state.drawable;
+		// 	},
+		// 	draw: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		console.log("draw", res);
+		// 		document.getElementById("preview1").src = res.file;
+		// 	},
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}	
+		// })
+
+		var test1 = {
+		    "canvasWidth": 5472,
+		    "canvasHeight": 3648,
+		    "width": 3768.2920643991088,
+		    "height": 596.832113102849,
+		    "left": 1831.0551775752149,
+		    "top": 2099.6462515004105,
+		    "x": 3715.2012097747693,
+		    "y": 2398.062308051835,
+		    "rotate": 328.0627994428064,
+		    "scaleX": 1,
+		    "scaleY": 1,
+		    "opacity": 1,
+		    "index": 0,
+		    "focusable": true,
+		    "editable": true,
+		    "drawable": true
+		}
+
+		// test 4
+		canvaaas.init(elem, {
+			initDrawWidth: 2000,
+			initDrawHeight: 2073,
+			edit: function(err, res){
+				console.log(canvaaas.getImageData(res));
+			},
+			draw: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("draw", res);
+				document.getElementById("preview1").src = res.file;
+			},
+		}, function(err){
 			if (err) {
 				console.log(err);
-				return false;
 			}
-			var canvasState = canvaaas.getCanvasData();
-			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var preview = document.getElementById("preview2");
-			var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
-			var state = canvaaas.getImageData(res);
+			canvaaas.uploadUrls(['/img/1.jpeg'], test1, function(err){
+				if (err) {
+					console.log(err)
+				}
+			})
+		})
+		
 
-			preview.src = '/img/1.jpeg';
-			preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
-			preview.style.position = "absolute";
-			preview.style.width = state.width * scaleRatio + "px";
-			preview.style.height = state.height * scaleRatio + "px";
-			preview.style.left = (state.x - (state.width * 0.5)) * scaleRatio + "px";
-			preview.style.top = (state.y - (state.height * 0.5)) * scaleRatio + "px";
-			var transform = "";
-			transform += "scaleX(" + state.scaleX + ")";
-			transform += "scaleY(" + state.scaleY + ")";
-			transform += "rotate(" + state.rotate + "deg)";
-			preview.style.transform = transform;
-
-			inputs.width.value = state.width;
-			inputs.height.value = state.height;
-			inputs.x.value = state.x;
-			inputs.y.value = state.y;
-			inputs.index.value = state.index;
-			inputs.rotate.value = state.rotate;
-			inputs.scaleX.value = state.scaleX;
-			inputs.scaleY.value = state.scaleY;
-			inputs.opacity.value = state.opacity;
-			inputs.focusable.value = state.focusable;
-			inputs.editable.value = state.editable;
-			inputs.drawable.value = state.drawable;
-		},
-		edit: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			// console.log("edit", res);
-			var canvasState = canvaaas.getCanvasData();
-			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var preview = document.getElementById("preview2");
-			var scaleRatio = preview.parentNode.offsetWidth / canvasState.originalWidth;
-			var state = canvaaas.getImageData(res);
-
-			preview.src = '/img/1.jpeg';
-			preview.parentNode.style.height = preview.parentNode.offsetWidth / canvasAspectRatio + "px";
-			preview.style.position = "absolute";
-			preview.style.width = state.width * scaleRatio + "px";
-			preview.style.height = state.height * scaleRatio + "px";
-			preview.style.left = (state.x - (state.width * 0.5)) * scaleRatio + "px";
-			preview.style.top = (state.y - (state.height * 0.5)) * scaleRatio + "px";
-			var transform = "";
-			transform += "scaleX(" + state.scaleX + ")";
-			transform += "scaleY(" + state.scaleY + ")";
-			transform += "rotate(" + state.rotate + "deg)";
-			preview.style.transform = transform;
-
-			inputs.width.value = state.width;
-			inputs.height.value = state.height;
-			inputs.x.value = state.x;
-			inputs.y.value = state.y;
-			inputs.index.value = state.index;
-			inputs.rotate.value = state.rotate;
-			inputs.scaleX.value = state.scaleX;
-			inputs.scaleY.value = state.scaleY;
-			inputs.opacity.value = state.opacity;
-			inputs.focusable.value = state.focusable;
-			inputs.editable.value = state.editable;
-			inputs.drawable.value = state.drawable;
-		},
-		draw: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("draw", res);
-			document.getElementById("preview1").src = res.file;
-		},
-	}, function(err){
-		if (err) {
-			console.log(err);
-		}	
-	})
-
-
-	
-
-</script>
+	</script>
 </body>
 </html>

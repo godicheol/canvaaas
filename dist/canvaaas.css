@@ -44,11 +44,11 @@
 /* overlay */
 .canvaaas-canvas .canvaaas-overlay{
 	background-color: rgba(255,255,255);
-	opacity: 0.4;
+	opacity: 0.3;
 }
 .canvaaas-clone .canvaaas-overlay{
 	background-color: rgba(0,0,0);
-	opacity: 0.5;
+	opacity: 0.7;
 }
 
 /* image outline */
@@ -57,6 +57,10 @@
 }
 .canvaaas-clone .canvaaas-outline{
 	border-color: red;
+}
+.canvaaas-image.active .canvaaas-outline,
+.canvaaas-clone.active .canvaaas-outline{
+	border-color: blue;
 }
 .canvaaas-outline-top{
 	border-top-width: 1px;
@@ -117,19 +121,27 @@
 
 /* handle innerbox */
 .canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
-	width: 6px;
-	height: 6px;
-	border: 1px solid red; 
-	background-color: #fff;
-}
-
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle,
 .canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
 .canvaaas-image .canvaaas-rotate-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
-	border: 1px solid #000; 
+	border: 1px solid; 
 	background-color: #fff;
+}
+.canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle{
+	border-color: #000;
+}
+.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
+	border-color: red;
+}
+.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle.active,
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle.active,
+.canvaaas-image .canvaaas-resize-handle .canvaaas-handle.active,
+.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle.active{
+	border-color: red; 
 }
 
 /*!
