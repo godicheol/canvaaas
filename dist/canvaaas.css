@@ -14,9 +14,6 @@
 				<div> all handles </div>
 			</div>
 		</div>
-		<div class="canvaaas-preview">
-			<img>
-		</div>
 	</div>
 </div>
 */
@@ -58,10 +55,7 @@
 .canvaaas-clone .canvaaas-outline{
 	border-color: red;
 }
-.canvaaas-image.active .canvaaas-outline,
-.canvaaas-clone.active .canvaaas-outline{
-	border-color: blue;
-}
+
 .canvaaas-outline-top{
 	border-top-width: 1px;
 	border-top-style: solid;
@@ -120,10 +114,10 @@
 }
 
 /* handle innerbox */
-.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle,
 .canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle{
+.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
 	width: 6px;
 	height: 6px;
 	border: 1px solid; 
@@ -136,12 +130,6 @@
 .canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
 .canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
 	border-color: red;
-}
-.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle.active,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle.active,
-.canvaaas-image .canvaaas-resize-handle .canvaaas-handle.active,
-.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle.active{
-	border-color: red; 
 }
 
 /*!

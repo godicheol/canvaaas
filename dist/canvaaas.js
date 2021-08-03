@@ -33,6 +33,8 @@
  * 
  * elem => source
  * 
+ * update preview
+ * 
  */
 
 /*!
@@ -40,6 +42,8 @@
  * 업데이트 예정
  * 
  * handle 사용 중 scroll
+ * 
+ * handle 사용 중 active
  * 
  * 
  */
@@ -588,8 +592,6 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				setContainerCoordinates();
-
 				var source = eventState.target;
 				var state = getStateBySource(source);
 
@@ -659,6 +661,7 @@
 				}
 
 				// save initial data
+				eventState.handle = handle;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 				eventState.initialR = state.rotate;
@@ -735,8 +738,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				setContainerCoordinates();
-
+				var handle = eventState.handle;
 				var source = eventState.target;
 				var state = getStateBySource(source);
 
@@ -820,6 +822,7 @@
 				minH = config.minImageHeight;
 
 				// save initial data
+				eventState.handle = handle;
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
@@ -1049,8 +1052,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				setContainerCoordinates();
-
+				var handle = eventState.handle; 
 				var source = eventState.target;
 				var state = getStateBySource(source);
 
@@ -1283,8 +1285,6 @@
 			endPinchZoom: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				setContainerCoordinates();
 
 				var source = eventState.target;
 				var state = getStateBySource(source);
@@ -1744,10 +1744,9 @@
 			var tmp = {};
 			tmp.canvasWidth = canvasState.originalWidth;
 			tmp.canvasHeight = canvasState.originalHeight;
+			tmp.src = state.src;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
-			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
-			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.rotate = state.rotate;
@@ -2911,6 +2910,7 @@
 				newState.scaleX = scaleX;
 				newState.scaleY = scaleY;
 				newState.opacity = opacity;
+				newState.drawable = true;
 
 				setElement(newSource, newState);
 
@@ -3255,44 +3255,59 @@
 				hasState = false;
 			}	
 
-			if (Array.isArray(imageURLs)) {
-				for (var i = 0; i < imageURLs.length; i++) {
-					if (hasState === false) {
-						if (
-							typeof(imageURLs[i]) === "object" &&
-							imageURLs[i] !== null
-						) {
-							if (imageURLs[i].src !== undefined) {
-								thisURLs[i] = imageURLs[i].src;
-							} else if (imageURLs.url !== undefined) {
-								thisURLs[i] = imageURLs[i].url;
-							} else if (imageURLs.path !== undefined) {
-								thisURLs[i] = imageURLs[i].path;
-							} else {
-								if (thisCb) {
-									thisCb("Argument error");
-								} 
-								return false;
-							}
-
-							if (
-								typeof(imageURLs[i].state) === "object" &&
-								imageURLs[i].state !== null
-							) {
-								thisStates[i] = imageURLs[i].state;
-							} else {
-								if (thisCb) {
-									thisCb("Argument error");
-								} 
-								return false;
-							}
+			if (hasState === false) {
+				if (Array.isArray(imageURLs)) {
+					for (var i = 0; i < imageURLs.length; i++) {
+						if (imageURLs[i].src !== undefined) {
+							thisURLs[i] = imageURLs[i].src;
+						} else if (imageURLs.url !== undefined) {
+							thisURLs[i] = imageURLs[i].url;
+						} else if (imageURLs.path !== undefined) {
+							thisURLs[i] = imageURLs[i].path;
 						} else {
 							if (thisCb) {
 								thisCb("Argument error");
 							} 
 							return false;
 						}
+
+						var tmp = {};
+						copyObject(imageURLs[i], tmp);
+						delete tmp.src;
+						thisStates[i] = tmp;
+					}
+				} else if (
+					typeof(imageURLs) === "object" &&
+					imageURLs !== null
+				) {
+					if (imageURLs.src !== undefined) {
+						thisURLs[0] = imageURLs.src;
+					} else if (imageURLs.url !== undefined) {
+						thisURLs[0] = imageURLs.url;
+					} else if (imageURLs.path !== undefined) {
+						thisURLs[0] = imageURLs.path;
 					} else {
+						if (thisCb) {
+							thisCb("Argument error");
+						} 
+						return false;
+					}
+
+					var tmp = {};
+					copyObject(imageURLs, tmp);
+					delete tmp.src;
+					thisStates[0] = tmp;
+
+				} else {
+					if (thisCb) {
+						thisCb("Argument error");
+					} 
+					return false;
+				}
+			} else {
+				// hasState === true
+				if (Array.isArray(imageURLs)) {
+					for (var i = 0; i < imageURLs.length; i++) {
 						if (typeof(imageURLs[i]) === "string") {
 							thisURLs[i] = imageURLs[i];
 						} else {
@@ -3302,44 +3317,14 @@
 							return false;
 						}
 					}
-				}
-				hasState = true;
-			} else if (
-				typeof(imageURLs) === "object" &&
-				imageURLs !== null
-			) {
-				if (imageURLs.src !== undefined) {
-					thisURLs[0] = imageURLs.src;
-				} else if (imageURLs.url !== undefined) {
-					thisURLs[0] = imageURLs.url;
-				} else if (imageURLs.path !== undefined) {
-					thisURLs[0] = imageURLs.path;
+				} else if (typeof(imageURLs) === "string") {
+					thisURLs[0] = imageURLs;
 				} else {
 					if (thisCb) {
 						thisCb("Argument error");
 					} 
 					return false;
 				}
-
-				if (hasState === false) {
-					if (
-						typeof(imageURLs.state) === "object" &&
-						imageURLs.state !== null
-					) {
-						thisStates[0] = imageURLs.state;
-						hasState = true;
-					} else {
-						if (thisCb) {
-							thisCb("Argument error");
-						} 
-						return false;
-					}
-				}
-			} else {
-				if (thisCb) {
-					thisCb("Argument error");
-				} 
-				return false
 			}
 
 			if (thisURLs.length !== thisStates.length) {
@@ -3364,9 +3349,13 @@
 			containerElement = thisTarget.querySelector("div.canvaaas");
 			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
 
+			// set container
 			initContainer(thisStates[0].canvasWidth, thisStates[0].canvasHeight);
+
+			// set canvas
 			initCanvas(thisStates[0].canvasWidth, thisStates[0].canvasHeight);
 
+			// set events
 			window.addEventListener("resize", handlers.resizeWindow, false);
 
 			var index = thisURLs.length;
@@ -3388,7 +3377,7 @@
 				} else {
 
 					isInitialized = true;
-					
+
 					if (cb) {
 						cb(null, results);
 					}
@@ -3484,8 +3473,11 @@
 							if (config.upload) {
 								config.upload(null, id);
 							}
-							results.push(id);
 						}
+						results.push({
+							err: err,
+							id: id
+						});
 						count++;
 						recursiveFunc();
 					});
@@ -3574,8 +3566,11 @@
 							if (config.upload) {
 								config.upload(null, id);
 							}
-							results.push(id);
 						}
+						results.push({
+							err: err,
+							id: id
+						});
 						count++;
 						recursiveFunc();
 					});

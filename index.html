@@ -234,20 +234,20 @@
 		
 
 		// test 1
-		// canvaaas.init(elem, {
-		// 	draw: function(err, res){
-		// 		if (err) {
-		// 			console.log(err);
-		// 			return false;
-		// 		}
-		// 		console.log("draw", res);
-		// 		document.getElementById("preview2").src = res.file;
-		// 	},
-		// }, function(err){
-		// 	if (err) {
-		// 		console.log(err);
-		// 	}	
-		// })
+		canvaaas.init(elem, {
+			draw: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("draw", res);
+				document.getElementById("preview2").src = res.file;
+			},
+		}, function(err){
+			if (err) {
+				console.log(err);
+			}	
+		})
 
 		// test 2
 		// canvaaas.init(elem, {
@@ -420,51 +420,115 @@
 		// })
 
 		// test 5
-		canvaaas.preview(elem, {
-			url: '/img/1.jpeg',
-			state: {
-				"canvasWidth": 5472,
-			    "canvasHeight": 3648,
-			    "width": 3768.2920643991088,
-			    "height": 596.832113102849,
-			    "left": 1831.0551775752149,
-			    "top": 2099.6462515004105,
-			    "x": 3715.2012097747693,
-			    "y": 2398.062308051835,
-			    "rotate": 328.0627994428064,
-			    "scaleX": 1,
-			    "scaleY": 1,
-			    "opacity": 1,
-			}
-		}, function(err){
-			if (err) {
-				console.log(err);
-			}
-		})
+		// canvaaas.preview(elem, {
+		// 	url: '/img/1.jpeg',
+		// 	state: {
+		// 		"canvasWidth": 5472,
+		// 	    "canvasHeight": 3648,
+		// 	    "width": 3768.2920643991088,
+		// 	    "height": 596.832113102849,
+		// 	    "left": 1831.0551775752149,
+		// 	    "top": 2099.6462515004105,
+		// 	    "x": 3715.2012097747693,
+		// 	    "y": 2398.062308051835,
+		// 	    "rotate": 328.0627994428064,
+		// 	    "scaleX": 1,
+		// 	    "scaleY": 1,
+		// 	    "opacity": 1,
+		// 	}
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}
+		// })
 
 		// test 6
-		canvaaas.preview(
-			elem,
-			['/img/1.jpeg'],
-			[{
-				"canvasWidth": 5472,
-			    "canvasHeight": 3648,
-			    "width": 3768.2920643991088,
-			    "height": 596.832113102849,
-			    "left": 1831.0551775752149,
-			    "top": 2099.6462515004105,
-			    "x": 3715.2012097747693,
-			    "y": 2398.062308051835,
-			    "rotate": 328.0627994428064,
-			    "scaleX": 1,
-			    "scaleY": 1,
-			    "opacity": 1,
-			}], function(err, res){
-			if (err) {
-				console.log(err);
-			}
-			console.log(res)
-		})
+		// canvaaas.preview(
+		// 	elem,
+		// 	['/img/1.jpeg'],
+		// 	[{
+		// 		"canvasWidth": 5472,
+		// 	    "canvasHeight": 3648,
+		// 	    "width": 3768.2920643991088,
+		// 	    "height": 596.832113102849,
+		// 	    "left": 1831.0551775752149,
+		// 	    "top": 2099.6462515004105,
+		// 	    "x": 3715.2012097747693,
+		// 	    "y": 2398.062308051835,
+		// 	    "rotate": 328.0627994428064,
+		// 	    "scaleX": 1,
+		// 	    "scaleY": 1,
+		// 	    "opacity": 1,
+		// 	}], function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}
+		// 	console.log(res)
+		// })
+
+		var test2 = [
+		    {
+		        "canvasWidth": 4032,
+		        "canvasHeight": 3024,
+		        "src": "/img/3.jpg",
+		        "width": 3911.961907399141,
+		        "height": 2933.971430549356,
+		        "x": 2114.9767441860463,
+		        "y": 1501.581395348837,
+		        "rotate": 0,
+		        "scaleX": 1,
+		        "scaleY": 1,
+		        "opacity": 1,
+		        "index": 0,
+		        "focusable": true,
+		        "editable": true,
+		        "drawable": true
+		    },
+		    {
+		        "canvasWidth": 4032,
+		        "canvasHeight": 3024,
+		        "src": "/img/3.jpeg",
+		        "width": 1835.8343049688174,
+		        "height": 2447.779073291754,
+		        "x": 747.7636254672568,
+		        "y": 2079.813953488372,
+		        "rotate": 335.5923831769435,
+		        "scaleX": 1,
+		        "scaleY": 1,
+		        "opacity": 1,
+		        "index": 1,
+		        "focusable": true,
+		        "editable": true,
+		        "drawable": true
+		    },
+		    {
+		        "canvasWidth": 4032,
+		        "canvasHeight": 3024,
+		        "src": "/img/3.png",
+		        "width": 1591.309449421528,
+		        "height": 1591.309449421528,
+		        "x": 2896.3720930232557,
+		        "y": 1905.84685605785,
+		        "rotate": -335.54985541284424,
+		        "scaleX": 1,
+		        "scaleY": 1,
+		        "opacity": 0.5,
+		        "index": 2,
+		        "focusable": true,
+		        "editable": true,
+		        "drawable": true
+		    }
+		]
+
+		// test 7
+		// canvaaas.preview(
+		// 	elem,
+		// 	test2, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}
+		// 	console.log(res)
+		// })
 		
 
 	</script>
