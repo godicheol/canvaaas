@@ -72,7 +72,7 @@
 
 			magnetic: true, // boolean
 
-			aspectRatio: true, // boolean
+			lockAspectRatio: true, // boolean
 
 			minAutoIndexing: 0, // number
 
@@ -98,9 +98,9 @@
 
 			drawQuality: 0.8, // number, 0 ~ 1
 
-			imageSmoothingEnabled: false, // boolean
+			drawSmoothingEnabled: false, // boolean
 			
-			imageSmoothingQuality: "low", // string, low, medium, high
+			drawSmoothingQuality: "low", // string, low, medium, high
 
 			initDrawWidth: undefined, // number, px
 
@@ -878,7 +878,7 @@
 					return false;
 				}
 
-				if (!config.aspectRatio || e.shiftKey) {
+				if (config.lockAspectRatio || e.shiftKey) {
 					onShiftKey = true;
 				}
 
@@ -2478,8 +2478,6 @@
 				tmpCtx.translate(tmpCanvas.width * 0.5, tmpCanvas.height * 0.5);
 				tmpCtx.scale(state.scaleX, state.scaleY);
 				tmpCtx.rotate(state.rotate * (Math.PI / 180));
-				// tmpCtx.imageSmoothingQuality = config.imageSmoothingQuality;
-				// tmpCtx.imageSmoothingEnabled = config.imageSmoothingEnabled;
 
 				// draw
 				tmpCtx.drawImage(
@@ -5285,7 +5283,7 @@
 
 		myObject.lockAspectRatio = function(cb){
 
-			config.aspectRatio = false;
+			config.lockAspectRatio = true;
 
 			if (config.config) {
 				config.config(null, config);
@@ -5297,7 +5295,7 @@
 
 		myObject.unlockAspectRatio = function(cb){
 
-			config.aspectRatio = true;
+			config.lockAspectRatio = false;
 			
 			if (config.config) {
 				config.config(null, config);
@@ -5316,8 +5314,8 @@
 			var drawHeight = canvasState.originalHeight;
 			var quality = config.drawQuality;
 			var mimeType = config.drawMimeType;
-			var imageSmoothingQuality = config.imageSmoothingQuality;
-			var imageSmoothingEnabled = config.imageSmoothingEnabled;
+			var imageSmoothingQuality = config.drawSmoothingQuality;
+			var imageSmoothingEnabled = config.drawSmoothingEnabled;
 			var fillColor = config.drawFillColor;
 
 			var drawOption = {
@@ -5417,8 +5415,8 @@
 			var quality = options.quality || options.drawQuality || config.drawQuality;
 			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
 			var fillColor = options.fillColor || options.drawFillColor || config.drawFillColor;
-			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.imageSmoothingQuality;
-			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.imageSmoothingEnabled;
+			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.drawSmoothingQuality;
+			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.drawSmoothingEnabled;
 
 			var drawOption = {
 				width: drawWidth,
@@ -5500,8 +5498,8 @@
 			var drawHeight = canvasState.originalHeight;
 			var quality = config.drawQuality;
 			var mimeType = config.drawMimeType;
-			var imageSmoothingQuality = config.imageSmoothingQuality;
-			var imageSmoothingEnabled = config.imageSmoothingEnabled;
+			var imageSmoothingQuality = config.drawSmoothingQuality;
+			var imageSmoothingEnabled = config.drawSmoothingEnabled;
 			var fillColor = config.drawFillColor;
 			var filename = config.filename || "Untitled";
 			filename += "." + mimeType.split("/")[1];
@@ -5608,8 +5606,8 @@
 			var quality = options.quality || options.drawQuality || config.drawQuality;
 			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
 			var fillColor = options.fillColor || options.drawFillColor || config.drawFillColor;
-			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.imageSmoothingQuality;
-			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.imageSmoothingEnabled;
+			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.drawSmoothingQuality;
+			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.drawSmoothingEnabled;
 			var filename = options.filename || config.filename || "Untitled";
 			filename += "." + mimeType.split("/").pop();
 
