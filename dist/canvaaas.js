@@ -288,11 +288,12 @@
 					return false;
 				}
 
-				if (eventState.target) {
-					if (!e.target.classList.contains("canvaaas-image")) {
-						var oldId = getIdBySource(eventState.target);
-						setFocusOut(oldId);
-					}
+				if (
+					!e.target.classList.contains("canvaaas-image") &&
+					!e.target.classList.contains("canvaaas-clone")
+				) {
+					var oldId = getIdBySource(eventState.target);
+					setFocusOut(oldId);
 				}
 			},
 
@@ -427,6 +428,8 @@
 				}
 
 				setFocusIn(state.id);
+
+				handlers.startMove(e);
 
 				if (config.focus) {
 					config.focus(null, state.id);
@@ -1571,6 +1574,8 @@
 
 				document.addEventListener("mousedown", handlers.isOutside, false);
 				document.addEventListener("touchstart", handlers.isOutside, false);
+
+
 				document.addEventListener("scroll", handlers.onScroll, false);
 			} catch(err) {
 				console.log(err);
@@ -1622,6 +1627,7 @@
 
 				document.removeEventListener("mousedown", handlers.isOutside, false);
 				document.removeEventListener("touchstart", handlers.isOutside, false);
+
 				document.removeEventListener("scroll", handlers.onScroll, false);
 			} catch(err) {
 				console.log(err);
@@ -1738,8 +1744,8 @@
 			tmp.height = tmp.width / aspectRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
-			tmp.left = (state.x / scaleRatio) - ((state.width / scaleRatio) / 2);
-			tmp.top = (state.y / scaleRatio) - ((state.height / scaleRatio) / 2);
+			// tmp.left = (state.x / scaleRatio) - ((state.width / scaleRatio) / 2);
+			// tmp.top = (state.y / scaleRatio) - ((state.height / scaleRatio) / 2);
 			tmp.rotate = state.rotate;
 			tmp.scaleX = state.scaleX;
 			tmp.scaleY = state.scaleY;
@@ -5830,7 +5836,7 @@
 			var state = getStateById(id);
 			if (!state) {
 				if (cb) {
-					cb("Image not found")
+					cb("Image not found");
 				}
 				return false;
 			}
