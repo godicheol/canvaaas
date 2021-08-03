@@ -144,7 +144,7 @@
 
 		var config = {};
 
-		var imageId = "canvaaas-" + getShortId() + "-";
+		var sourceId = "canvaaas-" + getShortId() + "-";
 		var cloneId = "canvaaas-" + getShortId() + "-";
 
 		var isInitialized = false;
@@ -191,11 +191,6 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
-		var viewTemplate = "";
-		viewTemplate += "<div class='canvaaas'>";
-		viewTemplate += "<div class='canvaaas-canvas'></div>";
-		viewTemplate += "</div>";
-
 		var eventState = {};
 		var eventCaches = [];
 		var eventSubCaches = [];
@@ -207,7 +202,7 @@
 		var canvasElement;
 		var mirrorElement;
 
-		var imageElements = [];
+		var sourceElements = [];
 		var cloneElements = [];
 
 		copyObject(defaultConfiguration, config);
@@ -295,7 +290,7 @@
 
 				if (eventState.target) {
 					if (!e.target.classList.contains("canvaaas-image")) {
-						var oldId = getIdByImageElement(eventState.target);
+						var oldId = getIdBySource(eventState.target);
 						setFocusOut(oldId);
 					}
 				}
@@ -303,15 +298,15 @@
 
 			onScroll: function(e) {
 				if (eventState.target) {
-					var oldId = getIdByImageElement(eventState.target);
+					var oldId = getIdBySource(eventState.target);
 					setFocusOut(oldId);
 				}
 			},
 
 			keydown: function(e) {
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementById(state.id);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneById(state.id);
 
 				if (!config.editable) {
 					return false;
@@ -319,7 +314,7 @@
 				if (!eventState.target) {
 					return false;
 				}
-				if (!elem || !state || !clone) {
+				if (!source || !state || !clone) {
 					return false;
 				}
 				if (!state.editable) {
@@ -380,7 +375,7 @@
 				}
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				if (config.edit) {
@@ -392,15 +387,15 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				var elem;
+				var source;
 				if (!e.target.classList.contains("canvaaas-image")) {
 					if (!e.target.parentNode.classList.contains("canvaaas-image")) {
 						return false;
 					} else {
-						elem = e.target.parentNode;
+						source = e.target.parentNode;
 					}
 				} else {
-					elem = e.target;
+					source = e.target;
 				}
 
 				if (!config.editable) {
@@ -410,7 +405,7 @@
 					return false;
 				}
 
-				var state = getStateByImageElement(elem);
+				var state = getStateBySource(source);
 
 				if (!state.focusable) {
 					if (config.focus) {
@@ -420,14 +415,14 @@
 				}
 
 				if (eventState.target) {
-					if (elem.isSameNode(eventState.target)) {
+					if (source.isSameNode(eventState.target)) {
 						if (config.focus) {
 							config.focus("Already focused");
 						}
 						return false;
 					}
 
-					var oldId = getIdByImageElement(eventState.target);
+					var oldId = getIdBySource(eventState.target);
 					setFocusOut(oldId);
 				}
 
@@ -452,7 +447,7 @@
 					}
 				}
 
-				var oldId = getIdByImageElement(eventState.target);
+				var oldId = getIdBySource(eventState.target);
 				setFocusOut(oldId);
 			},
 
@@ -470,8 +465,8 @@
 					return false;
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
 				var rotatedRect;
@@ -530,9 +525,9 @@
 					return false;
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -573,7 +568,7 @@
 				state.y = axisY;
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				if (config.edit) {
@@ -587,8 +582,8 @@
 
 				setContainerCoordinates();
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 
 				// toggle off
 				onMove = false;
@@ -620,8 +615,8 @@
 				}
 
 				var handle = e.target;
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -684,9 +679,9 @@
 					return false;
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -720,7 +715,7 @@
 				state.rotate = eventState.initialR + (deg - eventState.initialD);
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				if (config.edit) {
@@ -734,8 +729,8 @@
 
 				setContainerCoordinates();
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 
 				// toggle off
 				onRotate = false;
@@ -766,8 +761,8 @@
 				}
 
 				var handle = e.target;
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
 				var flipX;
@@ -851,9 +846,9 @@
 				}
 
 				var direction = eventState.direction;
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var aspectRatio;
 				var mouseX;
 				var mouseY;
@@ -1034,7 +1029,7 @@
 				state.y = axisY;
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				if (config.edit) {
@@ -1048,8 +1043,8 @@
 
 				setContainerCoordinates();
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 
 				// toggle off
 				onResize = false;
@@ -1082,9 +1077,9 @@
 					return false;
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var ratio;
 				var diffX;
 				var diffY;
@@ -1138,7 +1133,7 @@
 				state.height = height;
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				eventState.wheeling = setTimeout(function() {
@@ -1179,9 +1174,9 @@
 					document.removeEventListener("touchend", handlers.endMove, false);
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var diagonal;
 				var mouseX;
 				var mouseY;
@@ -1230,9 +1225,9 @@
 					return false;
 				}
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
-				var clone = getCloneElementByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
 				var diagonal;
 				var mouseX;
 				var mouseY;
@@ -1265,7 +1260,7 @@
 				state.height = height;
 
 				// adjust state
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 
 				if (config.edit) {
@@ -1279,8 +1274,8 @@
 
 				setContainerCoordinates();
 
-				var elem = eventState.target;
-				var state = getStateByImageElement(elem);
+				var source = eventState.target;
+				var state = getStateBySource(source);
 
 				// toggle off
 				onZoom = false;
@@ -1323,15 +1318,15 @@
 				initCanvas(canvasState.originalWidth, canvasState.originalHeight);
 
 				imageStates.forEach(function(state){
-					var elem = getImageElementById(state.id);
-					var clone = getCloneElementById(state.id);
+					var source = getSourceById(state.id);
+					var clone = getCloneById(state.id);
 
 					state.width *= scaleRatio;
 					state.height *= scaleRatio;
 					state.x *= scaleRatio;
 					state.y *= scaleRatio;
 
-					setElement(elem, state);
+					setElement(source, state);
 					setElement(clone, state);
 				});
 
@@ -1461,12 +1456,12 @@
 				return false;
 			}
 
-			var elem = getImageElementById(id);
-			if (!elem) {
+			var source = getSourceById(id);
+			if (!source) {
 				return false;
 			}
 
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 			if (!clone) {
 				return false;
 			}
@@ -1485,7 +1480,7 @@
 			var tmp = {};
 			tmp.id = id;
 			tmp.state = tmpState;
-			tmp.imageClass = elem.className.split(' ');
+			tmp.sourceClass = source.className.split(' ');
 			tmp.cloneClass = clone.className.split(' ');
 			tmp.updatedAt = Date.now();
 
@@ -1503,12 +1498,12 @@
 				return false;
 			}
 
-			var elem = getImageElementById(id);
-			if (!elem) {
+			var source = getSourceById(id);
+			if (!source) {
 				return false;
 			}
 
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 			if (!clone) {
 				return false;
 			}
@@ -1527,7 +1522,7 @@
 			var tmp = {};
 			tmp.id = id;
 			tmp.state = tmpState;
-			tmp.imageClass = elem.className.split(' ');
+			tmp.sourceClass = source.className.split(' ');
 			tmp.cloneClass = clone.className.split(' ');
 			tmp.updatedAt = Date.now();
 
@@ -1541,12 +1536,12 @@
 				return false;
 			}
 
-			var elem = getImageElementById(id);
-			if (!elem) {
+			var source = getSourceById(id);
+			if (!source) {
 				return false;
 			}
 
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 			if (!clone) {
 				return false;
 			}
@@ -1555,15 +1550,15 @@
 				canvasElement.classList.add("focused");
 				mirrorElement.classList.add("focused");
 
-				elem.classList.add("focused");
+				source.classList.add("focused");
 				clone.classList.add("focused");
 
-				elem.removeEventListener("mousedown", handlers.startFocusIn, false);
-				elem.removeEventListener("touchstart", handlers.startFocusIn, false);
+				source.removeEventListener("mousedown", handlers.startFocusIn, false);
+				source.removeEventListener("touchstart", handlers.startFocusIn, false);
 
-				elem.addEventListener("mousedown", handlers.startMove, false);
-				elem.addEventListener("touchstart", handlers.startMove, false);
-				elem.addEventListener("wheel", handlers.startWheelZoom, false);
+				source.addEventListener("mousedown", handlers.startMove, false);
+				source.addEventListener("touchstart", handlers.startMove, false);
+				source.addEventListener("wheel", handlers.startWheelZoom, false);
 
 				clone.removeEventListener("mousedown", handlers.startFocusIn, false);
 				clone.removeEventListener("touchstart", handlers.startFocusIn, false);
@@ -1582,7 +1577,7 @@
 				return false;
 			}
 			
-			eventState.target = elem;
+			eventState.target = source;
 
 			return true;
 		};
@@ -1592,12 +1587,12 @@
 				return false;
 			}
 
-			var elem = getImageElementById(id)
-			if (!elem) {
+			var source = getSourceById(id)
+			if (!source) {
 				return false;
 			}
 
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 			if (!clone) {
 				return false;
 			}
@@ -1606,15 +1601,15 @@
 				canvasElement.classList.remove("focused");
 				mirrorElement.classList.remove("focused");
 
-				elem.classList.remove("focused");
+				source.classList.remove("focused");
 				clone.classList.remove("focused");
 
-				elem.removeEventListener("mousedown", handlers.startMove, false);
-				elem.removeEventListener("touchstart", handlers.startMove, false);
-				elem.removeEventListener("wheel", handlers.startWheelZoom, false);
+				source.removeEventListener("mousedown", handlers.startMove, false);
+				source.removeEventListener("touchstart", handlers.startMove, false);
+				source.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				elem.addEventListener("mousedown", handlers.startFocusIn, false);
-				elem.addEventListener("touchstart", handlers.startFocusIn, false);
+				source.addEventListener("mousedown", handlers.startFocusIn, false);
+				source.addEventListener("touchstart", handlers.startFocusIn, false);
 
 				clone.removeEventListener("mousedown", handlers.startMove, false);
 				clone.removeEventListener("touchstart", handlers.startMove, false);
@@ -1640,10 +1635,10 @@
 
 		function setIndex() {
 			var tmpStates = [];
-			var tmpImageElements = [];
+			var tmpSourceElements = [];
 			var tmpCloneElements = [];
-			var firstImageChild = canvasElement.firstChild;
-			var lastImageChild = undefined;
+			var firstSourceChild = canvasElement.firstChild;
+			var lastSourceChild = undefined;
 			var firstCloneChild = mirrorElement.firstChild;
 			var lastCloneChild = undefined;
 
@@ -1666,33 +1661,35 @@
 			});
 
 			tmpStates.forEach(function(state){
-				var elem = getImageElementById(state.id);
-				var clone = getCloneElementById(state.id);
+				var source = getSourceById(state.id);
+				var clone = getCloneById(state.id);
 
+				// set source
 				try {
-					if (!lastImageChild) {
-						if (!elem.isSameNode(firstImageChild)) {
-							canvasElement.insertBefore(elem, firstImageChild);
+					if (!lastSourceChild) {
+						if (!source.isSameNode(firstSourceChild)) {
+							canvasElement.insertBefore(source, firstSourceChild);
 						} else {
-							if (elem.nextSibling) {
-								lastImageChild = elem.nextSibling;
+							if (source.nextSibling) {
+								lastSourceChild = source.nextSibling;
 							}
 						}
 					} else {
-						if (!elem.isSameNode(lastImageChild)) {
-							canvasElement.insertBefore(elem, lastImageChild);
+						if (!source.isSameNode(lastSourceChild)) {
+							canvasElement.insertBefore(source, lastSourceChild);
 						} else {
-							if (elem.nextSibling) {
-								lastImageChild = elem.nextSibling;
+							if (source.nextSibling) {
+								lastSourceChild = source.nextSibling;
 							}
 						}
 					}
 
-					tmpImageElements.push(elem);
+					tmpSourceElements.push(source);
 				} catch (err) {
 					return false;
 				}
 
+				// set clone
 				try {
 					if (!lastCloneChild) {
 						if (!clone.isSameNode(firstCloneChild)) {
@@ -1712,14 +1709,14 @@
 						}
 					}
 
-					tmpCloneElements.push(elem);
+					tmpCloneElements.push(clone);
 				} catch (err) {
 					return false;
 				}
 			});
 
 			imageStates = tmpStates;
-			imageElements = tmpImageElements;
+			sourceElements = tmpSourceElements;
 			cloneElements = tmpCloneElements;
 
 			return true;
@@ -1754,31 +1751,31 @@
 			return tmp;
 		}
 
-		function getIdByImageElement(elem) {
-			if (!elem) {
+		function getIdBySource(source) {
+			if (!source) {
 				return false;
 			}
-			if (!elem.classList.contains("canvaaas-image")) {
+			if (!source.classList.contains("canvaaas-image")) {
 				return false;
 			}
 			if (
-				elem.id === undefined ||
-				elem.id === null ||
-				elem.id === ""
+				source.id === undefined ||
+				source.id === null ||
+				source.id === ""
 			) {
 				return false;
 			}
-			return elem.id.split("-").pop();
+			return source.id.split("-").pop();
 		}
 
-		function getImageElementById(id) {
+		function getSourceById(id) {
 			if (!id) {
 				return false;
 			}
-			return document.getElementById(imageId + id);
+			return document.getElementById(sourceId + id);
 		}
 
-		function getImageElementByFilename(str) {
+		function getSourceByFilename(str) {
 			if (!str) {
 				return false;
 			}
@@ -1790,7 +1787,7 @@
 			if (!state) {
 				return false;
 			}
-			return document.getElementById(imageId + state.id);
+			return document.getElementById(sourceId + state.id);
 		}
 
 		function getStateById(id) {
@@ -1804,22 +1801,22 @@
 			});
 		}
 
-		function getStateByImageElement(elem) {
-			if (!elem) {
+		function getStateBySource(source) {
+			if (!source) {
 				return false;
 			}
-			if (!elem.classList.contains("canvaaas-image")) {
+			if (!source.classList.contains("canvaaas-image")) {
 				return false;
 			}
 			if (
-				elem.id === undefined ||
-				elem.id === null ||
-				elem.id === ""
+				source.id === undefined ||
+				source.id === null ||
+				source.id === ""
 			) {
 				return false;
 			}
 
-			var id = elem.id.split("-").pop();
+			var id = source.id.split("-").pop();
 
 			return imageStates.find(function(state){
 				if (state.id === id) {
@@ -1839,29 +1836,29 @@
 			});
 		}
 
-		function getCloneElementById(id) {
+		function getCloneById(id) {
 			if (!id) {
 				return false;
 			}
 			return document.getElementById(cloneId + id);
 		}
 
-		function getCloneElementByImageElement(elem) {
-			if (!elem) {
+		function getCloneBySource(source) {
+			if (!source) {
 				return false;
 			}
-			if (!elem.classList.contains("canvaaas-image")) {
+			if (!source.classList.contains("canvaaas-image")) {
 				return false;
 			}
 			if (
-				elem.id === undefined ||
-				elem.id === null ||
-				elem.id === ""
+				source.id === undefined ||
+				source.id === null ||
+				source.id === ""
 			) {
 				return false;
 			}
 			
-			var id = elem.id.split("-").pop();
+			var id = source.id.split("-").pop();
 
 			return document.getElementById(cloneId + id);
 		}
@@ -1870,10 +1867,10 @@
 			if (!id) {
 				return false;
 			}
-			var elem = document.getElementById(imageId + id);
+			var source = document.getElementById(sourceId + id);
 			var clone = document.getElementById(cloneId + id);
 
-			if (!elem || !clone) {
+			if (!source || !clone) {
 				return false;
 			}
 
@@ -1882,23 +1879,25 @@
 					return state;
 				}
 			});
+
 			if (stateSeq === undefined || stateSeq === null) {
 				return false;
 			}
 
-			var elemSeq = imageElements.findIndex(function(candidateElement){
-				if (candidateElement.isSameNode(elem)) {
-					return candidateElement;
+			var sourceSeq = sourceElements.findIndex(function(candidateSource){
+				if (candidateSource.isSameNode(source)) {
+					return candidateSource;
 				}
 			});
-			if (elemSeq === undefined || elemSeq === null) {
+
+			if (sourceSeq === undefined || sourceSeq === null) {
 				return false;
 			}
 
 			try {
 				imageStates.splice(stateSeq, 1);
-				imageElements.splice(elemSeq, 1);
-				elem.parentNode.removeChild(elem);
+				sourceElements.splice(sourceSeq, 1);
+				source.parentNode.removeChild(source);
 				clone.parentNode.removeChild(clone);
 			} catch(err) {
 				console.log(err);
@@ -2391,17 +2390,17 @@
 				return cb("Argument error");
 			}
 
-			var elem = getImageElementById(id);
-			if (!elem) {
-				return cb("element not found");
+			var source = getSourceById(id);
+			if (!source) {
+				return cb("Source element not found");
 			}
 			var state = getStateById(id);
 			if (!state) {
-				return cb("state not found");
+				return cb("State not found");
 			}
-			var originalImg = elem.querySelector("img");
+			var originalImg = source.querySelector("img");
 			if (!originalImg) {
-				return cb("element not found");
+				return cb("Image element not found");
 			}
 
 			var virtualImg = new Image();
@@ -2519,7 +2518,7 @@
 				return false;
 			}
 
-			if (imageElements.length > config.maxNumberOfImages - 1) {
+			if (sourceElements.length > config.maxNumberOfImages - 1) {
 				if (cb) {
 					cb("Exceed `config.maxNumberOfImages`");
 				}
@@ -2599,12 +2598,12 @@
 					}
 				});
 
-				var newElem = document.createElement("div");
-				newElem.classList.add("canvaaas-image");
-				newElem.id = imageId + id;
-				newElem.innerHTML = imageTemplate;
+				var newSource = document.createElement("div");
+				newSource.classList.add("canvaaas-image");
+				newSource.id = sourceId + id;
+				newSource.innerHTML = imageTemplate;
 
-				var newImg = newElem.querySelector("img");
+				var newImg = newSource.querySelector("img");
 				newImg.src = newImage.src;
 
 				// image
@@ -2717,22 +2716,23 @@
 				newState.editable = editable;
 				newState.drawable = drawable;
 
-				setElement(newElem, newState);
+				setElement(newSource, newState);
 
-				canvasElement.appendChild(newElem);
 				imageStates.push(newState);
-				imageElements.push(newElem);
+
+				canvasElement.appendChild(newSource);
+				sourceElements.push(newSource);
 
 				// mirror
-				var newClone = newElem.cloneNode();
+				var newClone = newSource.cloneNode();
 
-				newClone.innerHTML = newElem.innerHTML;
+				newClone.innerHTML = newSource.innerHTML;
 				newClone.id = cloneId + id;
 				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
 
 				// events
-				var rotateHandlesA = newElem.querySelectorAll("div.canvaaas-rotate-handle");
-				var resizeHandlesA = newElem.querySelectorAll("div.canvaaas-resize-handle");
+				var rotateHandlesA = newSource.querySelectorAll("div.canvaaas-rotate-handle");
+				var resizeHandlesA = newSource.querySelectorAll("div.canvaaas-resize-handle");
 				
 				rotateHandlesA.forEach(function(handleElem){
 					handleElem.addEventListener("mousedown", handlers.startRotate, false);
@@ -2744,8 +2744,8 @@
 					handleElem.addEventListener("touchstart", handlers.startResize, false);
 				});
 
-				newElem.addEventListener("mousedown", handlers.startFocusIn, false);
-				newElem.addEventListener("touchstart", handlers.startFocusIn, false);
+				newSource.addEventListener("mousedown", handlers.startFocusIn, false);
+				newSource.addEventListener("touchstart", handlers.startFocusIn, false);
 
 				var rotateHandlesB = newClone.querySelectorAll("div.canvaaas-rotate-handle");
 				var resizeHandlesB = newClone.querySelectorAll("div.canvaaas-resize-handle");
@@ -2914,7 +2914,7 @@
 			if (
 				containerElement ||
 				canvasElement ||
-				imageElements.length > 0 ||
+				sourceElements.length > 0 ||
 				isInitialized === true
 			) {
 				if (cb) {
@@ -3223,9 +3223,9 @@
 		// 
 
 		myObject.moveX = function(id, x, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3257,7 +3257,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3285,7 +3285,7 @@
 			state.x -= x;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3297,9 +3297,9 @@
 		}
 
 		myObject.moveY = function(id, y, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3331,7 +3331,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3359,7 +3359,7 @@
 			state.y -= y;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3371,9 +3371,9 @@
 		}
 
 		myObject.moveTo = function(id, x, y, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3408,7 +3408,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3485,7 +3485,7 @@
 			}
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3497,9 +3497,9 @@
 		}
 
 		myObject.zoom = function(id, ratio, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3531,7 +3531,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3560,7 +3560,7 @@
 			state.height *= 1 + ratio;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3572,9 +3572,9 @@
 		}
 
 		myObject.zoomTo = function(id, ratio, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3609,7 +3609,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3686,7 +3686,7 @@
 			state.top = top;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3698,9 +3698,9 @@
 		}
 
 		myObject.rotate = function(id, deg, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3732,7 +3732,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3768,7 +3768,7 @@
 			state.rotate += deg;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3780,9 +3780,9 @@
 		}
 
 		myObject.rotateTo = function(id, deg, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3814,7 +3814,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3850,7 +3850,7 @@
 			state.rotate = deg;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3862,9 +3862,9 @@
 		}
 
 		myObject.flipX = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3886,7 +3886,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3915,7 +3915,7 @@
 			state.rotate *= -1;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3927,9 +3927,9 @@
 		}
 
 		myObject.flipY = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -3951,7 +3951,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -3980,7 +3980,7 @@
 			state.rotate *= -1;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -3992,9 +3992,9 @@
 		}
 
 		myObject.flipTo = function(id, x, y, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4029,7 +4029,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4077,7 +4077,7 @@
 			state.scaleY = x;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -4089,9 +4089,9 @@
 		}
 
 		myObject.opacityTo = function(id, num, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4123,7 +4123,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4158,7 +4158,7 @@
 			state.opacity = num;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -4170,9 +4170,9 @@
 		}
 
 		myObject.indexUp = function(id, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4194,7 +4194,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4243,7 +4243,7 @@
 			state.index += 1;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			var res = setIndex();
@@ -4265,9 +4265,9 @@
 		}
 
 		myObject.indexDown = function(id, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4289,7 +4289,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4338,7 +4338,7 @@
 			state.index -= 1;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			var res = setIndex();
@@ -4360,9 +4360,9 @@
 		}
 
 		myObject.indexTo = function(id, num, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4394,7 +4394,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4422,7 +4422,7 @@
 			state.index = num;
 
 			// adjust state
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			var res = setIndex();
@@ -4444,7 +4444,7 @@
 		}
 
 		myObject.focusIn = function(id, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4457,7 +4457,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.focus) {
 					config.focus("Image not found");
 				}
@@ -4478,7 +4478,7 @@
 			}
 
 			if (eventState.target) {
-				var oldId = getIdByImageElement(eventState.target);
+				var oldId = getIdBySource(eventState.target);
 				setFocusOut(oldId);
 			}
 
@@ -4500,7 +4500,7 @@
 				return false;
 			}
 
-			var id = getIdByImageElement(eventState.target);
+			var id = getIdBySource(eventState.target);
 			
 			if (!id) {
 				if (cb) {
@@ -4517,7 +4517,7 @@
 		}
 
 		myObject.focusable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4540,7 +4540,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4568,7 +4568,7 @@
 			state.focusable = true;
 
 			// remove class
-			elem.classList.remove("unclickable");
+			source.classList.remove("unclickable");
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -4579,7 +4579,7 @@
 		}
 
 		myObject.editable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (!config.editable) {
@@ -4602,22 +4602,12 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.edit) {
-					config.edit("Has been denied");
-				}
-				if (cb) {
-					cb("Has been denied");
 				} 
 				return false;
 			}
@@ -4638,7 +4628,7 @@
 		}
 
 		myObject.drawable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4661,7 +4651,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4697,7 +4687,7 @@
 		}
 
 		myObject.unfocusable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4720,7 +4710,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4741,7 +4731,7 @@
 			}
 
 			if (eventState.target) {
-				if (elem.isSameNode(eventState.target)) {
+				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
 					if (!res) {
 						if (config.edit) {
@@ -4763,7 +4753,7 @@
 			state.focusable = false;
 
 			// add class
-			elem.classList.add("unclickable");
+			source.classList.add("unclickable");
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -4774,7 +4764,7 @@
 		}
 
 		myObject.uneditable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4797,7 +4787,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4822,7 +4812,7 @@
 			eventSubCaches = [];
 
 			// save state
-			state.movable = false;
+			state.editable = false;
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -4833,7 +4823,7 @@
 		}
 
 		myObject.undrawable = function(id, cb){
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
@@ -4856,7 +4846,7 @@
 				return false;
 			}
 
-			if (!elem || !state) {
+			if (!source || !state) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4892,9 +4882,9 @@
 		}
 
 		myObject.remove = function(id, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.remove) {
@@ -4916,7 +4906,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.remove) {
 					config.remove("Image not found");
 				}
@@ -4928,7 +4918,7 @@
 
 			// check focus
 			if (eventState.target) {
-				if (elem.isSameNode(eventState.target)) {
+				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
 					if (!res) {
 						if (config.remove) {
@@ -5011,9 +5001,9 @@
 		}
 
 		myObject.reset = function(id, cb) {
-			var elem = getImageElementById(id);
+			var source = getSourceById(id);
 			var state = getStateById(id);
-			var clone = getCloneElementById(id);
+			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -5035,7 +5025,7 @@
 				return false;
 			}
 
-			if (!elem || !state || !clone) {
+			if (!source || !state || !clone) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -5085,7 +5075,7 @@
 			state.editable = true;
 			state.drawable = true;
 
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			if (config.edit) {
@@ -5177,8 +5167,8 @@
 
 			// new state adjust to images
 			imageStates.forEach(function(state){
-				var elem = getImageElementById(state.id);
-				var clone = getCloneElementById(state.id);
+				var source = getSourceById(state.id);
+				var clone = getCloneById(state.id);
 
 				var aspectRatio = state.width / state.height;
 
@@ -5187,7 +5177,7 @@
 				state.x *= scaleRatioX;
 				state.y *= scaleRatioY;
 
-				setElement(elem, state);
+				setElement(source, state);
 				setElement(clone, state);
 			});
 
@@ -5228,7 +5218,7 @@
 
 		myObject.stop = function(cb) {
 			if (eventState.target) {
-				var oldId = getIdByImageElement(eventState.target);
+				var oldId = getIdBySource(eventState.target);
 				var res = setFocusOut(oldId);
 				if (!res) {
 					if (cb) {
@@ -5708,7 +5698,7 @@
 			}
 
 			if (eventState.target) {
-				var oldId = getIdByImageElement(eventState.target);
+				var oldId = getIdBySource(eventState.target);
 				var res = setFocusOut(oldId);
 				if (!res) {
 					if (cb) {
@@ -5758,7 +5748,7 @@
 				return false;
 			}
 
-			var id = getIdByImageElement(eventState.target);
+			var id = getIdBySource(eventState.target);
 
 			if (cb) {
 				cb(null, id);
@@ -5774,7 +5764,7 @@
 				return false;
 			}
 
-			var id = getIdByImageElement(eventState.target);
+			var id = getIdBySource(eventState.target);
 			var state = getStateById(id);
 
 			var tmp = {};
@@ -5794,7 +5784,7 @@
 				return false;
 			}
 
-			var id = getIdByImageElement(eventState.target);
+			var id = getIdBySource(eventState.target);
 			var state = getStateById(id);
 
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
@@ -5874,17 +5864,17 @@
 				return false;
 			}
 			var recent = eventCaches.pop();
-			var elem = getImageElementById(recent.id);
-			var clone = getCloneElementById(recent.id);
+			var source = getSourceById(recent.id);
+			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
 			pushSubCache(recent.id);
 
-			elem.className = recent.imageClass.join(" ");
+			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
 			copyObject(recent.state, state);
 
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			var res = setIndex();
@@ -5910,17 +5900,17 @@
 				return false;
 			}
 			var recent = eventSubCaches.pop();
-			var elem = getImageElementById(recent.id);
-			var clone = getCloneElementById(recent.id);
+			var source = getSourceById(recent.id);
+			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
 			pushCache(recent.id);
 
-			elem.className = recent.imageClass.join(" ");
+			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
 			copyObject(recent.state, state);
 
-			setElement(elem, state);
+			setElement(source, state);
 			setElement(clone, state);
 
 			var res = setIndex();
@@ -5956,7 +5946,7 @@
 			canvasElement = undefined;
 			mirrorElement = undefined;
 
-			imageElements = [];
+			sourceElements = [];
 			cloneElements = [];
 				
 			isInitialized = false;
@@ -5969,7 +5959,7 @@
 			onFlip = false;
 			onFreeze = false;
 
-			imageId = "canvaaas-" + getShortId() + "-";
+			sourceId = "canvaaas-" + getShortId() + "-";
 			cloneId = "canvaaas-" + getShortId() + "-";
 
 			if (cb) {
