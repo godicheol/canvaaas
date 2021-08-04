@@ -41,9 +41,15 @@
  * 
  * 업데이트 예정
  * 
- * handle 사용 중 scroll
- * 
  * handle 사용 중 active => 실패 (clone.handle 접근 불가)
+ * 
+ * init도 preview처럼
+ * 
+ * init에서 inner 제거? or inner + states
+ * 
+ * resize handle 가장자리 lock aspect 고치기
+ * 
+ * focus out 후 element canvas 밖에 있으면 끌어오기
  * 
  * 
  */
@@ -154,6 +160,9 @@
 		var cloneId = "canvaaas-" + getShortId() + "-";
 
 		var isInitialized = false;
+		var isEditor = false;
+		var isPreview = false;
+
 		var onUpload = false;
 		var onMove = false;
 		var onZoom = false;
@@ -307,6 +316,22 @@
 			},
 
 			onScroll: function(e) {
+
+				if (onMove === true) {
+					handlers.endMove(e);
+					return false;
+				}
+
+				if (onResize === true) {
+					handlers.endResize(e);
+					return false;
+				}
+
+				if (onRotate === true) {
+					handlers.endRotate(e);
+					return false;
+				}
+
 				if (eventState.target) {
 					var oldId = getIdBySource(eventState.target);
 					setFocusOut(oldId);
@@ -3058,12 +3083,7 @@
 		// 
 
 		myObject.init = function(target, preConfig, cb) {
-			if (
-				containerElement ||
-				canvasElement ||
-				sourceElements.length > 0 ||
-				isInitialized === true
-			) {
+			if (isInitialized === true) {
 				if (cb) {
 					cb("Already initialized");
 				}
@@ -3108,7 +3128,6 @@
 			mirrorElement = target.querySelector("div.canvaaas-mirror");
 
 			// check config.initDrawWidth, config.initDrawHeight
-			var hasCanvasSizes = false;
 			if (
 				config.initDrawWidth !== undefined &&
 				config.initDrawHeight !== undefined
@@ -3131,7 +3150,6 @@
 					return false;
 				}
 
-				hasCanvasSizes = true;
 				isInitialized = true;
 
 				containerElement.classList.add("hidden");
@@ -3173,9 +3191,10 @@
 						recursiveFunc();
 					});
 				} else {
+
 					onUpload = false;
 
-					if (hasCanvasSizes === true) {
+					if (isInitialized === true) {
 						containerElement.classList.remove("hidden");
 					}
 
@@ -3202,6 +3221,25 @@
 				thisCb,
 				hasState = false;
 
+			if (isInitialized === true) {
+				if (cb) {
+					cb("Already initialized");
+				}
+				return false;
+			}
+
+			if (
+				typeof(target) !== "object" ||
+				target === null
+			) {
+				if (thisCb) {
+					thisCb("Argument error");
+				}
+				return false;
+			}
+			
+			thisTarget = target;
+
 			if (cb) {
 				if (typeof(imageStates) === "function") {
 					if (thisCb) {
@@ -3216,18 +3254,6 @@
 				if (typeof(imageStates) === "function") {
 					thisCb = imageStates;
 				}
-			}
-
-			if (
-				typeof(target) === "object" &&
-				target !== null
-			) {
-				thisTarget = target;
-			} else {
-				if (thisCb) {
-					thisCb("Argument error");
-				}
-				return false;
 			}
 
 			if (Array.isArray(imageStates)) {
@@ -3297,7 +3323,6 @@
 					copyObject(imageURLs, tmp);
 					delete tmp.src;
 					thisStates[0] = tmp;
-
 				} else {
 					if (thisCb) {
 						thisCb("Argument error");
@@ -3377,6 +3402,7 @@
 				} else {
 
 					isInitialized = true;
+					isPreview = true;
 
 					if (cb) {
 						cb(null, results);

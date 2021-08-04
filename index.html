@@ -234,20 +234,20 @@
 		
 
 		// test 1
-		canvaaas.init(elem, {
-			draw: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("draw", res);
-				document.getElementById("preview2").src = res.file;
-			},
-		}, function(err){
-			if (err) {
-				console.log(err);
-			}	
-		})
+		// canvaaas.init(elem, {
+		// 	draw: function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		console.log("draw", res);
+		// 		document.getElementById("preview2").src = res.file;
+		// 	},
+		// }, function(err){
+		// 	if (err) {
+		// 		console.log(err);
+		// 	}	
+		// })
 
 		// test 2
 		// canvaaas.init(elem, {
@@ -529,6 +529,25 @@
 		// 	}
 		// 	console.log(res)
 		// })
+
+		// test 8
+		canvaaas.init(elem, {
+			initDrawWidth: undefined,
+			initDrawHeight: undefined,
+		}, function(err){
+			if (err) {
+				console.log(err);
+			}
+			canvaaas.uploadUrls([
+				"/img/3.jpg",
+				"/img/3.jpeg",
+				"/img/3.png"
+			], test2, function(err){
+				if (err) {
+					console.log(err)
+				}
+			})
+		})
 		
 
 	</script>
