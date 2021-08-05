@@ -2988,6 +2988,22 @@
 			}
 
 			var aspectRatio = width / height;
+			var maxWidth = config.maxCanvasWidth || 9999;
+			var maxHeight = config.maxCanvasHeight || 9999;
+			var minWidth = config.minCanvasWidth || 0;
+			var minHeight = config.minCanvasHeight || 0;
+
+			var maxSizes = getFittedRect(
+				maxWidth,
+				maxHeight,
+				aspectRatio
+			);
+
+			var minSizes = getFittedRect(
+				minWidth,
+				minHeight,
+				aspectRatio
+			);
 
 			var fittedSizes = getFittedRect(
 				containerState.width,
@@ -2995,11 +3011,14 @@
 				aspectRatio
 			);
 
+			var originalWidth = Math.min(maxSizes[0], Math.max(minSizes[0], width));
+			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], height));
+
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
-			canvasState.originalWidth = width;
-			canvasState.originalHeight = height;
+			canvasState.originalWidth = originalWidth;
+			canvasState.originalHeight = originalHeight;
 			canvasState.width = fittedSizes[0];
 			canvasState.height = fittedSizes[1];
 			canvasState.x = axisX;
@@ -3727,13 +3746,10 @@
 				state.x = (canvasState.width * 0.5);
 			} else if (x === "r" || x === "right") {
 				state.x = (canvasState.width * 1) - (state.width * 0.5);
-			} else if (
-				parseFloat(x) >= 0 &&
-				parseFloat(x) <= 1
-			) {
+			} else if (parseFloat(x) >= 0 && parseFloat(x) <= 1) {
 				state.x = (canvasState.width - state.width) * parseFloat(x) + (state.width * 0.5);
 			} else if (isNumeric(x) === true) {
-				state.x = parseInt(x);
+				state.x = parseFloat(x);
 			}
 
 			if (y === "t" || y === "top") {
@@ -3742,15 +3758,106 @@
 				state.y = (canvasState.height * 0.5);
 			} else if (y === "b" || y === "bottom") {
 				state.y = (canvasState.height * 1) - (state.height * 0.5);
-			} else if (
-				parseFloat(y) >= 0 &&
-				parseFloat(y) <= 1
-			) {
+			} else if (parseFloat(y) >= 0 && parseFloat(y) <= 1) {
 				state.y = (canvasState.height - state.height) * parseFloat(y) + (state.height * 0.5);
 			} else if (isNumeric(y) === true) {
-				state.y = parseInt(y);
+				state.y = parseFloat(y);
 			}
 
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id)
+			}
+		}
+
+		myObject.resize = function(id, x, y, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (
+				!isNumeric(x) ||
+				!isNumeric(y)
+			) {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				} 
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
+			if (parseFloat(x) >= 0 && parseFloat(x) <= 1) {
+				state.width = canvasState.width * parseFloat(x);
+			} else {
+				state.width = parseFloat(x);
+			}
+
+			if (parseFloat(y) >= 0 && parseFloat(y) <= 1) {
+				state.height = canvasState.height * parseFloat(y);
+			} else {
+				state.height = parseFloat(y);
+			}
+
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			if (state.width !== state.height * aspectRatio) {
+				if (config.lockAspectRatio === true) {
+					config.lockAspectRatio = false;
+				}
+			}
+			
 			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
