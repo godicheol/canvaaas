@@ -1,21 +1,26 @@
 /*
-<div> ### init(target) ###
-	<div class="canvaaas">
-		<div class="canvaaas-mirror">
-			<div class="canvaaas-clone">
-				<img>
-				<div class="canvaaas-overlay"></div>
-				<div> all handles </div>
+	<init() target>
+		<div class="canvaaas">
+			<div class="canvaaas-mirror">
+				<div class="canvaaas-clone">
+					<img>
+					<div class="canvaaas-overlay"></div>
+					<outlines>
+					<innerlines>
+					<handles>
+				</div>
 			</div>
-		</div>
-		<div class="canvaaas-canvas">
-			<div class="canvaaas-image">
-				<img>
-				<div> all handles </div>
+			<div class="canvaaas-canvas">
+				<div class="canvaaas-image">
+					<img>
+					<div class="canvaaas-overlay"></div>
+					<outlines>
+					<innerlines>
+					<handles>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
 */
 
 
@@ -27,15 +32,6 @@
 .canvaaas{
 	margin-left: auto;
 	margin-right: auto;
-}
-
-/* hide container after init() */
-.canvaaas.hidden{
-	position: fixed;
-	top: -100%;
-	left: 0;
-	z-index: -1;
-	visibility: hidden;
 }
 
 /* overlay */
@@ -55,7 +51,24 @@
 .canvaaas-clone .canvaaas-outline{
 	border-color: red;
 }
-
+/* on move
+.canvaaas-image.move .canvaaas-outline,
+.canvaaas-clone.move .canvaaas-outline{
+	border-color: blue;
+}
+*/
+/* on reisze
+.canvaaas-image.resize .canvaaas-outline,
+.canvaaas-clone.resize .canvaaas-outline{
+	border-color: blue;
+}
+*/
+/* on rotate
+.canvaaas-image.rotate .canvaaas-outline,
+.canvaaas-clone.rotate .canvaaas-outline{
+	border-color: blue;
+}
+*/
 .canvaaas-outline-top{
 	border-top-width: 1px;
 	border-top-style: solid;
@@ -80,6 +93,25 @@
 .canvaaas-clone .canvaaas-innerline{
 	border-color: red;
 }
+/* on move
+.canvaaas-image.move .canvaaas-innerline,
+.canvaaas-clone.move .canvaaas-innerline{
+	border-color: blue;
+}
+*/
+/* on reisze
+.canvaaas-image.resize .canvaaas-innerline,
+.canvaaas-clone.resize .canvaaas-innerline{
+	border-color: blue;
+}
+*/
+/* on rotate
+.canvaaas-image.rotate .canvaaas-innerline,
+.canvaaas-clone.rotate .canvaaas-innerline{
+	border-color: blue;
+}
+*/
+
 .canvaaas-innerline-top{
 	border-top-width: 1px;
 	border-top-style: dashed;
@@ -132,6 +164,31 @@
 	border-color: red;
 }
 
+/* on move
+.canvaaas-image.move .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-image.move .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-clone.move .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone.move .canvaaas-rotate-handle .canvaaas-handle{
+	border-color: blue;
+}
+*/
+/* on reisze
+.canvaaas-image.resize .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-image.resize .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-clone.resize .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone.resize .canvaaas-rotate-handle .canvaaas-handle{
+	border-color: blue;
+}
+*/
+/* on rotate
+.canvaaas-image.rotate .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-image.rotate .canvaaas-rotate-handle .canvaaas-handle,
+.canvaaas-clone.rotate .canvaaas-resize-handle .canvaaas-handle,
+.canvaaas-clone.rotate .canvaaas-rotate-handle .canvaaas-handle{
+	border-color: blue;
+}
+*/
+
 /*!
  * initial
  */
@@ -148,7 +205,16 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-.canvaaas-canvas{
+.canvaaas.hidden{
+	position: fixed;
+	top: -100%;
+	left: 0;
+	z-index: -1;
+	visibility: hidden;
+}
+
+.canvaaas-canvas,
+.canvaaas-mirror{
 	display: block;
 	position: absolute;
 	top: 0;
@@ -161,6 +227,12 @@
 	-ms-user-select: none;
 	user-select: none;
 }
+.canvaaas-canvas{
+	overflow: hidden;
+}
+.canvaaas-mirror{
+	overflow: visible;
+}
 .canvaaas-canvas.checker{
 	background-image: 
 		linear-gradient(45deg, #aaa 25%, transparent 25%),
@@ -170,25 +242,10 @@
 	background-size: 20px 20px;
 	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
-.canvaaas-canvas.hidden{
-	display: none;
-}
-.canvaaas-mirror{
-	position: absolute;
-	top: 0;
-	left: 0;
-	overflow: visible;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
 
 /* image & clone */
-.canvaaas-image{
-	display: block;
+.canvaaas-image,
+.canvaaas-clone{
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -200,23 +257,16 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-.canvaaas-image.focused{
-	z-index: 1;
+.canvaaas-image{
+	display: block;
 }
 .canvaaas-clone{
 	display: none;
-	position: absolute;
-	top: 0;
-	left: 0;
-	transform-origin: center center !important;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
 }
-.canvaaas-clone.focused{
+.canvaaas-image.focus{
+	z-index: 1;
+}
+.canvaaas-clone.focus{
 	display: block;
 }
 .canvaaas-clone img,
@@ -236,15 +286,12 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-.canvaaas-image.focused,
-.canvaaas-clone.focused{
+.canvaaas-image.focus,
+.canvaaas-clone.focus{
 	cursor: move;
 }
 
-.canvaaas-image.unclickable{
-	pointer-events: none;
-}
-
+.canvaaas-image.unclickable,
 .canvaaas-clone.unclickable{
 	pointer-events: none;
 }
@@ -259,13 +306,13 @@
 	left: 0;
 	right: 0;
 }
-.canvaaas-canvas.focused .canvaaas-image .canvaaas-overlay{
+.canvaaas-canvas.focus .canvaaas-image .canvaaas-overlay{
 	display: block;
 }
-.canvaaas-canvas.focused .canvaaas-image.focused .canvaaas-overlay{
+.canvaaas-canvas.focus .canvaaas-image.focus .canvaaas-overlay{
 	display: none;
 }
-.canvaaas-clone.focused .canvaaas-overlay{
+.canvaaas-clone.focus .canvaaas-overlay{
 	display: block;
 }
 /* outlines */
@@ -275,8 +322,8 @@
 	display: none;
 	pointer-events: none;
 }
-.canvaaas-image.focused .canvaaas-outline,
-.canvaaas-clone.focused .canvaaas-outline{
+.canvaaas-image.focus .canvaaas-outline,
+.canvaaas-clone.focus .canvaaas-outline{
 	display: block;
 }
 
@@ -305,7 +352,6 @@
 	height: 100%;
 }
 
-
 /* innerlines */
 .canvaaas-image .canvaaas-innerline,
 .canvaaas-clone .canvaaas-innerline{
@@ -313,8 +359,8 @@
 	display: none;
 	pointer-events: none;
 }
-.canvaaas-image.focused .canvaaas-innerline,
-.canvaaas-clone.focused .canvaaas-innerline{
+.canvaaas-image.focus .canvaaas-innerline,
+.canvaaas-clone.focus .canvaaas-innerline{
 	display: block;
 }
 
@@ -353,12 +399,12 @@
 	cursor: grab;
 }
 
-.canvaaas-clone.focused .canvaaas-resize-handle,
-.canvaaas-clone.focused .canvaaas-rotate-handle{
+.canvaaas-clone.focus .canvaaas-resize-handle,
+.canvaaas-clone.focus .canvaaas-rotate-handle{
 	display: block;
 }
-.canvaaas-image.focused .canvaaas-resize-handle,
-.canvaaas-image.focused .canvaaas-rotate-handle{
+.canvaaas-image.focus .canvaaas-resize-handle,
+.canvaaas-image.focus .canvaaas-rotate-handle{
 	display: block;
 }
 
@@ -419,24 +465,6 @@
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
-}
-
-/* preview */
-.canvaaas-preview{
-	position: relative;
-	overflow: hidden;
-	font-size: 0;
-	line-height: 0;
-}
-.canvaaas-preview.hidden{
-	display: none;
-}
-.canvaaas-preview img{
-	display: block;
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	transform-origin: center center;
 }
 
 /*!

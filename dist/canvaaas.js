@@ -35,6 +35,8 @@
  * 
  * update preview
  * 
+ * update init
+ * 
  */
 
 /*!
@@ -42,10 +44,6 @@
  * 업데이트 예정
  * 
  * handle 사용 중 active => 실패 (clone.handle 접근 불가)
- * 
- * init도 preview처럼
- * 
- * init에서 inner 제거? or inner + states
  * 
  * resize handle 가장자리 lock aspect 고치기
  * 
@@ -304,9 +302,14 @@
 					return false;
 				}
 
+				var source = eventState.target;
+				if (!source) {
+					return false;
+				}
+
 				if (e.target.tagName === "INPUT") {
-					var oldId = getIdBySource(eventState.target);
-					setFocusOut(oldId);
+					var id = getIdBySource(source);
+					setFocusOut(id);
 					return false;
 				}
 
@@ -317,8 +320,8 @@
 					!e.target.classList.contains("canvaaas-image") &&
 					!e.target.classList.contains("canvaaas-clone")
 				) {
-					var oldId = getIdBySource(eventState.target);
-					setFocusOut(oldId);
+					var id = getIdBySource(source);
+					setFocusOut(id);
 				}
 			},
 
@@ -339,21 +342,17 @@
 					return false;
 				}
 
-				if (eventState.target) {
-					var oldId = getIdBySource(eventState.target);
-					setFocusOut(oldId);
-				}
+				var source = eventState.target;
+				var id = getIdBySource(source);
+				setFocusOut(id);
 			},
 
 			keydown: function(e) {
 				var source = eventState.target;
 				var state = getStateBySource(source);
-				var clone = getCloneById(state.id);
+				var clone = getCloneBySource(source);
 
 				if (!config.editable) {
-					return false;
-				}
-				if (!eventState.target) {
 					return false;
 				}
 				if (!source || !state || !clone) {
@@ -399,19 +398,28 @@
 
 				// check magnetic option
 				if (config.magnetic) {
-					if (magR - 5 < state.x && magR + 5 > state.x) {
+					if (
+						magR - 5 < state.x &&
+						magR + 5 > state.x
+					) {
 						state.x = magR;
 					}
-
-					if (magB - 5 < state.y && magB + 5 > state.y) {
+					if (
+						magB - 5 < state.y &&
+						magB + 5 > state.y
+					) {
 						state.y = magB;
 					}
-
-					if (magL - 5 < state.x && magL + 5 > state.x) {
+					if (
+						magL - 5 < state.x &&
+						magL + 5 > state.x
+					) {
 						state.x = magL;
 					}
-
-					if (magT - 5 < state.y && magT + 5 > state.y) {
+					if (
+						magT - 5 < state.y &&
+						magT + 5 > state.y
+					) {
 						state.y = magT;
 					}
 				}
@@ -439,33 +447,26 @@
 				} else {
 					source = e.target;
 				}
+				var state = getStateBySource(source);
 
-				if (!config.editable) {
-					if (config.focus) {
-						config.focus("Editing has been disabled");
-					}
+				if (!source || !state) {
 					return false;
 				}
 
-				var state = getStateBySource(source);
-
 				if (!state.focusable) {
 					if (config.focus) {
-						config.focus("Has been denied");
+						config.focus("This element has been denied");
 					}
 					return false;
 				}
 
 				if (eventState.target) {
 					if (source.isSameNode(eventState.target)) {
-						if (config.focus) {
-							config.focus("Already focused");
-						}
 						return false;
 					}
 
-					var oldId = getIdBySource(eventState.target);
-					setFocusOut(oldId);
+					var id = getIdBySource(eventState.target);
+					setFocusOut(id);
 				}
 
 				setFocusIn(state.id);
@@ -481,18 +482,15 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!eventState.target) {
-					return false;
-				}
-
 				if (typeof(e.touches) !== "undefined") {
 					if (e.touches.length === 2) {
 						return handlers.startPinchZoom(e);
 					}
 				}
 
-				var oldId = getIdBySource(eventState.target);
-				setFocusOut(oldId);
+				var source = eventState.target;
+				var id = getIdBySource(source);
+				setFocusOut(id);
 			},
 
 			startMove: function(e) {
@@ -501,21 +499,26 @@
 
 				setContainerCoordinates();
 
-				if (!config.editable) {
-					return false;
-				}
-
-				if (!eventState.target) {
-					return false;
-				}
-
 				var source = eventState.target;
+				var clone = getCloneBySource(source);
 				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
 				var rotatedRect;
 				var halfWidth;
 				var halfHeight;
+
+				if (!config.editable) {
+					return false;
+				}
+
+				if (!source || !state || !clone) {
+					return false;
+				}
+
+				if (!state.editable) {
+					return false;
+				}
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX;
@@ -527,11 +530,7 @@
 					return handlers.startPinchZoom(e);
 				}
 
-				if (!state.editable) {
-					return false;
-				}
-
-				// calc rotate rect
+				// calculate rotate rect
 				rotatedRect = getRotatedRect(state.width, state.height, state.rotate);
 				halfWidth = 0.5 * rotatedRect[0];
 				halfHeight = 0.5 * rotatedRect[1];
@@ -553,6 +552,13 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
+				// set styles
+				canvasElement.classList.add("move");
+				mirrorElement.classList.add("move");
+
+				source.classList.add("move");
+				clone.classList.add("move");
+
 				// add event handles
 				document.addEventListener("mousemove", handlers.onMove, false);
 				document.addEventListener("mouseup", handlers.endMove, false);
@@ -565,10 +571,6 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!onMove) {
-					return false;
-				}
-
 				var source = eventState.target;
 				var state = getStateBySource(source);
 				var clone = getCloneBySource(source);
@@ -576,6 +578,10 @@
 				var mouseY;
 				var axisX;
 				var axisY;
+
+				if (!onMove) {
+					return false;
+				}
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -625,10 +631,22 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
+				var clone = getCloneBySource(source);
 				var state = getStateBySource(source);
+
+				// if (!source || !state || !clone) {
+				// 	return false;
+				// }
 
 				// toggle off
 				onMove = false;
+
+				// set styles
+				canvasElement.classList.remove("move");
+				mirrorElement.classList.remove("move");
+
+				source.classList.remove("move");
+				clone.classList.remove("move");
 
 				// remove event handles
 				document.removeEventListener("mousemove", handlers.onMove, false);
@@ -648,22 +666,23 @@
 
 				setContainerCoordinates();
 
-				if (!config.editable) {
-					return false;
-				}
-
-				if (!eventState.target) {
-					return false;
-				}
-
 				var handle = e.target;
 				var source = eventState.target;
+				var clone = getCloneBySource(source);
 				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
 				var axisY;
 				var deg;
+
+				if (!config.editable) {
+					return false;
+				}
+
+				if (!source || !state || !clone) {
+					return false;
+				}
 
 				if (!state.editable) {
 					return false;
@@ -706,6 +725,13 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
+				// set styles
+				canvasElement.classList.add("rotate");
+				mirrorElement.classList.add("rotate");
+
+				source.classList.add("rotate");
+				clone.classList.add("rotate");
+
 				// add event handles
 				document.addEventListener("mousemove", handlers.onRotate, false);
 				document.addEventListener("mouseup", handlers.endRotate, false);
@@ -718,10 +744,6 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!onRotate) {
-					return false;
-				}
-
 				var source = eventState.target;
 				var state = getStateBySource(source);
 				var clone = getCloneBySource(source);
@@ -730,6 +752,10 @@
 				var axisX;
 				var axisY;
 				var deg;
+
+				if (!onRotate) {
+					return false;
+				}
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
@@ -770,12 +796,23 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				var handle = eventState.handle;
 				var source = eventState.target;
 				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
+
+				// if (!source || !state || !clone) {
+				// 	return false;
+				// }
 
 				// toggle off
 				onRotate = false;
+
+				// set styles
+				canvasElement.classList.remove("rotate");
+				mirrorElement.classList.remove("rotate");
+
+				source.classList.remove("rotate");
+				clone.classList.remove("rotate");
 
 				document.removeEventListener("mousemove", handlers.onRotate, false);
 				document.removeEventListener("mouseup", handlers.endRotate, false);
@@ -794,16 +831,9 @@
 
 				setContainerCoordinates();
 
-				if (!config.editable) {
-					return false;
-				}
-
-				if (!eventState.target) {
-					return false;
-				}
-
 				var handle = e.target;
 				var source = eventState.target;
+				var clone = getCloneBySource(source);
 				var state = getStateBySource(source);
 				var mouseX;
 				var mouseY;
@@ -813,6 +843,14 @@
 				var direction;
 				var minW;
 				var minH;
+
+				if (!config.editable) {
+					return false;
+				}
+
+				if (!source || !clone || !state) {
+					return false;
+				}
 
 				if (!state.editable) {
 					return false;
@@ -854,7 +892,6 @@
 				minH = config.minImageHeight;
 
 				// save initial data
-				eventState.handle = handle;
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
@@ -872,6 +909,13 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
+				// set styles
+				canvasElement.classList.add("resize");
+				mirrorElement.classList.add("resize");
+
+				source.classList.add("resize");
+				clone.classList.add("resize");
+
 				// add event handles
 				document.addEventListener("mousemove", handlers.onResize, false);
 				document.addEventListener("mouseup", handlers.endResize, false);
@@ -883,10 +927,6 @@
 			onResize: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				if (!onResize) {
-					return false;
-				}
 
 				var direction = eventState.direction;
 				var source = eventState.target;
@@ -907,6 +947,10 @@
 				var onShiftKey = false;
 				var minW;
 				var minH;
+
+				if (!onResize) {
+					return false;
+				}
 
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
@@ -1084,12 +1128,23 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				var handle = eventState.handle; 
 				var source = eventState.target;
+				var clone = getCloneBySource(source);
 				var state = getStateBySource(source);
+
+				// if (!source || !state || !clone) {
+				// 	return false;
+				// }
 
 				// toggle off
 				onResize = false;
+
+				// set styles
+				canvasElement.classList.remove("resize");
+				mirrorElement.classList.remove("resize");
+
+				source.classList.remove("resize");
+				clone.classList.remove("resize");
 
 				// remove event handles
 				document.removeEventListener("mousemove", handlers.onResize, false);
@@ -1107,11 +1162,18 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!config.editable) {
-					return false;
-				}
+				var source = eventState.target;
+				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
+				var ratio;
+				var diffX;
+				var diffY;
+				var width;
+				var height;
+				var minW;
+				var minH;
 
-				if (!eventState.target) {
+				if (!config.editable) {
 					return false;
 				}
 
@@ -1123,16 +1185,9 @@
 					return false;
 				}
 
-				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
-				var ratio;
-				var diffX;
-				var diffY;
-				var width;
-				var height;
-				var minW;
-				var minH;
+				if (!source || !state || !clone) {
+					return false;
+				}
 
 				if (!state.editable) {
 					return false;
@@ -1201,25 +1256,6 @@
 
 				setContainerCoordinates();
 
-				if (!config.editable) {
-					return false;
-				}
-
-				if (!eventState.target) {
-					return false;
-				}
-
-				// check move toggle on
-				if (onMove) {
-					onMove = false;
-
-					document.removeEventListener("mousemove", handlers.onMove, false);
-					document.removeEventListener("mouseup", handlers.endMove, false);
-
-					document.removeEventListener("touchmove", handlers.onMove, false);
-					document.removeEventListener("touchend", handlers.endMove, false);
-				}
-
 				var source = eventState.target;
 				var state = getStateBySource(source);
 				var clone = getCloneBySource(source);
@@ -1228,6 +1264,18 @@
 				var mouseY;
 				var minW;
 				var minH;
+
+				if (onMove === true) {
+					handlers.endMove(e)
+				}
+
+				if (!config.editable) {
+					return false;
+				}
+
+				if (!source || !state || !clone) {
+					return false;
+				}
 
 				if (!state.editable) {
 					return false;
@@ -1263,14 +1311,6 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!onZoom) {
-					return false;
-				}
-
-				if (e.touches.length !== 2) {
-					return false;
-				}
-
 				var source = eventState.target;
 				var state = getStateBySource(source);
 				var clone = getCloneBySource(source);
@@ -1282,6 +1322,14 @@
 				var ratio;
 				var minW;
 				var minH;
+
+				if (!onZoom) {
+					return false;
+				}
+
+				if (e.touches.length !== 2) {
+					return false;
+				}
 
 				minW = eventState.minW;
 				minH = eventState.minH;
@@ -1320,6 +1368,11 @@
 
 				var source = eventState.target;
 				var state = getStateBySource(source);
+				var clone = getCloneBySource(source);
+
+				// if (!source || !state || !clone) {
+				// 	return false;
+				// }
 
 				// toggle off
 				onZoom = false;
@@ -1581,21 +1634,22 @@
 			}
 
 			var source = getSourceById(id);
+			var clone = getCloneById(id);
+
 			if (!source) {
 				return false;
 			}
 
-			var clone = getCloneById(id);
 			if (!clone) {
 				return false;
 			}
 
 			try {
-				canvasElement.classList.add("focused");
-				mirrorElement.classList.add("focused");
+				canvasElement.classList.add("focus");
+				mirrorElement.classList.add("focus");
 
-				source.classList.add("focused");
-				clone.classList.add("focused");
+				source.classList.add("focus");
+				clone.classList.add("focus");
 
 				source.removeEventListener("mousedown", handlers.startFocusIn, false);
 				source.removeEventListener("touchstart", handlers.startFocusIn, false);
@@ -1643,11 +1697,11 @@
 			}
 
 			try {
-				canvasElement.classList.remove("focused");
-				mirrorElement.classList.remove("focused");
+				canvasElement.classList.remove("focus");
+				mirrorElement.classList.remove("focus");
 
-				source.classList.remove("focused");
-				clone.classList.remove("focused");
+				source.classList.remove("focus");
+				clone.classList.remove("focus");
 
 				source.removeEventListener("mousedown", handlers.startMove, false);
 				source.removeEventListener("touchstart", handlers.startMove, false);
@@ -3647,10 +3701,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -3721,10 +3775,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -3798,10 +3852,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -3921,10 +3975,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -3999,10 +4053,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4122,10 +4176,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4204,10 +4258,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4276,10 +4330,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4341,10 +4395,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4419,10 +4473,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4513,10 +4567,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4584,10 +4638,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4687,10 +4741,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4792,10 +4846,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4855,10 +4909,10 @@
 
 			if (!state.focusable) {
 				if (config.focus) {
-					config.focus("Has been denied");
+					config.focus("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -4879,14 +4933,15 @@
 		}
 
 		myObject.focusOut = function(cb) {
-			if (!eventState.target) {
+			var source = eventState.target;
+			var id = getIdBySource(source);
+
+			if (!source) {
 				if (cb) {
 					cb("Target not found");
 				} 
 				return false;
 			}
-
-			var id = getIdBySource(eventState.target);
 			
 			if (!id) {
 				if (cb) {
@@ -4938,10 +4993,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -5049,10 +5104,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -5108,10 +5163,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -5185,10 +5240,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -5244,10 +5299,10 @@
 
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Has been denied");
+					config.edit("This element has been denied");
 				}
 				if (cb) {
-					cb("Has been denied");
+					cb("This element has been denied");
 				} 
 				return false;
 			}
@@ -5576,7 +5631,6 @@
 		}
 
 		myObject.hideContainer = function(cb) {
-
 			containerElement.classList.add("hidden");
 
 			if (cb) {
@@ -5585,7 +5639,6 @@
 		}
 
 		myObject.showContainer = function(cb) {
-
 			containerElement.classList.remove("hidden");
 
 			if (cb) {
@@ -5594,7 +5647,6 @@
 		}
 
 		myObject.resume = function(cb) {
-
 			config.editable = true;
 
 			if (cb) {
@@ -5603,9 +5655,13 @@
 		}
 
 		myObject.stop = function(cb) {
-			if (eventState.target) {
-				var oldId = getIdBySource(eventState.target);
-				var res = setFocusOut(oldId);
+			var source = eventState.target;
+			if (
+				source !== undefined &&
+				source !== null
+			) {
+				var id = getIdBySource(source);
+				var res = setFocusOut(id);
 				if (!res) {
 					if (cb) {
 						cb("`setFocusOut()` error");
@@ -5613,6 +5669,7 @@
 					return false;
 				}
 			}
+			
 
 			config.editable = false;
 
@@ -6082,9 +6139,13 @@
 				return false;
 			}
 
-			if (eventState.target) {
-				var oldId = getIdBySource(eventState.target);
-				var res = setFocusOut(oldId);
+			var source = eventState.target;
+			if (
+				source !== undefined &&
+				source !== null
+			) {
+				var id = getIdBySource(source);
+				var res = setFocusOut(id);
 				if (!res) {
 					if (cb) {
 						cb("`setFocusOut()` error");
@@ -6096,7 +6157,7 @@
 			config.editable = false;
 			onFreeze = true;
 
-			// set bg
+			// set background
 			canvasElement.style.backgroundColor = config.drawFillColor;
 			canvasElement.classList.remove("checker");
 
