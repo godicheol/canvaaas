@@ -25,178 +25,489 @@
 		/*background-color: #000;*/
 	}
 
-	table{
-		margin: 0 auto;
+	#logger{
+		display: inline-block;
+		width: 48%;
+		height: 300px;
+		vertical-align: top;
+		overflow-y: scroll;
+	}
+	#logger th{
 		text-align: right;
+	}
+
+	#logger input{
+		max-width: 100%;
+	}
+
+	#buttons{
+		display: inline-block;
+		width: 48%;
+		height: 300px;
+		padding-bottom: 300px;
+		overflow-y: scroll;
+	}
+
+	input[type='file']{
+		display: none;
+	}
+	label,
+	button{
+		font-family: arial;
+		padding: 3px 6px;
+		font-size: 14px;
+		border: 1px solid #777;
+		border-radius: 2px;
+		background-color: #e7e7e7;
+		cursor: pointer;
+	}
+	label:hover,
+	button:hover{
+		background-color: #c7c7c7;
+	}
+	label:active,
+	button:active{
+		background-color: #e7e7e7;
 	}
 </style>
 </head>
 <body style="">
 
-	<!-- main 1, empty -->
 	<div id="container"></div>
 
-	<!-- main 2, has inner -->
-	<!-- <div id="container">
-		<img src="/img/3.jpeg" alt="">
-		<img src="/img/2.jpeg" alt="">
-		<img src="/img/1.jpeg" alt="">
-		<img src="/img/4.jpeg" alt="">
-	</div> -->
-
-	<table>
+	<table id="logger">
 		<tr>
-			<td>X:<input id="axisX" name="axisX" type="text"></td>
-			<td>Y:<input id="axisY" name="axisY" type="text"></td>
+			<th>AxisX:</th>
+			<td><input id="axisX" name="axisX" type="text"></td>
 		</tr>
 		<tr>
-			<td>Width:<input id="width" name="width" type="text"></td>
-			<td>Height:<input id="height" name="height" type="text"></td>
+			<th>AxisY:</th>
+			<td><input id="axisY" name="axisY" type="text"></td>
 		</tr>
 		<tr>
-			<td>Rotate:<input id="rotate" name="rotate" type="text"></td>
+			<th>Width:</th>
+			<td><input id="width" name="width" type="text"></td>
 		</tr>
 		<tr>
-			<td>ScaleX<input id="scaleX" name="scaleX" type="text"></td>
-			<td>ScaleY<input id="scaleY" name="scaleY" type="text"></td>
+			<th>Height:</th>
+			<td><input id="height" name="height" type="text"></td>
 		</tr>
 		<tr>
-			<td>Opacity<input id="opacity" name="opacity" type="text"></td>
-			<td>Index<input id="index" name="index" type="text"></td>
+			<th>Rotate:</th>
+			<td><input id="rotate" name="rotate" type="text"></td>
 		</tr>
 		<tr>
-			<td>Focusable<input id="focusable" name="focusable" type="text"></td>
-			<td>Editable<input id="editable" name="editable" type="text"></td>
+			<th>ScaleX:</th>
+			<td><input id="scaleX" name="scaleX" type="text"></td>
 		</tr>
 		<tr>
-			<td>Drawable<input id="drawable" name="drawable" type="text"></td>
+			<th>ScaleY:</th>
+			<td><input id="scaleY" name="scaleY" type="text"></td>
+		</tr>
+		<tr>
+			<th>Opacity:</th>
+			<td><input id="opacity" name="opacity" type="text"></td>
+		</tr>
+		<tr>
+			<th>Index:</th>
+			<td><input id="index" name="index" type="text"></td>
+		</tr>
+		<tr>
+			<th>Focusable:</th>
+			<td><input id="focusable" name="focusable" type="text"></td>
+		</tr>
+		<tr>
+			<th>Editable:</th>
+			<td><input id="editable" name="editable" type="text"></td>
+		</tr>
+		<tr>
+			<th>Drawable:</th>
+			<td><input id="drawable" name="drawable" type="text"></td>
 		</tr>
 	</table>
 
-	<div id="buttons">
-		<!-- buttons -->
-		<input type="file" onchange="
-			canvaaas.uploadFiles(this)
-		" multiple>
-		<button type="button" onclick="
-			canvaaas.uploadUrls(['/img/1.jpeg'])
-		">uploadUrls(url, cb)</button>
-		<button type="button" onclick="
-			canvaaas.uploadUrls(['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'], null)
-		">uploadUrls(array, cb)</button>
-		<button type="button" onclick="
-			canvaaas.uploadUrls(['/img/1.svg'], null)
-		">uploadUrls(url, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.moveX(canvaaas.this(), 10)">moveX(id, 10, cb)</button>
-		<button type="button" onclick="canvaaas.moveX(canvaaas.this(), -10)">moveX(id, -10, cb)</button>
-		<button type="button" onclick="canvaaas.moveY(canvaaas.this(), 10)">moveY(id, 10, cb)</button>
-		<button type="button" onclick="canvaaas.moveY(canvaaas.this(), -10)">moveY(id, -10, cb)</button>
-		<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0, 0)">moveTo(id, 0, 0, cb)</button>
-		<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0.5, 0.5)">moveTo(id, 0.5, 0.5, cb)</button>
-		<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 1, 1)">moveTo(id, 1, 1, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.zoom(canvaaas.this(), 0.1)">zoom(id, 0.1, cb)</button>
-		<button type="button" onclick="canvaaas.zoom(canvaaas.this(), -0.1)">zoom(id, -0.1, cb)</button>
-		<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 0.01)">zoomTo(id, 0.01, cb)</button>
-		<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'cover')">zoomTo(id, 'cover', cb)</button>
-		<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'contain')">zoomTo(id, 'contain', cb)</button>
-		//
-		<button type="button" onclick="canvaaas.rotate(canvaaas.this(), 45)">rotate(id, 45, cb)</button>
-		<button type="button" onclick="canvaaas.rotateTo(canvaaas.this(), 45)">rotateTo(id, 45, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.flipX(canvaaas.this())">flipX(id, cb)</button>
-		<button type="button" onclick="canvaaas.flipY(canvaaas.this())">flipY(id, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0)">opacityTo(id, 0, cb)</button>
-		<button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0.5)">opacityTo(id, 0.5, cb)</button>
-		<button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 1)">opacityTo(id, 1, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.indexUp(canvaaas.this())">indexUp(id, cb)</button>
-		<button type="button" onclick="canvaaas.indexDown(canvaaas.this())">indexDown(id, cb)</button>
-		<button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1, cb)</button>
-		<button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.focusIn(canvaaas.this())">focusIn(id, cb)</button>
-		<button type="button" onclick="canvaaas.focusOut()">focusOut(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.focusable(window.prompt())">focusable(id, cb)</button>
-		<button type="button" onclick="canvaaas.editable(canvaaas.this())">editable(id, cb)</button>
-		<button type="button" onclick="canvaaas.drawable(canvaaas.this())">drawable(id, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.unfocusable(canvaaas.this())">unfocusable(id, cb)</button>
-		<button type="button" onclick="canvaaas.uneditable(canvaaas.this())">uneditable(id, cb)</button>
-		<button type="button" onclick="canvaaas.undrawable(canvaaas.this())">undrawable(id, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.remove(canvaaas.this())">remove(id, cb)</button>
-		<button type="button" onclick="canvaaas.removeAll()">removeAll(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.reset(canvaaas.this())">reset(id, cb)</button>
-		//
-		<script>
-			var tmp1 = {
-				lockAspectRatio: false
-			}
-		</script>
-		<button type="button" onclick="canvaaas.config(tmp1)">setConfig(object, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.canvas(512, 512)">canvas(512, 512, cb)</button>
-		<button type="button" onclick="canvaaas.canvas(1920, 1080)">canvas(1920, 1080, cb)</button>
-		<button type="button" onclick="canvaaas.canvas(1080, 1920)">canvas(1080, 1920, cb)</button>
-		<button type="button" onclick="canvaaas.canvas(4000, 4000)">canvas(4000, 4000, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.setFillColor('#000000')">setFillColor("000000", cb)</button>
-		<button type="button" onclick="canvaaas.setFillColor('FFFFFF')">setFillColor('FFFFFF', cb)</button>
-		<button type="button" onclick="canvaaas.setFillColor('alpha')">setFillColor('alpha', cb)</button>
-		<button type="button" onclick="canvaaas.unsetFillColor()">unsetFillColor(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.lockAspectRatio()">lockAspectRatio(cb)</button>
-		<button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio(cb)</button>
-		//
-		<script>
-			var tmp2 = {
-				width: 256,
-				fillColor: "#123456",
-				mimeType: "image/png",
-				quality: 1,
-				smoothingQuality: "high",
-				smoothingEnabled: true,
-			}
-		</script>
-		<button type="button" onclick="canvaaas.draw()">draw(cb)</button>
-		<button type="button" onclick="canvaaas.drawTo(tmp2)">drawTo(options, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.freeze()">freeze(cb)</button>
-		<button type="button" onclick="canvaaas.thaw()">thaw(cb)</button>
-		//
-		<script>
-			var tmp3 = {
-				width: 256,
-				fillColor: "#123456",
-				mimeType: "image/png",
-				quality: 1,
-				smoothingQuality: "high",
-				smoothingEnabled: true,
-			}
-		</script>
-		<button type="button" onclick="canvaaas.download()">download(cb)</button>
-		<button type="button" onclick="canvaaas.downloadTo(tmp3)">downloadTo(options, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.this(console.log)">this(cb)</button>
-		<button type="button" onclick="canvaaas.getThisData(console.log)">getThisData(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.getConfigData(console.log)">getConfigData(cb)</button>
-		<button type="button" onclick="canvaaas.getContainerData(console.log)">getContainerData(cb)</button>
-		<button type="button" onclick="canvaaas.getCanvasData(console.log)">getCanvasData(cb)</button>
-		<button type="button" onclick="canvaaas.getImageData(canvaaas.this(), console.log)">getImageData(cb)</button>
-		<button type="button" onclick="canvaaas.getImageDataAll(console.log)">getImageDataAll(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.undo()">undo(cb)</button>
-		<button type="button" onclick="canvaaas.redo()">redo(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.init(elem)">init()</button>
-		<button type="button" onclick="canvaaas.destroy()">destroy()</button>
-	</div>
+	<table id="buttons">
+		<tr>
+			<th colspan="2">Upload</th>
+		</tr>
+
+		<tr>
+			<td>
+				<label for="upload">uploadFiles(this)</label>
+				<input id="upload" type="file" onchange="canvaaas.uploadFiles(this)" multiple>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="
+					canvaaas.uploadUrls(['/img/1.jpeg'])
+				">uploadUrls(url, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="
+					canvaaas.uploadUrls(['/img/3.jpg', '/img/3.jpeg', '/img/4.png', '/img/3.png'], null)
+				">uploadUrls(array, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Move</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.moveX(canvaaas.this(), 10)">moveX(id, 10, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.moveX(canvaaas.this(), -10)">moveX(id, -10, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.moveY(canvaaas.this(), 10)">moveY(id, 10, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.moveY(canvaaas.this(), -10)">moveY(id, -10, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0, 0)">moveTo(id, 0, 0, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 0.5, 0.5)">moveTo(id, 0.5, 0.5, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 1, 1)">moveTo(id, 1, 1, cb)</button>
+				<button type="button" onclick="canvaaas.moveTo(canvaaas.this(), 'left', 'top')">moveTo(id, 'left', 'top', cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Zoom</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.zoom(canvaaas.this(), 0.1)">zoom(id, 0.1, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.zoom(canvaaas.this(), -0.1)">zoom(id, -0.1, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 0.01)">zoomTo(id, 0.01, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'cover')">zoomTo(id, 'cover', cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.zoomTo(canvaaas.this(), 'contain')">zoomTo(id, 'contain', cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Rotate</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.rotate(canvaaas.this(), 45)">rotate(id, 45, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.rotateTo(canvaaas.this(), 45)">rotateTo(id, 45, cb)</button>	
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Flip</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.flipX(canvaaas.this())">flipX(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.flipY(canvaaas.this())">flipY(id, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Opacity</th>
+		</tr>
+
+		<tr>
+			<td colspan="2">
+				<input type="range" min="0" max="10" value="10" step="1"
+					oninput="canvaaas.opacityTo(
+						canvaaas.this(), this.value * 0.1
+					)"
+				>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0)">opacityTo(id, 0.5, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.opacityTo(canvaaas.this(), 0.5)">opacityTo(id, 1, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Index</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.indexUp(canvaaas.this())">indexUp(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.indexDown(canvaaas.this())">indexDown(id, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1)">indexTo(id, 1, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.indexTo(canvaaas.this(), 1000)">indexTo(id, 1000, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Focus</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.focusIn(canvaaas.this())">focusIn(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.focusOut()">focusOut(cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Status</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.focusable(window.prompt())">focusable(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.editable(canvaaas.this())">editable(id, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.drawable(canvaaas.this())">drawable(id, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.unfocusable(canvaaas.this())">unfocusable(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.uneditable(canvaaas.this())">uneditable(id, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.undrawable(canvaaas.this())">undrawable(id, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Remove</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.remove(canvaaas.this())">remove(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.removeAll()">removeAll(cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Reset</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.reset(canvaaas.this())">reset(id, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Config</th>
+		</tr>
+
+		<tr>
+			<script>
+				var tmp1 = {
+					lockAspectRatio: false
+				}
+			</script>
+			<td>
+				<button type="button" onclick="canvaaas.config(tmp1)">setConfig(object, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.setFillColor('#000000')">setFillColor("000000", cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.setFillColor('FFFFFF')">setFillColor('FFFFFF', cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.setFillColor('alpha')">setFillColor('alpha', cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.unsetFillColor()">unsetFillColor(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.lockAspectRatio()">lockAspectRatio(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.unlockAspectRatio()">unlockAspectRatio(cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Canvas</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.undo()">undo(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.redo()">redo(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.freeze()">freeze(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.thaw()">thaw(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.canvas(512, 512)">canvas(512, 512, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.canvas(1920, 1080)">canvas(1920, 1080, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.canvas(1920, 1080)">canvas(1920, 1080, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.canvas(4000, 4000)">canvas(4000, 4000, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.init(elem)">init()</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.destroy()">destroy()</button>
+			</td>
+		</tr>	
+
+		<tr>
+			<th colspan="2">Draw</th>
+		</tr>
+
+		<tr>
+			<script>
+				var tmp2 = {
+					width: 256,
+					fillColor: "#123456",
+					mimeType: "image/png",
+					quality: 1,
+					smoothingQuality: "high",
+					smoothingEnabled: true,
+				}
+			</script>
+			<td>
+				<button type="button" onclick="canvaaas.draw()">draw(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.drawTo(tmp2)">drawTo(options, cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<script>
+				var tmp3 = {
+					width: 256,
+					fillColor: "#123456",
+					mimeType: "image/png",
+					quality: 1,
+					smoothingQuality: "high",
+					smoothingEnabled: true,
+				}
+			</script>
+			<td>
+				<button type="button" onclick="canvaaas.download()">download(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.downloadTo(tmp3)">downloadTo(options, cb)</button>
+			</td>
+		</tr>
+
+		<tr>
+			<th colspan="2">Data</th>
+		</tr>
+
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.this(console.log)">this(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.getThisData(console.log)">getThisData(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.getConfigData(console.log)">getConfigData(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.getContainerData(console.log)">getContainerData(cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.getCanvasData(console.log)">getCanvasData(cb)</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="canvaaas.getImageData(canvaaas.this(), console.log)">getImageData(id, cb)</button>
+			</td>
+			<td>
+				<button type="button" onclick="canvaaas.getImageDataAll(console.log)">getImageDataAll(cb)</button>
+			</td>	
+		</tr>
+	</table>
 
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview1" style="width: 100%;" src="" alt="">
@@ -205,7 +516,7 @@
 	<div style="position: relative; display: inline-block; width: 30%; overflow: hidden; border: 1px solid; font-size: 0px;">
 		<img id="preview2" style="width: 100%;" src="" alt="">
 	</div>
-	
+
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview3" style="width: 100%;" src="" alt="">
 	</div>
@@ -283,22 +594,22 @@
 		    }
 		]
 
-		// test 7
+		// #1 config
 		canvaaas.config({
-			// initCanvasWidth: 3000,
-			// initCanvasHeight: 3000,
+			initCanvasWidth: 6000,
+			initCanvasHeight: 6000,
 			edit: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
 				var state = canvaaas.getImageData(res);
-				inputs.width.value = state.width;
-				inputs.height.value = state.height;
-				inputs.x.value = state.x;
-				inputs.y.value = state.y;
+				inputs.width.value = Math.floor(state.width * 100) / 100;
+				inputs.height.value = Math.floor(state.height * 100) / 100;
+				inputs.x.value = Math.floor(state.x * 100) / 100;
+				inputs.y.value = Math.floor(state.y * 100) / 100;
 				inputs.index.value = state.index;
-				inputs.rotate.value = state.rotate;
+				inputs.rotate.value = Math.floor(state.rotate * 100) / 100;
 				inputs.scaleX.value = state.scaleX;
 				inputs.scaleY.value = state.scaleY;
 				inputs.opacity.value = state.opacity;
@@ -316,7 +627,7 @@
 			},
 		})
 
-		// test 7.1
+		// #2 init (preview)
 		// canvaaas.preview(elem, test1, function(err, res){
 		// 	if (err) {
 		// 		console.log(err);
@@ -325,7 +636,7 @@
 		// 	console.log(res);
 		// })
 
-		// test 7.2
+		// #2 init (editor)
 		canvaaas.init(elem, test1, function(err, res){
 			if (err) {
 				console.log(err);

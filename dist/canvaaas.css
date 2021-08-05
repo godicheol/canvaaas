@@ -1,31 +1,15 @@
-/*
-	<init() target>
-		<div class="canvaaas">
-			<div class="canvaaas-mirror">
-				<div class="canvaaas-clone">
-					<img>
-					<div class="canvaaas-overlay"></div>
-					<outlines>
-					<innerlines>
-					<handles>
-				</div>
-			</div>
-			<div class="canvaaas-canvas">
-				<div class="canvaaas-image">
-					<img>
-					<div class="canvaaas-overlay"></div>
-					<outlines>
-					<innerlines>
-					<handles>
-				</div>
-			</div>
-		</div>
-	</div>
-*/
-
+/*!
+ * 
+ * canvaaas.js
+ * 
+ * 0.0.8
+ * 
+ * eeecheol@gmail.com
+ * 
+ */
 
 /*!
- * custom
+ * customize
  */
 
  /* container */
@@ -34,14 +18,19 @@
 	margin-right: auto;
 }
 
-/* overlay */
-.canvaaas-canvas .canvaaas-overlay{
+/* canvas */
+.canvaaas-mirror.focus{
+	outline: 1px solid red;
+}
+
+/* image overlay */
+.canvaaas-image .canvaaas-overlay{
 	background-color: rgba(255,255,255);
-	opacity: 0.3;
+	opacity: 0.4;
 }
 .canvaaas-clone .canvaaas-overlay{
 	background-color: rgba(0,0,0);
-	opacity: 0.3;
+	opacity: 0.4;
 }
 
 /* image outline */

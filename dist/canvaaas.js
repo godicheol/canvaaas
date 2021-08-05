@@ -2,72 +2,9 @@
  * 
  * canvaaas.js
  * 
+ * 0.0.8
+ * 
  * eeecheol@gmail.com
- * 
- * 0.0.7
- * 
- */
-
-/***!
- *** 
- *** release note
- * 
- * remove preview
- * 
- * reset(container) => reset(image)
- * 
- * typeof() === object <= add null check
- * 
- * config.drawWidth => config.initCanvasWidth
- * config.drawHeight => config.initCanvasHeight
- * 
- * draw() width, height => canvasState.originalWidth, canvasState.originalHeight
- * drawTo() width, height => canvasState.originalWidth, canvasState.originalHeight
- * download() width, height => canvasState.originalWidth, canvasState.originalHeight
- * downloadTo() width, height => canvasState.originalWidth, canvasState.originalHeight
- * 
- * remove export
- * remove import 
- * 
- * uploadUrls, uploadFiles add argument `imageStates`
- * 
- * elem => source
- * 
- * update preview
- * 
- * update init
- * 
- * remove hide container, show container
- * 
- * remove stop, resume
- * 
- * escape freeze => thaw
- * 
- * 
- * 
- */
-
-/*!
- * 
- * 업데이트 예정
- * 
- * handle 사용 중 active => 실패 (clone.handle 접근 불가)
- * 
- * resize handle 가장자리 lock aspect 고치기 => 실패
- * 
- * 
- */
-
-/*!
- * 
- * 테스트 예정
- * 
- * index 1000 이상
- * 
- * index 겹치기
- * 
- * 
- * 
  * 
  */
 
@@ -300,23 +237,20 @@
 					}
 				}
 
-				if (e.target.tagName === "BUTTON") {
-					return false;
-				}
-
-				var source = eventState.target;
-				if (!source) {
-					return false;
-				}
-
-				if (e.target.tagName === "INPUT") {
-					var id = getIdBySource(source);
-					setFocusOut(id);
+				if (
+					e.target.tagName === "BUTTON" ||
+					e.target.tagName === "INPUT"
+				) {
 					return false;
 				}
 
 				e.preventDefault();
 				e.stopPropagation();
+
+				var source = eventState.target;
+				if (!source) {
+					return false;
+				}
 
 				if (
 					!e.target.classList.contains("canvaaas-image") &&
@@ -325,28 +259,6 @@
 					var id = getIdBySource(source);
 					setFocusOut(id);
 				}
-			},
-
-			onScroll: function(e) {
-
-				if (onMove === true) {
-					handlers.endMove(e);
-					return false;
-				}
-
-				if (onResize === true) {
-					handlers.endResize(e);
-					return false;
-				}
-
-				if (onRotate === true) {
-					handlers.endRotate(e);
-					return false;
-				}
-
-				var source = eventState.target;
-				var id = getIdBySource(source);
-				setFocusOut(id);
 			},
 
 			keydown: function(e) {
@@ -1632,8 +1544,6 @@
 
 				document.addEventListener("mousedown", handlers.isOutside, false);
 				document.addEventListener("touchstart", handlers.isOutside, false);
-
-				document.addEventListener("scroll", handlers.onScroll, false);
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -1684,8 +1594,6 @@
 
 				document.removeEventListener("mousedown", handlers.isOutside, false);
 				document.removeEventListener("touchstart", handlers.isOutside, false);
-
-				document.removeEventListener("scroll", handlers.onScroll, false);
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -2310,7 +2218,9 @@
 			}
 			return res;
 		}
-
+		function isNumeric(n) {
+			return !isNaN(parseFloat(n)) && isFinite(n);
+		}
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -3107,7 +3017,6 @@
 
 		myObject.init = function(target, imageStates, cb) {
 			var thisTarget,
-				thisURLs = [],
 				thisStates = [],
 				thisCb,
 				hasState = true;
@@ -3264,7 +3173,6 @@
 
 		myObject.preview = function(target, imageStates, cb) {
 			var thisTarget,
-				thisURLs = [],
 				thisStates = [],
 				thisCb,
 				hasState = true;
@@ -3346,21 +3254,6 @@
 					thisCb("Argument error");
 				} 
 				return false;
-			}
-
-			for(var i = 0; i < thisStates.length; i++) {
-				if (canvasWidth !== thisStates[i].canvasWidth) {
-					if (thisCb) {
-						thisCb("Canvas width error");
-					} 
-					return false;
-				}
-				if (canvasHeight !== thisStates[i].canvasHeight) {
-					if (thisCb) {
-						thisCb("Canvas height error");
-					} 
-					return false;
-				}
 			}
 
 			// set template
@@ -3520,8 +3413,8 @@
 			}
 		}
 
-		myObject.uploadUrls = function(imageURLs, imageStates, cb) {
-			if (!Array.isArray(imageURLs)) {
+		myObject.uploadUrls = function(imageUrls, imageStates, cb) {
+			if (!Array.isArray(imageUrls)) {
 				if (config.upload) {
 					config.upload("Argument error");
 				}
@@ -3532,7 +3425,7 @@
 			}
 
 			var states = [];
-			for (var i = 0; i < imageURLs.length; i++) {
+			for (var i = 0; i < imageUrls.length; i++) {
 				states[i] = null;
 			}
 
@@ -3543,7 +3436,7 @@
 					}
 				} else {
 					if (
-						imageURLs.length === 1 &&
+						imageUrls.length === 1 &&
 						typeof(imageStates) === "object" &&
 						imageStates !== null
 					) {
@@ -3572,7 +3465,7 @@
 				return false;
 			}
 
-			var index = imageURLs.length;
+			var index = imageUrls.length;
 			var count = 0;
 			var results = [];
 
@@ -3582,7 +3475,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var thisUrl = imageURLs[count];
+					var thisUrl = imageUrls[count];
 					var thisState = states[count];
 
 					renderImage(thisUrl, thisState, function(err, id) {
@@ -3632,7 +3525,7 @@
 				return false;
 			}
 
-			if (typeof(x) !== "number") {
+			if (!isNumeric(x)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -3677,7 +3570,7 @@
 			eventSubCaches = [];
 
 			// save state
-			state.x -= x;
+			state.x -= parseFloat(x);
 
 			// adjust state
 			setElement(source, state);
@@ -3706,7 +3599,7 @@
 				return false;
 			}
 
-			if (typeof(y) !== "number") {
+			if (!isNumeric(y)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -3751,7 +3644,7 @@
 			eventSubCaches = [];
 
 			// save state
-			state.y -= y;
+			state.y -= parseFloat(y);
 
 			// adjust state
 			setElement(source, state);
@@ -3828,55 +3721,34 @@
 			eventSubCaches = [];
 
 			// save state
-			if (
-				x === 0 ||
-				x === "l" ||
-				x === "left"
-			) {
+			if (x === "l" || x === "left") {
 				state.x = (canvasState.width * 0) + (state.width * 0.5);
-			} else if (
-				x === 0.5 ||
-				x === "c" ||
-				x === "center"
-			) {
+			} else if (x === "c" || x === "center") {
 				state.x = (canvasState.width * 0.5);
-			} else if (
-				x === 1 ||
-				x === "r" ||
-				x === "right"
-			) {
+			} else if (x === "r" || x === "right") {
 				state.x = (canvasState.width * 1) - (state.width * 0.5);
 			} else if (
-				x !== null &&
-				x !== undefined
+				parseFloat(x) >= 0 &&
+				parseFloat(x) <= 1
 			) {
-				state.x = x;
+				state.x = (canvasState.width - state.width) * parseFloat(x) + (state.width * 0.5);
+			} else if (isNumeric(x) === true) {
+				state.x = parseInt(x);
 			}
 
-			if (
-				y === 0 ||
-				y === "t" ||
-				y === "top"
-			) {
+			if (y === "t" || y === "top") {
 				state.y = (canvasState.height * 0) + (state.height * 0.5);
-			} else if (
-				y === 0.5 ||
-				y === "c" ||
-				y === "center" ||
-				y === "middle"
-			) {
+			} else if (y === "c" || y === "center" || y === "middle") {
 				state.y = (canvasState.height * 0.5);
-			} else if (
-				y === 1 ||
-				y === "b" ||
-				y === "bottom"
-			) {
+			} else if (y === "b" || y === "bottom") {
 				state.y = (canvasState.height * 1) - (state.height * 0.5);
 			} else if (
-				y !== null &&
-				y !== undefined
+				parseFloat(y) >= 0 &&
+				parseFloat(y) <= 1
 			) {
-				state.y = y;
+				state.y = (canvasState.height - state.height) * parseFloat(y) + (state.height * 0.5);
+			} else if (isNumeric(y) === true) {
+				state.y = parseInt(y);
 			}
 
 			// adjust state
@@ -3906,7 +3778,7 @@
 				return false;
 			}
 
-			if (typeof(ratio) !== "number") {
+			if (!isNumeric(ratio)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -3951,8 +3823,8 @@
 			eventSubCaches = [];
 
 			// save state
-			state.width *= 1 + ratio;
-			state.height *= 1 + ratio;
+			state.width *= 1 + parseFloat(ratio);
+			state.height *= 1 + parseFloat(ratio);
 
 			// adjust state
 			setElement(source, state);
@@ -4054,6 +3926,11 @@
 					height = fittedSizes[1];
 					left = canvasState.width * 0.5;
 					top = canvasState.height * 0.5;
+				} else if (isNumeric(ratio) === true) {
+					width = state.originalWidth * parseFloat(ratio);
+					height = state.originalHeight * parseFloat(ratio);
+					left = state.left;
+					top = state.top;
 				} else {
 					if (config.edit) {
 						config.edit("Argument error");
@@ -4107,7 +3984,7 @@
 				return false;
 			}
 
-			if (typeof(deg) !== "number") {
+			if (!isNumeric(deg)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -4146,6 +4023,8 @@
 				} 
 				return false;
 			}
+
+			deg = parseFloat(deg);
 
 			if (state.scaleX === -1) {
 				deg *= -1;
@@ -4189,7 +4068,7 @@
 				return false;
 			}
 
-			if (typeof(deg) !== "number") {
+			if (!isNumeric(deg)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -4228,6 +4107,8 @@
 				} 
 				return false;
 			}
+
+			deg = parseFloat(deg);
 
 			if (state.scaleX === -1) {
 				deg *= -1;
@@ -4402,8 +4283,8 @@
 			}
 
 			if (
-				typeof(x) !== "number" ||
-				typeof(y) !== "number"
+				!isNumeric(x) ||
+				!isNumeric(y)
 			) {
 				if (config.edit) {
 					config.edit("Argument error");
@@ -4444,6 +4325,9 @@
 				return false;
 			}
 
+			x = parseFloat(x);
+			y = parseFloat(y);
+
 			if (x > 1) {
 				x = 1;
 			}
@@ -4469,7 +4353,7 @@
 
 			// save state
 			state.scaleX = x;
-			state.scaleY = x;
+			state.scaleY = y;
 
 			// adjust state
 			setElement(source, state);
@@ -4498,7 +4382,7 @@
 				return false;
 			}
 
-			if (typeof(num) !== "number") {
+			if (!isNumeric(num)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -4537,6 +4421,8 @@
 				} 
 				return false;
 			}
+
+			num = parseFloat(num);
 
 			if (num > 1) {
 				num = 1;
@@ -4777,7 +4663,7 @@
 				return false;
 			}
 
-			if (typeof(num) !== "number") {
+			if (!isNumeric(num)) {
 				if (config.edit) {
 					config.edit("Argument error");
 				}
@@ -4822,7 +4708,7 @@
 			eventSubCaches = [];
 
 			// save state
-			state.index = num;
+			state.index = parseFloat(num);
 
 			// adjust state
 			setElement(source, state);
@@ -5533,70 +5419,6 @@
 			}
 		}
 
-		myObject.canvas = function(w, h, cb) {
-			if (
-				typeof(w) !== "number" ||
-				typeof(h) !== "number"
-			) {
-				if (config.config) {
-					config.config("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.config) {
-					config.config("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			var oldW = canvasState.width;
-			var oldH = canvasState.height;
-
-			// set container
-			initContainer(w, h);
-
-			// set canvas
-			initCanvas(w, h);
-
-			// set images
-			var newW = canvasState.width;
-			var newH = canvasState.height;
-
-			var scaleRatioX = newW / oldW;
-			var scaleRatioY = newH / oldH;
-
-			// new state adjust to images
-			imageStates.forEach(function(state){
-				var source = getSourceById(state.id);
-				var clone = getCloneById(state.id);
-
-				var aspectRatio = state.width / state.height;
-
-				state.width *= scaleRatioX;
-				state.height = state.width / aspectRatio;
-				state.x *= scaleRatioX;
-				state.y *= scaleRatioY;
-
-				setElement(source, state);
-				setElement(clone, state);
-			});
-
-			if (config.config) {
-				config.config(null, canvasState);
-			}
-			if (cb) {
-				cb(null, canvasState);
-			}
-		}
-
 		myObject.setFillColor = function(colour, cb) {
 
 			if (typeof(colour) !== "string") {
@@ -6047,6 +5869,80 @@
 						cb(null, result);
 					}
 				}
+			}
+		}
+
+		// 
+		// canvas
+		// 
+
+		myObject.canvas = function(w, h, cb) {
+			if (
+				!isNumeric(w) ||
+				!isNumeric(h)
+			) {
+				if (config.config) {
+					config.config("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.config) {
+					config.config("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			var oldW = canvasState.width;
+			var oldH = canvasState.height;
+
+			// set container
+			initContainer(
+				parseFloat(w), 
+				parseFloat(h)
+			);
+
+			// set canvas
+			initCanvas(
+				parseFloat(w),
+				parseFloat(h)
+			);
+
+			// set images
+			var newW = canvasState.width;
+			var newH = canvasState.height;
+
+			var scaleRatioX = newW / oldW;
+			var scaleRatioY = newH / oldH;
+
+			// new state adjust to images
+			imageStates.forEach(function(state){
+				var source = getSourceById(state.id);
+				var clone = getCloneById(state.id);
+
+				var aspectRatio = state.width / state.height;
+
+				state.width *= scaleRatioX;
+				state.height = state.width / aspectRatio;
+				state.x *= scaleRatioX;
+				state.y *= scaleRatioY;
+
+				setElement(source, state);
+				setElement(clone, state);
+			});
+
+			if (config.config) {
+				config.config(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
 			}
 		}
 
