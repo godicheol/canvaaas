@@ -552,13 +552,6 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
-				// set styles
-				canvasElement.classList.add("move");
-				mirrorElement.classList.add("move");
-
-				source.classList.add("move");
-				clone.classList.add("move");
-
 				// add event handles
 				document.addEventListener("mousemove", handlers.onMove, false);
 				document.addEventListener("mouseup", handlers.endMove, false);
@@ -641,13 +634,6 @@
 				// toggle off
 				onMove = false;
 
-				// set styles
-				canvasElement.classList.remove("move");
-				mirrorElement.classList.remove("move");
-
-				source.classList.remove("move");
-				clone.classList.remove("move");
-
 				// remove event handles
 				document.removeEventListener("mousemove", handlers.onMove, false);
 				document.removeEventListener("mouseup", handlers.endMove, false);
@@ -725,13 +711,6 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
-				// set styles
-				canvasElement.classList.add("rotate");
-				mirrorElement.classList.add("rotate");
-
-				source.classList.add("rotate");
-				clone.classList.add("rotate");
-
 				// add event handles
 				document.addEventListener("mousemove", handlers.onRotate, false);
 				document.addEventListener("mouseup", handlers.endRotate, false);
@@ -806,13 +785,6 @@
 
 				// toggle off
 				onRotate = false;
-
-				// set styles
-				canvasElement.classList.remove("rotate");
-				mirrorElement.classList.remove("rotate");
-
-				source.classList.remove("rotate");
-				clone.classList.remove("rotate");
 
 				document.removeEventListener("mousemove", handlers.onRotate, false);
 				document.removeEventListener("mouseup", handlers.endRotate, false);
@@ -909,13 +881,6 @@
 				pushCache(state.id);
 				eventSubCaches = [];
 
-				// set styles
-				canvasElement.classList.add("resize");
-				mirrorElement.classList.add("resize");
-
-				source.classList.add("resize");
-				clone.classList.add("resize");
-
 				// add event handles
 				document.addEventListener("mousemove", handlers.onResize, false);
 				document.addEventListener("mouseup", handlers.endResize, false);
@@ -1000,20 +965,19 @@
 						width = height * aspectRatio;
 					}
 				} else if (direction === "ne") {
-					width += diffX;
-					height -= diffY;
-
 					if (!onShiftKey) {
+						width += diffX;
+						height -= diffY;
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
 					} else {
 						if (2 * diffX < 2 * -diffY * aspectRatio) {
-							height -= diffY;
+							height -= diffY * 2;
 							width = height * aspectRatio;
 						} else {
-							width += diffX;
+							width += diffX * 2;
 							height = width / aspectRatio;
 						}
 					}
@@ -1027,20 +991,19 @@
 						height = width / aspectRatio;
 					}
 				} else if (direction === "se") {
-					width += diffX;
-					height += diffY;
-
 					if (!onShiftKey) {
+						width += diffX;
+						height += diffY;
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
 					} else {
 						if (2 * diffX < 2 * diffY * aspectRatio) {
-							height += diffY;
+							height += 2 * diffY;
 							width = height * aspectRatio;
 						} else {
-							width += diffX;
+							width += 2 * diffX;
 							height = width / aspectRatio;
 						}
 					}
@@ -1054,20 +1017,19 @@
 						width = height * aspectRatio;
 					}
 				} else if (direction === "sw") {
-					width -= diffX;
-					height += diffY;
-
 					if (!onShiftKey) {
+						width -= diffX;
+						height += diffY;
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
 					} else {
 						if (2 * -diffX < 2 * diffY * aspectRatio) {
-							height += diffY;
+							height += 2 * diffY;
 							width = height * aspectRatio;
 						} else {
-							width -= diffX;
+							width -= 2 * diffX;
 							height = width / aspectRatio;
 						}
 					}
@@ -1081,20 +1043,19 @@
 						height = width / aspectRatio;
 					}
 				} else if (direction === "nw") {
-					width -= diffX;
-					height -= diffY;
-
 					if (!onShiftKey) {
+						width -= diffX;
+						height -= diffY;
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
 					} else {
 						if (2 * -diffX < 2 * -diffY * aspectRatio) {
-							height -= diffY;
+							height -= 2 * diffY;
 							width = height * aspectRatio;
 						} else {
-							width -= diffX;
+							width -= 2 * diffX;
 							height = width / aspectRatio;
 						}
 					}
@@ -1138,13 +1099,6 @@
 
 				// toggle off
 				onResize = false;
-
-				// set styles
-				canvasElement.classList.remove("resize");
-				mirrorElement.classList.remove("resize");
-
-				source.classList.remove("resize");
-				clone.classList.remove("resize");
 
 				// remove event handles
 				document.removeEventListener("mousemove", handlers.onResize, false);

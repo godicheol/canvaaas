@@ -51,24 +51,6 @@
 .canvaaas-clone .canvaaas-outline{
 	border-color: red;
 }
-/* on move
-.canvaaas-image.move .canvaaas-outline,
-.canvaaas-clone.move .canvaaas-outline{
-	border-color: blue;
-}
-*/
-/* on reisze
-.canvaaas-image.resize .canvaaas-outline,
-.canvaaas-clone.resize .canvaaas-outline{
-	border-color: blue;
-}
-*/
-/* on rotate
-.canvaaas-image.rotate .canvaaas-outline,
-.canvaaas-clone.rotate .canvaaas-outline{
-	border-color: blue;
-}
-*/
 .canvaaas-outline-top{
 	border-top-width: 1px;
 	border-top-style: solid;
@@ -93,24 +75,6 @@
 .canvaaas-clone .canvaaas-innerline{
 	border-color: red;
 }
-/* on move
-.canvaaas-image.move .canvaaas-innerline,
-.canvaaas-clone.move .canvaaas-innerline{
-	border-color: blue;
-}
-*/
-/* on reisze
-.canvaaas-image.resize .canvaaas-innerline,
-.canvaaas-clone.resize .canvaaas-innerline{
-	border-color: blue;
-}
-*/
-/* on rotate
-.canvaaas-image.rotate .canvaaas-innerline,
-.canvaaas-clone.rotate .canvaaas-innerline{
-	border-color: blue;
-}
-*/
 
 .canvaaas-innerline-top{
 	border-top-width: 1px;
@@ -163,31 +127,6 @@
 .canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
 	border-color: red;
 }
-
-/* on move
-.canvaaas-image.move .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image.move .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone.move .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone.move .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: blue;
-}
-*/
-/* on reisze
-.canvaaas-image.resize .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image.resize .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone.resize .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone.resize .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: blue;
-}
-*/
-/* on rotate
-.canvaaas-image.rotate .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image.rotate .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone.rotate .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone.rotate .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: blue;
-}
-*/
 
 /*!
  * initial

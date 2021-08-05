@@ -290,6 +290,7 @@
 		canvaaas.config({
 			// initCanvasWidth: 3000,
 			// initCanvasHeight: 3000,
+			lockAspectRatio: false,
 			edit: function(err, res){
 				var state = canvaaas.getImageData(res);
 				inputs.width.value = state.width;
