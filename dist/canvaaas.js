@@ -37,6 +37,14 @@
  * 
  * update init
  * 
+ * remove hide container, show container
+ * 
+ * remove stop, resume
+ * 
+ * escape freeze => thaw
+ * 
+ * 
+ * 
  */
 
 /*!
@@ -45,13 +53,7 @@
  * 
  * handle 사용 중 active => 실패 (clone.handle 접근 불가)
  * 
- * resize handle 가장자리 lock aspect 고치기
- * 
- * focus out 후 element canvas 밖에 있으면 끌어오기
- * 
- * hideContainer => resizeWindow => showContainer error
- * 
- * preview => freeze => escapeFreeze 사용됨
+ * resize handle 가장자리 lock aspect 고치기 => 실패
  * 
  * 
  */
@@ -448,6 +450,13 @@
 					source = e.target;
 				}
 				var state = getStateBySource(source);
+
+				if (!config.editable) {
+					if (config.focus) {
+						config.focus("Editing has been disabled");
+					}
+					return false;
+				}
 
 				if (!source || !state) {
 					return false;
@@ -5457,6 +5466,10 @@
 			var axisX = canvasState.width * 0.5;
 			var axisY = canvasState.height * 0.5;
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
 			state.width = width;
 			state.height = height;
 			state.x = axisX;
@@ -5581,54 +5594,6 @@
 			}
 			if (cb) {
 				cb(null, canvasState);
-			}
-		}
-
-		myObject.hideContainer = function(cb) {
-			containerElement.classList.add("hidden");
-
-			if (cb) {
-				cb(null, canvasState);
-			}
-		}
-
-		myObject.showContainer = function(cb) {
-			containerElement.classList.remove("hidden");
-
-			if (cb) {
-				cb(null, canvasState);
-			}
-		}
-
-		myObject.resume = function(cb) {
-			config.editable = true;
-
-			if (cb) {
-				cb(null, config);
-			}
-		}
-
-		myObject.stop = function(cb) {
-			var source = eventState.target;
-			if (
-				source !== undefined &&
-				source !== null
-			) {
-				var id = getIdBySource(source);
-				var res = setFocusOut(id);
-				if (!res) {
-					if (cb) {
-						cb("`setFocusOut()` error");
-					}
-					return false;
-				}
-			}
-			
-
-			config.editable = false;
-
-			if (cb) {
-				cb(null, config);
 			}
 		}
 
@@ -6120,7 +6085,7 @@
 			}
 		}
 
-		myObject.escapeFreeze = function(cb){
+		myObject.thaw = function(cb){
 			if (onFreeze === false) {
 				if (cb) {
 					cb("No progress in");

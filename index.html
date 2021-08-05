@@ -143,12 +143,7 @@
 		<button type="button" onclick="canvaaas.canvas(512, 512)">canvas(512, 512, cb)</button>
 		<button type="button" onclick="canvaaas.canvas(1920, 1080)">canvas(1920, 1080, cb)</button>
 		<button type="button" onclick="canvaaas.canvas(1080, 1920)">canvas(1080, 1920, cb)</button>
-		//
-		<button type="button" onclick="canvaaas.hideContainer()">hideContainer(cb)</button>
-		<button type="button" onclick="canvaaas.showContainer()">showContainer(cb)</button>
-		//
-		<button type="button" onclick="canvaaas.stop()">stop(cb)</button>
-		<button type="button" onclick="canvaaas.resume()">resume(cb)</button>
+		<button type="button" onclick="canvaaas.canvas(4000, 4000)">canvas(4000, 4000, cb)</button>
 		//
 		<button type="button" onclick="canvaaas.setFillColor('#000000')">setFillColor("000000", cb)</button>
 		<button type="button" onclick="canvaaas.setFillColor('FFFFFF')">setFillColor('FFFFFF', cb)</button>
@@ -172,7 +167,7 @@
 		<button type="button" onclick="canvaaas.drawTo(tmp2)">drawTo(options, cb)</button>
 		//
 		<button type="button" onclick="canvaaas.freeze()">freeze(cb)</button>
-		<button type="button" onclick="canvaaas.escapeFreeze()">escapeFreeze(cb)</button>
+		<button type="button" onclick="canvaaas.thaw()">thaw(cb)</button>
 		//
 		<script>
 			var tmp3 = {
@@ -206,9 +201,11 @@
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview1" style="width: 100%;" src="" alt="">
 	</div>
+
 	<div style="position: relative; display: inline-block; width: 30%; overflow: hidden; border: 1px solid; font-size: 0px;">
 		<img id="preview2" style="width: 100%;" src="" alt="">
 	</div>
+	
 	<div style="display: inline-block; width: 30%; border: 1px solid; font-size: 0px;">
 		<img id="preview3" style="width: 100%;" src="" alt="">
 	</div>
@@ -290,8 +287,11 @@
 		canvaaas.config({
 			// initCanvasWidth: 3000,
 			// initCanvasHeight: 3000,
-			lockAspectRatio: false,
 			edit: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
 				var state = canvaaas.getImageData(res);
 				inputs.width.value = state.width;
 				inputs.height.value = state.height;
