@@ -19,7 +19,7 @@
 
 			filename: undefined, // string
 
-			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg"], // string, jpg, jpeg, png, webp, svg...
+			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg", "svg+xml"], // string, jpg, jpeg, png, webp, svg...
 
 			editable: true, // boolean
 
@@ -2614,6 +2614,7 @@
 						}
 						return false;
 					}
+					
 					var resB = initCanvas();
 					if (!resB) {
 						if (cb) {
@@ -3430,6 +3431,29 @@
 		}
 
 		myObject.uploadFiles = function(self, imageStates, cb) {
+			var thisFiles = [],
+				thisStates = [],
+				thisCb,
+				hasState = true;
+
+			if (cb) {
+				if (typeof(cb) === "function") {
+					thisCb = cb;
+				}
+			} else {
+				if (typeof(imageStates) === "function") {
+					thisCb = imageStates;
+					hasState = false;
+				}
+			}
+
+			if (
+				imageStates === undefined ||
+				imageStates === null
+			) {
+				hasState = false;
+			}
+
 			if (
 				typeof(self) !== "object" ||
 				self === null
@@ -3437,36 +3461,31 @@
 				if (config.upload) {
 					config.upload("Argument error");
 				}
-				if (cb) {
-					cb("Argument error");
+				if (thisCb) {
+					thisCb("Argument error");
 				} 
 				return false;
 			}
 
-			var files = self.files;
-			if (files.length < 1) {
+			thisFiles = self.files;
+			if (thisFiles.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
-				if (cb) {
-					cb("File not found");
+				if (thisCb) {
+					thisCb("File not found");
 				} 
 				return false;
 			}
 
-			var states = [];
-			for (var i = 0; i < files.length; i++) {
-				states[i] = null;
-			}
-
-			if (imageStates) {
+			if (hasState === true) {
 				if (Array.isArray(imageStates)) {
 					for (var i = 0; i < imageStates.length; i++) {
-						states[i] = imageStates[i];
+						thisStates[i] = imageStates[i];
 					}
 				} else {
 					if (
-						files.length === 1 &&
+						thisFiles.length === 1 &&
 						typeof(imageStates) === "object" &&
 						imageStates !== null
 					) {
@@ -3479,8 +3498,8 @@
 				if (config.upload) {
 					config.upload("Editing has been disabled");
 				}
-				if (cb) {
-					cb("Editing has been disabled");
+				if (thisCb) {
+					thisCb("Editing has been disabled");
 				} 
 				return false;
 			}
@@ -3489,15 +3508,15 @@
 				if (config.upload) {
 					config.upload("Already in progress");
 				}
-				if (cb) {
-					cb("Already in progress");
+				if (thisCb) {
+					thisCb("Already in progress");
 				} 
 				return false;
 			}
 
 			onUpload = true;
 
-			var index = files.length;
+			var index = thisFiles.length;
 			var count = 0;
 			var results = [];
 
@@ -3505,10 +3524,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var thisUrl = files[count];
-					var thisState = states[count];
-
-					renderImage(thisUrl, thisState, function(err, id) {
+					renderImage(thisFiles[count], thisStates[count], function(err, id) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3526,40 +3542,58 @@
 						recursiveFunc();
 					});
 				} else {
-
 					onUpload = false;
 
-					if (cb) {
-						cb(null, results);
+					if (thisCb) {
+						thisCb(null, results);
 					}
 				}
 			}
 		}
 
 		myObject.uploadUrls = function(imageUrls, imageStates, cb) {
-			if (!Array.isArray(imageUrls)) {
+			var thisFiles = [],
+				thisStates = [],
+				thisCb,
+				hasState = true;
+
+			if (cb) {
+				if (typeof(cb) === "function") {
+					thisCb = cb;
+				}
+			} else {
+				if (typeof(imageStates) === "function") {
+					thisCb = imageStates;
+					hasState = false;
+				}
+			}
+
+			if (
+				imageStates === undefined ||
+				imageStates === null
+			) {
+				hasState = false;
+			}
+
+			thisFiles = imageUrls;
+			if (!Array.isArray(thisFiles)) {
 				if (config.upload) {
 					config.upload("Argument error");
 				}
-				if (cb) {
-					cb("Argument error");
+				if (thisCb) {
+					thisCb("Argument error");
 				} 
 				return false;
 			}
 
-			var states = [];
-			for (var i = 0; i < imageUrls.length; i++) {
-				states[i] = null;
-			}
-
-			if (imageStates) {
+			if (hasState === true) {
 				if (Array.isArray(imageStates)) {
 					for (var i = 0; i < imageStates.length; i++) {
-						states[i] = imageStates[i];
+						thisStates[i] = imageStates[i];
 					}
 				} else {
 					if (
-						imageUrls.length === 1 &&
+						thisFiles.length === 1 &&
 						typeof(imageStates) === "object" &&
 						imageStates !== null
 					) {
@@ -3572,8 +3606,8 @@
 				if (config.upload) {
 					config.upload("Editing has been disabled");
 				}
-				if (cb) {
-					cb("Editing has been disabled");
+				if (thisCb) {
+					thisCb("Editing has been disabled");
 				} 
 				return false;
 			}
@@ -3582,13 +3616,13 @@
 				if (config.upload) {
 					config.upload("Already in progress");
 				}
-				if (cb) {
-					cb("Already in progress");
+				if (thisCb) {
+					thisCb("Already in progress");
 				} 
 				return false;
 			}
 
-			var index = imageUrls.length;
+			var index = thisFiles.length;
 			var count = 0;
 			var results = [];
 
@@ -3598,10 +3632,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var thisUrl = imageUrls[count];
-					var thisState = states[count];
-
-					renderImage(thisUrl, thisState, function(err, id) {
+					renderImage(thisFiles[count], thisStates[count], function(err, id) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3619,11 +3650,10 @@
 						recursiveFunc();
 					});
 				} else {
-
 					onUpload = false;
 
-					if (cb) {
-						cb(null, results);
+					if (thisCb) {
+						thisCb(null, results);
 					}
 				}
 			}
@@ -6144,88 +6174,6 @@
 		// draw
 		// 
 
-		myObject.draw = function(cb){
-			var canvasWidth = canvasState.originalWidth;
-			var canvasHeight = canvasState.originalHeight;
-			var quality = canvasState.quality;
-			var mimeType = canvasState.mimeType;
-			var imageSmoothingQuality = canvasState.smoothingQuality;
-			var imageSmoothingEnabled = canvasState.smoothingEnabled;
-			var backgroundColor = canvasState.backgroundColor;
-
-			var drawOption = {
-				width: canvasWidth,
-				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 99999,
-				maxHeight: config.maxCanvasHeight || 99999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
-				backgroundColor: backgroundColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (config.draw) {
-					config.draw("`drawCanvas()` error");
-				}
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.backgroundColor = backgroundColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			var drawResults = [];
-			function recursiveFunc() {
-				if (count < index) {
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					result.states = drawResults;
-					result.file = canvas.toDataURL(mimeType, quality);
-
-					if (config.draw) {
-						config.draw(null, result);
-					}
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
 		myObject.draw = function(options, cb){
 			/*!
 			 * options = {
@@ -6237,7 +6185,6 @@
 			 * smoothingEnabled
 			 * }
 			 */
-
 
 			var canvasAspectRatio;
 			var canvasWidth;
