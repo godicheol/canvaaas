@@ -58,9 +58,9 @@
 }
 
 /* image innerline */
-.canvaaas-innerline{
+/*.canvaaas-innerline{
 	display: none !important;
-}
+}*/
 .canvaaas-image .canvaaas-innerline{
 	border-color: #888;
 }

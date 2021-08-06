@@ -194,7 +194,16 @@
 				">Remove All</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.download()
+					// download 
+					canvaaas.draw(function(err, res){
+						var link = document.createElement('a');
+						link.setAttribute('href', res.file);
+						link.setAttribute('download', 'untitled');
+						link.style.display = 'none';
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+					})
 				">Save</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -262,6 +271,16 @@
 				">Opacity</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleAspectRatio(canvaaas.this())
+				">Toggle Aspect Ratio</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.lockAspectRatio(canvaaas.this())
+				">Lock Aspect Ratio</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unlockAspectRatio(canvaaas.this())
+				">Unlock Aspect Ratio</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexUp(canvaaas.this())
 				">Index Up</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -294,6 +313,10 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.undrawable(canvaaas.this())
 				">Disable Draw</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.reset(canvaaas.this())
+				">reset</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -314,16 +337,8 @@
 				">Thaw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.setFillColor(window.prompt('RGB (e.g. #FFFFFF)'))
-				">Set Background Color</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.lockAspectRatio()
-				">Lock Aspect Ratio</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.unlockAspectRatio()
-				">Unlock Aspect Ratio</a></li>
-				<li class="rule"></li>
+					canvaaas.backgroundColor(window.prompt('RGB (e.g. #FFFFFF)'))
+				">Background Color</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -438,6 +453,8 @@
 			<input id="image-opacity" type="text">
 			Index:
 			<input id="image-index" type="text">
+			LockAspectRatio
+			<input id="image-lockAspectRatio" type="text">
 			Focusable:
 			<input id="image-focusable" type="text">
 			Editable:
@@ -856,6 +873,7 @@
 				scaleY: document.getElementById("image-scaleY"),
 				opacity: document.getElementById("image-opacity"),
 				index: document.getElementById("image-index"),
+				lockAspectRatio: document.getElementById("image-lockAspectRatio"),
 				focusable: document.getElementById("image-focusable"),
 				editable: document.getElementById("image-editable"),
 				drawable: document.getElementById("image-drawable"),
@@ -1014,6 +1032,7 @@
 				inputs.image.scaleX.value = imageState.scaleX;
 				inputs.image.scaleY.value = imageState.scaleY;
 				inputs.image.opacity.value = imageState.opacity;
+				inputs.image.lockAspectRatio.value = imageState.lockAspectRatio;
 				inputs.image.focusable.value = imageState.focusable;
 				inputs.image.editable.value = imageState.editable;
 				inputs.image.drawable.value = imageState.drawable;

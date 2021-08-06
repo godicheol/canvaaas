@@ -17,15 +17,13 @@
 
 		var defaultConfiguration = {
 
-			filename: undefined, // string
+			filename: "untitled", // string
 
 			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg"], // string, jpg, jpeg, png, webp, svg...
 
 			editable: true, // boolean
 
 			magnetic: true, // boolean
-
-			lockAspectRatio: true, // boolean
 
 			minAutoIndexing: 0, // number
 
@@ -44,16 +42,6 @@
 			maxContainerWidth: 1, // number, px, (0 ~ 1) => viewportWidth * (0 ~ 1)
 
 			maxContainerHeight: 0.7, // number, px, (0 ~ 1) => viewportHeight * (0 ~ 1)
-
-			drawFillColor: "#FFFFFF", // string, RGB
-
-			drawMimeType: "image/jpeg", // string, image/jpeg, image/png, image/webp...
-
-			drawQuality: 0.8, // number, 0 ~ 1
-
-			drawSmoothingEnabled: false, // boolean
-			
-			drawSmoothingQuality: "low", // string, low, medium, high
 
 			initCanvasWidth: undefined, // number, px
 
@@ -81,18 +69,13 @@
 
 			init: undefined, // callback function
 
-			focus: undefined, // callback function
-
-			edit: undefined, // callback function
-
-			remove: undefined, // callback function
-
-			config: undefined, // callback function
-
 			upload: undefined, // callback function
 
 			draw: undefined, // callback function
 
+			focus: undefined, // callback function
+
+			edit: undefined, // callback function
 		};
 
 		Object.freeze(defaultConfiguration);
@@ -855,7 +838,7 @@
 					return false;
 				}
 
-				if (config.lockAspectRatio || e.shiftKey) {
+				if (state.lockAspectRatio || e.shiftKey) {
 					onShiftKey = true;
 				}
 
@@ -1289,12 +1272,12 @@
 
 				var oldWidth = containerElement.offsetWidth;
 
-				initContainer(canvasState.originalWidth, canvasState.originalHeight);
+				initContainer();
 
 				var newWidth = containerState.width;
 				var scaleRatio = newWidth / oldWidth;
 
-				initCanvas(canvasState.originalWidth, canvasState.originalHeight);
+				initCanvas();
 
 				imageStates.forEach(function(state){
 					var source = getSourceById(state.id);
@@ -1720,6 +1703,7 @@
 			tmp.scaleY = state.scaleY;
 			tmp.opacity = state.opacity;
 			tmp.index = state.index;
+			tmp.lockAspectRatio = state.lockAspectRatio;
 			tmp.focusable = state.focusable;
 			tmp.editable = state.editable;
 			tmp.drawable = state.drawable;
@@ -2316,13 +2300,13 @@
 			var maxHeight = options.maxHeight;
 			var minWidth = options.minWidth || 0;
 			var minHeight = options.minHeight || 0;
-			var fillColor = options.fillColor;
+			var fillStyle = options.backgroundColor || "#FFFFFF";
 
 			if (
 				!width ||
 				!height ||
 				!aspectRatio ||
-				!fillColor ||
+				!fillStyle ||
 				!maxWidth ||
 				!maxHeight
 			) {
@@ -2348,7 +2332,7 @@
 			canvas.width = canvasWidth;
 			canvas.height = canvasHeight;
 
-			ctx.fillStyle = fillColor;
+			ctx.fillStyle = fillStyle;
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
 
@@ -2547,14 +2531,17 @@
 
 				// check initialized canvas
 				if (!isInitialized) {
-					var resA = initContainer(newImage.width, newImage.height);
+					canvasState.originalWidth = newImage.width;
+					canvasState.originalHeight = newImage.height;
+
+					var resA = initContainer();
 					if (!resA) {
 						if (cb) {
 							cb("`initContainer()` error");
 						}
 						return false;
 					}
-					var resB = initCanvas(newImage.width, newImage.height);
+					var resB = initCanvas();
 					if (!resB) {
 						if (cb) {
 							cb("`initCanvas()` error");
@@ -2616,6 +2603,7 @@
 				var scaleX = 1;
 				var scaleY = 1;
 				var opacity = 1;
+				var lockAspectRatio = true;
 				var focusable = true;
 				var editable = true;
 				var drawable = true;
@@ -2659,6 +2647,9 @@
 					if (oldState.scaleY !== undefined){
 						scaleY = oldState.scaleY;
 					}
+					if (oldState.lockAspectRatio !== undefined){
+						lockAspectRatio = oldState.lockAspectRatio;
+					}
 					if (oldState.focusable !== undefined){
 						focusable = oldState.focusable;
 					}
@@ -2684,6 +2675,7 @@
 				newState.scaleX = scaleX;
 				newState.scaleY = scaleY;
 				newState.opacity = opacity;
+				newState.lockAspectRatio = lockAspectRatio;
 				newState.focusable = focusable;
 				newState.editable = editable;
 				newState.drawable = drawable;
@@ -2894,13 +2886,8 @@
 			}
 		}
 
-		function initContainer(width, height) {
-			if (
-				containerElement === false ||
-				containerElement === undefined ||
-				typeof(width) !== "number" ||
-				typeof(height) !== "number"
-			) {
+		function initContainer() {
+			if (!containerElement) {
 				return false;
 			}
 
@@ -2944,7 +2931,8 @@
 				maxHeight = config.maxContainerHeight;
 			}
 
-			var aspectRatio = config.containerAspectRatio || width / height;
+			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var aspectRatio = config.containerAspectRatio || canvasAspectRatio;
 
 			var containerWidth = containerElement.offsetWidth;
 			var containerHeight = containerElement.offsetWidth / aspectRatio;
@@ -2985,18 +2973,16 @@
 			return true;
 		}
 
-		function initCanvas(width, height) {
+		function initCanvas() {
 			if (
 				!canvasElement ||
 				!containerState.width ||
-				!containerState.height ||
-				typeof(width) !== "number" ||
-				typeof(height) !== "number"
+				!containerState.height
 			) {
 				return false;
 			}
 
-			var aspectRatio = width / height;
+			var aspectRatio = canvasState.originalWidth / canvasState.originalHeight;
 			var maxWidth = config.maxCanvasWidth || 9999;
 			var maxHeight = config.maxCanvasHeight || 9999;
 			var minWidth = config.minCanvasWidth || 0;
@@ -3020,12 +3006,17 @@
 				aspectRatio
 			);
 
-			var originalWidth = Math.min(maxSizes[0], Math.max(minSizes[0], width));
-			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], height));
+			var originalWidth = Math.min(maxSizes[0], Math.max(minSizes[0], canvasState.originalWidth));
+			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], canvasState.originalHeight));
 
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
+			canvasState.quality = 0.8;
+			canvasState.mimeType = "image/jpeg";
+			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
+			canvasState.smoothingEnabled = false; // false, true
+			canvasState.backgroundColor = "#FFFFFF";
 			canvasState.originalWidth = originalWidth;
 			canvasState.originalHeight = originalHeight;
 			canvasState.width = fittedSizes[0];
@@ -3133,7 +3124,10 @@
 				config.initCanvasHeight !== null
 			) {
 				// set container
-				var resA = initContainer(config.initCanvasWidth, config.initCanvasHeight);
+				canvasState.originalWidth = config.initCanvasWidth;
+				canvasState.originalHeight = config.initCanvasHeight;
+
+				var resA = initContainer();
 				if (!resA) {
 					if (config.init) {
 						config.init("`initContainer()` error");
@@ -3145,7 +3139,7 @@
 				}
 
 				// set canvas
-				var resB = initCanvas(config.initCanvasWidth, config.initCanvasHeight);
+				var resB = initCanvas();
 				if (!resB) {
 					if (config.init) {
 						config.init("`initCanvas()` error");
@@ -3315,11 +3309,14 @@
 			containerElement = thisTarget.querySelector("div.canvaaas");
 			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
 
+			canvasState.originalWidth = canvasWidth;
+			canvasState.originalHeight = canvasHeight;
+
 			// set container
-			initContainer(canvasWidth, canvasHeight);
+			initContainer();
 
 			// set canvas
-			initCanvas(canvasWidth, canvasHeight);
+			initCanvas();
 
 			// set events
 			window.addEventListener("resize", handlers.resizeWindow, false);
@@ -3343,10 +3340,6 @@
 						recursiveFunc();
 					});
 				} else {
-					// set styles
-					if (config.drawFillColor) {
-						canvasElement.style.backgroundColor = config.drawFillColor;
-					}
 
 					onInitialize = false;
 					isInitialized = true;
@@ -3901,8 +3894,8 @@
 
 			var aspectRatio = state.originalWidth / state.originalHeight;
 			if (state.width !== state.height * aspectRatio) {
-				if (config.lockAspectRatio === true) {
-					config.lockAspectRatio = false;
+				if (state.lockAspectRatio === true) {
+					state.lockAspectRatio = false;
 				}
 			}
 			
@@ -4886,6 +4879,214 @@
 			}
 		}
 
+		myObject.toggleAspectRatio = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
+			if (state.lockAspectRatio === true) {
+				state.lockAspectRatio = false;
+			} else {
+				state.lockAspectRatio = true;
+				var aspectRatio = state.originalWidth / state.originalHeight;
+				if (state.width > state.height / aspectRatio) {
+					state.height = state.width / aspectRatio;
+				} else {
+					state.width = state.height * aspectRatio;
+				}
+			}
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.lockAspectRatio = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
+			state.lockAspectRatio = true;
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			if (state.width > state.height / aspectRatio) {
+				state.height = state.width / aspectRatio;
+			} else {
+				state.width = state.height * aspectRatio;
+			}
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.unlockAspectRatio = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
+			state.lockAspectRatio = false;
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
 		myObject.focusIn = function(id, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -5331,9 +5532,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.remove) {
-					config.remove("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5341,9 +5539,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.remove) {
-					config.remove("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5351,9 +5546,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.remove) {
-					config.remove("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5365,9 +5557,6 @@
 				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
 					if (!res) {
-						if (config.remove) {
-							config.remove("`setFocusOut()` error");
-						}
 						if (cb) {
 							cb("`setFocusOut()` error");
 						}
@@ -5379,16 +5568,10 @@
 			// remove element
 			var res = removeImageById(id);
 			if (!res) {
-				if (config.remove) {
-					config.remove("`removeImageById()` error");
-				}
 				if (cb) {
 					cb("`removeImageById()` error");
 				}
 			} else {
-				if (config.remove) {
-					config.remove(null, id);
-				}
 				if (cb) {
 					cb(null, id);
 				}
@@ -5397,9 +5580,6 @@
 
 		myObject.removeAll = function(cb) {
 			if (!config.editable) {
-				if (config.remove) {
-					config.remove("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5422,18 +5602,16 @@
 					// remove element
 					var res = removeImageById(arr[count]);
 					if (!res) {
-						if (config.remove) {
-							config.remove("`removeImageById()` error");
-						}
+						results.push({
+							err: "`removeImageById()` error",
+							res: arr[count]
+						});
 					} else {
-						if (config.remove) {
-							config.remove(null, arr[count]);
-						}
+						results.push({
+							err: null,
+							res: arr[count]
+						});
 					}
-					results.push({
-						err: "`removeImageById()` error",
-						res: arr[count]
-					});
 					count++;
 					recursiveFunc();
 				} else {
@@ -5518,7 +5696,7 @@
 			state.scaleX = 1;
 			state.scaleY = 1;
 			state.opacity = 1;
-
+			state.lockAspectRatio = true;
 			state.focusable = true;
 			state.editable = true;
 			state.drawable = true;
@@ -5543,486 +5721,24 @@
 				typeof(newConfig) !== "object" ||
 				newConfig === null
 			) {
-				if (config.config) {
-					config.config("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				}
 				return false;
 			}
 
-			if (!config.editable) {
-				if (config.config) {
-					config.config("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
+			// if (!config.editable) {
+			// 	if (cb) {
+			// 		cb("Editing has been disabled");
+			// 	}
+			// 	return false;
+			// }
 
 			// set config
 			copyObject(newConfig, config);
 
-			if (config.config) {
-				config.config(null, config);
-			}
 			if (cb) {
 				cb(null, config);
-			}
-		}
-
-		myObject.setFillColor = function(colour, cb) {
-
-			if (typeof(colour) !== "string") {
-				if (config.config) {
-					config.config("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			if (colour.toLowerCase() === "alpha") {
-				colour = "transparent";
-			} else {
-				if (colour.charAt(0) !== "#") {
-					colour = "#" + colour;
-				}	
-			}
-
-			config.drawFillColor = colour;
-
-			if (config.config) {
-				config.config(null, config);
-			}
-			if (cb) {
-				cb(null, config);
-			}
-		}
-
-		myObject.unsetFillColor = function(cb) {
-
-			config.drawFillColor = defaultConfiguration.fillColor;
-
-			if (config.config) {
-				config.config(null, config);
-			}
-			if (cb) {
-				cb(null, config);
-			}
-		}
-
-		myObject.lockAspectRatio = function(cb){
-
-			config.lockAspectRatio = true;
-
-			if (config.config) {
-				config.config(null, config);
-			}
-			if (cb) {
-				cb(null, config);
-			}
-		}
-
-		myObject.unlockAspectRatio = function(cb){
-
-			config.lockAspectRatio = false;
-			
-			if (config.config) {
-				config.config(null, config);
-			}
-			if (cb) {
-				cb(null, config);
-			}
-		}
-
-		// 
-		// draw
-		// 
-
-		myObject.draw = function(cb){
-			var canvasWidth = canvasState.originalWidth;
-			var canvasHeight = canvasState.originalHeight;
-			var quality = config.drawQuality;
-			var mimeType = config.drawMimeType;
-			var imageSmoothingQuality = config.drawSmoothingQuality;
-			var imageSmoothingEnabled = config.drawSmoothingEnabled;
-			var fillColor = config.drawFillColor;
-
-			var drawOption = {
-				width: canvasWidth,
-				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
-				fillColor: fillColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (config.draw) {
-					config.draw("`drawCanvas()` error");
-				}
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			var drawResults = [];
-			function recursiveFunc() {
-				if (count < index) {
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					result.states = drawResults;
-					result.file = canvas.toDataURL(mimeType, quality);
-
-					if (config.draw) {
-						config.draw(null, result);
-					}
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
-		myObject.drawTo = function(options, cb){
-			/*!
-			 * options keys => width, quality, mimeType, fillColor, filename, smoothingQuality, smoothingEnabled
-			 */
-			if (
-				typeof(options) !== "object" ||
-				options === null
-			) {
-				if (config.draw) {
-					config.draw("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var canvasWidth = options.width || options.canvasWidth || canvasState.originalWidth;
-			var canvasHeight = canvasWidth / canvasAspectRatio;
-			var quality = options.quality || options.drawQuality || config.drawQuality;
-			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
-			var fillColor = options.fillColor || options.drawFillColor || config.drawFillColor;
-			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.drawSmoothingQuality;
-			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.drawSmoothingEnabled;
-
-			var drawOption = {
-				width: canvasWidth,
-				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
-				fillColor: fillColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (config.draw) {
-					config.draw("`drawCanvas()` error");
-				}
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// recursive
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					result.states = drawResults;
-					result.file = canvas.toDataURL(mimeType, quality);
-
-					if (config.draw) {
-						config.draw(null, result);
-					}
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
-		myObject.download = function(cb){
-			var canvasWidth = canvasState.originalWidth;
-			var canvasHeight = canvasState.originalHeight;
-			var quality = config.drawQuality;
-			var mimeType = config.drawMimeType;
-			var imageSmoothingQuality = config.drawSmoothingQuality;
-			var imageSmoothingEnabled = config.drawSmoothingEnabled;
-			var fillColor = config.drawFillColor;
-			var filename = config.filename || "Untitled";
-			filename += "." + mimeType.split("/")[1];
-
-			var drawOption = {
-				width: canvasWidth,
-				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
-				fillColor: fillColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
-			result.filename = filename;
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// draw image
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					result.states = drawResults;
-
-					var file = canvas.toDataURL(mimeType, quality);
-
-					var link = document.createElement('a');
-					link.setAttribute('href', file);
-					link.setAttribute('download', filename);
-					link.style.display = "none";
-
-					document.body.appendChild(link);
-
-					link.click();
-
-					document.body.removeChild(link);
-
-					if (cb) {
-						cb(null, result);
-					}
-				}
-			}
-		}
-
-		myObject.downloadTo = function(options, cb){
-			/*!
-			 * options keys => width, quality, mimeType, fillColor, filename, smoothingQuality, smoothingEnabled
-			 */
-			if (
-				typeof(options) !== "object" ||
-				options === null
-			) {
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var canvasWidth = options.width || options.canvasWidth || canvasState.originalWidth;
-			var canvasHeight = canvasWidth / canvasAspectRatio;
-			var quality = options.quality || options.drawQuality || config.drawQuality;
-			var mimeType = options.mimeType || options.drawMimeType || config.drawMimeType;
-			var fillColor = options.fillColor || options.drawFillColor || config.drawFillColor;
-			var imageSmoothingQuality = options.smoothingQuality || options.imageSmoothingQuality || config.drawSmoothingQuality;
-			var imageSmoothingEnabled = options.smoothingQuality || options.imageSmoothingEnabled || config.drawSmoothingEnabled;
-			var filename = options.filename || config.filename || "Untitled";
-			filename += "." + mimeType.split("/").pop();
-
-			var drawOption = {
-				width: canvasWidth,
-				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
-				fillColor: fillColor
-			}
-
-			var canvas = drawCanvas(drawOption);
-			if (!canvas) {
-				if (cb) {
-					cb("`drawCanvas()` error");
-				}
-				return false;
-			}
-			var ctx = canvas.getContext("2d");
-
-			var drawables = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
-				}
-			}
-
-			var index = drawables.length;
-			var count = 0;
-			var result = {};
-			var drawResults = [];
-
-			result.filename = filename;
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.fillColor = fillColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// draw image
-					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					ctx.imageSmoothingQuality = imageSmoothingQuality;
-					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
-					ctx.restore();
-
-					result.states = drawResults;
-
-					var file = canvas.toDataURL(mimeType, quality);
-
-					var link = document.createElement('a');
-					link.setAttribute('href', file);
-					link.setAttribute('download', filename);
-					link.style.display = "none";
-
-					document.body.appendChild(link);
-
-					link.click();
-
-					document.body.removeChild(link);
-
-					if (cb) {
-						cb(null, result);
-					}
-				}
 			}
 		}
 
@@ -6035,8 +5751,8 @@
 				!isNumeric(w) ||
 				!isNumeric(h)
 			) {
-				if (config.config) {
-					config.config("Argument error");
+				if (config.canvas) {
+					config.canvas("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -6045,8 +5761,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.config) {
-					config.config("Editing has been disabled");
+				if (config.canvas) {
+					config.canvas("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -6092,8 +5808,39 @@
 				setElement(clone, state);
 			});
 
-			if (config.config) {
-				config.config(null, canvasState);
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
+			}
+		}
+
+		myObject.backgroundColor = function(colour, cb) {
+
+			if (typeof(colour) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (colour.toLowerCase() === "alpha") {
+				colour = "transparent";
+			} else {
+				if (colour.charAt(0) !== "#") {
+					colour = "#" + colour;
+				}	
+			}
+
+			canvasState.backgroundColor = colour;
+			canvasElement.style.backgroundColor = colour;
+
+			if (config.canvas) {
+				config.canvas(null, canvasState);
 			}
 			if (cb) {
 				cb(null, canvasState);
@@ -6126,12 +5873,11 @@
 			config.editable = false;
 			onFreeze = true;
 
-			// set background
-			canvasElement.style.backgroundColor = config.drawFillColor;
+			// remove checker
 			canvasElement.classList.remove("checker");
 
 			if (cb) {
-				cb(null);
+				cb(null, canvasState);
 			}
 		}
 
@@ -6146,14 +5892,218 @@
 			config.editable = true;
 			onFreeze = false;
 
-			// unset bg
-			canvasElement.style.backgroundColor = "";
+			// set checker
 			canvasElement.classList.add("checker");
 
 			if (cb) {
 				cb(null);
 			}
 		}
+
+		// 
+		// draw
+		// 
+
+		myObject.draw = function(cb){
+			var canvasWidth = canvasState.originalWidth;
+			var canvasHeight = canvasState.originalHeight;
+			var quality = canvasState.quality;
+			var mimeType = canvasState.mimeType;
+			var imageSmoothingQuality = canvasState.smoothingQuality;
+			var imageSmoothingEnabled = canvasState.smoothingEnabled;
+			var backgroundColor = canvasState.backgroundColor;
+
+			var drawOption = {
+				width: canvasWidth,
+				height: canvasHeight,
+				maxWidth: config.maxCanvasWidth || 9999,
+				maxHeight: config.maxCanvasHeight || 9999,
+				minWidth: config.minCanvasWidth || 0,
+				minHeight: config.minCanvasHeight || 0,
+				backgroundColor: backgroundColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.draw) {
+					config.draw("`drawCanvas()` error");
+				}
+				if (cb) {
+					cb("`drawCanvas()` error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					drawables.push(imageStates[i]);
+				}
+			}
+
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+
+			result.width = canvas.width;
+			result.height = canvas.height;
+			result.numberOfImages = drawables.length;
+			result.backgroundColor = backgroundColor;
+			result.mimeType = mimeType;
+			result.quality = quality;
+			result.imageSmoothingQuality = imageSmoothingQuality;
+			result.imageSmoothingEnabled = imageSmoothingEnabled;
+
+			recursiveFunc();
+
+			var drawResults = [];
+			function recursiveFunc() {
+				if (count < index) {
+					drawImage(canvas, drawables[count].id, function(err) {
+						drawResults.push({
+							err: err,
+							res: drawables[count]
+						});
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					ctx.imageSmoothingQuality = imageSmoothingQuality;
+					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
+					ctx.restore();
+
+					result.states = drawResults;
+					result.file = canvas.toDataURL(mimeType, quality);
+
+					if (config.draw) {
+						config.draw(null, result);
+					}
+					if (cb) {
+						cb(null, result);
+					}
+				}
+			}
+		}
+
+		myObject.drawTo = function(options, cb){
+			/*!
+			 * options keys {
+			 * width, 
+			 * quality,
+			 * mimeType,
+			 * backgroundColor,
+			 * smoothingQuality,
+			 * smoothingEnabled
+			 * }
+			 */
+			if (
+				typeof(options) !== "object" ||
+				options === null
+			) {
+				if (config.draw) {
+					config.draw("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+			var canvasWidth = 	options.width || 
+								options.canvasWidth || 
+								canvasState.originalWidth;
+			var canvasHeight = canvasWidth / canvasAspectRatio;
+			var quality = 	options.quality ||
+							canvasState.quality;
+			var mimeType = 	options.mimeType ||
+							canvasState.mimeType;
+			var backgroundColor = 	options.backgroundColor || 
+									canvasState.backgroundColor;
+			var imageSmoothingQuality = options.smoothingQuality ||  
+										canvasState.smoothingQuality;
+			var imageSmoothingEnabled = options.smoothingQuality || 
+										canvasState.smoothingEnabled;
+
+			var drawOption = {
+				width: canvasWidth,
+				height: canvasHeight,
+				maxWidth: config.maxCanvasWidth || 9999,
+				maxHeight: config.maxCanvasHeight || 9999,
+				minWidth: config.minCanvasWidth || 0,
+				minHeight: config.minCanvasHeight || 0,
+				backgroundColor: backgroundColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.draw) {
+					config.draw("`drawCanvas()` error");
+				}
+				if (cb) {
+					cb("`drawCanvas()` error");
+				}
+				return false;
+			}
+			var ctx = canvas.getContext("2d");
+
+			var drawables = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					drawables.push(imageStates[i]);
+				}
+			}
+
+			var index = drawables.length;
+			var count = 0;
+			var result = {};
+			var drawResults = [];
+
+			result.width = canvas.width;
+			result.height = canvas.height;
+			result.numberOfImages = drawables.length;
+			result.backgroundColor = backgroundColor;
+			result.mimeType = mimeType;
+			result.quality = quality;
+			result.imageSmoothingQuality = imageSmoothingQuality;
+			result.imageSmoothingEnabled = imageSmoothingEnabled;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					// recursive
+					drawImage(canvas, drawables[count].id, function(err) {
+						drawResults.push({
+							err: err,
+							res: drawables[count]
+						});
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					// end
+					ctx.imageSmoothingQuality = imageSmoothingQuality;
+					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
+					ctx.restore();
+
+					result.states = drawResults;
+					result.file = canvas.toDataURL(mimeType, quality);
+
+					if (config.draw) {
+						config.draw(null, result);
+					}
+					if (cb) {
+						cb(null, result);
+					}
+				}
+			}
+		}
+
+		// 
+		// data
+		// 
 
 		myObject.this = function(cb){
 			if (!eventState.target) {
@@ -6339,7 +6289,7 @@
 				var oldId = getIdBySource(eventState.target);
 				setFocusOut(oldId);
 			}
-			
+
 			var recent = eventSubCaches.pop();
 			var source = getSourceById(recent.id);
 			var clone = getCloneById(recent.id);
