@@ -19,7 +19,7 @@
 
 			filename: undefined, // string
 
-			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg", "svg+xml"], // string, jpg, jpeg, png, webp, svg...
+			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg", "svg+xml", "tiff", "tif"], // string, jpg, jpeg, png, webp, svg...
 
 			editable: true, // boolean
 
@@ -99,7 +99,7 @@
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
-		conatinerTemplate += "<div class='canvaaas-canvas checker'></div>";
+		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "</div>";
 
 		var imageTemplate = "";
@@ -205,8 +205,11 @@
 							recursiveFunc();
 						});
 					} else {
-						// end
 						onUpload = false;
+
+						results.forEach(function(res) {
+							showImage(res.id);
+						});
 					}
 				}
 			},
@@ -1939,6 +1942,34 @@
 			return true;
 		}
 
+		function showImage(id) {
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+
+			if (!id || !source || !clone) {
+				return false;
+			}
+
+			source.classList.remove("hidden");
+			clone.classList.remove("hidden");
+
+			return true;
+		}
+
+		function hideImage(id) {
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+
+			if (!id || !source || !clone) {
+				return false;
+			}
+
+			source.classList.add("hidden");
+			clone.classList.add("hidden");
+
+			return true;
+		}
+
 		function getDegrees(x, y) {
 			if (x === undefined || y === undefined) {
 				return false;
@@ -2614,7 +2645,7 @@
 						}
 						return false;
 					}
-					
+
 					var resB = initCanvas();
 					if (!resB) {
 						if (cb) {
@@ -2638,6 +2669,7 @@
 				// create element
 				var newSource = document.createElement("div");
 				newSource.classList.add("canvaaas-image");
+				newSource.classList.add("hidden");
 				newSource.id = sourceId + id;
 				newSource.innerHTML = imageTemplate;
 
@@ -3086,11 +3118,6 @@
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
-			canvasState.quality = 0.8;
-			canvasState.mimeType = "image/jpeg";
-			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
-			canvasState.smoothingEnabled = false; // false, true
-			canvasState.backgroundColor = "#FFFFFF";
 			canvasState.originalWidth = originalWidth;
 			canvasState.originalHeight = originalHeight;
 			canvasState.width = fittedSizes[0];
@@ -3190,6 +3217,16 @@
 			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
 			mirrorElement = thisTarget.querySelector("div.canvaaas-mirror");
 
+			// set canvasState
+			canvasState.quality = 0.8;
+			canvasState.mimeType = "image/jpeg";
+			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
+			canvasState.smoothingEnabled = false; // false, true
+			canvasState.backgroundColor = "#FFFFFF";
+
+			// set canvas background
+			canvasElement.style.backgroundColor = canvasState.backgroundColor;
+
 			// check config.initCanvasWidth, config.initCanvasHeight
 			if (
 				config.initCanvasWidth !== undefined &&
@@ -3267,6 +3304,12 @@
 						containerElement.classList.remove("hidden");
 					}
 
+					results.forEach(function(res) {
+						showImage(res.id);
+					});
+
+					canvasElement.classList.add("checker");
+
 					if (config.init) {
 						config.init(null, results);
 					}
@@ -3274,158 +3317,6 @@
 						thisCb(null, results);
 					} 
 					console.log("canvaaas.js initialized", config);
-				}
-			}
-		}
-
-		myObject.preview = function(target, imageStates, cb) {
-			var thisTarget,
-				thisStates = [],
-				thisCb,
-				hasState = true;
-
-			if (cb) {
-				if (typeof(cb) === "function") {
-					thisCb = cb;
-				}
-			} else {
-				if (typeof(imageStates) === "function") {
-					thisCb = imageStates;
-					hasState = false;
-				}
-			}
-
-			if (isInitialized === true) {
-				if (config.init) {
-					config.init("Already initialized");
-				}
-				if (thisCb) {
-					thisCb("Already initialized");
-				}
-				return false;
-			}
-
-			if (onInitialize === true) {
-				if (config.init) {
-					config.init("Already in progress");
-				}
-				if (thisCb) {
-					thisCb("Already in progress");
-				}
-				return false;
-			}
-
-			if (
-				typeof(target) !== "object" ||
-				target === null
-			) {
-				if (config.init) {
-					config.init("Argument error");
-				}
-				if (thisCb) {
-					thisCb("Argument error");
-				}
-				return false;
-			}
-
-			thisTarget = target;
-
-			if (hasState === true) {
-				if (Array.isArray(imageStates)) {
-					thisStates = imageStates;
-				} else if (
-					typeof(imageStates) === "object" &&
-					imageStates !== null
-				) {
-					thisStates[0] = imageStates;
-				} else {
-					if (config.init) {
-						config.init("Argument error");
-					}
-					if (thisCb) {
-						thisCb("Argument error");
-					}
-					return false;
-				}
-			}
-
-			var canvasWidth;
-			var canvasHeight;
-
-			if (
-				config.initCanvasWidth !== undefined &&
-				config.initCanvasHeight !== undefined &&
-				config.initCanvasWidth !== null &&
-				config.initCanvasHeight !== null
-			) {
-				canvasWidth = config.initCanvasWidth;
-				canvasHeight = config.initCanvasHeight;
-			} else {
-				canvasWidth = thisStates[0].canvasWidth;
-				canvasHeight = thisStates[0].canvasHeight;
-			}
-
-			if (
-				canvasWidth === undefined ||
-				canvasHeight === undefined
-			) {
-				if (config.init) {
-					config.init("Argument error");
-				}
-				if (thisCb) {
-					thisCb("Argument error");
-				} 
-				return false;
-			}
-
-			// set template
-			thisTarget.innerHTML = previewTemplate;
-			containerElement = thisTarget.querySelector("div.canvaaas");
-			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
-
-			canvasState.originalWidth = canvasWidth;
-			canvasState.originalHeight = canvasHeight;
-
-			// set container
-			initContainer();
-
-			// set canvas
-			initCanvas();
-
-			// set events
-			window.addEventListener("resize", handlers.resizeWindow, false);
-
-			var index = thisStates.length;
-			var count = 0;
-			var results = [];
-
-			onInitialize = true;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					renderPreview(thisStates[count].src, thisStates[count], function(err, id) {
-						results.push({
-							err: err,
-							id: id
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-
-					onInitialize = false;
-					isInitialized = true;
-
-					config.editable = false;
-
-					if (config.init) {
-						config.init(null, results);
-					}
-					if (thisCb) {
-						thisCb(null, results);
-					}
 				}
 			}
 		}
@@ -3544,6 +3435,10 @@
 				} else {
 					onUpload = false;
 
+					results.forEach(function(res) {
+						showImage(res.id);
+					});
+
 					if (thisCb) {
 						thisCb(null, results);
 					}
@@ -3651,6 +3546,10 @@
 					});
 				} else {
 					onUpload = false;
+
+					results.forEach(function(res) {
+						showImage(res.id);
+					});
 
 					if (thisCb) {
 						thisCb(null, results);
@@ -5876,17 +5775,32 @@
 			var oldW = canvasState.width;
 			var oldH = canvasState.height;
 
+			canvasState.originalWidth = parseFloat(w);
+			canvasState.originalHeight = parseFloat(h);
+
 			// set container
-			initContainer(
-				parseFloat(w), 
-				parseFloat(h)
-			);
+			var resA = initContainer();
+			if (!resA) {
+				if (config.canvas) {
+					config.canvas("`initContainer()` error");
+				}
+				if (cb) {
+					cb("`initContainer()` error");
+				}
+				return false;
+			}
 
 			// set canvas
-			initCanvas(
-				parseFloat(w),
-				parseFloat(h)
-			);
+			var resB = initCanvas();
+			if (!resB) {
+				if (config.canvas) {
+					config.canvas("`initCanvas()` error");
+				}
+				if (cb) {
+					cb("`initCanvas()` error");
+				}
+				return false;
+			}
 
 			// set images
 			var newW = canvasState.width;
@@ -5900,10 +5814,8 @@
 				var source = getSourceById(state.id);
 				var clone = getCloneById(state.id);
 
-				var aspectRatio = state.width / state.height;
-
 				state.width *= scaleRatioX;
-				state.height = state.width / aspectRatio;
+				state.height *= scaleRatioX;
 				state.x *= scaleRatioX;
 				state.y *= scaleRatioY;
 
@@ -6143,6 +6055,13 @@
 			config.editable = false;
 			onFreeze = true;
 
+			// check drawable
+			imageStates.forEach(function(state){
+				if (!state.drawable) {
+					hideImage(state.id);
+				}
+			})
+
 			// remove checker
 			canvasElement.classList.remove("checker");
 
@@ -6161,6 +6080,13 @@
 
 			config.editable = true;
 			onFreeze = false;
+
+			// check drawable
+			imageStates.forEach(function(state){
+				if (!state.drawable) {
+					showImage(state.id);
+				}
+			})
 
 			// set checker
 			canvasElement.classList.add("checker");

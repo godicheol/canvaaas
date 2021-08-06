@@ -214,6 +214,7 @@
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
+						URL.revokeObjectURL(link.href);
 					})
 				">Save</a></li>
 				<li class="rule"></li>
@@ -239,10 +240,16 @@
 				">Get Cache Data</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.init(elem, test1)
+					canvaaas.init(elem, testState1)
 				">Init</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.destroy()
+					canvaaas.destroy(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						canvaaas.config(testConfig1)
+					})
 				">Destroy</a></li>
 			</ul>
 		</div>
@@ -575,62 +582,57 @@
 
 		var elem = document.getElementById("container");
 
-		var test1 = [
-		    {
-		        "canvasWidth": 4032,
-		        "canvasHeight": 3024,
-		        "src": "/img/3.jpg",
-		        "width": 3911.961907399141,
-		        "height": 2933.971430549356,
-		        "x": 2114.9767441860463,
-		        "y": 1501.581395348837,
-		        "rotate": 0,
-		        "scaleX": 1,
-		        "scaleY": 1,
-		        "opacity": 1,
-		        "index": 0,
-		        "focusable": true,
-		        "editable": true,
-		        "drawable": true
-		    },
-		    {
-		        "canvasWidth": 4032,
-		        "canvasHeight": 3024,
-		        "src": "/img/3.jpeg",
-		        "width": 1835.8343049688174,
-		        "height": 2447.779073291754,
-		        "x": 747.7636254672568,
-		        "y": 2079.813953488372,
-		        "rotate": 335.5923831769435,
-		        "scaleX": 1,
-		        "scaleY": 1,
-		        "opacity": 1,
-		        "index": 1,
-		        "focusable": true,
-		        "editable": true,
-		        "drawable": true
-		    },
-		    {
-		        "canvasWidth": 4032,
-		        "canvasHeight": 3024,
-		        "src": "/img/3.png",
-		        "width": 1591.309449421528,
-		        "height": 1591.309449421528,
-		        "x": 2896.3720930232557,
-		        "y": 1905.84685605785,
-		        "rotate": -335.54985541284424,
-		        "scaleX": 1,
-		        "scaleY": 1,
-		        "opacity": 0.5,
-		        "index": 2,
-		        "focusable": true,
-		        "editable": true,
-		        "drawable": true
-		    }
-		]
+		var testState1 = [{
+	        "canvasWidth": 4032,
+	        "canvasHeight": 3024,
+	        "src": "/img/3.jpg",
+	        "width": 3911.961907399141,
+	        "height": 2933.971430549356,
+	        "x": 2114.9767441860463,
+	        "y": 1501.581395348837,
+	        "rotate": 0,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "index": 0,
+	        "focusable": true,
+	        "editable": true,
+	        "drawable": false
+	    }, {
+	        "canvasWidth": 4032,
+	        "canvasHeight": 3024,
+	        "src": "/img/3.jpeg",
+	        "width": 1835.8343049688174,
+	        "height": 2447.779073291754,
+	        "x": 747.7636254672568,
+	        "y": 2079.813953488372,
+	        "rotate": 335.5923831769435,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "index": 1,
+	        "focusable": true,
+	        "editable": true,
+	        "drawable": true
+	    }, {
+	        "canvasWidth": 4032,
+	        "canvasHeight": 3024,
+	        "src": "/img/3.png",
+	        "width": 1591.309449421528,
+	        "height": 1591.309449421528,
+	        "x": 2896.3720930232557,
+	        "y": 1905.84685605785,
+	        "rotate": -335.54985541284424,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 0.5,
+	        "index": 2,
+	        "focusable": true,
+	        "editable": true,
+	        "drawable": true
+	    }]
 
-		// #1 config
-		canvaaas.config({
+		var testConfig1 = {
 			// initCanvasWidth: 6000,
 			// initCanvasHeight: 6000,
 			init: function(err, res){
@@ -760,10 +762,23 @@
 				console.log("draw", res);
 				// document.getElementById("preview1").src = res.file;
 			},
+		}
+
+
+		// #0 config
+		canvaaas.config(testConfig1);
+
+		// #1 init
+		canvaaas.init(elem, testState1, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+			console.log(res);
 		})
 
-		// #2 init (preview)
-		// canvaaas.preview(elem, test1, function(err, res){
+		// #1 init 
+		// canvaaas.init(elem, null, function(err, res){
 		// 	if (err) {
 		// 		console.log(err);
 		// 		return false;
@@ -771,14 +786,15 @@
 		// 	console.log(res);
 		// })
 
-		// #2 init (editor)
-		canvaaas.init(elem, test1, function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log(res);
-		})
+		// #1 init & freeze
+		// canvaaas.init(elem, testState1, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+		// 	console.log(res);
+		// 	canvaaas.freeze();
+		// })
 
 	</script>
 </body>
