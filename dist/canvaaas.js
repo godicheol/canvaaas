@@ -15,9 +15,9 @@
 
 		var myObject = {};
 
-		var defaultConfiguration = {
+		var defaultConfig = {
 
-			filename: "untitled", // string
+			filename: undefined, // string
 
 			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg"], // string, jpg, jpeg, png, webp, svg...
 
@@ -78,7 +78,7 @@
 			edit: undefined, // callback function
 		};
 
-		Object.freeze(defaultConfiguration);
+		Object.freeze(defaultConfig);
 
 		var config = {};
 
@@ -148,7 +148,7 @@
 
 		var sourceElements = [];
 
-		copyObject(defaultConfiguration, config);
+		copyObject(defaultConfig, config);
 
 		// 
 		// handlers
@@ -487,6 +487,10 @@
 					return false;
 				}
 
+				if (!source || !state || !clone) {
+					return false;
+				}
+
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
 					mouseY = e.clientY - eventState.mouseY;
@@ -647,6 +651,10 @@
 					return false;
 				}
 
+				if (!source || !state || !clone) {
+					return false;
+				}
+
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
 					mouseY = e.clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
@@ -724,8 +732,8 @@
 				var flipY;
 				var dire;
 				var direction;
-				var minW;
-				var minH;
+				var maxSizes;
+				var minSizes;
 
 				if (!config.editable) {
 					return false;
@@ -771,8 +779,18 @@
 
 				direction = getDirection(dire, state.scaleX, state.scaleY);
 
-				minW = config.minImageWidth;
-				minH = config.minImageHeight;
+				maxSizes = getFittedRect(
+					config.maxImageWidth || 99999,
+					config.maxImageHeight || 99999,
+					state.originalWidth / state.originalHeight
+				)
+
+				minSizes = getFittedRect(
+					config.minImageWidth || 0,
+					config.minImageHeight || 0,
+					state.originalWidth / state.originalHeight,
+					"cover"
+				)
 
 				// save initial data
 				eventState.direction = direction;
@@ -782,8 +800,10 @@
 				eventState.initialH = state.height;
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-				eventState.minW = minW;
-				eventState.minH = minH;
+				eventState.maxW = maxSizes[0];
+				eventState.maxH = maxSizes[1];
+				eventState.minW = minSizes[0];
+				eventState.minH = minSizes[1];
 
 				// toggle on
 				onResize = true;
@@ -821,10 +841,16 @@
 				var cosFraction;
 				var sinFraction;
 				var onShiftKey = false;
-				var minW;
-				var minH;
+				var maxW = eventState.maxW;
+				var maxH = eventState.maxH;
+				var minW = eventState.minW;
+				var minH = eventState.minH;
 
 				if (!onResize) {
+					return false;
+				}
+
+				if (!source || !state || !clone) {
 					return false;
 				}
 
@@ -841,9 +867,6 @@
 				if (state.lockAspectRatio || e.shiftKey) {
 					onShiftKey = true;
 				}
-
-				minW = eventState.minW;
-				minH = eventState.minH;
 
 				aspectRatio = state.originalWidth / state.originalHeight;
 				radians = state.rotate * Math.PI / 180;
@@ -974,12 +997,18 @@
 					return false;
 				}
 
-				if (minW > width) {
-					return false;
-				}
 
-				if (minH > height) {
-					return false;
+				if (width < minW) {
+					width = minW;
+				}
+				if (width > maxW) {
+					width = maxW;
+				}
+				if (height < minH) {
+					height = minH;
+				}
+				if (height > maxH) {
+					height = maxH;
 				}
 
 				state.width = width;
@@ -1036,7 +1065,11 @@
 				var width;
 				var height;
 				var minW;
+				var maxW;
 				var minH;
+				var maxH;
+				var minSizes;
+				var maxSizes;
 
 				if (!config.editable) {
 					return false;
@@ -1058,8 +1091,23 @@
 					return false;
 				}
 
-				minW = config.minImageWidth;
-				minH = config.minImageHeight;
+				maxSizes = getFittedRect(
+					config.maxImageWidth || 99999,
+					config.maxImageHeight || 99999,
+					state.originalWidth / state.originalHeight
+				)
+
+				minSizes = getFittedRect(
+					config.minImageWidth || 0,
+					config.minImageHeight || 0,
+					state.originalWidth / state.originalHeight,
+					"cover"
+				)
+
+				maxW = maxSizes[0];
+				maxH = maxSizes[1];
+				minW = minSizes[0];
+				minH = minSizes[1];
 
 				ratio = -e.deltaY * 0.001;
 				diffX = state.width * ratio;
@@ -1087,12 +1135,17 @@
 				// add timer
 				clearTimeout(eventState.wheeling);
 
-				if (minW > width) {
-					return false;
+				if (width < minW) {
+					width = minW;
 				}
-
-				if (minH > height) {
-					return false;
+				if (width > maxW) {
+					width = maxW;
+				}
+				if (height < minH) {
+					height = minH;
+				}
+				if (height > maxH) {
+					height = maxH;
 				}
 
 				state.width = width;
@@ -1127,8 +1180,8 @@
 				var diagonal;
 				var mouseX;
 				var mouseY;
-				var minW;
-				var minH;
+				var maxSizes;
+				var minSizes;
 
 				if (onMove === true) {
 					handlers.endMove(e)
@@ -1150,15 +1203,27 @@
 				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
 				diagonal = getDiagonal(mouseX, mouseY);
 
-				minW = config.minImageWidth;
-				minH = config.minImageHeight;
+				maxSizes = getFittedRect(
+					config.maxImageWidth || 99999,
+					config.maxImageHeight || 99999,
+					state.originalWidth / state.originalHeight
+				)
+
+				minSizes = getFittedRect(
+					config.minImageWidth || 0,
+					config.minImageHeight || 0,
+					state.originalWidth / state.originalHeight,
+					"cover"
+				)
 
 				// save initial data
 				eventState.diagonal = diagonal;
 				eventState.initialW = state.width;
 				eventState.initialH = state.height;
-				eventState.minW = minW;
-				eventState.minH = minH;
+				eventState.maxW = maxSizes[0];
+				eventState.maxH = maxSizes[1];
+				eventState.minW = minSizes[0];
+				eventState.minH = minSizes[1];
 
 				// toggle on
 				onZoom = true;
@@ -1185,19 +1250,22 @@
 				var width;
 				var height;
 				var ratio;
-				var minW;
-				var minH;
+				var maxW = eventState.maxW;
+				var maxH = eventState.maxH;
+				var minW = eventState.minW;
+				var minH = eventState.minH;
 
 				if (!onZoom) {
+					return false;
+				}
+
+				if (!source || !state || !clone) {
 					return false;
 				}
 
 				if (e.touches.length !== 2) {
 					return false;
 				}
-
-				minW = eventState.minW;
-				minH = eventState.minH;
 
 				mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
 				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
@@ -1207,12 +1275,17 @@
 				width = eventState.initialW * ratio;
 				height = eventState.initialH * ratio;
 
-				if (minW > width) {
-					return false;
+				if (width < minW) {
+					width = minW;
 				}
-
-				if (minH > height) {
-					return false;
+				if (width > maxW) {
+					width = maxW;
+				}
+				if (height < minH) {
+					height = minH;
+				}
+				if (height > maxH) {
+					height = maxH;
 				}
 
 				state.width = width;
@@ -2371,8 +2444,8 @@
 				return cb(e);
 			}
 			virtualImg.onload = function(e) {
-				var maxCanvasWidth = config.maxCanvasWidth || 9999;
-				var maxCanvasHeight = config.maxCanvasHeight || 9999;
+				var maxCanvasWidth = config.maxCanvasWidth || 99999;
+				var maxCanvasHeight = config.maxCanvasHeight || 99999;
 				var minCanvasWidth = config.minCanvasWidth || 0;
 				var minCanvasHeight = config.minCanvasHeight || 0;
 
@@ -2983,8 +3056,8 @@
 			}
 
 			var aspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var maxWidth = config.maxCanvasWidth || 9999;
-			var maxHeight = config.maxCanvasHeight || 9999;
+			var maxWidth = config.maxCanvasWidth || 99999;
+			var maxHeight = config.maxCanvasHeight || 99999;
 			var minWidth = config.minCanvasWidth || 0;
 			var minHeight = config.minCanvasHeight || 0;
 
@@ -5816,8 +5889,100 @@
 			}
 		}
 
-		myObject.backgroundColor = function(colour, cb) {
+		myObject.quality = function(num, cb) {
+			if (!isNumeric(num)) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
 
+			num = parseFloat(num);
+
+			if (num > 1) {
+				num = 1;
+			}
+
+			if (num < 0) {
+				num = 0;
+			}
+
+			canvasState.quality = num;
+
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
+			}
+		}
+
+		myObject.mimeType = function(mimeType, cb) {
+			if (typeof(mimeType) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			mimeType = mimeType.toLowerCase();
+
+			if (mimeType.indexOf("/") < 0) {
+				if (
+					mimeType === "jpg" ||
+					mimeType === "jpeg"
+				) {
+					mimeType = "image/jpeg";
+				} else if (
+					mimeType === "png"
+				) {
+					mimeType = "image/png";
+				} else if (
+					mimeType === "tif" ||
+					mimeType === "tiff"
+				) {
+					mimeType = "image/tiff";
+				} else if (
+					mimeType === "svg" ||
+					mimeType === "svg+xml"
+				) {
+					mimeType = "image/svg";
+				} else if (
+					mimeType === "bmp"
+				) {
+					mimeType = "image/bmp";
+				} else if (
+					mimeType === "webp"
+				) {
+					mimeType = "image/webp";
+				} else {
+					if (config.canvas) {
+						config.canvas("Argument error");
+					}
+					if (cb) {
+						cb("Argument error");
+					}
+					return false;
+				}
+			}
+
+			canvasState.mimeType = mimeType;
+
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
+			}
+		}
+
+		myObject.backgroundColor = function(colour, cb) {
 			if (typeof(colour) !== "string") {
 				if (config.canvas) {
 					config.canvas("Argument error");
@@ -5838,6 +6003,81 @@
 
 			canvasState.backgroundColor = colour;
 			canvasElement.style.backgroundColor = colour;
+
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
+			}
+		}
+
+		myObject.smoothingQuality = function(str, cb) {
+			if (typeof(str) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			str = str.toLowerCase();
+
+			if (
+				str !== "low" &&
+				str !== "medium" &&
+				str !== "high"
+			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			canvasState.smoothingQuality = str;
+
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
+			if (cb) {
+				cb(null, canvasState);
+			}
+		}
+
+		myObject.smoothingEnabled = function(num, cb) {
+			if (!isNumeric(num)) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			num = parseFloat(num);
+			num = Math.round(num);
+
+			if (num > 1) {
+				num = 1;
+			}
+
+			if (num < 0) {
+				num = 0;
+			}
+
+			if (num === 0) {
+				num = false;
+			} else {
+				num = true;
+			}
+
+			canvasState.smoothingEnabled = num;
 
 			if (config.canvas) {
 				config.canvas(null, canvasState);
@@ -5916,8 +6156,8 @@
 			var drawOption = {
 				width: canvasWidth,
 				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
+				maxWidth: config.maxCanvasWidth || 99999,
+				maxHeight: config.maxCanvasHeight || 99999,
 				minWidth: config.minCanvasWidth || 0,
 				minHeight: config.minCanvasHeight || 0,
 				backgroundColor: backgroundColor
@@ -5986,9 +6226,9 @@
 			}
 		}
 
-		myObject.drawTo = function(options, cb){
+		myObject.draw = function(options, cb){
 			/*!
-			 * options keys {
+			 * options = {
 			 * width, 
 			 * quality,
 			 * mimeType,
@@ -5997,40 +6237,41 @@
 			 * smoothingEnabled
 			 * }
 			 */
-			if (
-				typeof(options) !== "object" ||
-				options === null
-			) {
-				if (config.draw) {
-					config.draw("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
 
-			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var canvasWidth = 	options.width || 
-								options.canvasWidth || 
-								canvasState.originalWidth;
-			var canvasHeight = canvasWidth / canvasAspectRatio;
-			var quality = 	options.quality ||
-							canvasState.quality;
-			var mimeType = 	options.mimeType ||
-							canvasState.mimeType;
-			var backgroundColor = 	options.backgroundColor || 
-									canvasState.backgroundColor;
-			var imageSmoothingQuality = options.smoothingQuality ||  
-										canvasState.smoothingQuality;
-			var imageSmoothingEnabled = options.smoothingQuality || 
-										canvasState.smoothingEnabled;
+
+			var canvasAspectRatio;
+			var canvasWidth;
+			var canvasHeight;
+			var quality;
+			var mimeType;
+			var backgroundColor;
+			var imageSmoothingQuality;
+			var imageSmoothingEnabled;
+
+			if (typeof(options) === "object" && options !== null) {
+				canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
+				canvasWidth = options.width || options.canvasWidth || canvasState.originalWidth;
+				canvasHeight = canvasWidth / canvasAspectRatio;
+				quality = options.quality || canvasState.quality;
+				mimeType = options.mimeType || canvasState.mimeType;
+				imageSmoothingQuality = options.smoothingQuality || canvasState.smoothingQuality;
+				imageSmoothingEnabled = options.smoothingQuality || canvasState.smoothingEnabled;
+				backgroundColor = options.backgroundColor || canvasState.backgroundColor;
+			} else {
+				canvasWidth = canvasState.originalWidth;
+				canvasHeight = canvasState.originalHeight;
+				quality = canvasState.quality;
+				mimeType = canvasState.mimeType;
+				imageSmoothingQuality = canvasState.smoothingQuality;
+				imageSmoothingEnabled = canvasState.smoothingEnabled;
+				backgroundColor = canvasState.backgroundColor;
+			}
 
 			var drawOption = {
 				width: canvasWidth,
 				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 9999,
-				maxHeight: config.maxCanvasHeight || 9999,
+				maxWidth: config.maxCanvasWidth || 99999,
+				maxHeight: config.maxCanvasHeight || 99999,
 				minWidth: config.minCanvasWidth || 0,
 				minHeight: config.minCanvasHeight || 0,
 				backgroundColor: backgroundColor
@@ -6332,7 +6573,7 @@
 
 			config = {};
 
-			copyObject(defaultConfiguration, config);
+			copyObject(defaultConfig, config);
 
 			eventState = {};
 			eventCaches = [];

@@ -106,7 +106,9 @@
 		margin: 0 6px;
 		padding: 6px 6px;
 		background-color: #171717;
+		max-height: 500px;
 		z-index: 999;
+		overflow-y: auto;
 	}
 	.header-list.hidden{
 		display: none;
@@ -155,6 +157,15 @@
 		width: 50px;
 		text-align: right;
 	}
+
+	.logger #canvas-backgroundColor{
+		display: inline-block;
+		width: 50px;
+		height: 20px;
+		border: 1px solid #878787;
+		border-radius: 3px;
+		vertical-align: middle;
+	}
 </style>
 </head>
 <body style="">
@@ -195,7 +206,7 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					// download 
-					canvaaas.draw(function(err, res){
+					canvaaas.draw(null, function(err, res){
 						var link = document.createElement('a');
 						link.setAttribute('href', res.file);
 						link.setAttribute('download', 'untitled');
@@ -337,8 +348,20 @@
 				">Thaw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.backgroundColor(window.prompt('RGB (e.g. #FFFFFF)'))
+					canvaaas.mimeType(window.prompt('e.g. `jpg`'))
+				">MimeType</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.quality(window.prompt('e.g. 0 ~ 1'))
+				">Quality</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.backgroundColor(window.prompt('e.g. #FFFFFF'))
 				">Background Color</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.smoothingEnabled(window.prompt('e.g. 0 ~ 1'))
+				">SmoothEnabled</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.smoothingQuality(window.prompt('e.g. 0 ~ 1'))
+				">SmoothQuality</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -433,6 +456,16 @@
 			<input id="canvas-width" type="text">
 			Height:
 			<input id="canvas-height" type="text">
+			Background:
+			<div id="canvas-backgroundColor"></div>
+			MimeType:
+			<input id="canvas-mimeType" type="text">
+			Quality:
+			<input id="canvas-quality" type="text">
+			SmoothingQuality:
+			<input id="canvas-smoothingQuality" type="text">
+			SmoothingEnabled:
+			<input id="canvas-smoothingEnabled" type="text">
 		</div>
 		<div class="image-data hidden">
 			X:
@@ -862,6 +895,11 @@
 				height: document.getElementById("canvas-height"),
 				x: document.getElementById("canvas-x"),
 				y: document.getElementById("canvas-y"),
+				quality: document.getElementById("canvas-quality"),
+				mimeType: document.getElementById("canvas-mimeType"),
+				backgroundColor: document.getElementById("canvas-backgroundColor"),
+				smoothingEnabled: document.getElementById("canvas-smoothingEnabled"),
+				smoothingQuality: document.getElementById("canvas-smoothingQuality"),
 			},
 			image:{
 				width: document.getElementById("image-width"),
@@ -966,6 +1004,28 @@
 					buttons.redo.style.color = "";
 				}
 			},
+			canvas: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				var containerState = canvaaas.getContainerData();
+				inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
+				inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
+				inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
+				inputs.container.top.value = Math.floor(containerState.top * 100) / 100;
+
+				var canvasState = canvaaas.getCanvasData();
+				inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
+				inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
+				inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
+				inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
+				inputs.canvas.mimeType.value = canvasState.mimeType;
+				inputs.canvas.quality.value = canvasState.quality;
+				inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
+				inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
+				inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
+			},
 			focus: function(err, res){
 				if (err) {
 					console.log(err);
@@ -982,6 +1042,11 @@
 				inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
 				inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
 				inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
+				inputs.canvas.mimeType.value = canvasState.mimeType;
+				inputs.canvas.quality.value = canvasState.quality;
+				inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
+				inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
+				inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
 
 				var imageState = canvaaas.getImageData(res);
 				inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
