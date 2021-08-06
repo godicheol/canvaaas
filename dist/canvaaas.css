@@ -19,9 +19,9 @@
 }
 
 /* canvas */
-.canvaaas-mirror.focus{
+/*.canvaaas-mirror.focus{
 	outline: 1px solid red;
-}
+}*/
 
 /* image overlay */
 .canvaaas-image .canvaaas-overlay{
@@ -58,6 +58,9 @@
 }
 
 /* image innerline */
+.canvaaas-innerline{
+	display: none !important;
+}
 .canvaaas-image .canvaaas-innerline{
 	border-color: #888;
 }
@@ -218,7 +221,6 @@
 .canvaaas-clone.focus{
 	cursor: move;
 }
-
 .canvaaas-image.unclickable,
 .canvaaas-clone.unclickable{
 	pointer-events: none;
