@@ -583,24 +583,20 @@
 		var elem = document.getElementById("container");
 
 		var testState1 = [{
-	        "canvasWidth": 4032,
-	        "canvasHeight": 3024,
 	        "src": "/img/3.jpg",
 	        "width": 3911.961907399141,
 	        "height": 2933.971430549356,
 	        "x": 2114.9767441860463,
 	        "y": 1501.581395348837,
-	        "rotate": 0,
+	        "rotate": 45,
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
 	        "index": 0,
 	        "focusable": true,
 	        "editable": true,
-	        "drawable": false
+	        "drawable": true
 	    }, {
-	        "canvasWidth": 4032,
-	        "canvasHeight": 3024,
 	        "src": "/img/3.jpeg",
 	        "width": 1835.8343049688174,
 	        "height": 2447.779073291754,
@@ -615,8 +611,6 @@
 	        "editable": true,
 	        "drawable": true
 	    }, {
-	        "canvasWidth": 4032,
-	        "canvasHeight": 3024,
 	        "src": "/img/3.png",
 	        "width": 1591.309449421528,
 	        "height": 1591.309449421528,
@@ -629,7 +623,7 @@
 	        "index": 2,
 	        "focusable": true,
 	        "editable": true,
-	        "drawable": true
+	        "drawable": false
 	    }]
 
 		var testConfig1 = {
@@ -769,13 +763,13 @@
 		canvaaas.config(testConfig1);
 
 		// #1 init
-		canvaaas.init(elem, testState1, function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log(res);
-		})
+		// canvaaas.init(elem, testState1, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+		// 	console.log(res);
+		// })
 
 		// #1 init 
 		// canvaaas.init(elem, null, function(err, res){
@@ -787,14 +781,14 @@
 		// })
 
 		// #1 init & freeze
-		// canvaaas.init(elem, testState1, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log(res);
-		// 	canvaaas.freeze();
-		// })
+		canvaaas.init(elem, testState1, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+			console.log(res);
+			// canvaaas.freeze();
+		})
 
 	</script>
 </body>

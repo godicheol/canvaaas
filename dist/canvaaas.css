@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.0.8
+ * 0.0.9
  * 
  * eeecheol@gmail.com
  * 
@@ -19,9 +19,9 @@
 }
 
 /* canvas */
-/*.canvaaas-mirror.focus{
+.canvaaas-canvas.focus{
 	outline: 1px solid red;
-}*/
+}
 
 /* image overlay */
 .canvaaas-image .canvaaas-overlay{

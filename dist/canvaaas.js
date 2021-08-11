@@ -2,9 +2,14 @@
  * 
  * canvaaas.js
  * 
- * 0.0.8
+ * 0.0.9
  * 
  * eeecheol@gmail.com
+ * 
+ */
+
+/*!
+ * 
  * 
  */
 
@@ -129,11 +134,6 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-nw'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
-
-		var previewTemplate = "";
-		previewTemplate += "<div class='canvaaas'>";
-		previewTemplate += "<div class='canvaaas-canvas'></div>";
-		previewTemplate += "</div>";
 
 		var eventState = {};
 		var eventCaches = [];
@@ -276,23 +276,51 @@
 				var magT = halfHeight;
 				var magR = canvasState.width - halfWidth;
 				var magB = canvasState.height - halfHeight;
-				var x = 0;
-				var y = 0;
+				var axisX = state.x;
+				var axisY = state.y;
 
 				if (e.keyCode == '38') {
 					// up arrow
-					y -= 10;
+					axisY -= 10;
 				} else if (e.keyCode == '40') {
 					// down arrow
-					y += 10;
+					axisY += 10;
 				} else if (e.keyCode == '37') {
 					// left arrow
-					x -= 10;
+					axisX -= 10;
 				} else if (e.keyCode == '39') {
 					// right arrow
-					x += 10;
+					axisX += 10;
 				} else {
 					return false;
+				}
+
+				// check magnetic option
+				if (config.magnetic) {
+					if (
+						axisX > magR - 5 &&
+						axisX < magR + 5
+					) {
+						axisX = magR;
+					}
+					if (
+						axisX > magL - 5 &&
+						axisX < magL + 5 
+					) {
+						axisX = magL;
+					}
+					if (
+						axisY > magB - 5 &&
+						axisY < magB + 5
+					) {
+						axisY = magB;
+					}
+					if (
+						axisY > magT - 5 &&
+						axisY < magT + 5 
+					) {
+						axisY = magT;
+					}
 				}
 
 				// save cache
@@ -300,36 +328,10 @@
 				eventSubCaches = [];
 
 				// save state
-				state.x += x;
-				state.y += y;
-
-				// check magnetic option
-				if (config.magnetic) {
-					if (
-						magR - 5 < state.x &&
-						magR + 5 > state.x
-					) {
-						state.x = magR;
-					}
-					if (
-						magB - 5 < state.y &&
-						magB + 5 > state.y
-					) {
-						state.y = magB;
-					}
-					if (
-						magL - 5 < state.x &&
-						magL + 5 > state.x
-					) {
-						state.x = magL;
-					}
-					if (
-						magT - 5 < state.y &&
-						magT + 5 > state.y
-					) {
-						state.y = magT;
-					}
-				}
+				setState(state, {
+					x: axisX,
+					y: axisY
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -525,8 +527,10 @@
 				}
 
 				// save state
-				state.x = axisX;
-				state.y = axisY;
+				setState(state, {
+					x: axisX,
+					y: axisY
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -682,7 +686,9 @@
 				}
 
 				// save state
-				state.rotate = eventState.initialR + (deg - eventState.initialD);
+				setState(state, {
+					rotate: eventState.initialR + (deg - eventState.initialD)
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -1014,10 +1020,13 @@
 					height = maxH;
 				}
 
-				state.width = width;
-				state.height = height;
-				state.x = axisX;
-				state.y = axisY;
+				// save state
+				setState(state, {
+					x: axisX,
+					y: axisY,
+					width: width,
+					height: height
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -1151,8 +1160,11 @@
 					height = maxH;
 				}
 
-				state.width = width;
-				state.height = height;
+				// save state
+				setState(state, {
+					width: width,
+					height: height
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -1291,8 +1303,11 @@
 					height = maxH;
 				}
 
-				state.width = width;
-				state.height = height;
+				// save state
+				setState(state, {
+					width: width,
+					height: height
+				});
 
 				// adjust state
 				setElement(source, state);
@@ -1359,11 +1374,19 @@
 					var source = getSourceById(state.id);
 					var clone = getCloneById(state.id);
 
-					state.width *= scaleRatio;
-					state.height *= scaleRatio;
-					state.x *= scaleRatio;
-					state.y *= scaleRatio;
+					if (!source || !clone) {
+						return;
+					}
 
+					// save state
+					setState(state, {
+						x: state.x * scaleRatio,
+						y: state.y * scaleRatio,
+						width: state.width * scaleRatio,
+						height: state.height * scaleRatio
+					});
+
+					// adjust state
 					setElement(source, state);
 					setElement(clone, state);
 				});
@@ -1376,86 +1399,181 @@
 		// methods
 		// 
 
+		function setState(state, additionalState){
+			if (
+				typeof(state) !== "object" ||
+				state === null
+			) {
+				return false;
+			}
+
+			if (
+				typeof(additionalState) !== "object" ||
+				additionalState === null
+			) {
+				return false;
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.originalWidth)) && 
+				isFinite(additionalState.originalWidth)
+			) {
+				state.originalWidth = parseFloat(additionalState.originalWidth);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.originalHeight)) && 
+				isFinite(additionalState.originalHeight)
+			) {
+				state.originalHeight = parseFloat(additionalState.originalHeight);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.index)) && 
+				isFinite(additionalState.index)
+			) {
+				state.index = parseFloat(additionalState.index);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.width)) && 
+				isFinite(additionalState.width)
+			) {
+				state.width = parseFloat(additionalState.width);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.height)) && 
+				isFinite(additionalState.height)
+			) {
+				state.height = parseFloat(additionalState.height);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.left)) && 
+				isFinite(additionalState.left)
+			) {
+				state.left = parseFloat(additionalState.left);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.top)) && 
+				isFinite(additionalState.top)
+			) {
+				state.top = parseFloat(additionalState.top);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.x)) && 
+				isFinite(additionalState.x)
+			) {
+				state.x = parseFloat(additionalState.x);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.y)) && 
+				isFinite(additionalState.y)
+			) {
+				state.y = parseFloat(additionalState.y);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.rotate)) && 
+				isFinite(additionalState.rotate)
+			) {
+				state.rotate = parseFloat(additionalState.rotate);
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.scaleX)) && 
+				isFinite(additionalState.scaleX)
+			) {
+				if (parseFloat(additionalState.scaleX) > 0) {
+					state.scaleX = 1;
+				} else {
+					state.scaleX = -1;
+				}
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.scaleY)) && 
+				isFinite(additionalState.scaleY)
+			) {
+				if (parseFloat(additionalState.scaleY) > 0) {
+					state.scaleY = 1;
+				} else {
+					state.scaleY = -1;
+				}
+			}
+
+			if (
+				!isNaN(parseFloat(additionalState.opacity)) && 
+				isFinite(additionalState.opacity)
+			) {
+				if (parseFloat(additionalState.opacity) > 1) {
+					state.opacity = 1;
+				} else if (parseFloat(additionalState.opacity) < 0) {
+					state.opacity = 0;
+				} else {
+					state.opacity = parseFloat(additionalState.opacity);
+				}
+			}
+
+			if (typeof(additionalState.lockAspectRatio) === "boolean") {
+				state.lockAspectRatio = additionalState.lockAspectRatio;
+			}
+
+			if (typeof(additionalState.focusable) === "boolean") {
+				state.focusable = additionalState.focusable;
+			}
+
+			if (typeof(additionalState.editable) === "boolean") {
+				state.editable = additionalState.editable;
+			}
+
+			if (typeof(additionalState.drawable) === "boolean") {
+				state.drawable = additionalState.drawable;
+			}
+
+			return true;
+		}
+
 		function setElement(elem, state) {
-			if (!elem) {
+			if (
+				typeof(elem) !== "object" ||
+				elem === null
+			) {
 				return false;
 			}
-			if (!state) {
+
+			if (
+				typeof(state) !== "object" ||
+				state === null
+			) {
 				return false;
 			}
 
-			var left = "";
-			var top = "";
-			var width = "";
-			var height = "";
-			var opacity = "";
-			var transform = "";
+			var left,
+				top,
+				width,
+				height,
+				opacity,
+				transform = "";
 
-			if (
-				state.x !== undefined ||
-				state.x !== null ||
-				state.x !== ""
-			) {
-				left = ( state.x - (state.width * 0.5) ) + "px";
-			}
+			left = ( state.x - (state.width * 0.5) ) + "px";
+			top = ( state.y - (state.height * 0.5) ) + "px";
+			width = state.width + "px";
+			height = state.height + "px";
+			opacity = state.opacity;
 
-			if (
-				state.y !== undefined ||
-				state.y !== null ||
-				state.y !== ""
-			) {
-				top = ( state.y - (state.height * 0.5) ) + "px";
-			}
-
-			if (
-				state.scaleX !== undefined ||
-				state.scaleX !== null ||
-				state.scaleX !== "" ||
-				state.scaleX !== 1
-			) {
+			if (state.scaleX === -1) {
 				transform += "scaleX(" + state.scaleX + ")";
 			}
-
-			if (
-				state.scaleY !== undefined ||
-				state.scaleY !== null ||
-				state.scaleY !== "" ||
-				state.scaleY !== 1
-			) {
+			if (state.scaleY === -1) {
 				transform += "scaleY(" + state.scaleY + ")";
 			}
-
-			if (
-				state.rotate !== undefined ||
-				state.rotate !== null ||
-				state.rotate !== "" ||
-				state.rotate !== 0
-			) {
+			if (state.rotate !== 0) {
 				transform += "rotate(" + state.rotate + "deg)";
-			}
-
-			if (
-				state.width !== undefined ||
-				state.width !== null ||
-				state.width !== ""
-			) {
-				width = state.width + "px";
-			}
-
-			if (
-				state.height !== undefined ||
-				state.height !== null ||
-				state.height !== ""
-			) {
-				height = state.height + "px";
-			}
-
-			if (
-				state.opacity !== undefined ||
-				state.opacity !== null ||
-				state.opacity !== ""
-			) {
-				opacity = state.opacity;
 			}
 
 			elem.style.left = left;
@@ -1490,22 +1608,11 @@
 		};
 
 		function pushCache(id) {
-			if (!id) {
-				return false;
-			}
-
 			var source = getSourceById(id);
-			if (!source) {
-				return false;
-			}
-
 			var clone = getCloneById(id);
-			if (!clone) {
-				return false;
-			}
-
 			var state = getStateById(id);
-			if (!state) {
+
+			if (!source || !clone || !state) {
 				return false;
 			}
 
@@ -1536,19 +1643,7 @@
 			var clone = getCloneById(id);
 			var state = getStateById(id);
 
-			if (!id) {
-				return false;
-			}
-
-			if (!source) {
-				return false;
-			}
-
-			if (!clone) {
-				return false;
-			}
-			
-			if (!state) {
+			if (!source || !clone || !state) {
 				return false;
 			}
 
@@ -1574,15 +1669,7 @@
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 
-			if (!id) {
-				return false;
-			}
-
-			if (!source) {
-				return false;
-			}
-
-			if (!clone) {
+			if (!source || !clone) {
 				return false;
 			}
 
@@ -1625,15 +1712,7 @@
 			var source = getSourceById(id)
 			var clone = getCloneById(id);
 
-			if (!id) {
-				return false;
-			}
-
-			if (!source) {
-				return false;
-			}
-
-			if (!clone) {
+			if (!source || !clone) {
 				return false;
 			}
 
@@ -1702,6 +1781,10 @@
 				var source = getSourceById(state.id);
 				var clone = getCloneById(state.id);
 
+				if (!source || !clone) {
+					return false;
+				}
+
 				// set source
 				try {
 					if (!lastSourceChild) {
@@ -1764,11 +1847,16 @@
 			return true;
 		}
 
-		function getAbsoluteData(state) {
+		function getAdjustedDataById(id) {
+			var state = getStateById(id);
+
+			if (!state) {
+				return false;
+			}
+
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 			var tmp = {};
-			tmp.canvasWidth = canvasState.originalWidth;
-			tmp.canvasHeight = canvasState.originalHeight;
+			tmp.id = state.id;
 			tmp.src = state.src;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
@@ -1946,7 +2034,7 @@
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 
-			if (!id || !source || !clone) {
+			if (!source || !clone) {
 				return false;
 			}
 
@@ -1960,7 +2048,7 @@
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 
-			if (!id || !source || !clone) {
+			if (!source || !clone) {
 				return false;
 			}
 
@@ -1971,7 +2059,10 @@
 		}
 
 		function getDegrees(x, y) {
-			if (x === undefined || y === undefined) {
+			if (
+				typeof(x) !== "number" ||
+				typeof(y) !== "number"
+			) {
 				return false;
 			}
 			var radians = Math.atan2(y, x) * 180 / Math.PI;
@@ -1984,9 +2075,9 @@
 
 		function getFittedRect(width, height, aspectRatio, fit) {
 			if (
-				width === undefined ||
-				height === undefined ||
-				aspectRatio === undefined
+				typeof(width) !== "number" ||
+				typeof(height) !== "number" ||
+				typeof(aspectRatio) !== "number"
 			) {
 				return false;
 			}
@@ -2012,9 +2103,9 @@
 
 		function getRotatedRect(width, height, angle) {
 			if (
-				width === undefined ||
-				height === undefined ||
-				angle === undefined
+				typeof(width) !== "number" ||
+				typeof(height) !== "number" ||
+				typeof(angle) !== "number"
 			) {
 				return false;
 			}
@@ -2123,16 +2214,19 @@
 			];
 		}
 
-		function getDiagonal(w, h) {
-			if (w === undefined || h === undefined) {
+		function getDiagonal(width, height) {
+			if (
+				typeof(width) !== "number" ||
+				typeof(height) !== "number"
+			) {
 				return false;
 			}
-			return Math.sqrt( Math.pow(w, 2) + Math.pow(h, 2) );
+			return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) );
 		}
 
 		function getDirection(direction, scaleX, scaleY) {
 			if (
-				!direction ||
+				direction === undefined ||
 				scaleX === undefined ||
 				scaleY === undefined
 			) {
@@ -2451,19 +2545,21 @@
 			) {
 				return cb("Argument error");
 			}
+
 			if (typeof(id) !== "string") {
 				return cb("Argument error");
 			}
 
 			var source = getSourceById(id);
+			var state = getStateById(id);
+			var originalImg = source.querySelector("img");
+
 			if (!source) {
 				return cb("Source element not found");
 			}
-			var state = getStateById(id);
 			if (!state) {
 				return cb("State not found");
 			}
-			var originalImg = source.querySelector("img");
 			if (!originalImg) {
 				return cb("Image element not found");
 			}
@@ -2666,16 +2762,6 @@
 					}
 				});
 
-				// create element
-				var newSource = document.createElement("div");
-				newSource.classList.add("canvaaas-image");
-				newSource.classList.add("hidden");
-				newSource.id = sourceId + id;
-				newSource.innerHTML = imageTemplate;
-
-				var newImg = newSource.querySelector("img");
-				newImg.src = newImage.src;
-
 				// create states
 				var originalWidth = newImage.width;
 				var originalHeight = newImage.height;
@@ -2718,51 +2804,58 @@
 					typeof(oldState) === "object" &&
 					oldState !== null
 				) {
-					if (oldState.canvasWidth !== undefined) {
-						var scaleRatioX = canvasState.width / oldState.canvasWidth;
-						var scaleRatioY = canvasState.width / oldState.canvasWidth;
+					var scaleRatio = canvasState.width / canvasState.originalWidth;
 
-						if (oldState.canvasHeight !== undefined) {
-							scaleRatioY = canvasState.height / oldState.canvasHeight;
-						}
-						if (oldState.width !== undefined){
-							width = oldState.width * scaleRatioX;
-						}
-						if (oldState.height !== undefined ){
-							height = oldState.height * scaleRatioX;
-						}
-						if (oldState.x !== undefined){
-							axisX = oldState.x * scaleRatioX;
-						}
-						if (oldState.y !== undefined){
-							axisY = oldState.y * scaleRatioY;
-						}
+					if (typeof(oldState.id) === "string") {
+						id = oldState.id;
 					}
-					if (oldState.index !== undefined){
-						index = oldState.index;
+					if (isNumeric(oldState.index)){
+						index = parseFloat(oldState.index);
 					}
-					if (oldState.opacity !== undefined){
-						opacity = oldState.opacity;
+					if (isNumeric(oldState.x)){
+						axisX = parseFloat(oldState.x) * scaleRatio;
 					}
-					if (oldState.rotate !== undefined){
-						rotate = oldState.rotate;
+					if (isNumeric(oldState.y)){
+						axisY = parseFloat(oldState.y) * scaleRatio;
 					}
-					if (oldState.scaleX !== undefined){
-						scaleX = oldState.scaleX;
+					if (isNumeric(oldState.width)){
+						width = parseFloat(oldState.width) * scaleRatio;
 					}
-					if (oldState.scaleY !== undefined){
-						scaleY = oldState.scaleY;
+					if (isNumeric(oldState.height)){
+						height = parseFloat(oldState.height) * scaleRatio;
 					}
-					if (oldState.lockAspectRatio !== undefined){
+					if (isNumeric(oldState.rotate)){
+						rotate = parseFloat(oldState.rotate);
+					}
+					if (
+						oldState.scaleX === -1 ||
+						oldState.scaleX === "-1" ||
+						oldState.scaleX === 1 ||
+						oldState.scaleX === "1"
+					){
+						scaleX = parseInt(oldState.scaleX);
+					}
+					if (
+						oldState.scaleY === -1 ||
+						oldState.scaleY === "-1" ||
+						oldState.scaleY === 1 ||
+						oldState.scaleY === "1"
+					){
+						scaleY = parseInt(oldState.scaleY);
+					}
+					if (isNumeric(oldState.opacity)){
+						opacity = parseFloat(oldState.opacity);
+					}
+					if (typeof(oldState.lockAspectRatio) === "boolean"){
 						lockAspectRatio = oldState.lockAspectRatio;
 					}
-					if (oldState.focusable !== undefined){
+					if (typeof(oldState.focusable) === "boolean"){
 						focusable = oldState.focusable;
 					}
-					if (oldState.editable !== undefined){
+					if (typeof(oldState.editable) === "boolean"){
 						editable = oldState.editable;
 					}
-					if (oldState.drawable !== undefined){
+					if (typeof(oldState.drawable) === "boolean"){
 						drawable = oldState.drawable;
 					}
 				}
@@ -2786,6 +2879,17 @@
 				newState.editable = editable;
 				newState.drawable = drawable;
 
+				// create wrap element
+				var newSource = document.createElement("div");
+				newSource.classList.add("canvaaas-image");
+				newSource.classList.add("hidden");
+				newSource.id = sourceId + id;
+				newSource.innerHTML = imageTemplate;
+
+				// create img element
+				var newImg = newSource.querySelector("img");
+				newImg.src = newImage.src;
+
 				setElement(newSource, newState);
 
 				imageStates.push(newState);
@@ -2793,9 +2897,8 @@
 				canvasElement.appendChild(newSource);
 				sourceElements.push(newSource);
 
-				// mirror
+				// create clone element
 				var newClone = newSource.cloneNode();
-
 				newClone.innerHTML = newSource.innerHTML;
 				newClone.id = cloneId + id;
 				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
@@ -2842,149 +2945,6 @@
 					}
 					return false;
 				}
-				if (cb) {
-					cb(null, id);
-				}		
-				return false;
-			}
-		}
-
-		// callback
-		function renderPreview(file, state, cb) {
-			if (!file) {
-				if (cb) {
-					cb("File not found");
-				}
-				return false;
-			}
-
-			if (typeof(file) !== "string") {
-				if (cb) {
-					cb("File not `String`");
-				}
-				return false;
-			}
-
-			var id = getShortId();
-			var newImage = new Image();
-			newImage.src = file;
-
-			newImage.onerror = function(e) {
-				if (cb) {
-					cb("Image load failed");
-				}
-				return false;
-			}
-
-			newImage.onload = function(e) {
-
-				// check initialized canvas
-				if (isInitialized === true) {
-					if (cb) {
-						cb("This canvas has been initialized");
-					}
-					return false;
-				}
-
-				var nextIndex = 0;
-				imageStates.forEach(function(s){
-					if (nextIndex < s.index) {
-						nextIndex = s.index;
-					}
-				});
-
-				// create element
-				var newSource = document.createElement("div");
-				newSource.id = sourceId + id;
-				newSource.classList.add("canvaaas-image");
-
-				var newImg = document.createElement("img");
-				newImg.src = newImage.src;
-
-				newSource.appendChild(newImg);
-
-				var originalWidth = newImage.width;
-				var originalHeight = newImage.height;
-				var index = nextIndex + 1;
-				var width;
-				var height;
-				var axisX;
-				var axisY;
-				var rotate = 0;
-				var scaleX = 1;
-				var scaleY = 1;
-				var opacity = 1;
-
-				if (
-					typeof(state) !== "object" ||
-					state === null
-				) {
-					if (cb) {
-						cb("State not `object`");
-					}
-					return false;
-				}
-
-				if (
-					state.canvasWidth === undefined ||
-					state.width === undefined ||
-					state.height === undefined ||
-					state.x === undefined ||
-					state.y === undefined
-				) {
-					if (cb) {
-						cb("`state` error");
-					}
-					return false;
-				}
-
-				var scaleRatioX = canvasState.width / state.canvasWidth;
-				var scaleRatioY = canvasState.width / state.canvasWidth;
-
-				if (state.canvasHeight !== undefined) {
-					scaleRatioY = canvasState.height / state.canvasHeight;
-				}
-
-				width = state.width * scaleRatioX;
-				height = state.height * scaleRatioX;
-				axisX = state.x * scaleRatioX;
-				axisY = state.y * scaleRatioY;
-
-				if (state.rotate !== undefined){
-					rotate = state.rotate;
-				}
-				if (state.scaleX !== undefined){
-					scaleX = state.scaleX;
-				}
-				if (state.scaleY !== undefined){
-					scaleY = state.scaleY;
-				}
-				if (state.opacity !== undefined){
-					opacity = state.opacity;
-				}
-
-				var newState = {};
-				newState.id = id;
-				newState.index = index;
-				newState.originalWidth = originalWidth;
-				newState.originalHeight = originalHeight;
-				newState.width = width;
-				newState.height = height;
-				newState.x = axisX;
-				newState.y = axisY;
-				newState.rotate = rotate;
-				newState.scaleX = scaleX;
-				newState.scaleY = scaleY;
-				newState.opacity = opacity;
-				newState.drawable = true;
-
-				setElement(newSource, newState);
-
-				imageStates.push(newState);
-
-				canvasElement.appendChild(newSource);
-				sourceElements.push(newSource);
-
 				if (cb) {
 					cb(null, id);
 				}		
@@ -3058,10 +3018,17 @@
 
 			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
 			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
+			var offset = containerElement.getBoundingClientRect();
 
-			containerState.width = adjWidth;
-			containerState.height = adjHeight;
+			// save state
+			setState(containerState, {
+				width: adjWidth,
+				height: adjHeight,
+				left: offset.left,
+				top: offset.top
+			})
 
+			// adjust state
 			setElement(containerElement, containerState);
 
 			// if (hasScrollbar()) {
@@ -3071,10 +3038,6 @@
 
 			// 	setElement(containerElement, containerState);
 			// }
-
-			var offset = containerElement.getBoundingClientRect();
-			containerState.left = offset.left;
-			containerState.top = offset.top;
 
 			return true;
 		}
@@ -3118,13 +3081,17 @@
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
 
-			canvasState.originalWidth = originalWidth;
-			canvasState.originalHeight = originalHeight;
-			canvasState.width = fittedSizes[0];
-			canvasState.height = fittedSizes[1];
-			canvasState.x = axisX;
-			canvasState.y = axisY;
+			// save state
+			setState(canvasState, {
+				originalWidth: originalWidth,
+				originalHeight: originalHeight,
+				x: axisX,
+				y: axisY,
+				width: fittedSizes[0],
+				height: fittedSizes[1],
+			});
 
+			// adjust state
 			setElement(canvasElement, canvasState);
 			setElement(mirrorElement, canvasState);
 
@@ -3621,8 +3588,12 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var axisX = state.x - parseFloat(x);
+
 			// save state
-			state.x -= parseFloat(x);
+			setState(state, {
+				x: axisX
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -3695,8 +3666,12 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var axisY = state.y - parseFloat(y);
+
 			// save state
-			state.y -= parseFloat(y);
+			setState(state, {
+				y: axisY
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -3772,50 +3747,58 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// save state
+			var axisX = state.x;
+			var axisY = state.y;
+
 			if (isNumeric(x) === true) {
-				state.x = parseFloat(x);
+				axisX = parseFloat(x);
 			} else {
 				if (
 					x.toLowerCase() === "l" || 
 					x.toLowerCase() === "left"
 				) {
-					state.x = (canvasState.width * 0) + (state.width * 0.5);
+					axisX = (canvasState.width * 0) + (state.width * 0.5);
 				} else if (
 					x.toLowerCase() === "c" || 
 					x.toLowerCase() === "center"
 				) {
-					state.x = (canvasState.width * 0.5);
+					axisX = (canvasState.width * 0.5);
 				} else if (
 					x.toLowerCase() === "r" || 
 					x.toLowerCase() === "right"
 				) {
-					state.x = (canvasState.width * 1) - (state.width * 0.5);
+					axisX = (canvasState.width * 1) - (state.width * 0.5);
 				}
 			}
-			
 
 			if (isNumeric(y) === true) {
-				state.y = parseFloat(y);
+				axisY = parseFloat(y);
 			} else {
 				if (
 					y.toLowerCase() === "t" || 
 					y.toLowerCase() === "top"
 				) {
-					state.y = (canvasState.height * 0) + (state.height * 0.5);
+					axisY = (canvasState.height * 0) + (state.height * 0.5);
 				} else if (
 					y.toLowerCase() === "c" || 
 					y.toLowerCase() === "center" || 
 					y.toLowerCase() === "middle"
 				) {
-					state.y = (canvasState.height * 0.5);
+					axisY = (canvasState.height * 0.5);
 				} else if (
 					y.toLowerCase() === "b" || 
 					y.toLowerCase() === "bottom"
 				) {
-					state.y = (canvasState.height * 1) - (state.height * 0.5);
+					axisY = (canvasState.height * 1) - (state.height * 0.5);
 				}
 			}
+
+			// save state
+			setState(state, {
+				x: axisX,
+				y: axisY
+			});
+
 			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
@@ -3828,7 +3811,7 @@
 			}
 		}
 
-		myObject.resize = function(id, x, y, cb) {
+		myObject.resize = function(id, w, h, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
@@ -3844,8 +3827,8 @@
 			}
 
 			if (
-				!isNumeric(x) ||
-				!isNumeric(y)
+				!isNumeric(w) ||
+				!isNumeric(h)
 			) {
 				if (config.edit) {
 					config.edit("Argument error");
@@ -3890,17 +3873,21 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// save state
-			state.width = parseFloat(x);
-			state.height = parseFloat(y);
-
 			var aspectRatio = state.originalWidth / state.originalHeight;
-			if (state.width !== state.height * aspectRatio) {
-				if (state.lockAspectRatio === true) {
-					state.lockAspectRatio = false;
-				}
+			var width = parseFloat(w);
+			var height = parseFloat(h);
+			var lockAspectRatio;
+			if (width !== height * aspectRatio) {
+				lockAspectRatio = false;
 			}
-			
+
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				lockAspectRatio: lockAspectRatio
+			})
+
 			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
@@ -3972,9 +3959,14 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var width = state.width * (1 + parseFloat(ratio));
+			var height = state.height * (1 + parseFloat(ratio));
+
 			// save state
-			state.width *= 1 + parseFloat(ratio);
-			state.height *= 1 + parseFloat(ratio);
+			setState(state, {
+				width: width,
+				height: height
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4097,10 +4089,12 @@
 			eventSubCaches = [];
 
 			// save state
-			state.width = width;
-			state.height = height;
-			state.x = axisX;
-			state.y = axisY;
+			setState(state, {
+				x: axisX,
+				y: axisY,
+				width: width,
+				height: height
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4183,8 +4177,12 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var rotate = state.rotate + parseFloat(deg);
+
 			// save state
-			state.rotate += deg;
+			setState(state, {
+				rotate: rotate
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4253,14 +4251,14 @@
 				return false;
 			}
 
-			deg = parseFloat(deg);
+			var rotate = parseFloat(deg);
 
 			if (state.scaleX === -1) {
-				deg *= -1;
+				rotate *= -1;
 			}
 
 			if (state.scaleY === -1) {
-				deg *= -1;
+				rotate *= -1;
 			}
 
 			// save cache
@@ -4268,7 +4266,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.rotate = deg;
+			setState(state, {
+				rotate: rotate
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -4331,9 +4331,14 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var scaleX = state.scaleX * -1;
+			var rotate = state.rotate * -1;
+
 			// save state
-			state.scaleX *= -1;
-			state.rotate *= -1;
+			setState(state, {
+				scaleX: scaleX,
+				rotate: rotate
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -4396,9 +4401,14 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var scaleY = state.scaleY * -1;
+			var rotate = state.rotate * -1;
+
 			// save state
-			state.scaleY *= -1;
-			state.rotate *= -1;
+			setState(state, {
+				scaleY: scaleY,
+				rotate: rotate
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -4470,30 +4480,31 @@
 				return false;
 			}
 
-			x = parseFloat(x);
-			y = parseFloat(y);
+			var scaleX = parseFloat(x);
+			var scaleY = parseFloat(y);
+			var rotate = state.rotate;
 
-			if (x > 1) {
-				x = 1;
-			} else if (x < -1) {
-				x = -1;
+			if (scaleX > 1) {
+				scaleX = 1;
+			} else if (scaleX < -1) {
+				scaleX = -1;
 			} else {
-				x = state.scaleX;
+				scaleX = state.scaleX;
 			}
 
-			if (y > 1) {
-				y = 1;
-			} else if (y < -1) {
-				y = -1;
+			if (scaleY > 1) {
+				scaleY = 1;
+			} else if (scaleY < -1) {
+				scaleY = -1;
 			} else {
-				y = state.scaleY;
+				scaleY = state.scaleY;
 			}
 
-			if (x !== state.scaleX) {
-				state.rotate *= -1;
+			if (scaleX !== state.scaleX) {
+				rotate *= -1;
 			}
-			if (y !== state.scaleY) {
-				state.rotate *= -1;
+			if (scaleY !== state.scaleY) {
+				rotate *= -1;
 			}
 
 			// save cache
@@ -4501,8 +4512,11 @@
 			eventSubCaches = [];
 
 			// save state
-			state.scaleX = x;
-			state.scaleY = y;
+			setState(state, {
+				rotate: rotate,
+				scaleX: scaleX,
+				scaleY: scaleY
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4571,13 +4585,13 @@
 				return false;
 			}
 
-			num = parseFloat(num);
+			var opacity = parseFloat(num);
 
-			if (num > 1) {
-				num = 1;
+			if (opacity > 1) {
+				opacity = 1;
 			}
-			if (num < 0) {
-				num = 0;
+			if (opacity < 0) {
+				opacity = 0;
 			}
 
 			// save cache
@@ -4585,7 +4599,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.opacity = num;
+			setState(state, {
+				opacity: opacity
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4665,7 +4681,9 @@
 					imageStates[state.index + 1].index > config.minAutoIndexing - 1 &&
 					imageStates[state.index + 1].index < config.maxAutoIndexing
 				) {
-					imageStates[state.index + 1].index = state.index;
+					setState(imageStates[state.index + 1], {
+						index: state.index
+					});
 				}
 			} else {
 				if (config.edit) {
@@ -4678,7 +4696,9 @@
 			}
 
 			// save state
-			state.index += 1;
+			setState(state, {
+				index: state.index + 1
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4768,12 +4788,16 @@
 					imageStates[state.index - 1].index > config.minAutoIndexing - 1 &&
 					imageStates[state.index - 1].index < config.maxAutoIndexing
 				) {
-					imageStates[state.index - 1].index = state.index;
+					setState(imageStates[state.index - 1], {
+						index: state.index
+					});
 				}
 			}
 
 			// save state
-			state.index -= 1;
+			setState(state, {
+				index: state.index - 1
+			})
 
 			// adjust state
 			setElement(source, state);
@@ -4856,8 +4880,12 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var index = parseFloat(num);
+
 			// save state
-			state.index = parseInt(num);
+			setState(imageStates[state.index - 1], {
+				index: index
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4930,18 +4958,27 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// save state
-			if (state.lockAspectRatio === true) {
-				state.lockAspectRatio = false;
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			var lockAspectRatio = state.lockAspectRatio;
+			var width = state.width;
+			var height = state.height;
+			if (lockAspectRatio === true) {
+				lockAspectRatio = false;
 			} else {
-				state.lockAspectRatio = true;
-				var aspectRatio = state.originalWidth / state.originalHeight;
-				if (state.width > state.height / aspectRatio) {
-					state.height = state.width / aspectRatio;
+				lockAspectRatio = true;
+				if (width > height / aspectRatio) {
+					height = width / aspectRatio;
 				} else {
-					state.width = state.height * aspectRatio;
+					width = height * aspectRatio;
 				}
 			}
+
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				lockAspectRatio: lockAspectRatio
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -5004,14 +5041,22 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// save state
-			state.lockAspectRatio = true;
 			var aspectRatio = state.originalWidth / state.originalHeight;
-			if (state.width > state.height / aspectRatio) {
-				state.height = state.width / aspectRatio;
+			var lockAspectRatio = true;
+			var width = state.width;
+			var height = state.height;
+			if (width > height / aspectRatio) {
+				height = width / aspectRatio;
 			} else {
-				state.width = state.height * aspectRatio;
+				width = height * aspectRatio;
 			}
+			
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				lockAspectRatio: lockAspectRatio
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -5074,8 +5119,12 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
+			var lockAspectRatio = false;
+
 			// save state
-			state.lockAspectRatio = false;
+			setState(state, {
+				lockAspectRatio: lockAspectRatio
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -5212,7 +5261,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.focusable = true;
+			setState(state, {
+				focusable: true
+			});
 
 			// remove class
 			source.classList.remove("unclickable");
@@ -5264,7 +5315,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.editable = true;
+			setState(state, {
+				editable: true
+			});
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -5323,7 +5376,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.drawable = true;
+			setState(state, {
+				drawable: true
+			});
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -5397,7 +5452,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.focusable = false;
+			setState(state, {
+				focusable: false
+			});
 
 			// add class
 			source.classList.add("unclickable");
@@ -5459,7 +5516,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.editable = false;
+			setState(state, {
+				editable: false
+			});
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -5518,7 +5577,9 @@
 			eventSubCaches = [];
 
 			// save state
-			state.drawable = false;
+			setState(state, {
+				drawable: false
+			});
 
 			if (config.edit) {
 				config.edit(null, state.id);
@@ -5659,6 +5720,10 @@
 				return false;
 			}
 
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
 			var originalWidth = state.originalWidth;
 			var originalHeight = state.originalHeight;
 			var aspectRatio = state.originalWidth / state.originalHeight;
@@ -5686,23 +5751,23 @@
 			var axisX = canvasState.width * 0.5;
 			var axisY = canvasState.height * 0.5;
 
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-			state.width = width;
-			state.height = height;
-			state.x = axisX;
-			state.y = axisY;
-			state.rotate = 0;
-			state.scaleX = 1;
-			state.scaleY = 1;
-			state.opacity = 1;
-			state.lockAspectRatio = true;
-			state.focusable = true;
-			state.editable = true;
-			state.drawable = true;
-
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				x: axisX,
+				y: axisY,
+				rotate: 0,
+				scaleX: 1,
+				scaleY: 1,
+				opacity: 1,
+				lockAspectRatio: true,
+				focusable: true,
+				editable: true,
+				drawable: true,
+			});
+			
+			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
 
@@ -5814,14 +5879,31 @@
 				var source = getSourceById(state.id);
 				var clone = getCloneById(state.id);
 
-				state.width *= scaleRatioX;
-				state.height *= scaleRatioX;
-				state.x *= scaleRatioX;
-				state.y *= scaleRatioY;
+				if (!source || !clone) {
+					return;
+				}
 
+				var axisX = state.x * scaleRatioX;
+				var axisY = state.y * scaleRatioY;
+				var width = state.width * scaleRatioX;
+				var height = state.height * scaleRatioX;
+
+				// save state
+				setState(state, {
+					axisX: axisX,
+					axisY: axisY,
+					width: width,
+					height: height
+				});
+
+				// adjust state
 				setElement(source, state);
 				setElement(clone, state);
 			});
+
+			// clear cache
+			eventCaches = [];
+			eventSubCaches = [];
 
 			if (config.canvas) {
 				config.canvas(null, canvasState);
@@ -5842,17 +5924,17 @@
 				return false;
 			}
 
-			num = parseFloat(num);
+			var quality = parseFloat(num);
 
-			if (num > 1) {
-				num = 1;
+			if (quality > 1) {
+				quality = 1;
 			}
 
-			if (num < 0) {
-				num = 0;
+			if (quality < 0) {
+				quality = 0;
 			}
 
-			canvasState.quality = num;
+			canvasState.quality = quality;
 
 			if (config.canvas) {
 				config.canvas(null, canvasState);
@@ -6243,8 +6325,8 @@
 				return false;
 			}
 
-			var state = getStateBySource(eventState.target);
-			var tmp = getAbsoluteData(state);
+			var id = getIdBySource(eventState.target);
+			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
 				cb(null, tmp);
@@ -6260,8 +6342,8 @@
 				return false;
 			}
 
-			var state = getStateBySource(eventState.target);
-			var tmp = getAbsoluteData(state);
+			var id = getIdBySource(eventState.target);
+			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
 				cb(null, tmp);
@@ -6310,15 +6392,14 @@
 		}
 
 		myObject.getImageData = function(id, cb){
-			var state = getStateById(id);
-			if (!state) {
+			if (!id) {
 				if (cb) {
 					cb("Image not found");
 				}
 				return false;
 			}
 
-			var tmp = getAbsoluteData(state);
+			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
 				cb(null, tmp);
@@ -6329,7 +6410,7 @@
 		myObject.getImageDataAll = function(cb){
 			var tmp = [];
 			imageStates.forEach(function(state){
-				tmp.push(getAbsoluteData(state));
+				tmp.push(getAdjustedDataById(state.id));
 			});
 
 			if (cb) {
@@ -6363,6 +6444,7 @@
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
+
 			copyObject(recent.state, state);
 
 			setElement(source, state);
@@ -6413,6 +6495,7 @@
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
+
 			copyObject(recent.state, state);
 
 			setElement(source, state);
