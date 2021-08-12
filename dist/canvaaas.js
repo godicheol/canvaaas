@@ -1430,80 +1430,47 @@
 				return false;
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.originalWidth)) && 
-				isFinite(additionalState.originalWidth)
-			) {
+			if (isNumeric(additionalState.originalWidth)) {
 				state.originalWidth = parseFloat(additionalState.originalWidth);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.originalHeight)) && 
-				isFinite(additionalState.originalHeight)
-			) {
+			if (isNumeric(additionalState.originalHeight)) {
 				state.originalHeight = parseFloat(additionalState.originalHeight);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.index)) && 
-				isFinite(additionalState.index)
-			) {
+			if (isNumeric(additionalState.index)) {
 				state.index = parseFloat(additionalState.index);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.width)) && 
-				isFinite(additionalState.width)
-			) {
+			if (isNumeric(additionalState.width)) {
 				state.width = parseFloat(additionalState.width);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.height)) && 
-				isFinite(additionalState.height)
-			) {
+			if (isNumeric(additionalState.height)) {
 				state.height = parseFloat(additionalState.height);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.left)) && 
-				isFinite(additionalState.left)
-			) {
+			if (isNumeric(additionalState.left)) {
 				state.left = parseFloat(additionalState.left);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.top)) && 
-				isFinite(additionalState.top)
-			) {
+			if (isNumeric(additionalState.top)) {
 				state.top = parseFloat(additionalState.top);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.x)) && 
-				isFinite(additionalState.x)
-			) {
+			if (isNumeric(additionalState.x)) {
 				state.x = parseFloat(additionalState.x);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.y)) && 
-				isFinite(additionalState.y)
-			) {
+			if (isNumeric(additionalState.y)) {
 				state.y = parseFloat(additionalState.y);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.rotate)) && 
-				isFinite(additionalState.rotate)
-			) {
+			if (isNumeric(additionalState.rotate)) {
 				state.rotate = parseFloat(additionalState.rotate);
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.scaleX)) && 
-				isFinite(additionalState.scaleX)
-			) {
+			if (isNumeric(additionalState.scaleX)) {
 				if (parseFloat(additionalState.scaleX) > 0) {
 					state.scaleX = 1;
 				} else {
@@ -1511,10 +1478,7 @@
 				}
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.scaleY)) && 
-				isFinite(additionalState.scaleY)
-			) {
+			if (isNumeric(additionalState.scaleY)) {
 				if (parseFloat(additionalState.scaleY) > 0) {
 					state.scaleY = 1;
 				} else {
@@ -1522,10 +1486,7 @@
 				}
 			}
 
-			if (
-				!isNaN(parseFloat(additionalState.opacity)) && 
-				isFinite(additionalState.opacity)
-			) {
+			if (isNumeric(additionalState.opacity)) {
 				if (parseFloat(additionalState.opacity) > 1) {
 					state.opacity = 1;
 				} else if (parseFloat(additionalState.opacity) < 0) {
@@ -2437,6 +2398,11 @@
 			return firstPart + secondPart;
 		}
 
+		function isNumeric(n) {
+			return !isNaN(parseFloat(n)) && isFinite(n);
+		}
+
+		// deprecated
 		function isMobile() {
 			var res = false;
 			// device detection
@@ -2446,9 +2412,8 @@
 			}
 			return res;
 		}
-		function isNumeric(n) {
-			return !isNaN(parseFloat(n)) && isFinite(n);
-		}
+		
+		// deprecated
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -2483,6 +2448,7 @@
 			return (contentOverflows && overflowShown) || (alwaysShowScroll);
 		}
 
+		// deprecated
 		function getScrollbarWidth() {
 			var tmp = document.createElement('div');
 			tmp.style.overflow = 'scroll';
