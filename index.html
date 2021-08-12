@@ -216,9 +216,24 @@
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
-						URL.revokeObjectURL(link.href);
+						window.URL.revokeObjectURL(res.file);
 					})
 				">Save</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					// new tab
+					canvaaas.draw(null, function(err, res){
+						var image = new Image();
+						image.src = res.file;
+						image.style.maxWidth = '100%';
+						image.style.maxHeight = '100%';
+
+				        var newTab = window.open('');
+				        newTab.document.write(image.outerHTML);
+
+						window.URL.revokeObjectURL(res.file);
+					})
+				">Draw to New Tab</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getContainerData(function(err, res){
@@ -684,6 +699,11 @@
 			initCanvasWidth: 3911.961907399141,
 			initCanvasHeight: 2933.971430549356,
 			init: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.init callback", res);
 				var caches = canvaaas.getCacheData();
 				if (caches.undo.length < 1) {
 					buttons.undo.style.pointerEvents = "none";
@@ -709,6 +729,7 @@
 					console.log(err);
 					return false;
 				}
+				console.log("config.canvas callback", res);
 				var containerState = canvaaas.getContainerData();
 				inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
 				inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
@@ -731,6 +752,7 @@
 					console.log(err);
 					return false;
 				}
+				console.log("config.focus callback", res);
 				var containerState = canvaaas.getContainerData();
 				inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
 				inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
@@ -767,6 +789,7 @@
 					console.log(err);
 					return false;
 				}
+				console.log("config.edit callback", res);
 				var caches = canvaaas.getCacheData();
 				if (caches.undo.length < 1) {
 					buttons.undo.style.pointerEvents = "none";
@@ -807,7 +830,7 @@
 					console.log(err);
 					return false;
 				}
-				console.log("draw", res);
+				console.log("config.draw callback", res);
 				// document.getElementById("preview1").src = res.file;
 			},
 		}
@@ -833,7 +856,10 @@
 					return false;
 				}
 				canvaaas.state(res, elem, function(err, res){
-					console.log(err, res);
+					if (err) {
+						console.log(err);
+						return false;
+					}
 				})
 			})
 		})

@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.0
+ * 0.1.1
  * 
  * eeecheol@gmail.com
  * 
@@ -86,7 +86,6 @@
 		var cloneId = "canvaaas-" + getShortId() + "-";
 
 		var isInitialized = false;
-		var onInitialize = false;
 
 		var onUpload = false;
 		var onMove = false;
@@ -5946,6 +5945,7 @@
 
 			var oldW = canvasState.width;
 			var oldH = canvasState.height;
+			var oldAS = canvasState.originalWidth / canvasState.originalHeight;
 
 			canvasState.originalWidth = parseFloat(w);
 			canvasState.originalHeight = parseFloat(h);
@@ -5977,9 +5977,15 @@
 			// set images
 			var newW = canvasState.width;
 			var newH = canvasState.height;
+			var newAS = canvasState.originalWidth / canvasState.originalHeight;
 
 			var scaleRatioX = newW / oldW;
 			var scaleRatioY = newH / oldH;
+
+			var isInit = false;
+			if (oldAS !== newAS) {
+				isInit = true;
+			}
 
 			// new state adjust to images
 			imageStates.forEach(function(state){
@@ -5990,22 +5996,54 @@
 					return;
 				}
 
-				var axisX = state.x * scaleRatioX;
-				var axisY = state.y * scaleRatioY;
-				var width = state.width * scaleRatioX;
-				var height = state.height * scaleRatioX;
+				if (isInit === true) {
+					var originalWidth = state.originalWidth;
+					var originalHeight = state.originalHeight;
+					var aspectRatio = state.originalWidth / state.originalHeight;
 
-				// save state
-				setState(state, {
-					axisX: axisX,
-					axisY: axisY,
-					width: width,
-					height: height
-				});
+					var maxWidth = canvasState.width * config.maxImageRenderWidth;
+					var maxHeight = canvasState.height * config.maxImageRenderHeight;
+					var minWidth = canvasState.width * config.minImageRenderWidth;
+					var minHeight = canvasState.height * config.minImageRenderHeight;
 
-				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+					var maxSizes = getFittedRect(
+						maxWidth,
+						maxHeight,
+						aspectRatio,
+					);
+
+					var minSizes = getFittedRect(
+						minWidth,
+						minHeight,
+						aspectRatio,
+						"cover"
+					);
+
+					var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
+					var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
+					var axisX = canvasState.width * 0.5;
+					var axisY = canvasState.height * 0.5;
+
+					// save state
+					setState(state, {
+						width: width,
+						height: height,
+						x: axisX,
+						y: axisY,
+						rotate: 0,
+						scaleX: 1,
+						scaleY: 1,
+						opacity: 1,
+						lockAspectRatio: true,
+						focusable: true,
+						editable: true,
+						drawable: true
+					});
+					
+					// adjust state
+					setElement(source, state);
+					setElement(clone, state);
+				}
 			});
 
 			// clear cache
@@ -6642,6 +6680,13 @@
 
 		myObject.destroy = function(cb){
 
+			if (isInitialized !== true) {
+				if (cb) {
+					cb("Canvas not initialized");
+				}
+				return false;
+			}
+
 			window.removeEventListener("resize", handlers.resizeWindow, false);
 
 			containerElement.parentNode.removeChild(containerElement);
@@ -6664,7 +6709,6 @@
 			sourceElements = [];
 				
 			isInitialized = false;
-			onInitialize = false;
 
 			onUpload = false;
 			onMove = false;
