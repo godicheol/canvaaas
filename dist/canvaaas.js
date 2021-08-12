@@ -8,11 +8,6 @@
  * 
  */
 
-/*!
- * 
- * 
- */
-
 (function(window){
 	'use strict';
 
@@ -110,14 +105,14 @@
 		var imageTemplate = "";
 		imageTemplate += "<img>";
 		imageTemplate += "<div class='canvaaas-overlay'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-top'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-top'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-bottom'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-left'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-right'></div>";
+		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-top'></div>";
+		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
+		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
+		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-e'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-s'><div class='canvaaas-handle'></div></div>";
@@ -145,7 +140,6 @@
 		var containerElement;
 		var canvasElement;
 		var mirrorElement;
-
 		var sourceElements = [];
 
 		copyObject(defaultConfig, config);
@@ -240,17 +234,14 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				var source = eventState.target;
-				if (!source) {
-					return false;
-				}
-
 				if (
 					!e.target.classList.contains("canvaaas-image") &&
 					!e.target.classList.contains("canvaaas-clone")
 				) {
-					var id = getIdBySource(source);
-					setFocusOut(id);
+					if (eventState.target) {
+						var id = getIdBySource(eventState.target);
+						setFocusOut(id);
+					}
 				}
 			},
 
@@ -282,15 +273,27 @@
 				if (e.keyCode == '38') {
 					// up arrow
 					axisY -= 10;
+					if (e.shiftKey) {
+						axisY = magT;
+					}
 				} else if (e.keyCode == '40') {
 					// down arrow
 					axisY += 10;
+					if (e.shiftKey) {
+						axisY = magB;
+					}
 				} else if (e.keyCode == '37') {
 					// left arrow
 					axisX -= 10;
+					if (e.shiftKey) {
+						axisX = magL;
+					}
 				} else if (e.keyCode == '39') {
 					// right arrow
 					axisX += 10;
+					if (e.shiftKey) {
+						axisX = magR;
+					}
 				} else {
 					return false;
 				}
@@ -404,9 +407,10 @@
 					}
 				}
 
-				var source = eventState.target;
-				var id = getIdBySource(source);
-				setFocusOut(id);
+				if (eventState.target) {
+					var id = getIdBySource(eventState.target);
+					setFocusOut(id);
+				}
 			},
 
 			startMove: function(e) {
@@ -653,6 +657,8 @@
 				var axisX;
 				var axisY;
 				var deg;
+				var rotate;
+				// var onShiftKey = false;
 
 				if (!onRotate) {
 					return false;
@@ -672,6 +678,10 @@
 					return false;
 				}
 
+				// if (e.shiftKey) {
+				// 	onShiftKey = true;
+				// }
+
 				// calculate mouse point
 				axisX = mouseX - state.x;
 				axisY = state.y - mouseY;
@@ -685,9 +695,21 @@
 					deg = 180 - deg;
 				}
 
+				rotate = eventState.initialR + (deg - eventState.initialD);
+				// rotate = rotate % 360;
+
+				// if (onShiftKey === true) {
+				// 	var overflow = rotate % 45;
+				// 	if (overflow > 22.5) {
+				// 		rotate = rotate - overflow - 45;
+				// 	} else {
+				// 		rotate = rotate - overflow;
+				// 	}
+				// }
+
 				// save state
 				setState(state, {
-					rotate: eventState.initialR + (deg - eventState.initialD)
+					rotate: rotate
 				});
 
 				// adjust state
@@ -1006,18 +1028,17 @@
 					return false;
 				}
 
-
 				if (width < minW) {
-					width = minW;
+					return false;
 				}
 				if (width > maxW) {
-					width = maxW;
+					return false;
 				}
 				if (height < minH) {
-					height = minH;
+					return false;
 				}
 				if (height > maxH) {
-					height = maxH;
+					return false;
 				}
 
 				// save state
@@ -1580,8 +1601,14 @@
 			elem.style.top = top;
 			elem.style.width = width;
 			elem.style.height = height;
-			elem.style.opacity = opacity;
 			elem.style.transform = transform;
+
+			if (
+				elem.classList.contains("canvaaas-image") ||
+				elem.classList.contains("canvaaas-clone")
+			) {
+				elem.querySelector("img").style.opacity = opacity;
+			}
 
 			return true;
 		};
@@ -3196,15 +3223,13 @@
 
 			// check config.initCanvasWidth, config.initCanvasHeight
 			if (
-				config.initCanvasWidth !== undefined &&
-				config.initCanvasHeight !== undefined &&
-				config.initCanvasWidth !== null &&
-				config.initCanvasHeight !== null
+				typeof(config.initCanvasWidth) === "number" &&
+				typeof(config.initCanvasHeight) === "number"
 			) {
-				// set container
 				canvasState.originalWidth = config.initCanvasWidth;
 				canvasState.originalHeight = config.initCanvasHeight;
 
+				// set container
 				var resA = initContainer();
 				if (!resA) {
 					if (config.init) {
@@ -3230,7 +3255,7 @@
 
 				isInitialized = true;
 
-				containerElement.classList.add("hidden");
+				// containerElement.classList.add("hidden");
 			}
 
 			// set events
@@ -3267,9 +3292,9 @@
 					onUpload = false;
 					onInitialize = false;
 
-					if (isInitialized === true) {
-						containerElement.classList.remove("hidden");
-					}
+					// if (isInitialized === true) {
+					// 	containerElement.classList.remove("hidden");
+					// }
 
 					results.forEach(function(res) {
 						showImage(res.id);
@@ -3282,7 +3307,8 @@
 					}
 					if (thisCb) {
 						thisCb(null, results);
-					} 
+					}
+
 					console.log("canvaaas.js initialized", config);
 				}
 			}
@@ -4268,7 +4294,7 @@
 			// save state
 			setState(state, {
 				rotate: rotate
-			})
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4338,7 +4364,7 @@
 			setState(state, {
 				scaleX: scaleX,
 				rotate: rotate
-			})
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -4408,7 +4434,7 @@
 			setState(state, {
 				scaleY: scaleY,
 				rotate: rotate
-			})
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -5212,6 +5238,210 @@
 			}
 		}
 
+		myObject.toggleFocusable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			var focusable = state.focusable === false;
+
+			// save state
+			setState(state, {
+				focusable: focusable
+			});
+
+			// focus out
+			if (focusable === false) {
+				if (eventState.target) {
+					if (source.isSameNode(eventState.target)) {
+						var res = setFocusOut(id);
+						if (!res) {
+							if (config.edit) {
+								config.edit("`setFocusOut()` error");
+							}
+							if (cb) {
+								cb("`setFocusOut()` error");
+							} 
+							return false;
+						}
+					}	
+				}
+			}
+
+			// remove class
+			if (focusable === true) {
+				source.classList.remove("unclickable");
+			} else {
+				source.classList.add("unclickable");
+			}
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.toggleEditable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!source || !state) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			var editable = state.editable === false;
+
+			// save state
+			setState(state, {
+				editable: editable
+			});
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
+		myObject.toggleDrawable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			var drawable = state.drawable === false;
+
+			// save state
+			setState(state, {
+				drawable: drawable
+			});
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
 		myObject.focusable = function(id, cb){
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -5794,13 +6024,6 @@
 				return false;
 			}
 
-			// if (!config.editable) {
-			// 	if (cb) {
-			// 		cb("Editing has been disabled");
-			// 	}
-			// 	return false;
-			// }
-
 			// set config
 			copyObject(newConfig, config);
 
@@ -5814,6 +6037,16 @@
 		// 
 
 		myObject.canvas = function(w, h, cb) {
+			if (!config.editable) {
+				if (config.canvas) {
+					config.canvas("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
 			if (
 				!isNumeric(w) ||
 				!isNumeric(h)
@@ -5823,16 +6056,6 @@
 				}
 				if (cb) {
 					cb("Argument error");
-				}
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.canvas) {
-					config.canvas("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
 				}
 				return false;
 			}
@@ -6074,7 +6297,11 @@
 		}
 
 		myObject.smoothingEnabled = function(num, cb) {
-			if (!isNumeric(num)) {
+			if (
+				!isNumeric(num) &&
+				typeof(num) !== "boolean" &&
+				typeof(num) !== "string"
+			) {
 				if (config.canvas) {
 					config.canvas("Argument error");
 				}
@@ -6084,24 +6311,36 @@
 				return false;
 			}
 
-			num = parseFloat(num);
-			num = Math.round(num);
+			var enabled;
+			if (isNumeric(num) === true) {
+				num = parseInt(num);
 
-			if (num > 1) {
-				num = 1;
+				if (num < 1) {
+					enabled = false;
+				} else {
+					enabled = true;
+				}
+			} else if (typeof(num) === "boolean") {
+				enabled = num;
+			} else if (typeof(num) === "string") {
+				if (num === "true") {
+					enabled = true;
+				} else if (num === "false") {
+					enabled = false;
+				}
 			}
 
-			if (num < 0) {
-				num = 0;
+			if (enabled === undefined) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
 			}
 
-			if (num === 0) {
-				num = false;
-			} else {
-				num = true;
-			}
-
-			canvasState.smoothingEnabled = num;
+			canvasState.smoothingEnabled = enabled;
 
 			if (config.canvas) {
 				config.canvas(null, canvasState);
@@ -6119,12 +6358,8 @@
 				return false;
 			}
 
-			var source = eventState.target;
-			if (
-				source !== undefined &&
-				source !== null
-			) {
-				var id = getIdBySource(source);
+			if (eventState.target) {
+				var id = getIdBySource(eventState.target);
 				var res = setFocusOut(id);
 				if (!res) {
 					if (cb) {

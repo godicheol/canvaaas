@@ -19,9 +19,9 @@
 }
 
 /* canvas */
-.canvaaas-canvas.focus{
+/*.canvaaas-canvas.focus{
 	outline: 1px solid red;
-}
+}*/
 
 /* image overlay */
 .canvaaas-image .canvaaas-overlay{
@@ -59,7 +59,7 @@
 
 /* image innerline */
 /*.canvaaas-innerline{
-	display: none !important;
+	visibility: hidden;
 }*/
 .canvaaas-image .canvaaas-innerline{
 	border-color: #888;
@@ -203,10 +203,10 @@
 	display: block;
 }
 .canvaaas-image.hidden{
-	display: none;
+	visibility: hidden;
 }
 .canvaaas-clone.hidden{
-	display: none;
+	visibility: hidden;
 }
 .canvaaas-clone img,
 .canvaaas-image img{

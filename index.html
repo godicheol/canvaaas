@@ -275,15 +275,16 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.moveX(canvaaas.this(), -10)
 				">Move Right</a></li>
-				<!-- <li><label for="moveTopLeft">Move top-left</label></li>
+				<li class="rule"></li>
+				<li><label for="moveTopLeft">Move top-left</label></li>
 				<li><label for="moveTopCenter">Move top-center</label></li>
 				<li><label for="moveTopRight">Move top-right</label></li>
-				<li><label for="moveMiddleLeft">Move middle-left</label></li> -->
+				<li><label for="moveMiddleLeft">Move middle-left</label></li>
 				<li><label for="moveMiddleCenter">Move middle-center</label></li>
-				<!-- <li><label for="moveMiddleRight">Move middle-right</label></li>
+				<li><label for="moveMiddleRight">Move middle-right</label></li>
 				<li><label for="moveBottomLeft">Move bottom-left</label></li>
 				<li><label for="moveBottomCenter">Move bottom-center</label></li>
-				<li><label for="moveBottomRight">Move bottom-right</label></li> -->
+				<li><label for="moveBottomRight">Move bottom-right</label></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize(
@@ -344,6 +345,16 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusOut()
 				">Focus Out</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleFocusable(canvaaas.this())
+				">Toggle Focus</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleEditable(canvaaas.this())
+				">Toggle Edit</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleDrawable(canvaaas.this())
+				">Toggle Draw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this())
@@ -621,6 +632,7 @@
 	        "scaleY": 1,
 	        "opacity": 0.5,
 	        "index": 2,
+	        "lockAspectRatio": false,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": false
