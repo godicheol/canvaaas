@@ -172,7 +172,8 @@
 
 	<div id="header" class="header">
 		<div class="header-hidden">
-			<input id="upload" type="file" onchange="canvaaas.uploadFiles(this, null, console.log)" multiple>
+			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this, console.log)">
+			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this, console.log)" multiple>
 			<button id="moveTopLeft" onclick="canvaaas.moveTo(canvaaas.this(), 'left', 'top')"></button>
 			<button id="moveTopCenter" onclick="canvaaas.moveTo(canvaaas.this(), 'center', 'top')"></button>
 			<button id="moveTopRight" onclick="canvaaas.moveTo(canvaaas.this(), 'right', 'top')"></button>
@@ -192,10 +193,11 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">File</a>
 			<ul class="header-list hidden">
-				<li><label for="upload">Upload Files</label></li>
+				<li><label for="uploadSingle">Upload File</label></li>
+				<li><label for="uploadMultiple">Upload Files</label></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrls([window.prompt('Type image URL.')], null, console.log)
-				">Upload URLs</a></li>
+					canvaaas.uploadUrl(window.prompt('Type image URL.'), console.log)
+				">Upload URL</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.remove(canvaaas.this())
@@ -240,7 +242,9 @@
 				">Get Cache Data</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.init(elem, testState1)
+					canvaaas.config(testConfig1, function(err, res){
+						canvaaas.init(elem)
+					})
 				">Init</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.destroy(function(err, res){
@@ -248,7 +252,6 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.config(testConfig1)
 					})
 				">Destroy</a></li>
 			</ul>
@@ -302,6 +305,23 @@
 				">Zoom Out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoomTo(canvaaas.this(), 0.01)
+				">Zoom 0.01</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoomTo(canvaaas.this(), 0.1)
+				">Zoom 0.1</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoomTo(canvaaas.this(), 1)
+				">Zoom 1</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoomTo(canvaaas.this(), 'cover')
+				">Zoom Cover</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoomTo(canvaaas.this(), 'contain')
+				">Zoom Contain</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.rotate(canvaaas.this(), -45)
 				">Rotate Left</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -317,6 +337,9 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.flipY(canvaaas.this())
 				">Flip Vertically</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.flipTo(canvaaas.this(), 1, 1)
+				">Flip Reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.opacityTo(canvaaas.this(), window.prompt('0 ~ 1'))
@@ -325,6 +348,7 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.toggleAspectRatio(canvaaas.this())
 				">Toggle Aspect Ratio</a></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.lockAspectRatio(canvaaas.this())
 				">Lock Aspect Ratio</a></li>
@@ -332,6 +356,9 @@
 					canvaaas.unlockAspectRatio(canvaaas.this())
 				">Unlock Aspect Ratio</a></li>
 				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.indexTo(canvaaas.this(), window.prompt('Number'))
+				">Index</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexUp(canvaaas.this())
 				">Index Up</a></li>
@@ -378,7 +405,7 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.reset(canvaaas.this())
-				">reset</a></li>
+				">Reset</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -409,10 +436,10 @@
 				">Background Color</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.smoothingEnabled(window.prompt('e.g. 0 ~ 1'))
-				">SmoothEnabled</a></li>
+				">Smooth Enabled</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.smoothingQuality(window.prompt('e.g. 0 ~ 1'))
-				">SmoothQuality</a></li>
+				">Smooth Quality</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -593,7 +620,7 @@
 
 		var elem = document.getElementById("container");
 
-		var testState1 = [{
+		var testStates1 = [{
 	        "src": "/img/3.jpg",
 	        "width": 3911.961907399141,
 	        "height": 2933.971430549356,
@@ -603,7 +630,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 0,
+	        "index": 4,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": true
@@ -617,7 +644,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 1,
+	        "index": null,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": true
@@ -631,7 +658,22 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 0.5,
-	        "index": 2,
+	        "index": null,
+	        "lockAspectRatio": false,
+	        "focusable": true,
+	        "editable": true,
+	        "drawable": false
+	    }, {
+	        "src": "/img/1.png",
+	        "width": 1591.309449421528,
+	        "height": 1591.309449421528,
+	        "x": 2896.3720930232557,
+	        "y": 1905.84685605785,
+	        "rotate": -335.54985541284424,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "index": 3,
 	        "lockAspectRatio": false,
 	        "focusable": true,
 	        "editable": true,
@@ -639,8 +681,8 @@
 	    }]
 
 		var testConfig1 = {
-			// initCanvasWidth: 6000,
-			// initCanvasHeight: 6000,
+			initCanvasWidth: 3911.961907399141,
+			initCanvasHeight: 2933.971430549356,
 			init: function(err, res){
 				var caches = canvaaas.getCacheData();
 				if (caches.undo.length < 1) {
@@ -775,32 +817,37 @@
 		canvaaas.config(testConfig1);
 
 		// #1 init
-		// canvaaas.init(elem, testState1, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log(res);
-		// })
-
-		// #1 init 
-		// canvaaas.init(elem, null, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log(res);
-		// })
-
-		// #1 init & freeze
-		canvaaas.init(elem, testState1, function(err, res){
+		canvaaas.init(elem, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
 			}
-			console.log(res);
-			// canvaaas.freeze();
 		})
+
+		// #2
+		testStates1.forEach(function(elem, idx){
+			// elem.index = idx;
+			canvaaas.uploadUrl(elem.src, function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				canvaaas.state(res, elem, function(err, res){
+					console.log(err, res);
+				})
+			})
+		})
+
+
+		// #1 init & freeze
+		// canvaaas.init(elem, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+		// 	console.log(res);
+		// 	// canvaaas.freeze();
+		// })
 
 	</script>
 </body>

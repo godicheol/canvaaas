@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.0.9
+ * 0.1.0
  * 
  * eeecheol@gmail.com
  * 
@@ -185,14 +185,14 @@
 
 				function recursiveFunc() {
 					if (count < index) {
-						renderImage(files[count], null, function(err, id) {
+						renderImage(files[count], function(err, res) {
 							if (err) {
 								if (config.upload) {
 									config.upload(err);
 								}
 							} else {
 								if (config.upload) {
-									config.upload(null, id);
+									config.upload(null, res);
 								}
 							}
 							count++;
@@ -200,10 +200,6 @@
 						});
 					} else {
 						onUpload = false;
-
-						results.forEach(function(res) {
-							showImage(res.id);
-						});
 					}
 				}
 			},
@@ -1794,14 +1790,6 @@
 					return -1;
 				}
 				return 0;
-			}).map(function(state, i){
-				if (
-					state.index > config.minAutoIndexing - 1 &&
-					state.index < config.maxAutoIndexing
-				) {
-					state.index = i;
-				}
-				return state;
 			});
 
 			tmpStates.forEach(function(state){
@@ -1833,6 +1821,7 @@
 					}
 					tmpSourceElements.push(source);
 				} catch (err) {
+					console.log(err);
 					return false;
 				}
 
@@ -1856,6 +1845,7 @@
 						}
 					}
 				} catch (err) {
+					console.log(err);
 					return false;
 				}
 			});
@@ -1876,7 +1866,6 @@
 
 		function getAdjustedDataById(id) {
 			var state = getStateById(id);
-
 			if (!state) {
 				return false;
 			}
@@ -1885,6 +1874,7 @@
 			var tmp = {};
 			tmp.id = state.id;
 			tmp.src = state.src;
+			tmp.index = state.index;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
 			tmp.x = state.x / scaleRatio;
@@ -1893,11 +1883,11 @@
 			tmp.scaleX = state.scaleX;
 			tmp.scaleY = state.scaleY;
 			tmp.opacity = state.opacity;
-			tmp.index = state.index;
 			tmp.lockAspectRatio = state.lockAspectRatio;
 			tmp.focusable = state.focusable;
 			tmp.editable = state.editable;
 			tmp.drawable = state.drawable;
+
 			return tmp;
 		}
 
@@ -1918,6 +1908,27 @@
 			return source.id.split("-").pop();
 		}
 
+		function getIndexById(id) {
+			if (!id) {
+				return false;
+			}
+
+			var idx = imageStates.findIndex(function(elem){
+				if (elem.id === id) {
+					return elem;
+				}
+			});
+
+			if (
+				idx === undefined ||
+				idx === null
+			) {
+				return false;
+			}
+
+			return idx;
+		}
+
 		function getSourceById(id) {
 			if (!id) {
 				return false;
@@ -1929,9 +1940,9 @@
 			if (!str) {
 				return false;
 			}
-			var state = imageStates.find(function(state){
-				if (state.filename === str) {
-					return state;
+			var state = imageStates.find(function(elem){
+				if (elem.filename === str) {
+					return elem;
 				}
 			});
 			if (!state) {
@@ -1944,9 +1955,9 @@
 			if (!id) {
 				return false;
 			}
-			return imageStates.find(function(state){
-				if (state.id === id) {
-					return state;
+			return imageStates.find(function(elem){
+				if (elem.id === id) {
+					return elem;
 				}
 			});
 		}
@@ -1968,9 +1979,9 @@
 
 			var id = source.id.split("-").pop();
 
-			return imageStates.find(function(state){
-				if (state.id === id) {
-					return state;
+			return imageStates.find(function(elem){
+				if (elem.id === id) {
+					return elem;
 				}
 			});
 		}
@@ -1979,9 +1990,9 @@
 			if (!str) {
 				return false;
 			}
-			return imageStates.find(function(state){
-				if (state.filename === str) {
-					return state;
+			return imageStates.find(function(elem){
+				if (elem.filename === str) {
+					return elem;
 				}
 			});
 		}
@@ -2024,9 +2035,9 @@
 				return false;
 			}
 
-			var stateSeq = imageStates.findIndex(function(state){
-				if (state.id === id) {
-					return state;
+			var stateSeq = imageStates.findIndex(function(elem){
+				if (elem.id === id) {
+					return elem;
 				}
 			});
 
@@ -2034,9 +2045,9 @@
 				return false;
 			}
 
-			var sourceSeq = sourceElements.findIndex(function(candidateSource){
-				if (candidateSource.isSameNode(source)) {
-					return candidateSource;
+			var sourceSeq = sourceElements.findIndex(function(elem){
+				if (elem.isSameNode(source)) {
+					return elem;
 				}
 			});
 
@@ -2564,7 +2575,7 @@
 			return canvas;
 		}
 
-		// callback
+		// asynchronous
 		function drawImage(canvas, id, cb){
 			if (
 				typeof(canvas) !== "object" ||
@@ -2582,13 +2593,13 @@
 			var originalImg = source.querySelector("img");
 
 			if (!source) {
-				return cb("Source element not found");
+				return cb("Source not found");
 			}
 			if (!state) {
 				return cb("State not found");
 			}
 			if (!originalImg) {
-				return cb("Image element not found");
+				return cb("Image not found");
 			}
 
 			var virtualImg = new Image();
@@ -2695,8 +2706,8 @@
 			}
 		}
 
-		// callback
-		function renderImage(file, oldState, cb) {
+		// asynchronous
+		function renderImage(file, cb) {
 			if (!file) {
 				if (cb) {
 					cb("File not found");
@@ -2706,7 +2717,7 @@
 
 			if (sourceElements.length > config.maxNumberOfImages - 1) {
 				if (cb) {
-					cb("Exceed `config.maxNumberOfImages`");
+					cb("Exceed max number of images");
 				}
 				return false;
 			}
@@ -2776,6 +2787,7 @@
 						}
 						return false;
 					}
+
 					isInitialized = true;
 				}
 
@@ -2827,66 +2839,6 @@
 				var editable = true;
 				var drawable = true;
 
-				if (
-					typeof(oldState) === "object" &&
-					oldState !== null
-				) {
-					var scaleRatio = canvasState.width / canvasState.originalWidth;
-
-					if (typeof(oldState.id) === "string") {
-						id = oldState.id;
-					}
-					if (isNumeric(oldState.index)){
-						index = parseFloat(oldState.index);
-					}
-					if (isNumeric(oldState.x)){
-						axisX = parseFloat(oldState.x) * scaleRatio;
-					}
-					if (isNumeric(oldState.y)){
-						axisY = parseFloat(oldState.y) * scaleRatio;
-					}
-					if (isNumeric(oldState.width)){
-						width = parseFloat(oldState.width) * scaleRatio;
-					}
-					if (isNumeric(oldState.height)){
-						height = parseFloat(oldState.height) * scaleRatio;
-					}
-					if (isNumeric(oldState.rotate)){
-						rotate = parseFloat(oldState.rotate);
-					}
-					if (
-						oldState.scaleX === -1 ||
-						oldState.scaleX === "-1" ||
-						oldState.scaleX === 1 ||
-						oldState.scaleX === "1"
-					){
-						scaleX = parseInt(oldState.scaleX);
-					}
-					if (
-						oldState.scaleY === -1 ||
-						oldState.scaleY === "-1" ||
-						oldState.scaleY === 1 ||
-						oldState.scaleY === "1"
-					){
-						scaleY = parseInt(oldState.scaleY);
-					}
-					if (isNumeric(oldState.opacity)){
-						opacity = parseFloat(oldState.opacity);
-					}
-					if (typeof(oldState.lockAspectRatio) === "boolean"){
-						lockAspectRatio = oldState.lockAspectRatio;
-					}
-					if (typeof(oldState.focusable) === "boolean"){
-						focusable = oldState.focusable;
-					}
-					if (typeof(oldState.editable) === "boolean"){
-						editable = oldState.editable;
-					}
-					if (typeof(oldState.drawable) === "boolean"){
-						drawable = oldState.drawable;
-					}
-				}
-
 				var newState = {};
 				newState.src = src;
 				newState.id = id;
@@ -2909,20 +2861,11 @@
 				// create wrap element
 				var newSource = document.createElement("div");
 				newSource.classList.add("canvaaas-image");
-				newSource.classList.add("hidden");
 				newSource.id = sourceId + id;
 				newSource.innerHTML = imageTemplate;
 
-				// create img element
 				var newImg = newSource.querySelector("img");
 				newImg.src = newImage.src;
-
-				setElement(newSource, newState);
-
-				imageStates.push(newState);
-
-				canvasElement.appendChild(newSource);
-				sourceElements.push(newSource);
 
 				// create clone element
 				var newClone = newSource.cloneNode();
@@ -2930,7 +2873,7 @@
 				newClone.id = cloneId + id;
 				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
 
-				// events
+				// set events
 				var rotateHandlesA = newSource.querySelectorAll("div.canvaaas-rotate-handle");
 				var resizeHandlesA = newSource.querySelectorAll("div.canvaaas-resize-handle");
 				
@@ -2963,7 +2906,13 @@
 				newClone.addEventListener("mousedown", handlers.startFocusIn, false);
 				newClone.addEventListener("touchstart", handlers.startFocusIn, false);
 
+				// finish
+				imageStates.push(newState);
+
+				setElement(newSource, newState);
+				canvasElement.appendChild(newSource);
 				mirrorElement.appendChild(newClone);
+				sourceElements.push(newSource);
 
 				var res = setIndex();
 				if (!res) {
@@ -3129,39 +3078,13 @@
 		// exports
 		// 
 
-		myObject.init = function(target, imageStates, cb) {
-			var thisTarget,
-				thisStates = [],
-				thisCb,
-				hasState = true;
-
-			if (cb) {
-				if (typeof(cb) === "function") {
-					thisCb = cb;
-				}
-			} else {
-				if (typeof(imageStates) === "function") {
-					thisCb = imageStates;
-					hasState = false;
-				}
-			}
-
+		myObject.init = function(target, cb) {
 			if (isInitialized === true) {
 				if (config.init) {
 					config.init("Already initialized");
 				}
-				if (thisCb) {
-					thisCb("Already initialized");
-				}
-				return false;
-			}
-
-			if (onInitialize === true) {
-				if (config.init) {
-					config.init("Already in progress");
-				}
-				if (thisCb) {
-					thisCb("Already in progress");
+				if (cb) {
+					cb("Already initialized");
 				}
 				return false;
 			}
@@ -3173,43 +3096,19 @@
 				if (config.init) {
 					config.init("Argument error");
 				}
-				if (thisCb) {
-					thisCb("Argument error");
+				if (cb) {
+					cb("Argument error");
 				}
 				return false;
 			}
 
-			thisTarget = target;
-
-			if (hasState === true) {
-				if (Array.isArray(imageStates)) {
-					thisStates = imageStates;
-				} else if (
-					typeof(imageStates) === "object" &&
-					imageStates !== null
-				) {
-					thisStates[0] = imageStates;
-				} else if (
-					imageStates === undefined ||
-					imageStates === null
-				) {
-					hasState = false;
-				} else {
-					if (config.init) {
-						config.init("Argument error");
-					}
-					if (thisCb) {
-						thisCb("Argument error");
-					}
-					return false;
-				}
-			}			
-
 			// set template
-			thisTarget.innerHTML = conatinerTemplate;
-			containerElement = thisTarget.querySelector("div.canvaaas");
-			canvasElement = thisTarget.querySelector("div.canvaaas-canvas");
-			mirrorElement = thisTarget.querySelector("div.canvaaas-mirror");
+			target.innerHTML = conatinerTemplate;
+
+			// set elements
+			containerElement = target.querySelector("div.canvaaas");
+			canvasElement = target.querySelector("div.canvaaas-canvas");
+			mirrorElement = target.querySelector("div.canvaaas-mirror");
 
 			// set canvasState
 			canvasState.quality = 0.8;
@@ -3221,7 +3120,7 @@
 			// set canvas background
 			canvasElement.style.backgroundColor = canvasState.backgroundColor;
 
-			// check config.initCanvasWidth, config.initCanvasHeight
+			// check canvas dimensions
 			if (
 				typeof(config.initCanvasWidth) === "number" &&
 				typeof(config.initCanvasHeight) === "number"
@@ -3235,8 +3134,8 @@
 					if (config.init) {
 						config.init("`initContainer()` error");
 					}
-					if (thisCb) {
-						thisCb("`initContainer()` error");
+					if (cb) {
+						cb("`initContainer()` error");
 					}
 					return false;
 				}
@@ -3247,15 +3146,13 @@
 					if (config.init) {
 						config.init("`initCanvas()` error");
 					}
-					if (thisCb) {
-						thisCb("`initCanvas()` error");
+					if (cb) {
+						cb("`initCanvas()` error");
 					}
 					return false;
 				}
 
 				isInitialized = true;
-
-				// containerElement.classList.add("hidden");
 			}
 
 			// set events
@@ -3268,74 +3165,38 @@
 			containerElement.addEventListener('drop', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.dropImages, false);
 
-			// init target inner
-			var index = thisStates.length;
-			var count = 0;
-			var results = [];
+			canvasElement.classList.add("checker");
 
-			onUpload = true;
-			onInitialize = true;
+			console.log("canvaaas.js initialized", config);
 
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					renderImage(thisStates[count].src, thisStates[count], function(err, id) {
-						results.push({
-							err: err,
-							id: id
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					onUpload = false;
-					onInitialize = false;
-
-					// if (isInitialized === true) {
-					// 	containerElement.classList.remove("hidden");
-					// }
-
-					results.forEach(function(res) {
-						showImage(res.id);
-					});
-
-					canvasElement.classList.add("checker");
-
-					if (config.init) {
-						config.init(null, results);
-					}
-					if (thisCb) {
-						thisCb(null, results);
-					}
-
-					console.log("canvaaas.js initialized", config);
-				}
+			if (config.init) {
+				config.init(null, config);
 			}
+			if (cb) {
+				cb(null, config);
+			}
+			return true;
 		}
 
-		myObject.uploadFiles = function(self, imageStates, cb) {
-			var thisFiles = [],
-				thisStates = [],
-				thisCb,
-				hasState = true;
-
-			if (cb) {
-				if (typeof(cb) === "function") {
-					thisCb = cb;
+		myObject.uploadFiles = function(self, cb) {
+			if (onUpload === true) {
+				if (config.upload) {
+					config.upload("Already in progress");
 				}
-			} else {
-				if (typeof(imageStates) === "function") {
-					thisCb = imageStates;
-					hasState = false;
-				}
+				if (cb) {
+					cb("Already in progress");
+				} 
+				return false;
 			}
 
-			if (
-				imageStates === undefined ||
-				imageStates === null
-			) {
-				hasState = false;
+			if (!config.editable) {
+				if (config.upload) {
+					config.upload("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				} 
+				return false;
 			}
 
 			if (
@@ -3345,82 +3206,40 @@
 				if (config.upload) {
 					config.upload("Argument error");
 				}
-				if (thisCb) {
-					thisCb("Argument error");
+				if (cb) {
+					cb("Argument error");
 				} 
 				return false;
 			}
 
-			thisFiles = self.files;
+			var thisFiles = self.files;
 			if (thisFiles.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
-				if (thisCb) {
-					thisCb("File not found");
+				if (cb) {
+					cb("File not found");
 				} 
 				return false;
 			}
-
-			if (hasState === true) {
-				if (Array.isArray(imageStates)) {
-					for (var i = 0; i < imageStates.length; i++) {
-						thisStates[i] = imageStates[i];
-					}
-				} else {
-					if (
-						thisFiles.length === 1 &&
-						typeof(imageStates) === "object" &&
-						imageStates !== null
-					) {
-						states[0] = imageStates;
-					}
-				}
-			}
-
-			if (!config.editable) {
-				if (config.upload) {
-					config.upload("Editing has been disabled");
-				}
-				if (thisCb) {
-					thisCb("Editing has been disabled");
-				} 
-				return false;
-			}
-
-			if (onUpload === true) {
-				if (config.upload) {
-					config.upload("Already in progress");
-				}
-				if (thisCb) {
-					thisCb("Already in progress");
-				} 
-				return false;
-			}
-
-			onUpload = true;
 
 			var index = thisFiles.length;
 			var count = 0;
 			var results = [];
 
+			onUpload = true;
+
 			recursiveFunc();
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(thisFiles[count], thisStates[count], function(err, id) {
-						if (err) {
-							if (config.upload) {
-								config.upload(err);
-							}
-						} else {
-							if (config.upload) {
-								config.upload(null, id);
-							}
+					renderImage(thisFiles[count], function(err, res) {
+						if (config.upload) {
+							config.upload(err, res);
 						}
 						results.push({
 							err: err,
-							id: id
+							id: res
 						});
 						count++;
 						recursiveFunc();
@@ -3428,127 +3247,63 @@
 				} else {
 					onUpload = false;
 
-					results.forEach(function(res) {
-						showImage(res.id);
-					});
-
-					if (thisCb) {
-						thisCb(null, results);
+					if (cb) {
+						cb(null, results);
 					}
 				}
 			}
 		}
 
-		myObject.uploadUrls = function(imageUrls, imageStates, cb) {
-			var thisFiles = [],
-				thisStates = [],
-				thisCb,
-				hasState = true;
-
-			if (cb) {
-				if (typeof(cb) === "function") {
-					thisCb = cb;
-				}
-			} else {
-				if (typeof(imageStates) === "function") {
-					thisCb = imageStates;
-					hasState = false;
-				}
-			}
-
-			if (
-				imageStates === undefined ||
-				imageStates === null
-			) {
-				hasState = false;
-			}
-
-			thisFiles = imageUrls;
-			if (!Array.isArray(thisFiles)) {
+		myObject.uploadUrl = function(imageUrl, cb) {
+			if (onUpload === true) {
 				if (config.upload) {
-					config.upload("Argument error");
+					config.upload("Already in progress");
 				}
-				if (thisCb) {
-					thisCb("Argument error");
+				if (cb) {
+					cb("Already in progress");
 				} 
 				return false;
-			}
-
-			if (hasState === true) {
-				if (Array.isArray(imageStates)) {
-					for (var i = 0; i < imageStates.length; i++) {
-						thisStates[i] = imageStates[i];
-					}
-				} else {
-					if (
-						thisFiles.length === 1 &&
-						typeof(imageStates) === "object" &&
-						imageStates !== null
-					) {
-						states[0] = imageStates;
-					}
-				}
 			}
 
 			if (!config.editable) {
 				if (config.upload) {
 					config.upload("Editing has been disabled");
 				}
-				if (thisCb) {
-					thisCb("Editing has been disabled");
+				if (cb) {
+					cb("Editing has been disabled");
 				} 
 				return false;
 			}
 
-			if (onUpload === true) {
+			var thisFile = imageUrl;
+			if (!thisFile) {
 				if (config.upload) {
-					config.upload("Already in progress");
+					config.upload("File not found");
 				}
-				if (thisCb) {
-					thisCb("Already in progress");
+				if (cb) {
+					cb("File not found");
 				} 
 				return false;
 			}
 
-			var index = thisFiles.length;
-			var count = 0;
-			var results = [];
-
-			onUpload = true;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					renderImage(thisFiles[count], thisStates[count], function(err, id) {
-						if (err) {
-							if (config.upload) {
-								config.upload(err);
-							}
-						} else {
-							if (config.upload) {
-								config.upload(null, id);
-							}
-						}
-						results.push({
-							err: err,
-							id: id
-						});
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					onUpload = false;
-
-					results.forEach(function(res) {
-						showImage(res.id);
-					});
-
-					if (thisCb) {
-						thisCb(null, results);
+			renderImage(thisFile, function(err, res) {
+				if (err) {
+					if (config.upload) {
+						config.upload(err);
 					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
 				}
-			}
+
+				if (config.upload) {
+					config.upload(null, res);
+				}
+				if (cb) {
+					cb(null, res);
+				}
+			});
 		}
 
 		// 
@@ -4510,20 +4265,18 @@
 			var scaleY = parseFloat(y);
 			var rotate = state.rotate;
 
-			if (scaleX > 1) {
+			if (
+				scaleX !== 1 &&
+				scaleX !== -1
+			) {
 				scaleX = 1;
-			} else if (scaleX < -1) {
-				scaleX = -1;
-			} else {
-				scaleX = state.scaleX;
 			}
 
-			if (scaleY > 1) {
+			if (
+				scaleY !== 1 &&
+				scaleY !== -1
+			) {
 				scaleY = 1;
-			} else if (scaleY < -1) {
-				scaleY = -1;
-			} else {
-				scaleY = state.scaleY;
 			}
 
 			if (scaleX !== state.scaleX) {
@@ -4645,6 +4398,7 @@
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
+			var seq = getIndexById(id)
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4666,7 +4420,7 @@
 				return false;
 			}
 
-			if (!source || !state || !clone) {
+			if (!source || !state || !clone || seq === false) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4686,8 +4440,30 @@
 				return false;
 			}
 
+			// check next index
+			var nextIndex = state.index + 1;
+			var nextState = imageStates[seq + 1];
+			if (!nextState) {
+				if (config.edit) {
+					config.edit("Exceed max number of index");
+				}
+				if (cb) {
+					cb("Exceed max number of index");
+				}
+				return false;
+			}
+
+			if (
+				nextState.index > config.minAutoIndexing - 1 &&
+				nextState.index < config.maxAutoIndexing
+			) {
+				if (nextIndex < nextState.index) {
+					nextIndex = nextState.index;
+				}
+			}
+
 			// check index limit
-			if (state.index > config.maxAutoIndexing - 1) {
+			if (nextState.index > config.maxAutoIndexing - 1) {
 				if (config.edit) {
 					config.edit("Exceed max number of index");
 				}
@@ -4701,29 +4477,13 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// check next index
-			if (imageStates[state.index + 1] !== undefined) {
-				if (
-					imageStates[state.index + 1].index > config.minAutoIndexing - 1 &&
-					imageStates[state.index + 1].index < config.maxAutoIndexing
-				) {
-					setState(imageStates[state.index + 1], {
-						index: state.index
-					});
-				}
-			} else {
-				if (config.edit) {
-					config.edit("Exceed max number of index");
-				}
-				if (cb) {
-					cb("Exceed max number of index");
-				}
-				return false;
-			}
-
 			// save state
+			setState(nextState, {
+				index: nextIndex - 1
+			});
+
 			setState(state, {
-				index: state.index + 1
+				index: nextIndex
 			});
 
 			// adjust state
@@ -4746,12 +4506,14 @@
 			if (cb) {
 				cb(null, state.id);
 			}
+			return true;
 		}
 
 		myObject.indexDown = function(id, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
+			var seq = getIndexById(id)
 
 			if (typeof(id) !== "string") {
 				if (config.edit) {
@@ -4773,7 +4535,7 @@
 				return false;
 			}
 
-			if (!source || !state || !clone) {
+			if (!source || !state || !clone || seq === false) {
 				if (config.edit) {
 					config.edit("Image not found");
 				}
@@ -4793,8 +4555,30 @@
 				return false;
 			}
 
+			// check next index
+			var previousIndex = state.index - 1;
+			var previousState = imageStates[seq - 1];
+			if (!previousState) {
+				if (config.edit) {
+					config.edit("Reached min number of index");
+				}
+				if (cb) {
+					cb("Reached min number of index");
+				}
+				return false;
+			}
+
+			if (
+				previousState.index > config.minAutoIndexing - 1 &&
+				previousState.index < config.maxAutoIndexing
+			) {
+				if (previousIndex > previousState.index) {
+					previousIndex = previousState.index;
+				}
+			}
+
 			// check index limit
-			if (state.index - 1 < config.minAutoIndexing) {
+			if (previousState.index < config.minAutoIndexing + 1) {
 				if (config.edit) {
 					config.edit("Reached min number of index");
 				}
@@ -4808,22 +4592,14 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			// check previous state
-			if (imageStates[state.index - 1] !== undefined) {
-				if (
-					imageStates[state.index - 1].index > config.minAutoIndexing - 1 &&
-					imageStates[state.index - 1].index < config.maxAutoIndexing
-				) {
-					setState(imageStates[state.index - 1], {
-						index: state.index
-					});
-				}
-			}
-
 			// save state
+			setState(previousState, {
+				index: previousIndex + 1
+			});
+			
 			setState(state, {
-				index: state.index - 1
-			})
+				index: previousIndex
+			});
 
 			// adjust state
 			setElement(source, state);
@@ -5915,6 +5691,114 @@
 			}
 		}
 
+		myObject.state = function(id, newState, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (
+				typeof(newState) !== "object" ||
+				newState === null
+			) {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// preset state
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			if (
+				!isNaN(parseFloat(newState.x)) && 
+				isFinite(newState.x)
+			) {
+				newState.x = parseFloat(newState.x) * scaleRatio;
+			}
+
+			if (
+				!isNaN(parseFloat(newState.y)) && 
+				isFinite(newState.y)
+			) {
+				newState.y = parseFloat(newState.y) * scaleRatio;
+			}
+
+			if (
+				!isNaN(parseFloat(newState.width)) && 
+				isFinite(newState.width)
+			) {
+				newState.width = parseFloat(newState.width) * scaleRatio;
+			}
+
+			if (
+				!isNaN(parseFloat(newState.height)) && 
+				isFinite(newState.height)
+			) {
+				newState.height = parseFloat(newState.height) * scaleRatio;
+			}
+
+			// save state
+			setState(state, newState);
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			var res = setIndex();
+			if (!res) {
+				if (config.edit) {
+					config.edit("`setIndex()` error");
+				}
+				if (cb) {
+					cb("`setIndex()` error");
+				}
+				return false;
+			}
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+		}
+
 		myObject.reset = function(id, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -6010,7 +5894,7 @@
 		}
 
 		// 
-		// edit config
+		// config
 		// 
 
 		myObject.config = function(newConfig, cb) {

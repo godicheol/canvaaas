@@ -2,8 +2,6 @@
  * 
  * canvaaas.js
  * 
- * 0.0.9
- * 
  * eeecheol@gmail.com
  * 
  */
@@ -21,6 +19,11 @@
 /* canvas */
 /*.canvaaas-canvas.focus{
 	outline: 1px solid red;
+}*/
+
+/* image focused */
+/*.canvaaas-image.focus{
+	z-index: 1;
 }*/
 
 /* image overlay */
@@ -195,9 +198,6 @@
 }
 .canvaaas-clone{
 	display: none;
-}
-.canvaaas-image.focus{
-	z-index: 1;
 }
 .canvaaas-clone.focus{
 	display: block;
