@@ -275,10 +275,10 @@
 			<a href="javascript:void(0)" class="header-subject">Edit</a>
 			<ul class="header-list hidden">
 				<li><a id="undo" href="javascript:void(0)" onclick="
-					canvaaas.undo(console.log)
+					canvaaas.undo()
 				">Undo</a></li>
 				<li><a id="redo" href="javascript:void(0)" onclick="
-					canvaaas.redo(console.log)
+					canvaaas.redo()
 				">Redo</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -645,7 +645,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 0,
+	        "index": 1,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": true
@@ -659,7 +659,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 1,
+	        "index": 9,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": true
@@ -673,13 +673,14 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 0.5,
-	        "index": 2,
+	        // "index": null,
 	        "lockAspectRatio": false,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": false
 	    }, {
 	        "src": "/img/1.png",
+	        "id": "test1.png",
 	        "width": 1591.309449421528,
 	        "height": 1591.309449421528,
 	        "x": 2896.3720930232557,
@@ -688,7 +689,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 3,
+	        "index": 4,
 	        "lockAspectRatio": false,
 	        "focusable": true,
 	        "editable": true,
@@ -704,25 +705,11 @@
 					return false;
 				}
 				console.log("config.init callback", res);
-				var caches = canvaaas.getCacheData();
-				if (caches.undo.length < 1) {
-					buttons.undo.style.pointerEvents = "none";
-					buttons.undo.style.cursor = "default";
-					buttons.undo.style.color = "#777";
-				} else {
-					buttons.undo.style.pointerEvents = "";
-					buttons.undo.style.cursor = "";
-					buttons.undo.style.color = "";
-				}
-				if (caches.redo.length < 1) {
-					buttons.redo.style.pointerEvents = "none";
-					buttons.redo.style.cursor = "default";
-					buttons.redo.style.color = "#777";
-				} else {
-					buttons.redo.style.pointerEvents = "";
-					buttons.redo.style.cursor = "";
-					buttons.redo.style.color = "";
-				}
+
+				writeContainerData();
+				writeCanvasData();
+
+				checkCaches();
 			},
 			canvas: function(err, res){
 				if (err) {
@@ -730,22 +717,9 @@
 					return false;
 				}
 				console.log("config.canvas callback", res);
-				var containerState = canvaaas.getContainerData();
-				inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
-				inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
-				inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
-				inputs.container.top.value = Math.floor(containerState.top * 100) / 100;
 
-				var canvasState = canvaaas.getCanvasData();
-				inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
-				inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
-				inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
-				inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
-				inputs.canvas.mimeType.value = canvasState.mimeType;
-				inputs.canvas.quality.value = canvasState.quality;
-				inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
-				inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
-				inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
+				writeContainerData();
+				writeCanvasData();
 			},
 			focus: function(err, res){
 				if (err) {
@@ -753,36 +727,10 @@
 					return false;
 				}
 				console.log("config.focus callback", res);
-				var containerState = canvaaas.getContainerData();
-				inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
-				inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
-				inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
-				inputs.container.top.value = Math.floor(containerState.top * 100) / 100;
 
-				var canvasState = canvaaas.getCanvasData();
-				inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
-				inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
-				inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
-				inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
-				inputs.canvas.mimeType.value = canvasState.mimeType;
-				inputs.canvas.quality.value = canvasState.quality;
-				inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
-				inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
-				inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
-
-				var imageState = canvaaas.getImageData(res);
-				inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
-				inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
-				inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
-				inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
-				inputs.image.index.value = imageState.index;
-				inputs.image.rotate.value = Math.floor(imageState.rotate * 100) / 100;
-				inputs.image.scaleX.value = imageState.scaleX;
-				inputs.image.scaleY.value = imageState.scaleY;
-				inputs.image.opacity.value = imageState.opacity;
-				inputs.image.focusable.value = imageState.focusable;
-				inputs.image.editable.value = imageState.editable;
-				inputs.image.drawable.value = imageState.drawable;
+				writeContainerData();
+				writeCanvasData();
+				writeImageData(res);
 			},
 			edit: function(err, res){
 				if (err) {
@@ -790,40 +738,10 @@
 					return false;
 				}
 				console.log("config.edit callback", res);
-				var caches = canvaaas.getCacheData();
-				if (caches.undo.length < 1) {
-					buttons.undo.style.pointerEvents = "none";
-					buttons.undo.style.cursor = "default";
-					buttons.undo.style.color = "#777";
-				} else {
-					buttons.undo.style.pointerEvents = "";
-					buttons.undo.style.cursor = "";
-					buttons.undo.style.color = "";
-				}
-				if (caches.redo.length < 1) {
-					buttons.redo.style.pointerEvents = "none";
-					buttons.redo.style.cursor = "default";
-					buttons.redo.style.color = "#777";
-				} else {
-					buttons.redo.style.pointerEvents = "";
-					buttons.redo.style.cursor = "";
-					buttons.redo.style.color = "";
-				}
 
-				var imageState = canvaaas.getImageData(res);
-				inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
-				inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
-				inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
-				inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
-				inputs.image.index.value = imageState.index;
-				inputs.image.rotate.value = Math.floor(imageState.rotate * 100) / 100;
-				inputs.image.scaleX.value = imageState.scaleX;
-				inputs.image.scaleY.value = imageState.scaleY;
-				inputs.image.opacity.value = imageState.opacity;
-				inputs.image.lockAspectRatio.value = imageState.lockAspectRatio;
-				inputs.image.focusable.value = imageState.focusable;
-				inputs.image.editable.value = imageState.editable;
-				inputs.image.drawable.value = imageState.drawable;
+				writeImageData(res);
+
+				checkCaches();
 			},
 			draw: function(err, res){
 				if (err) {
@@ -847,33 +765,121 @@
 			}
 		})
 
-		// #2
-		testStates1.forEach(function(elem, idx){
-			// elem.index = idx;
-			canvaaas.uploadUrl(elem.src, function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				canvaaas.state(res, elem, function(err, res){
+		// #2.0 sort
+		// testStates1.sort(function(a, b){
+		// 	return a.index - b.index;
+		// });
+
+		// #2.1 upload
+		// testStates1.forEach(function(elem, idx){
+
+
+		// 	elem.index = idx; // index 0, 1, 2...
+
+
+		// 	canvaaas.uploadUrl(elem.src, function(err, res){
+		// 		if (err) {
+		// 			console.log(err);
+		// 			return false;
+		// 		}
+		// 		canvaaas.state(res, elem, function(err, res){
+		// 			if (err) {
+		// 				console.log(err);
+		// 				return false;
+		// 			}
+		// 		})
+		// 	})
+		// });
+
+		// #2.0 create urls
+		var tmpStates = testStates1.sort(function(a, b){
+			return a.index - b.index;
+		})
+
+		var arr = tmpStates.map(function(elem){
+			return elem.src;
+		}); 
+
+		// #2.1 upload urls (asynchronous)
+		canvaaas.uploadUrls(arr, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+
+			// #3 set state
+			for (var i = 0; i < res.length; i++) {
+				canvaaas.state(res[i], tmpStates[i], function(err, res){
 					if (err) {
 						console.log(err);
 						return false;
 					}
 				})
-			})
+			}
+
+			// #4 freeze
+			canvaaas.freeze();
 		})
 
+		function writeContainerData(){
+			var containerState = canvaaas.getContainerData();
+			inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
+			inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
+			inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
+			inputs.container.top.value = Math.floor(containerState.top * 100) / 100;
+		}
 
-		// #1 init & freeze
-		// canvaaas.init(elem, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log(res);
-		// 	// canvaaas.freeze();
-		// })
+		function writeCanvasData(){
+			var canvasState = canvaaas.getCanvasData();
+			inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
+			inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
+			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
+			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
+			inputs.canvas.mimeType.value = canvasState.mimeType;
+			inputs.canvas.quality.value = canvasState.quality;
+			inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
+			inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
+			inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
+		}
+
+		function writeImageData(id){
+			var imageState = canvaaas.getImageData(id);
+			inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
+			inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
+			inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
+			inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
+			inputs.image.index.value = imageState.index;
+			inputs.image.rotate.value = Math.floor(imageState.rotate * 100) / 100;
+			inputs.image.scaleX.value = imageState.scaleX;
+			inputs.image.scaleY.value = imageState.scaleY;
+			inputs.image.opacity.value = imageState.opacity;
+			inputs.image.lockAspectRatio.value = imageState.lockAspectRatio;
+			inputs.image.focusable.value = imageState.focusable;
+			inputs.image.editable.value = imageState.editable;
+			inputs.image.drawable.value = imageState.drawable;
+		}
+
+		function checkCaches(){
+			var caches = canvaaas.getCacheData();
+			if (caches.undo.length < 1) {
+				buttons.undo.style.pointerEvents = "none";
+				buttons.undo.style.cursor = "default";
+				buttons.undo.style.color = "#777";
+			} else {
+				buttons.undo.style.pointerEvents = "";
+				buttons.undo.style.cursor = "";
+				buttons.undo.style.color = "";
+			}
+			if (caches.redo.length < 1) {
+				buttons.redo.style.pointerEvents = "none";
+				buttons.redo.style.cursor = "default";
+				buttons.redo.style.color = "#777";
+			} else {
+				buttons.redo.style.pointerEvents = "";
+				buttons.redo.style.cursor = "";
+				buttons.redo.style.color = "";
+			}
+		}
 
 	</script>
 </body>

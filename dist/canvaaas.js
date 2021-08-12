@@ -1430,6 +1430,16 @@
 				return false;
 			}
 
+			if (
+				additionalState.id !== undefined &&
+				additionalState.id !== null &&
+				additionalState.id !== ""
+			) {
+				if (!existsId(additionalState.id)) {
+					changeIdById(state.id, additionalState.id);
+				}
+			}
+
 			if (isNumeric(additionalState.originalWidth)) {
 				state.originalWidth = parseFloat(additionalState.originalWidth);
 			}
@@ -1849,6 +1859,68 @@
 			tmp.drawable = state.drawable;
 
 			return tmp;
+		}
+
+		function existsId(id) {
+			var exists = imageStates.find(function(elem){
+				if (elem.id === id) {
+					return elem;
+				}
+			});
+
+			if (exists) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		function changeIdById(id, candidateId) {
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (!source || !clone || !state || !candidateId) {
+				return false;
+			}
+
+			var exists = imageStates.find(function(elem){
+				if (elem.id === candidateId) {
+					return elem;
+				}
+			});
+
+			if (exists) {
+				return false;
+			}
+
+			eventCaches.forEach(function(elem){
+				if (elem.id === id) {
+					elem.id = candidateId;
+				}
+				if (elem.state) {
+					if (elem.state.id === id) {
+						elem.state.id = candidateId;
+					}
+				}
+			});
+
+			eventSubCaches.forEach(function(elem){
+				if (elem.id === id) {
+					elem.id = candidateId;
+				}
+				if (elem.state) {
+					if (elem.state.id === id) {
+						elem.state.id = candidateId;
+					}
+				}
+			});
+
+			source.id = sourceId + candidateId;
+			clone.id = cloneId + candidateId;
+			state.id = candidateId;
+
+			return true;
 		}
 
 		function getIdBySource(source) {
@@ -3143,6 +3215,7 @@
 			return true;
 		}
 
+		// asynchronous
 		myObject.uploadFiles = function(self, cb) {
 			if (onUpload === true) {
 				if (config.upload) {
@@ -3199,13 +3272,16 @@
 			function recursiveFunc() {
 				if (count < index) {
 					renderImage(thisFiles[count], function(err, res) {
-						if (config.upload) {
-							config.upload(err, res);
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+						} else {
+							if (config.upload) {
+								config.upload(null, res);
+							}
+							results.push(res);
 						}
-						results.push({
-							err: err,
-							id: res
-						});
 						count++;
 						recursiveFunc();
 					});
@@ -3219,6 +3295,84 @@
 			}
 		}
 
+		// asynchronous
+		myObject.uploadUrls = function(imageUrls, cb) {
+			if (onUpload === true) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.upload) {
+					config.upload("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				} 
+				return false;
+			}
+
+			if (!Array.isArray(imageUrls)) {
+				if (config.upload) {
+					config.upload("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			var thisFiles = imageUrls;
+			if (thisFiles.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				} 
+				return false;
+			}
+
+			var index = thisFiles.length;
+			var count = 0;
+			var results = [];
+
+			onUpload = true;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					renderImage(thisFiles[count], function(err, res) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+						} else {
+							if (config.upload) {
+								config.upload(null, res);
+							}
+							results.push(res);
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					onUpload = false;
+
+					if (cb) {
+						cb(null, results);
+					}
+				}
+			}
+		}
+
+		// asynchronous
 		myObject.uploadUrl = function(imageUrl, cb) {
 			if (onUpload === true) {
 				if (config.upload) {
@@ -5711,31 +5865,19 @@
 			// preset state
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
-			if (
-				!isNaN(parseFloat(newState.x)) && 
-				isFinite(newState.x)
-			) {
+			if (isNumeric(newState.x)) {
 				newState.x = parseFloat(newState.x) * scaleRatio;
 			}
 
-			if (
-				!isNaN(parseFloat(newState.y)) && 
-				isFinite(newState.y)
-			) {
+			if (isNumeric(newState.y)) {
 				newState.y = parseFloat(newState.y) * scaleRatio;
 			}
 
-			if (
-				!isNaN(parseFloat(newState.width)) && 
-				isFinite(newState.width)
-			) {
+			if (isNumeric(newState.width)) {
 				newState.width = parseFloat(newState.width) * scaleRatio;
 			}
 
-			if (
-				!isNaN(parseFloat(newState.height)) && 
-				isFinite(newState.height)
-			) {
+			if (isNumeric(newState.height)) {
 				newState.height = parseFloat(newState.height) * scaleRatio;
 			}
 
@@ -6477,6 +6619,7 @@
 		myObject.getConfigData = function(cb){
 			var tmp = {};
 			copyObject(config, tmp);
+
 			if (cb) {
 				cb(null, tmp);
 			}
@@ -6486,6 +6629,7 @@
 		myObject.getContainerData = function(cb){
 			var tmp = {};
 			copyObject(containerState, tmp);
+
 			if (cb) {
 				cb(null, tmp);
 			}
@@ -6583,13 +6727,11 @@
 				}
 				return false;
 			}
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
 			if (cb) {
-				if (config.edit) {
-					config.edit(null, state.id);
-				}
-				if (cb) {
-					cb(null, state.id);
-				}
+				cb(null, state.id);
 			}
 		}
 
@@ -6634,13 +6776,11 @@
 				}
 				return false;
 			}
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
 			if (cb) {
-				if (config.edit) {
-					config.edit(null, state.id);
-				}
-				if (cb) {
-					cb(null, state.id);
-				}
+				cb(null, state.id);
 			}
 		}
 
