@@ -1862,8 +1862,8 @@
 			tmp.originalHeight = state.originalHeight;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
-			// tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
-			// tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
+			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.rotate = state.rotate;
