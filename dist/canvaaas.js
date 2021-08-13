@@ -94,6 +94,7 @@
 		var onRotate = false;
 		var onFlip = false;
 		var onFreeze = false;
+		var onDraw = false;
 
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
@@ -1845,8 +1846,12 @@
 			tmp.id = state.id;
 			tmp.src = state.src;
 			tmp.index = state.index;
+			tmp.originalWidth = state.originalWidth;
+			tmp.originalHeight = state.originalHeight;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
+			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.rotate = state.rotate;
@@ -6459,6 +6464,16 @@
 			 * }
 			 */
 
+			if (onDraw === true) {
+				if (config.draw) {
+					config.draw("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				}
+				return false;
+			}
+
 			var canvasAspectRatio;
 			var canvasWidth;
 			var canvasHeight;
@@ -6507,7 +6522,6 @@
 				}
 				return false;
 			}
-			var ctx = canvas.getContext("2d");
 
 			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
@@ -6516,19 +6530,23 @@
 				}
 			}
 
-			var index = drawables.length;
-			var count = 0;
 			var result = {};
+			var canvasResult = {};
 			var drawResults = [];
 
-			result.width = canvas.width;
-			result.height = canvas.height;
-			result.numberOfImages = drawables.length;
-			result.backgroundColor = backgroundColor;
-			result.mimeType = mimeType;
-			result.quality = quality;
-			result.imageSmoothingQuality = imageSmoothingQuality;
-			result.imageSmoothingEnabled = imageSmoothingEnabled;
+			canvasResult.width = canvas.width;
+			canvasResult.height = canvas.height;
+			canvasResult.numberOfImages = drawables.length;
+			canvasResult.backgroundColor = backgroundColor;
+			canvasResult.mimeType = mimeType;
+			canvasResult.quality = quality;
+			canvasResult.imageSmoothingQuality = imageSmoothingQuality;
+			canvasResult.imageSmoothingEnabled = imageSmoothingEnabled;
+
+			onDraw = true;
+
+			var index = drawables.length;
+			var count = 0;
 
 			recursiveFunc();
 
@@ -6545,12 +6563,16 @@
 					});
 				} else {
 					// end
+					var ctx = canvas.getContext("2d");
 					ctx.imageSmoothingQuality = imageSmoothingQuality;
 					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
 					ctx.restore();
 
 					result.states = drawResults;
+					result.canvas = canvasResult;
 					result.file = canvas.toDataURL(mimeType, quality);
+
+					onDraw = false;
 
 					if (config.draw) {
 						config.draw(null, result);
@@ -6640,6 +6662,9 @@
 			var tmp = {};
 			copyObject(canvasState, tmp);
 
+			tmp.left = tmp.x - (tmp.width * 0.5);
+			tmp.top = tmp.y - (tmp.height * 0.5);
+
 			if (cb) {
 				cb(null, tmp);
 			}
@@ -6687,6 +6712,16 @@
 		}
 
 		myObject.undo = function(cb){
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
 			if (eventCaches.length < 1) {
 				if (config.edit) {
 					config.edit("Cache is empty");
@@ -6736,6 +6771,16 @@
 		}
 
 		myObject.redo = function(cb){
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
 			if (eventSubCaches.length < 1) {
 				if (config.edit) {
 					config.edit("Cache is empty");
@@ -6785,7 +6830,6 @@
 		}
 
 		myObject.destroy = function(cb){
-
 			if (isInitialized !== true) {
 				if (cb) {
 					cb("Canvas not initialized");

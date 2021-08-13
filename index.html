@@ -156,6 +156,7 @@
 	.image-data input{
 		width: 50px;
 		text-align: right;
+		font-size: 0.8rem;
 	}
 
 	.logger #canvas-backgroundColor{
@@ -540,6 +541,14 @@
 			<input id="container-height" type="text">
 		</div>
 		<div class="canvas-data hidden">
+			Original Width:
+			<input id="canvas-originalWidth" type="text">
+			Original Height:
+			<input id="canvas-originalHeight" type="text">
+			Left:
+			<input id="canvas-left" type="text">
+			Top:
+			<input id="canvas-top" type="text">
 			X:
 			<input id="canvas-x" type="text">
 			Y:
@@ -554,12 +563,20 @@
 			<input id="canvas-mimeType" type="text">
 			Quality:
 			<input id="canvas-quality" type="text">
-			SmoothingQuality:
+			Smoothing Quality:
 			<input id="canvas-smoothingQuality" type="text">
-			SmoothingEnabled:
+			Smoothing Enabled:
 			<input id="canvas-smoothingEnabled" type="text">
 		</div>
 		<div class="image-data hidden">
+			Original Width:
+			<input id="image-originalWidth" type="text">
+			Original Height:
+			<input id="image-originalHeight" type="text">
+			Left:
+			<input id="image-left" type="text">
+			Top:
+			<input id="image-top" type="text">
 			X:
 			<input id="image-x" type="text">
 			Y:
@@ -601,8 +618,12 @@
 				top: document.getElementById("container-top"),
 			},
 			canvas:{
+				originalWidth: document.getElementById("canvas-originalWidth"),
+				originalHeight: document.getElementById("canvas-originalHeight"),
 				width: document.getElementById("canvas-width"),
 				height: document.getElementById("canvas-height"),
+				left: document.getElementById("canvas-left"),
+				top: document.getElementById("canvas-top"),
 				x: document.getElementById("canvas-x"),
 				y: document.getElementById("canvas-y"),
 				quality: document.getElementById("canvas-quality"),
@@ -612,8 +633,12 @@
 				smoothingQuality: document.getElementById("canvas-smoothingQuality"),
 			},
 			image:{
+				originalWidth: document.getElementById("image-originalWidth"),
+				originalHeight: document.getElementById("image-originalHeight"),
 				width: document.getElementById("image-width"),
 				height: document.getElementById("image-height"),
+				left: document.getElementById("image-left"),
+				top: document.getElementById("image-top"),
 				x: document.getElementById("image-x"),
 				y: document.getElementById("image-y"),
 				rotate: document.getElementById("image-rotate"),
@@ -831,8 +856,12 @@
 
 		function writeCanvasData(){
 			var canvasState = canvaaas.getCanvasData();
+			inputs.canvas.originalWidth.value = Math.floor(canvasState.originalWidth * 100) / 100;
+			inputs.canvas.originalHeight.value = Math.floor(canvasState.originalHeight * 100) / 100;
 			inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
 			inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
+			inputs.canvas.left.value = Math.floor(canvasState.left * 100) / 100;
+			inputs.canvas.top.value = Math.floor(canvasState.top * 100) / 100;
 			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
 			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
 			inputs.canvas.mimeType.value = canvasState.mimeType;
@@ -844,8 +873,12 @@
 
 		function writeImageData(id){
 			var imageState = canvaaas.getImageData(id);
+			inputs.image.originalWidth.value = Math.floor(imageState.originalWidth * 100) / 100;
+			inputs.image.originalHeight.value = Math.floor(imageState.originalHeight * 100) / 100;
 			inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
 			inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
+			inputs.image.left.value = Math.floor(imageState.left * 100) / 100;
+			inputs.image.top.value = Math.floor(imageState.top * 100) / 100;
 			inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
 			inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
 			inputs.image.index.value = imageState.index;
