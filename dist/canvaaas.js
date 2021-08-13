@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.1
+ * 0.1.2
  * 
  * eeecheol@gmail.com
  * 
@@ -76,6 +76,10 @@
 			focus: undefined, // callback function
 
 			edit: undefined, // callback function
+
+			export: undefined, // callback function
+
+			import: undefined, // callback function
 		};
 
 		Object.freeze(defaultConfig);
@@ -142,7 +146,7 @@
 		var mirrorElement;
 		var sourceElements = [];
 
-		copyObject(defaultConfig, config);
+		copyObject(config, defaultConfig);
 
 		// 
 		// handlers
@@ -1419,25 +1423,24 @@
 		function setState(state, additionalState){
 			if (
 				typeof(state) !== "object" ||
-				state === null
-			) {
-				return false;
-			}
-
-			if (
+				state === null || 
 				typeof(additionalState) !== "object" ||
 				additionalState === null
 			) {
 				return false;
 			}
 
-			if (
-				additionalState.id !== undefined &&
-				additionalState.id !== null &&
-				additionalState.id !== ""
-			) {
-				if (!existsId(additionalState.id)) {
-					changeIdById(state.id, additionalState.id);
+			if (additionalState._id) {
+				if (typeof(additionalState._id) === "string") {
+					state._id = additionalState._id;
+				} else if (typeof(additionalState._id) === "number") {
+					state._id = "" + additionalState._id;
+				}
+			} else if (additionalState.id) {
+				if (typeof(additionalState.id) === "string") {
+					state._id = additionalState.id;
+				} else if (typeof(additionalState.id) === "number") {
+					state._id = "" + additionalState.id;
 				}
 			}
 
@@ -1580,16 +1583,12 @@
 			return true;
 		};
 
-		function copyObject(srcObj, destiObj) {
-			if (
-				typeof(srcObj) !== "object" ||
-				srcObj === null
-			) {
-				return false;
-			}
+		function copyObject(destiObj, srcObj) {
 			if (
 				typeof(destiObj) !== "object" ||
-				destiObj === null
+				destiObj === null ||
+				typeof(srcObj) !== "object" ||
+				srcObj === null
 			) {
 				return false;
 			}
@@ -1611,7 +1610,7 @@
 			}
 
 			var tmpState = {};
-			var res = copyObject(state, tmpState);
+			var res = copyObject(tmpState, state);
 			if (!res) {
 				return false;
 			}
@@ -1642,7 +1641,7 @@
 			}
 
 			var tmpState = {};
-			var res = copyObject(state, tmpState);
+			var res = copyObject(tmpState, state);
 			if (!res) {
 				return false;
 			}
@@ -1843,15 +1842,16 @@
 
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 			var tmp = {};
-			tmp.id = state.id;
+			tmp._id = state._id;
+			tmp.type = state.type;
 			tmp.src = state.src;
 			tmp.index = state.index;
 			tmp.originalWidth = state.originalWidth;
 			tmp.originalHeight = state.originalHeight;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
-			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
-			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
+			// tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			// tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.rotate = state.rotate;
@@ -1866,6 +1866,7 @@
 			return tmp;
 		}
 
+		// deprecated
 		function existsId(id) {
 			var exists = imageStates.find(function(elem){
 				if (elem.id === id) {
@@ -1880,6 +1881,7 @@
 			}
 		}
 
+		// deprecated
 		function changeIdById(id, candidateId) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
@@ -2101,6 +2103,24 @@
 				console.log(err);
 				return false;
 			}
+
+			// clear caches
+			var tmpEventCaches = eventCaches.filter(function(elem){
+				if (elem.id === id) {
+					return false;
+				}
+				return true;
+			});
+
+			var tmpEventSubCaches = eventSubCaches.filter(function(elem){
+				if (elem.id === id) {
+					return false;
+				}
+				return true;
+			});
+
+			eventCaches = tmpEventCaches;
+			eventSubCaches = tmpEventSubCaches;
 
 			return true;
 		}
@@ -2766,6 +2786,7 @@
 
 			var ext;
 			var src;
+			var typ;
 			var newImage = new Image();
 			var id = getShortId();
 
@@ -2775,10 +2796,12 @@
 				file !== null
 			) {
 				// file
+				typ = "file";
 				ext = file.type.split("/").pop();
 				src = URL.createObjectURL(file);
 			} else if (typeof(file) === "string") {
 				// url
+				typ = "url";
 				ext = getExtension(file);
 				src = file;
 				// src = file + "?" + new Date().getTime(); // fix ios refresh error, cachebreaker
@@ -2884,6 +2907,7 @@
 				var newState = {};
 				newState.src = src;
 				newState.id = id;
+				newState.type = typ;
 				newState.index = index;
 				newState.originalWidth = originalWidth;
 				newState.originalHeight = originalHeight;
@@ -3285,8 +3309,12 @@
 							if (config.upload) {
 								config.upload(null, res);
 							}
-							results.push(res);
 						}
+						results.push({
+							err: err,
+							id: res
+						});
+
 						count++;
 						recursiveFunc();
 					});
@@ -3362,8 +3390,12 @@
 							if (config.upload) {
 								config.upload(null, res);
 							}
-							results.push(res);
 						}
+						results.push({
+							err: err,
+							id: res
+						});
+
 						count++;
 						recursiveFunc();
 					});
@@ -3431,8 +3463,107 @@
 		}
 
 		// 
-		// edit image
+		// image
 		// 
+
+		myObject.id = function(id, str, cb) {
+			// 
+			// set `_id` => use export(), import()
+			// 
+
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (
+				typeof(str) !== "string" &&
+				typeof(str) !== "number"
+			) {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (typeof(str) === "number") {
+				str = "" + str;
+			}
+
+			if (str.trim() === "") {
+				if (config.edit) {
+					config.edit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.edit) {
+					config.edit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				} 
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("This element has been denied");
+				}
+				if (cb) {
+					cb("This element has been denied");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			var _id = str;
+
+			// save state
+			setState(state, {
+				_id: _id
+			})
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.edit) {
+				config.edit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id)
+			}
+		}
 
 		myObject.moveX = function(id, x, cb) {
 			var source = getSourceById(id);
@@ -5909,6 +6040,7 @@
 			if (cb) {
 				cb(null, state.id);
 			}
+			return true;
 		}
 
 		myObject.reset = function(id, cb) {
@@ -6021,7 +6153,7 @@
 			}
 
 			// set config
-			copyObject(newConfig, config);
+			copyObject(config, newConfig);
 
 			if (cb) {
 				cb(null, config);
@@ -6640,7 +6772,7 @@
 
 		myObject.getConfigData = function(cb){
 			var tmp = {};
-			copyObject(config, tmp);
+			copyObject(tmp, config);
 
 			if (cb) {
 				cb(null, tmp);
@@ -6650,7 +6782,7 @@
 
 		myObject.getContainerData = function(cb){
 			var tmp = {};
-			copyObject(containerState, tmp);
+			copyObject(tmp, containerState);
 
 			if (cb) {
 				cb(null, tmp);
@@ -6660,7 +6792,7 @@
 
 		myObject.getCanvasData = function(cb){
 			var tmp = {};
-			copyObject(canvasState, tmp);
+			copyObject(tmp, canvasState);
 
 			tmp.left = tmp.x - (tmp.width * 0.5);
 			tmp.top = tmp.y - (tmp.height * 0.5);
@@ -6747,8 +6879,10 @@
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
 
-			copyObject(recent.state, state);
+			// save state
+			setState(state, recent.state);
 
+			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
 
@@ -6806,8 +6940,10 @@
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
 
-			copyObject(recent.state, state);
+			// save state
+			setState(state, recent.state);
 
+			// adjust state
 			setElement(source, state);
 			setElement(clone, state);
 
@@ -6829,6 +6965,128 @@
 			}
 		}
 
+		myObject.export = function(cb){
+			var newExports = [];
+
+			imageStates.forEach(function(elem){
+				if (elem.type === "url") {
+					var tmp = getAdjustedDataById(elem.id);
+					newExports.push(tmp);
+				}
+			})
+			if (config.export) {
+				config.export(null, newExports);
+			}
+			if (cb) {
+				cb(null, newExports);
+			}
+		}
+
+		myObject.import = function(exportedStates, cb){
+			if (!Array.isArray(exportedStates)) {
+				if (config.import) {
+					config.import("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.import) {
+					config.import("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var index = exportedStates.length;
+			var count = 0;
+			var results = [];
+
+			recursiveFunc()
+
+			function recursiveFunc() {
+				if (count < index) {
+
+					var thisState = {};
+					copyObject(thisState, exportedStates[count]);
+					var thisUrl = thisState.url || thisState.src || thisState.path;
+
+					renderImage(thisUrl, function(err, res) {
+						if (err) {
+							results.push({
+								err: err,
+								id: null
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						} 
+
+						var state = getStateById(res);
+						var source = getSourceById(res);
+						var clone = getCloneById(res);
+
+						if (!state || !source || !clone) {
+							results.push({
+								err: "Image element not found",
+								id: null
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						}
+
+						// // save cache
+						// pushCache(state.id);
+						// eventSubCaches = [];
+
+						if (isNumeric(thisState.x)) {
+							thisState.x = parseFloat(thisState.x) * scaleRatio;
+						}
+
+						if (isNumeric(thisState.y)) {
+							thisState.y = parseFloat(thisState.y) * scaleRatio;
+						}
+
+						if (isNumeric(thisState.width)) {
+							thisState.width = parseFloat(thisState.width) * scaleRatio;
+						}
+
+						if (isNumeric(thisState.height)) {
+							thisState.height = parseFloat(thisState.height) * scaleRatio;
+						}
+
+						// save state
+						setState(state, thisState);
+
+						// adjust state
+						setElement(source, state);
+						setElement(clone, state);
+
+						results.push({
+							err: null,
+							id: res
+						});
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					if (config.import) {
+						config.import(null, results);
+					}
+					if (cb) {
+						cb(null, results)
+					}
+				}
+			}
+		}
+
 		myObject.destroy = function(cb){
 			if (isInitialized !== true) {
 				if (cb) {
@@ -6843,7 +7101,7 @@
 
 			config = {};
 
-			copyObject(defaultConfig, config);
+			copyObject(config, defaultConfig);
 
 			eventState = {};
 			eventCaches = [];
@@ -6867,6 +7125,7 @@
 			onRotate = false;
 			onFlip = false;
 			onFreeze = false;
+			onDraw = false;
 
 			sourceId = "canvaaas-" + getShortId() + "-";
 			cloneId = "canvaaas-" + getShortId() + "-";

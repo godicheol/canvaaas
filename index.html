@@ -173,17 +173,8 @@
 
 	<div id="header" class="header">
 		<div class="header-hidden">
-			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this, console.log)">
-			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this, console.log)" multiple>
-			<button id="moveTopLeft" onclick="canvaaas.moveTo(canvaaas.this(), 'left', 'top')"></button>
-			<button id="moveTopCenter" onclick="canvaaas.moveTo(canvaaas.this(), 'center', 'top')"></button>
-			<button id="moveTopRight" onclick="canvaaas.moveTo(canvaaas.this(), 'right', 'top')"></button>
-			<button id="moveMiddleLeft" onclick="canvaaas.moveTo(canvaaas.this(), 'left', 'middle')"></button>
-			<button id="moveMiddleCenter" onclick="canvaaas.moveTo(canvaaas.this(), 'center', 'middle')"></button>
-			<button id="moveMiddleRight" onclick="canvaaas.moveTo(canvaaas.this(), 'right', 'middle')"></button>
-			<button id="moveBottomLeft" onclick="canvaaas.moveTo(canvaaas.this(), 'left', 'bottom')"></button>
-			<button id="moveBottomCenter" onclick="canvaaas.moveTo(canvaaas.this(), 'center', 'bottom')"></button>
-			<button id="moveBottomRight" onclick="canvaaas.moveTo(canvaaas.this(), 'right', 'bottom')"></button>
+			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this, console.log)" accept="image/*">
+			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this, console.log)" accept="image/*" multiple>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
@@ -201,13 +192,6 @@
 				">Upload URL</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.remove(canvaaas.this())
-				">Remove</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.removeAll()
-				">Remove All</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					// download 
 					canvaaas.draw(null, function(err, res){
 						var link = document.createElement('a');
@@ -220,6 +204,30 @@
 						window.URL.revokeObjectURL(res.file);
 					})
 				">Save</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.export(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+
+						exportedData = res;
+
+						canvaaas.removeAll();
+					})
+				">Export</a></li>
+				<script>
+					var exportedData;
+				</script>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.import(exportedData, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+					})
+				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					// new tab
@@ -283,6 +291,10 @@
 				">Redo</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.id(canvaaas.this(), window.prompt('Type new ID'))
+				">Set _ID</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.moveY(canvaaas.this(), 10)
 				">Move Top</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -295,15 +307,33 @@
 					canvaaas.moveX(canvaaas.this(), -10)
 				">Move Right</a></li>
 				<li class="rule"></li>
-				<li><label for="moveTopLeft">Move top-left</label></li>
-				<li><label for="moveTopCenter">Move top-center</label></li>
-				<li><label for="moveTopRight">Move top-right</label></li>
-				<li><label for="moveMiddleLeft">Move middle-left</label></li>
-				<li><label for="moveMiddleCenter">Move middle-center</label></li>
-				<li><label for="moveMiddleRight">Move middle-right</label></li>
-				<li><label for="moveBottomLeft">Move bottom-left</label></li>
-				<li><label for="moveBottomCenter">Move bottom-center</label></li>
-				<li><label for="moveBottomRight">Move bottom-right</label></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'left', 'top')
+				">Move Top-Left</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'center', 'top')
+				">Move Top-Center</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'right', 'top')
+				">Move Top-Right</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'left', 'middle')
+				">Move Middle-Left</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'center', 'middle')
+				">Move Middle-Center</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'right', 'middle')
+				">Move Middle-Right</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'left', 'bottom')
+				">Move Bottom-Left</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'center', 'bottom')
+				">Move Bottom-Center</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveTo(canvaaas.this(), 'right', 'bottom')
+				">Move Bottom-Right</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize(
@@ -420,6 +450,13 @@
 				">Disable Draw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.remove(canvaaas.this())
+				">Remove</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.removeAll()
+				">Remove All</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.reset(canvaaas.this())
 				">Reset</a></li>
 			</ul>
@@ -494,6 +531,7 @@
 					elem.classList.add("hidden");
 				}
 			}
+
 			(function(){
 				var header = document.getElementById("header");
 				var tabs = header.querySelectorAll("a.header-subject");
@@ -545,10 +583,6 @@
 			<input id="canvas-originalWidth" type="text">
 			Original Height:
 			<input id="canvas-originalHeight" type="text">
-			Left:
-			<input id="canvas-left" type="text">
-			Top:
-			<input id="canvas-top" type="text">
 			X:
 			<input id="canvas-x" type="text">
 			Y:
@@ -569,14 +603,14 @@
 			<input id="canvas-smoothingEnabled" type="text">
 		</div>
 		<div class="image-data hidden">
+			ID:
+			<input id="image-id" type="text">
+			Type:
+			<input id="image-type" type="text">
 			Original Width:
 			<input id="image-originalWidth" type="text">
 			Original Height:
 			<input id="image-originalHeight" type="text">
-			Left:
-			<input id="image-left" type="text">
-			Top:
-			<input id="image-top" type="text">
 			X:
 			<input id="image-x" type="text">
 			Y:
@@ -622,8 +656,6 @@
 				originalHeight: document.getElementById("canvas-originalHeight"),
 				width: document.getElementById("canvas-width"),
 				height: document.getElementById("canvas-height"),
-				left: document.getElementById("canvas-left"),
-				top: document.getElementById("canvas-top"),
 				x: document.getElementById("canvas-x"),
 				y: document.getElementById("canvas-y"),
 				quality: document.getElementById("canvas-quality"),
@@ -633,12 +665,12 @@
 				smoothingQuality: document.getElementById("canvas-smoothingQuality"),
 			},
 			image:{
+				id: document.getElementById("image-id"),
+				type: document.getElementById("image-type"),
 				originalWidth: document.getElementById("image-originalWidth"),
 				originalHeight: document.getElementById("image-originalHeight"),
 				width: document.getElementById("image-width"),
 				height: document.getElementById("image-height"),
-				left: document.getElementById("image-left"),
-				top: document.getElementById("image-top"),
 				x: document.getElementById("image-x"),
 				y: document.getElementById("image-y"),
 				rotate: document.getElementById("image-rotate"),
@@ -776,6 +808,20 @@
 				console.log("config.draw callback", res);
 				// document.getElementById("preview1").src = res.file;
 			},
+			export: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.export callback", res);
+			},
+			import: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.import callback", res);
+			}
 		}
 
 
@@ -789,32 +835,6 @@
 				return false;
 			}
 		})
-
-		// #2.0 sort
-		// testStates1.sort(function(a, b){
-		// 	return a.index - b.index;
-		// });
-
-		// #2.1 upload
-		// testStates1.forEach(function(elem, idx){
-
-
-		// 	elem.index = idx; // index 0, 1, 2...
-
-
-		// 	canvaaas.uploadUrl(elem.src, function(err, res){
-		// 		if (err) {
-		// 			console.log(err);
-		// 			return false;
-		// 		}
-		// 		canvaaas.state(res, elem, function(err, res){
-		// 			if (err) {
-		// 				console.log(err);
-		// 				return false;
-		// 			}
-		// 		})
-		// 	})
-		// });
 
 		// #2.0 create urls
 		var tmpStates = testStates1.sort(function(a, b){
@@ -834,7 +854,7 @@
 
 			// #3 set state
 			for (var i = 0; i < res.length; i++) {
-				canvaaas.state(res[i], tmpStates[i], function(err, res){
+				canvaaas.state(res[i].id, tmpStates[i], function(err, res){
 					if (err) {
 						console.log(err);
 						return false;
@@ -843,7 +863,7 @@
 			}
 
 			// #4 freeze
-			canvaaas.freeze();
+			// canvaaas.freeze();
 		})
 
 		function writeContainerData(){
@@ -860,8 +880,6 @@
 			inputs.canvas.originalHeight.value = Math.floor(canvasState.originalHeight * 100) / 100;
 			inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
 			inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
-			inputs.canvas.left.value = Math.floor(canvasState.left * 100) / 100;
-			inputs.canvas.top.value = Math.floor(canvasState.top * 100) / 100;
 			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
 			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
 			inputs.canvas.mimeType.value = canvasState.mimeType;
@@ -873,12 +891,12 @@
 
 		function writeImageData(id){
 			var imageState = canvaaas.getImageData(id);
+			inputs.image.id.value = imageState._id;
+			inputs.image.type.value = imageState.type;
 			inputs.image.originalWidth.value = Math.floor(imageState.originalWidth * 100) / 100;
 			inputs.image.originalHeight.value = Math.floor(imageState.originalHeight * 100) / 100;
 			inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
 			inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
-			inputs.image.left.value = Math.floor(imageState.left * 100) / 100;
-			inputs.image.top.value = Math.floor(imageState.top * 100) / 100;
 			inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
 			inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
 			inputs.image.index.value = imageState.index;
