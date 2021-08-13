@@ -825,10 +825,10 @@
 		}
 
 
-		// #0 config
+		// config
 		canvaaas.config(testConfig1);
 
-		// #1 init
+		// init
 		canvaaas.init(elem, function(err, res){
 			if (err) {
 				console.log(err);
@@ -836,34 +836,12 @@
 			}
 		})
 
-		// #2.0 create urls
-		var tmpStates = testStates1.sort(function(a, b){
-			return a.index - b.index;
-		})
-
-		var arr = tmpStates.map(function(elem){
-			return elem.src;
-		}); 
-
-		// #2.1 upload urls (asynchronous)
-		canvaaas.uploadUrls(arr, function(err, res){
+		// import
+		canvaaas.import(testStates1, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
 			}
-
-			// #3 set state
-			for (var i = 0; i < res.length; i++) {
-				canvaaas.state(res[i].id, tmpStates[i], function(err, res){
-					if (err) {
-						console.log(err);
-						return false;
-					}
-				})
-			}
-
-			// #4 freeze
-			// canvaaas.freeze();
 		})
 
 		function writeContainerData(){
