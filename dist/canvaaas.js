@@ -23,7 +23,7 @@
 
 			editable: true, // boolean
 
-			magnetic: true, // boolean
+			magneticRange: 5, // number, px
 
 			minAutoIndexing: 0, // number
 
@@ -263,10 +263,10 @@
 				var rotatedRect = getRotatedRect(state.width, state.height, state.rotate);
 				var halfWidth = 0.5 * rotatedRect[0];
 				var halfHeight = 0.5 * rotatedRect[1];
-				var magL = halfWidth;
-				var magT = halfHeight;
-				var magR = canvasState.width - halfWidth;
-				var magB = canvasState.height - halfHeight;
+				var canvasL = halfWidth;
+				var canvasT = halfHeight;
+				var canvasR = canvasState.width - halfWidth;
+				var canvasB = canvasState.height - halfHeight;
 				var axisX = state.x;
 				var axisY = state.y;
 
@@ -274,55 +274,55 @@
 					// up arrow
 					axisY -= 10;
 					if (e.shiftKey) {
-						axisY = magT;
+						axisY = canvasT;
 					}
 				} else if (e.keyCode == '40') {
 					// down arrow
 					axisY += 10;
 					if (e.shiftKey) {
-						axisY = magB;
+						axisY = canvasB;
 					}
 				} else if (e.keyCode == '37') {
 					// left arrow
 					axisX -= 10;
 					if (e.shiftKey) {
-						axisX = magL;
+						axisX = canvasL;
 					}
 				} else if (e.keyCode == '39') {
 					// right arrow
 					axisX += 10;
 					if (e.shiftKey) {
-						axisX = magR;
+						axisX = canvasR;
 					}
 				} else {
 					return false;
 				}
 
-				// check magnetic option
-				if (config.magnetic) {
+				// check magnetic
+				if (config.magneticRange !== 0) {
 					if (
-						axisX > magR - 5 &&
-						axisX < magR + 5
+						axisX > canvasR - config.magneticRange &&
+						axisX < canvasR + config.magneticRange
 					) {
-						axisX = magR;
+						axisX = canvasR;
 					}
 					if (
-						axisX > magL - 5 &&
-						axisX < magL + 5 
+						axisX > canvasL - config.magneticRange &&
+						axisX < canvasL + config.magneticRange 
 					) {
-						axisX = magL;
+						axisX = canvasL;
 					}
 					if (
-						axisY > magB - 5 &&
-						axisY < magB + 5
+						axisY > canvasB - config.magneticRange &&
+						axisY < canvasB + config.magneticRange
 					) {
-						axisY = magB;
+						axisY = canvasB;
 					}
 					if (
-						axisY > magT - 5 &&
-						axisY < magT + 5 
+						axisY > canvasT - config.magneticRange &&
+						axisY < canvasT + config.magneticRange 
 					) {
-						axisY = magT;
+						axisY = canvasT;
 					}
 				}
 
@@ -458,10 +458,10 @@
 				// save initial data
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-				eventState.magL = halfWidth;
-				eventState.magT = halfHeight;
-				eventState.magR = canvasState.width - halfWidth;
-				eventState.magB = canvasState.height - halfHeight;
+				eventState.canvasL = halfWidth;
+				eventState.canvasT = halfHeight;
+				eventState.canvasR = canvasState.width - halfWidth;
+				eventState.canvasB = canvasState.height - halfHeight;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 
@@ -515,18 +515,30 @@
 				axisY = eventState.initialY + mouseY;
 
 				// check magnetic option
-				if (config.magnetic) {
-					if (eventState.magR - 5 < axisX && eventState.magR + 5 > axisX) {
-						axisX = eventState.magR;
+				if (config.magneticRange !== 0) {
+					if (
+						axisX > eventState.canvasR - config.magneticRange &&
+						axisX < eventState.canvasR + config.magneticRange
+					) {
+						axisX = eventState.canvasR;
 					}
-					if (eventState.magB - 5 < axisY && eventState.magB + 5 > axisY) {
-						axisY = eventState.magB;
+					if (
+						axisY > eventState.canvasB - config.magneticRange &&
+						axisY < eventState.canvasB + config.magneticRange
+					) {
+						axisY = eventState.canvasB;
 					}
-					if (eventState.magL - 5 < axisX && eventState.magL + 5 > axisX) {
-						axisX = eventState.magL;
+					if (
+						axisX > eventState.canvasL - config.magneticRange &&
+						axisX < eventState.canvasL + config.magneticRange
+					) {
+						axisX = eventState.canvasL;
 					}
-					if (eventState.magT - 5 < axisY && eventState.magT + 5 > axisY) {
-						axisY = eventState.magT;
+					if (
+						axisY > eventState.canvasT - config.magneticRange &&
+						axisY < eventState.canvasT + config.magneticRange
+					) {
+						axisY = eventState.canvasT;
 					}
 				}
 
