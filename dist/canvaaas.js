@@ -8,6 +8,12 @@
  * 
  */
 
+/*!
+ * 
+ * onResize중 다른 image 클릭 후 zoom시 새로 클릭한 이미지가 zoom됨
+ * 
+ */
+
 (function(window){
 	'use strict';
 
@@ -209,9 +215,8 @@
 			},
 
 			isOutside: function(e) {
-
-				if (onMove = true) {
-					if (e.touches) {
+				if (onMove === true) {
+					if (e.touches !== undefined) {
 						if (e.touches.length === 2) {
 							handlers.startPinchZoom(e);
 							return false;
@@ -346,6 +351,17 @@
 			},
 
 			startFocusIn: function(e) {
+				if (!config.editable) {
+					if (config.focus) {
+						config.focus("Editing has been disabled");
+					}
+					return false;
+				}
+
+				if (onMove === true) {
+					return false;
+				}
+
 				e.preventDefault();
 				e.stopPropagation();
 
@@ -360,13 +376,6 @@
 					source = e.target;
 				}
 				var state = getStateBySource(source);
-
-				if (!config.editable) {
-					if (config.focus) {
-						config.focus("Editing has been disabled");
-					}
-					return false;
-				}
 
 				if (!source || !state) {
 					return false;
@@ -397,13 +406,15 @@
 				}
 			},
 
+			// deprecated
 			startFocusOut: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (typeof(e.touches) !== "undefined") {
+				if (e.touches !== undefined) {
 					if (e.touches.length === 2) {
-						return handlers.startPinchZoom(e);
+						handlers.startPinchZoom(e);
+						return false;
 					}
 				}
 
@@ -1373,6 +1384,8 @@
 				if (config.edit) {
 					config.edit(null, state.id);
 				}
+
+				handlers.startMove(e);
 			},
 
 			debounce: function(cb, time){
@@ -3480,7 +3493,7 @@
 
 		myObject.id = function(id, str, cb) {
 			// 
-			// set `_id` => use export(), import()
+			// _id !== id
 			// 
 
 			var source = getSourceById(id);
@@ -7020,6 +7033,8 @@
 			var count = 0;
 			var results = [];
 
+			onUpload = true;
+
 			recursiveFunc()
 
 			function recursiveFunc() {
@@ -7089,6 +7104,8 @@
 						recursiveFunc();
 					});
 				} else {
+					onUpload = false;
+
 					if (config.import) {
 						config.import(null, results);
 					}
