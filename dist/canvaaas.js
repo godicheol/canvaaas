@@ -8,12 +8,6 @@
  * 
  */
 
-/*!
- * 
- * onResize중 다른 image 클릭 후 zoom시 새로 클릭한 이미지가 zoom됨
- * 
- */
-
 (function(window){
 	'use strict';
 
@@ -30,6 +24,8 @@
 			editable: true, // boolean
 
 			magneticRange: 5, // number, px
+
+			restriction: true, // boolean
 
 			minAutoIndexing: 0, // number
 
@@ -79,9 +75,15 @@
 
 			draw: undefined, // callback function
 
-			focus: undefined, // callback function
+			focusIn: undefined, // callback function
 
-			edit: undefined, // callback function
+			focusOut: undefined, // callback function
+
+			startEdit: undefined, // callback function
+
+			onEdit: undefined, // callback function
+
+			endEdit: undefined, // callback function
 
 			export: undefined, // callback function
 
@@ -246,6 +248,10 @@
 					if (eventState.target) {
 						var id = getIdBySource(eventState.target);
 						setFocusOut(id);
+
+						if (config.focusOut) {
+							config.focusOut(null, id);
+						}
 					}
 				}
 			},
@@ -331,6 +337,10 @@
 					}
 				}
 
+				if (config.startEdit) {
+					config.startEdit(null, state.id);
+				}
+
 				// save cache
 				pushCache(state.id);
 				eventSubCaches = [];
@@ -345,16 +355,13 @@
 				setElement(source, state);
 				setElement(clone, state);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.endEdit) {
+					config.endEdit(null, state.id);
 				}
 			},
 
 			startFocusIn: function(e) {
 				if (!config.editable) {
-					if (config.focus) {
-						config.focus("Editing has been disabled");
-					}
 					return false;
 				}
 
@@ -382,9 +389,6 @@
 				}
 
 				if (!state.focusable) {
-					if (config.focus) {
-						config.focus("This element has been denied");
-					}
 					return false;
 				}
 
@@ -395,40 +399,24 @@
 
 					var id = getIdBySource(eventState.target);
 					setFocusOut(id);
+
+					if (config.focusOut) {
+						config.focusOut(null, id);
+					}
 				}
 
 				setFocusIn(state.id);
 
 				handlers.startMove(e);
 
-				if (config.focus) {
-					config.focus(null, state.id);
-				}
-			},
-
-			// deprecated
-			startFocusOut: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (e.touches !== undefined) {
-					if (e.touches.length === 2) {
-						handlers.startPinchZoom(e);
-						return false;
-					}
-				}
-
-				if (eventState.target) {
-					var id = getIdBySource(eventState.target);
-					setFocusOut(id);
+				if (config.focusIn) {
+					config.focusIn(null, state.id);
 				}
 			},
 
 			startMove: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				setContainerCoordinates();
 
 				var source = eventState.target;
 				var clone = getCloneBySource(source);
@@ -489,6 +477,10 @@
 
 				document.addEventListener("touchmove", handlers.onMove, false);
 				document.addEventListener("touchend", handlers.endMove, false);
+
+				if (config.startEdit) {
+					config.startEdit(null, state.id);
+				}
 			},
 
 			onMove: function(e) {
@@ -521,11 +513,10 @@
 					return false;
 				}
 
-				// calculate mouse point
 				axisX = eventState.initialX + mouseX;
 				axisY = eventState.initialY + mouseY;
 
-				// check magnetic option
+				// check magnetic
 				if (config.magneticRange !== 0) {
 					if (
 						axisX > eventState.canvasR - config.magneticRange &&
@@ -563,8 +554,8 @@
 				setElement(source, state);
 				setElement(clone, state);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.onEdit) {
+					config.onEdit(null, state.id);
 				}
 			},
 
@@ -590,16 +581,14 @@
 				document.removeEventListener("touchmove", handlers.onMove, false);
 				document.removeEventListener("touchend", handlers.endMove, false);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.endEdit) {
+					config.endEdit(null, state.id);
 				}
 			},
 
 			startRotate: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				setContainerCoordinates();
 
 				var handle = e.target;
 				var source = eventState.target;
@@ -624,11 +613,11 @@
 				}
 
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
-					mouseY = e.clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
 				} else {
 					return false;
 				}
@@ -666,6 +655,10 @@
 
 				document.addEventListener("touchmove", handlers.onRotate, false);
 				document.addEventListener("touchend", handlers.endRotate, false);
+
+				if (config.startEdit) {
+					config.startEdit(null, state.id);
+				}
 			},
 
 			onRotate: function(e) {
@@ -692,11 +685,11 @@
 				}
 
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
-					mouseY = e.clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.x - (0.5 * canvasState.width));
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.y - (0.5 * canvasState.height));
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
 				} else {
 					return false;
 				}
@@ -739,8 +732,8 @@
 				setElement(source, state);
 				setElement(clone, state);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.onEdit) {
+					config.onEdit(null, state.id);
 				}
 			},
 
@@ -765,16 +758,14 @@
 				document.removeEventListener("touchmove", handlers.onRotate, false);
 				document.removeEventListener("touchend", handlers.endRotate, false);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.endEdit) {
+					config.endEdit(null, state.id);
 				}
 			},
 
 			startResize: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-
-				setContainerCoordinates();
 
 				var handle = e.target;
 				var source = eventState.target;
@@ -872,6 +863,10 @@
 
 				document.addEventListener("touchmove", handlers.onResize, false);
 				document.addEventListener("touchend", handlers.endResize, false);
+
+				if (config.startEdit) {
+					config.startEdit(null, state.id);
+				}
 			},
 
 			onResize: function(e) {
@@ -895,10 +890,6 @@
 				var cosFraction;
 				var sinFraction;
 				var onShiftKey = false;
-				var maxW = eventState.maxW;
-				var maxH = eventState.maxH;
-				var minW = eventState.minW;
-				var minH = eventState.minH;
 
 				if (!onResize) {
 					return false;
@@ -944,18 +935,23 @@
 				axisY = eventState.initialY;
 
 				if (direction === "n") {
-					height -= diffY;
+					if (!onShiftKey) {
+						height -= diffY;
 
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-
-					if (onShiftKey) {
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						height -= diffY;
 						width = height * aspectRatio;
+
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
 					}
 				} else if (direction === "ne") {
 					if (!onShiftKey) {
 						width += diffX;
 						height -= diffY;
+
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
@@ -970,18 +966,23 @@
 						}
 					}
 				} else if (direction === "e") {
-					width += diffX;
+					if (!onShiftKey) {
+						width += diffX;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-
-					if (onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else {
+						width += diffX;
 						height = width / aspectRatio;
+
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
 					}
 				} else if (direction === "se") {
 					if (!onShiftKey) {
 						width += diffX;
 						height += diffY;
+
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
@@ -996,18 +997,23 @@
 						}
 					}
 				} else if (direction === "s") {
-					height += diffY;
+					if (!onShiftKey) {
+						height += diffY;
 
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-
-					if (onShiftKey) {
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						height += diffY;
 						width = height * aspectRatio;
+
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
 					}
 				} else if (direction === "sw") {
 					if (!onShiftKey) {
 						width -= diffX;
 						height += diffY;
+
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
@@ -1022,18 +1028,23 @@
 						}
 					}
 				} else if (direction === "w") {
-					width -= diffX;
+					if (!onShiftKey) {
+						width -= diffX;
 
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-
-					if (onShiftKey) {
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else {
+						width -= diffX;
 						height = width / aspectRatio;
+
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
 					}
 				} else if (direction === "nw") {
 					if (!onShiftKey) {
 						width -= diffX;
 						height -= diffY;
+
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
@@ -1051,16 +1062,16 @@
 					return false;
 				}
 
-				if (width < minW) {
+				if (width < eventState.minW) {
 					return false;
 				}
-				if (width > maxW) {
+				if (width > eventState.maxW) {
 					return false;
 				}
-				if (height < minH) {
+				if (height < eventState.minH) {
 					return false;
 				}
-				if (height > maxH) {
+				if (height > eventState.maxH) {
 					return false;
 				}
 
@@ -1076,8 +1087,8 @@
 				setElement(source, state);
 				setElement(clone, state);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.onEdit) {
+					config.onEdit(null, state.id);
 				}
 			},
 
@@ -1103,8 +1114,8 @@
 				document.removeEventListener("touchmove", handlers.onResize, false);
 				document.removeEventListener("touchend", handlers.endResize, false);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.endEdit) {
+					config.endEdit(null, state.id);
 				}
 			},
 
@@ -1173,8 +1184,6 @@
 
 				if (!onZoom) {
 
-					setContainerCoordinates();
-
 					// toggle on
 					onZoom = true;
 
@@ -1182,10 +1191,10 @@
 					pushCache(state.id);
 					eventSubCaches = [];
 
-				} else {
-					if (config.edit) {
-						config.edit(null, state.id);
+					if (config.startEdit) {
+						config.startEdit(null, state.id);
 					}
+
 				}
 
 				// add timer
@@ -1214,6 +1223,10 @@
 				setElement(source, state);
 				setElement(clone, state);
 
+				if (config.onEdit) {
+					config.onEdit(null, state.id);
+				}
+
 				eventState.wheeling = setTimeout(function() {
 					// remove timer
 					eventState.wheeling = undefined;
@@ -1221,8 +1234,8 @@
 					// toggle off
 					onZoom = false;
 
-					if (config.edit) {
-						config.edit(null, state.id);
+					if (config.endEdit) {
+						config.endEdit(null, state.id);
 					}
 				}, 300);
 			},
@@ -1230,8 +1243,6 @@
 			startPinchZoom: function(e){
 				e.preventDefault();
 				e.stopPropagation();
-
-				setContainerCoordinates();
 
 				var source = eventState.target;
 				var state = getStateBySource(source);
@@ -1294,6 +1305,10 @@
 				// add event handles
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
 				document.addEventListener("touchend", handlers.endPinchZoom, false);
+
+				if (config.startEdit) {
+					config.startEdit(null, state.id);
+				}
 			},
 
 			onPinchZoom: function(e){
@@ -1357,8 +1372,8 @@
 				setElement(source, state);
 				setElement(clone, state);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.onEdit) {
+					config.onEdit(null, state.id);
 				}
 			},
 
@@ -1381,8 +1396,8 @@
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
 				document.removeEventListener("touchend", handlers.endPinchZoom, false);
 
-				if (config.edit) {
-					config.edit(null, state.id);
+				if (config.endEdit) {
+					config.endEdit(null, state.id);
 				}
 
 				handlers.startMove(e);
@@ -1397,6 +1412,20 @@
 
 					timer = setTimeout(cb, time, e);
 				};
+			},
+
+			whereContainer: function(e){
+				if (!isInitialized) {
+					return false;
+				}
+
+				if (!containerElement || !containerState) {
+					return false;
+				}
+
+				var containerOffset = containerElement.getBoundingClientRect();
+				containerState.left = containerOffset.left;
+				containerState.top = containerOffset.top;
 			},
 
 			resizeWindow: function(e){
@@ -1847,14 +1876,6 @@
 
 			imageStates = tmpStates;
 			sourceElements = tmpSourceElements;
-
-			return true;
-		}
-
-		function setContainerCoordinates() {
-			var offset = containerElement.getBoundingClientRect();
-			containerState.left = offset.left;
-			containerState.top = offset.top;
 
 			return true;
 		}
@@ -3144,9 +3165,10 @@
 
 			var originalWidth = Math.min(maxSizes[0], Math.max(minSizes[0], canvasState.originalWidth));
 			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], canvasState.originalHeight));
-
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
+			var rectL = 0.5 * (containerState.width - fittedSizes[0]);
+			var rectT = 0.5 * (containerState.height - fittedSizes[1]);
 
 			// save state
 			setState(canvasState, {
@@ -3154,6 +3176,8 @@
 				originalHeight: originalHeight,
 				x: axisX,
 				y: axisY,
+				left: rectL,
+				top: rectT,
 				width: fittedSizes[0],
 				height: fittedSizes[1],
 			});
@@ -3249,6 +3273,7 @@
 			// set events
 			// window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", handlers.resizeWindow, false);
+			window.addEventListener("scroll", handlers.debounce( handlers.whereContainer, 300 ), false);
 
 			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
 			containerElement.addEventListener('dragleave', handlers.preventDefaults, false);
@@ -3501,8 +3526,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3514,8 +3539,8 @@
 				typeof(str) !== "string" &&
 				typeof(str) !== "number"
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3528,8 +3553,8 @@
 			}
 
 			if (str.trim() === "") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3538,8 +3563,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3548,8 +3573,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3558,13 +3583,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3582,8 +3611,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3596,8 +3625,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3606,8 +3635,8 @@
 			}
 
 			if (!isNumeric(x)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3616,8 +3645,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3626,8 +3655,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3636,13 +3665,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3660,8 +3693,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3674,8 +3707,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3684,8 +3717,8 @@
 			}
 
 			if (!isNumeric(y)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3694,8 +3727,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3704,8 +3737,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3714,13 +3747,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3738,8 +3775,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3752,8 +3789,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3765,8 +3802,8 @@
 				(typeof(x) !== "number" && typeof(x) !== "string") ||
 				(typeof(y) !== "number" && typeof(y) !== "string")
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3775,8 +3812,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3785,8 +3822,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3795,13 +3832,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3864,8 +3905,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3878,8 +3919,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3891,8 +3932,8 @@
 				!isNumeric(w) ||
 				!isNumeric(h)
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3901,8 +3942,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3911,8 +3952,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3921,13 +3962,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3953,8 +3998,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3967,8 +4012,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3977,8 +4022,8 @@
 			}
 
 			if (!isNumeric(ratio)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3987,8 +4032,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3997,8 +4042,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4007,13 +4052,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4033,8 +4082,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -4047,8 +4096,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4060,8 +4109,8 @@
 				typeof(ratio) !== "number" &&
 				typeof(ratio) !== "string" 
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4070,8 +4119,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4080,8 +4129,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4090,8 +4139,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4130,8 +4179,8 @@
 					axisX = canvasState.width * 0.5;
 					axisY = canvasState.height * 0.5;
 				} else {
-					if (config.edit) {
-						config.edit("Argument error");
+					if (config.startEdit) {
+						config.startEdit("Argument error");
 					}
 					if (cb) {
 						cb("Argument error");
@@ -4143,6 +4192,10 @@
 				height = state.originalHeight * parseFloat(ratio);
 				axisX = state.x;
 				axisY = state.y;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4161,8 +4214,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4175,8 +4228,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4185,8 +4238,8 @@
 			}
 
 			if (!isNumeric(deg)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4195,8 +4248,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4205,8 +4258,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4215,8 +4268,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4234,6 +4287,10 @@
 				deg *= -1;
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
@@ -4249,8 +4306,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4263,8 +4320,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4273,8 +4330,8 @@
 			}
 
 			if (!isNumeric(deg)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4283,8 +4340,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4293,8 +4350,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4303,8 +4360,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4322,6 +4379,10 @@
 				rotate *= -1;
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
@@ -4335,8 +4396,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4349,8 +4410,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4359,8 +4420,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4369,8 +4430,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4379,13 +4440,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4405,8 +4470,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4419,8 +4484,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4429,8 +4494,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4439,8 +4504,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4449,13 +4514,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4475,8 +4544,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4489,8 +4558,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4502,8 +4571,8 @@
 				!isNumeric(x) ||
 				!isNumeric(y)
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4512,8 +4581,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4522,8 +4591,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4532,8 +4601,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4566,6 +4635,10 @@
 				rotate *= -1;
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
@@ -4581,8 +4654,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4595,8 +4668,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4605,8 +4678,8 @@
 			}
 
 			if (!isNumeric(num)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4615,8 +4688,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4625,8 +4698,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4635,8 +4708,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4653,6 +4726,10 @@
 				opacity = 0;
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
@@ -4666,8 +4743,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4681,8 +4758,8 @@
 			var seq = getIndexById(id)
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4691,8 +4768,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4701,8 +4778,8 @@
 			}
 
 			if (!source || !state || !clone || seq === false) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4711,8 +4788,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4724,8 +4801,8 @@
 			var nextIndex = state.index + 1;
 			var nextState = imageStates[seq + 1];
 			if (!nextState) {
-				if (config.edit) {
-					config.edit("Exceed max number of index");
+				if (config.startEdit) {
+					config.startEdit("Exceed max number of index");
 				}
 				if (cb) {
 					cb("Exceed max number of index");
@@ -4744,13 +4821,17 @@
 
 			// check index limit
 			if (nextState.index > config.maxAutoIndexing - 1) {
-				if (config.edit) {
-					config.edit("Exceed max number of index");
+				if (config.startEdit) {
+					config.startEdit("Exceed max number of index");
 				}
 				if (cb) {
 					cb("Exceed max number of index");
 				}
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4772,16 +4853,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4796,8 +4877,8 @@
 			var seq = getIndexById(id)
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4806,8 +4887,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4816,8 +4897,8 @@
 			}
 
 			if (!source || !state || !clone || seq === false) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4826,8 +4907,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -4839,8 +4920,8 @@
 			var previousIndex = state.index - 1;
 			var previousState = imageStates[seq - 1];
 			if (!previousState) {
-				if (config.edit) {
-					config.edit("Reached min number of index");
+				if (config.startEdit) {
+					config.startEdit("Reached min number of index");
 				}
 				if (cb) {
 					cb("Reached min number of index");
@@ -4859,13 +4940,17 @@
 
 			// check index limit
 			if (previousState.index < config.minAutoIndexing + 1) {
-				if (config.edit) {
-					config.edit("Reached min number of index");
+				if (config.startEdit) {
+					config.startEdit("Reached min number of index");
 				}
 				if (cb) {
 					cb("Reached min number of index");
 				}
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4887,16 +4972,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4909,8 +4994,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4919,8 +5004,8 @@
 			}
 
 			if (!isNumeric(num)) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4929,8 +5014,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4939,8 +5024,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4949,13 +5034,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4975,16 +5064,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4997,8 +5086,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5007,8 +5096,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5017,8 +5106,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5027,13 +5116,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5066,8 +5159,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5080,8 +5173,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5090,8 +5183,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5100,8 +5193,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5110,13 +5203,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5144,8 +5241,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5158,8 +5255,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5168,8 +5265,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5178,8 +5275,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5188,13 +5285,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5212,8 +5313,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5225,8 +5326,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.focus) {
-					config.focus("Argument error");
+				if (config.focusIn) {
+					config.focusIn("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5235,8 +5336,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.focus) {
-					config.focus("Image not found");
+				if (config.focusIn) {
+					config.focusIn("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5245,8 +5346,8 @@
 			}
 
 			if (!state.focusable) {
-				if (config.focus) {
-					config.focus("This element has been denied");
+				if (config.focusIn) {
+					config.focusIn("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -5257,12 +5358,16 @@
 			if (eventState.target) {
 				var oldId = getIdBySource(eventState.target);
 				setFocusOut(oldId);
+
+				if (config.focusOut) {
+					config.focusOut(null, oldId);
+				}
 			}
 
 			setFocusIn(id);
 
-			if (config.focus) {
-				config.focus(null, id);
+			if (config.focusIn) {
+				config.focusIn(null, id);
 			}
 			if (cb) {
 				cb(null, id);
@@ -5289,6 +5394,9 @@
 
 			setFocusOut(id);
 
+			if (config.focusOut) {
+				config.focusOut(null, id);
+			}
 			if (cb) {
 				cb(null, id);
 			}
@@ -5299,8 +5407,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5309,8 +5417,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5319,8 +5427,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5329,13 +5437,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5354,14 +5466,10 @@
 				if (eventState.target) {
 					if (source.isSameNode(eventState.target)) {
 						var res = setFocusOut(id);
-						if (!res) {
-							if (config.edit) {
-								config.edit("`setFocusOut()` error");
+						if (res === true) {
+							if (config.focusOut) {
+								config.focusOut(null, id);
 							}
-							if (cb) {
-								cb("`setFocusOut()` error");
-							} 
-							return false;
 						}
 					}	
 				}
@@ -5374,8 +5482,8 @@
 				source.classList.add("unclickable");
 			}
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5387,8 +5495,8 @@
 			var state = getStateById(id);
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5397,8 +5505,8 @@
 			}
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5407,13 +5515,17 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5427,8 +5539,8 @@
 				editable: editable
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5440,8 +5552,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5450,8 +5562,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5460,8 +5572,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5470,13 +5582,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5490,8 +5606,8 @@
 				drawable: drawable
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5503,8 +5619,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5513,8 +5629,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5523,8 +5639,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5533,13 +5649,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5554,8 +5674,8 @@
 			// remove class
 			source.classList.remove("unclickable");
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5567,8 +5687,8 @@
 			var state = getStateById(id);
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5577,8 +5697,8 @@
 			}
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5587,13 +5707,17 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5605,8 +5729,8 @@
 				editable: true
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5618,8 +5742,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5628,8 +5752,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5638,8 +5762,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5648,13 +5772,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5666,8 +5794,8 @@
 				drawable: true
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5679,8 +5807,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5689,8 +5817,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5699,8 +5827,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5709,8 +5837,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
@@ -5721,16 +5849,16 @@
 			if (eventState.target) {
 				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
-					if (!res) {
-						if (config.edit) {
-							config.edit("`setFocusOut()` error");
+					if (res === true) {
+						if (config.focusOut) {
+							config.focusOut(null, id);
 						}
-						if (cb) {
-							cb("`setFocusOut()` error");
-						} 
-						return false;
 					}
 				}	
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5745,8 +5873,8 @@
 			// add class
 			source.classList.add("unclickable");
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5758,8 +5886,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5768,8 +5896,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5778,8 +5906,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5788,13 +5916,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5806,8 +5938,8 @@
 				editable: false
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5819,8 +5951,8 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5829,8 +5961,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5839,8 +5971,8 @@
 			}
 
 			if (!source || !state) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5849,13 +5981,17 @@
 			}
 
 			if (!state.editable) {
-				if (config.edit) {
-					config.edit("This element has been denied");
+				if (config.startEdit) {
+					config.startEdit("This element has been denied");
 				}
 				if (cb) {
 					cb("This element has been denied");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5867,8 +6003,8 @@
 				drawable: false
 			});
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5905,11 +6041,10 @@
 			if (eventState.target) {
 				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
-					if (!res) {
-						if (cb) {
-							cb("`setFocusOut()` error");
+					if (res === true) {
+						if (config.focusOut) {
+							config.focusOut(null, id);
 						}
-						return false;
 					}
 				}
 			}
@@ -5977,8 +6112,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5990,8 +6125,8 @@
 				typeof(newState) !== "object" ||
 				newState === null
 			) {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -6000,8 +6135,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -6010,13 +6145,17 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -6051,16 +6190,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -6074,8 +6213,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.edit) {
-					config.edit("Argument error");
+				if (config.startEdit) {
+					config.startEdit("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -6084,8 +6223,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -6094,13 +6233,17 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.edit) {
-					config.edit("Image not found");
+				if (config.startEdit) {
+					config.startEdit("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
+			}
+
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -6154,8 +6297,8 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -6553,11 +6696,10 @@
 			if (eventState.target) {
 				var id = getIdBySource(eventState.target);
 				var res = setFocusOut(id);
-				if (!res) {
-					if (cb) {
-						cb("`setFocusOut()` error");
+				if (res === true) {
+					if (config.focusOut) {
+						config.focusOut(null, id);
 					}
-					return false;
 				}
 			}
 
@@ -6870,8 +7012,8 @@
 
 		myObject.undo = function(cb){
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -6880,8 +7022,8 @@
 			}
 
 			if (eventCaches.length < 1) {
-				if (config.edit) {
-					config.edit("Cache is empty");
+				if (config.startEdit) {
+					config.startEdit("Cache is empty");
 				}
 				if (cb) {
 					cb("Cache is empty");
@@ -6913,16 +7055,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -6931,8 +7073,8 @@
 
 		myObject.redo = function(cb){
 			if (!config.editable) {
-				if (config.edit) {
-					config.edit("Editing has been disabled");
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -6941,8 +7083,8 @@
 			}
 
 			if (eventSubCaches.length < 1) {
-				if (config.edit) {
-					config.edit("Cache is empty");
+				if (config.startEdit) {
+					config.startEdit("Cache is empty");
 				}
 				if (cb) {
 					cb("Cache is empty");
@@ -6953,6 +7095,10 @@
 			if (eventState.target) {
 				var oldId = getIdBySource(eventState.target);
 				setFocusOut(oldId);
+
+				if (config.focusOut) {
+					config.focusOut(null, oldId);
+				}
 			}
 
 			var recent = eventSubCaches.pop();
@@ -6974,16 +7120,16 @@
 
 			var res = setIndex();
 			if (!res) {
-				if (config.edit) {
-					config.edit("`setIndex()` error");
+				if (config.endEdit) {
+					config.endEdit("`setIndex()` error");
 				}
 				if (cb) {
 					cb("`setIndex()` error");
 				}
 				return false;
 			}
-			if (config.edit) {
-				config.edit(null, state.id);
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -7070,8 +7216,8 @@
 						}
 
 						// // save cache
-						// pushCache(state.id);
-						// eventSubCaches = [];
+						pushCache(state.id);
+						eventSubCaches = [];
 
 						if (isNumeric(thisState.x)) {
 							thisState.x = parseFloat(thisState.x) * scaleRatio;

@@ -790,23 +790,52 @@
 				writeContainerData();
 				writeCanvasData();
 			},
-			focus: function(err, res){
+			focusIn: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.focus callback", res);
+				console.log("config.focusIn callback", res);
 
 				writeContainerData();
 				writeCanvasData();
 				writeImageData(res);
-			},
-			edit: function(err, res){
+			}, 
+			focusOut: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.edit callback", res);
+				console.log("config.focusOut callback", res);
+			},
+			startEdit: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.startEdit callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			onEdit: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.onEdit callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			endEdit: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.endEdit callback", res);
 
 				writeImageData(res);
 
