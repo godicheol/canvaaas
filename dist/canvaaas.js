@@ -19,7 +19,16 @@
 
 			filename: undefined, // string
 
-			allowedExtensions: ["jpg", "jpeg", "png", "webp", "svg", "svg+xml", "tiff", "tif"], // string, jpg, jpeg, png, webp, svg...
+			allowedExtensions: [
+				"jpg",
+				"jpeg",
+				"png",
+				"webp",
+				"svg",
+				"svg+xml",
+				"tiff",
+				"tif"
+			], // string, jpg, jpeg, png, webp, svg...
 
 			editable: true, // boolean
 
@@ -3167,8 +3176,8 @@
 			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], canvasState.originalHeight));
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
-			var rectL = 0.5 * (containerState.width - fittedSizes[0]);
-			var rectT = 0.5 * (containerState.height - fittedSizes[1]);
+			var rectL = Math.round( 0.5 * (containerState.width - fittedSizes[0]) );
+			var rectT = Math.round( 0.5 * (containerState.height - fittedSizes[1]) );
 
 			// save state
 			setState(canvasState, {
@@ -3283,7 +3292,7 @@
 
 			canvasElement.classList.add("checker");
 
-			console.log("canvaaas.js initialized", config);
+			// console.log("canvaaas.js initialized", config);
 
 			if (config.init) {
 				config.init(null, config);
@@ -6960,9 +6969,6 @@
 		myObject.getCanvasData = function(cb){
 			var tmp = {};
 			copyObject(tmp, canvasState);
-
-			tmp.left = tmp.x - (tmp.width * 0.5);
-			tmp.top = tmp.y - (tmp.height * 0.5);
 
 			if (cb) {
 				cb(null, tmp);
