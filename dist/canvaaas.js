@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.2
+ * 0.1.3
  * 
  * eeecheol@gmail.com
  * 
@@ -24,11 +24,14 @@
 				"jpeg",
 				"png",
 				"webp",
+				"gif",
 				"svg",
 				"svg+xml",
 				"tiff",
 				"tif"
-			], // string, jpg, jpeg, png, webp, svg...
+			], // string, jpg, jpeg, ,gif, png, webp, svg...
+
+			dropSpace: "document", // undefined, canvas, document
 
 			editable: true, // boolean
 
@@ -142,16 +145,16 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
 		var eventState = {};
-		var eventCaches = [];
-		var eventSubCaches = [];
+		var undoCaches = [];
+		var redoCaches = [];
 		var containerState = {};
 		var canvasState = {};
 		var imageStates = [];
 
-		var containerElement;
-		var canvasElement;
-		var mirrorElement;
-		var sourceElements = [];
+		var containerObject;
+		var canvasObject;
+		var mirrorObject;
+		var imageObjects = [];
 
 		var windowScrollEvent;
 		var windowResizeEvent;
@@ -199,7 +202,7 @@
 
 				function recursiveFunc() {
 					if (count < index) {
-						renderImage(files[count], function(err, res) {
+						renderObject(files[count], function(err, res) {
 							if (err) {
 								if (config.upload) {
 									config.upload(err);
@@ -248,7 +251,7 @@
 					!e.target.classList.contains("canvaaas-clone")
 				) {
 					if (eventState.target) {
-						var id = getIdBySource(eventState.target);
+						var id = getIdByObject(eventState.target);
 						setFocusOut(id);
 
 						if (config.focusOut) {
@@ -260,8 +263,8 @@
 
 			keydown: function(e) {
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 
 				if (!config.editable) {
 					return false;
@@ -344,8 +347,7 @@
 				}
 
 				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
+				pushUndoCache(state.id, true);
 
 				// save state
 				setState(state, {
@@ -354,8 +356,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.endEdit) {
 					config.endEdit(null, state.id);
@@ -384,7 +386,7 @@
 				} else {
 					source = e.target;
 				}
-				var state = getStateBySource(source);
+				var state = getStateByObject(source);
 
 				if (!source || !state) {
 					return false;
@@ -399,11 +401,11 @@
 						return false;
 					}
 
-					var id = getIdBySource(eventState.target);
-					setFocusOut(id);
+					var oldId = getIdByObject(eventState.target);
+					setFocusOut(oldId);
 
 					if (config.focusOut) {
-						config.focusOut(null, id);
+						config.focusOut(null, oldId);
 					}
 				}
 
@@ -421,8 +423,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var clone = getCloneBySource(source);
-				var state = getStateBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 				var mouseX;
 				var mouseY;
 				var rotatedRect;
@@ -470,8 +472,7 @@
 				onMove = true;
 
 				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
+				pushUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onMove, false);
@@ -490,8 +491,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -553,8 +554,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.onEdit) {
 					config.onEdit(null, state.id);
@@ -566,8 +567,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var clone = getCloneBySource(source);
-				var state = getStateBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 
 				// if (!source || !state || !clone) {
 				// 	return false;
@@ -594,8 +595,8 @@
 
 				var handle = e.target;
 				var source = eventState.target;
-				var clone = getCloneBySource(source);
-				var state = getStateBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -648,8 +649,7 @@
 				onRotate = true;
 
 				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
+				pushUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onRotate, false);
@@ -668,8 +668,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var mouseX;
 				var mouseY;
 				var axisX;
@@ -731,8 +731,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.onEdit) {
 					config.onEdit(null, state.id);
@@ -744,8 +744,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 
 				// if (!source || !state || !clone) {
 				// 	return false;
@@ -771,8 +771,8 @@
 
 				var handle = e.target;
 				var source = eventState.target;
-				var clone = getCloneBySource(source);
-				var state = getStateBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 				var mouseX;
 				var mouseY;
 				var flipX;
@@ -856,8 +856,7 @@
 				onResize = true;
 
 				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
+				pushUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -877,8 +876,8 @@
 
 				var direction = eventState.direction;
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var aspectRatio;
 				var mouseX;
 				var mouseY;
@@ -1086,8 +1085,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.onEdit) {
 					config.onEdit(null, state.id);
@@ -1099,8 +1098,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var clone = getCloneBySource(source);
-				var state = getStateBySource(source);
+				var clone = getCloneByObject(source);
+				var state = getStateByObject(source);
 
 				// if (!source || !state || !clone) {
 				// 	return false;
@@ -1126,8 +1125,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var ratio;
 				var diffX;
 				var diffY;
@@ -1185,18 +1184,15 @@
 				height = state.height + diffY;
 
 				if (!onZoom) {
-
 					// toggle on
 					onZoom = true;
 
 					// save cache
-					pushCache(state.id);
-					eventSubCaches = [];
+					pushUndoCache(state.id, true);
 
 					if (config.startEdit) {
 						config.startEdit(null, state.id);
 					}
-
 				}
 
 				// add timer
@@ -1222,8 +1218,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.onEdit) {
 					config.onEdit(null, state.id);
@@ -1247,8 +1243,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var diagonal;
 				var mouseX;
 				var mouseY;
@@ -1301,8 +1297,7 @@
 				onZoom = true;
 
 				// save cache
-				pushCache(state.id);
-				eventSubCaches = [];
+				pushUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
@@ -1318,8 +1313,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 				var diagonal;
 				var mouseX;
 				var mouseY;
@@ -1371,8 +1366,8 @@
 				});
 
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 
 				if (config.onEdit) {
 					config.onEdit(null, state.id);
@@ -1384,8 +1379,8 @@
 				e.stopPropagation();
 
 				var source = eventState.target;
-				var state = getStateBySource(source);
-				var clone = getCloneBySource(source);
+				var state = getStateByObject(source);
+				var clone = getCloneByObject(source);
 
 				// if (!source || !state || !clone) {
 				// 	return false;
@@ -1421,11 +1416,11 @@
 					return false;
 				}
 
-				if (!containerElement || !containerState) {
+				if (!containerObject || !containerState) {
 					return false;
 				}
 
-				var containerOffset = containerElement.getBoundingClientRect();
+				var containerOffset = containerObject.getBoundingClientRect();
 				containerState.left = containerOffset.left;
 				containerState.top = containerOffset.top;
 			},
@@ -1438,7 +1433,7 @@
 					return false;
 				}
 
-				var oldWidth = containerElement.offsetWidth;
+				var oldWidth = containerObject.offsetWidth;
 
 				initContainer();
 
@@ -1464,8 +1459,8 @@
 					});
 
 					// adjust state
-					setElement(source, state);
-					setElement(clone, state);
+					setObject(source, state);
+					setObject(clone, state);
 				});
 			},
 
@@ -1597,7 +1592,7 @@
 			return true;
 		}
 
-		function setElement(elem, state) {
+		function setObject(elem, state) {
 			if (
 				typeof(elem) !== "object" ||
 				elem === null
@@ -1671,7 +1666,7 @@
 			return true;
 		};
 
-		function pushCache(id) {
+		function pushUndoCache(id, clearRedoCaches) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 			var state = getStateById(id);
@@ -1693,12 +1688,16 @@
 			tmp.cloneClass = clone.className.replace(" focus", "").split(' ');
 			tmp.updatedAt = Date.now();
 
-			eventCaches.push(tmp);
+			undoCaches.push(tmp);
 
-			if (eventCaches.length > config.cacheLevels) {
-				eventCaches.shift();
+			if (undoCaches.length > config.cacheLevels) {
+				undoCaches.shift();
 			}
 
+			if (clearRedoCaches === true) {
+				redoCaches = [];
+			}
+			
 			return true;
 		}
 
@@ -1724,7 +1723,7 @@
 			tmp.cloneClass = clone.className.replace(" focus", "").split(' ');
 			tmp.updatedAt = Date.now();
 
-			eventSubCaches.push(tmp);
+			redoCaches.push(tmp);
 
 			return true;
 		}
@@ -1738,8 +1737,8 @@
 			}
 
 			try {
-				canvasElement.classList.add("focus");
-				mirrorElement.classList.add("focus");
+				canvasObject.classList.add("focus");
+				mirrorObject.classList.add("focus");
 
 				source.classList.add("focus");
 				clone.classList.add("focus");
@@ -1781,8 +1780,8 @@
 			}
 
 			try {
-				canvasElement.classList.remove("focus");
-				mirrorElement.classList.remove("focus");
+				canvasObject.classList.remove("focus");
+				mirrorObject.classList.remove("focus");
 
 				source.classList.remove("focus");
 				clone.classList.remove("focus");
@@ -1818,10 +1817,10 @@
 		// deprecated
 		function setIndex() {
 			var tmpStates = [];
-			var tmpSourceElements = [];
-			var firstSourceChild = canvasElement.firstChild;
+			var tmpimageObjects = [];
+			var firstSourceChild = canvasObject.firstChild;
 			var lastSourceChild = undefined;
-			var firstCloneChild = mirrorElement.firstChild;
+			var firstCloneChild = mirrorObject.firstChild;
 			var lastCloneChild = undefined;
 
 			var tmpStates = imageStates.sort(function(a, b){
@@ -1846,7 +1845,7 @@
 				try {
 					if (!lastSourceChild) {
 						if (!source.isSameNode(firstSourceChild)) {
-							canvasElement.insertBefore(source, firstSourceChild);
+							canvasObject.insertBefore(source, firstSourceChild);
 						} else {
 							if (source.nextSibling) {
 								lastSourceChild = source.nextSibling;
@@ -1854,14 +1853,14 @@
 						}
 					} else {
 						if (!source.isSameNode(lastSourceChild)) {
-							canvasElement.insertBefore(source, lastSourceChild);
+							canvasObject.insertBefore(source, lastSourceChild);
 						} else {
 							if (source.nextSibling) {
 								lastSourceChild = source.nextSibling;
 							}
 						}
 					}
-					tmpSourceElements.push(source);
+					tmpimageObjects.push(source);
 				} catch (err) {
 					console.log(err);
 					return false;
@@ -1871,7 +1870,7 @@
 				try {
 					if (!lastCloneChild) {
 						if (!clone.isSameNode(firstCloneChild)) {
-							mirrorElement.insertBefore(clone, firstCloneChild);
+							mirrorObject.insertBefore(clone, firstCloneChild);
 						} else {
 							if (clone.nextSibling) {
 								lastCloneChild = clone.nextSibling;
@@ -1879,7 +1878,7 @@
 						}
 					} else {
 						if (!clone.isSameNode(lastCloneChild)) {
-							mirrorElement.insertBefore(clone, lastCloneChild);
+							mirrorObject.insertBefore(clone, lastCloneChild);
 						} else {
 							if (clone.nextSibling) {
 								lastCloneChild = clone.nextSibling;
@@ -1893,7 +1892,7 @@
 			});
 
 			imageStates = tmpStates;
-			sourceElements = tmpSourceElements;
+			imageObjects = tmpimageObjects;
 
 			return true;
 		}
@@ -1963,7 +1962,7 @@
 				return false;
 			}
 
-			eventCaches.forEach(function(elem){
+			undoCaches.forEach(function(elem){
 				if (elem.id === id) {
 					elem.id = candidateId;
 				}
@@ -1974,7 +1973,7 @@
 				}
 			});
 
-			eventSubCaches.forEach(function(elem){
+			redoCaches.forEach(function(elem){
 				if (elem.id === id) {
 					elem.id = candidateId;
 				}
@@ -1992,22 +1991,25 @@
 			return true;
 		}
 
-		function getIdBySource(source) {
-			if (!source) {
-				return false;
-			}
-			if (!source.classList.contains("canvaaas-image")) {
+		function getIdByObject(obj) {
+			if (!obj) {
 				return false;
 			}
 			if (
-				source.id === undefined ||
-				source.id === null ||
-				source.id === ""
+				!obj.classList.contains("canvaaas-image") &&
+				!obj.classList.contains("canvaaas-clone")
+			) {
+				return false;
+			}
+			if (
+				obj.id === undefined ||
+				obj.id === null ||
+				obj.id === ""
 			) {
 				return false;
 			}
 
-			var arr = source.id.split("-");
+			var arr = obj.id.split("-");
 			var id;
 			if (arr.length === 3) {
 				id = arr.pop();
@@ -2021,15 +2023,19 @@
 			return id;
 		}
 
-		function getStatesByIndex(index) {
-			if (index === undefined) {
+		function getStatesByIndex(idx) {
+			if (
+				idx === undefined ||
+				idx === null ||
+				idx === ""
+			) {
 				return false;
 			}
 
 			var arr = [];
 
 			imageStates.forEach(function(elem){
-				if (elem.index === index) {
+				if (elem.index === idx) {
 					arr.push(elem);
 				}
 			})
@@ -2070,22 +2076,25 @@
 			});
 		}
 
-		function getStateBySource(source) {
-			if (!source) {
-				return false;
-			}
-			if (!source.classList.contains("canvaaas-image")) {
+		function getStateByObject(obj) {
+			if (!obj) {
 				return false;
 			}
 			if (
-				source.id === undefined ||
-				source.id === null ||
-				source.id === ""
+				!obj.classList.contains("canvaaas-image") &&
+				!obj.classList.contains("canvaaas-clone")
+			) {
+				return false;
+			}
+			if (
+				obj.id === undefined ||
+				obj.id === null ||
+				obj.id === ""
 			) {
 				return false;
 			}
 
-			var arr = source.id.split("-");
+			var arr = obj.id.split("-");
 			var id;
 			if (arr.length === 3) {
 				id = arr.pop();
@@ -2122,22 +2131,25 @@
 			return document.getElementById(cloneId + id);
 		}
 
-		function getCloneBySource(source) {
-			if (!source) {
-				return false;
-			}
-			if (!source.classList.contains("canvaaas-image")) {
+		function getCloneByObject(obj) {
+			if (!obj) {
 				return false;
 			}
 			if (
-				source.id === undefined ||
-				source.id === null ||
-				source.id === ""
+				!obj.classList.contains("canvaaas-image") &&
+				!obj.classList.contains("canvaaas-clone")
+			) {
+				return false;
+			}
+			if (
+				obj.id === undefined ||
+				obj.id === null ||
+				obj.id === ""
 			) {
 				return false;
 			}
 			
-			var arr = source.id.split("-");
+			var arr = obj.id.split("-");
 			var id;
 			if (arr.length === 3) {
 				id = arr.pop();
@@ -2152,19 +2164,22 @@
 			return document.getElementById(cloneId + id);
 		}
 
-		function removeImageById(id) {
+		function removeObjectById(id) {
 			if (!id) {
 				return false;
 			}
 			var source = document.getElementById(sourceId + id);
 			var clone = document.getElementById(cloneId + id);
+			var state = getStateById(id);
 
-			if (!source || !clone) {
+			URL.revokeObjectURL(state.src);
+
+			if (!source || !clone || !state) {
 				return false;
 			}
 
 			var stateSeq = imageStates.findIndex(function(elem){
-				if (elem.id === id) {
+				if (elem.id === state.id) {
 					return elem;
 				}
 			});
@@ -2173,7 +2188,7 @@
 				return false;
 			}
 
-			var sourceSeq = sourceElements.findIndex(function(elem){
+			var sourceSeq = imageObjects.findIndex(function(elem){
 				if (elem.isSameNode(source)) {
 					return elem;
 				}
@@ -2185,7 +2200,7 @@
 
 			try {
 				imageStates.splice(stateSeq, 1);
-				sourceElements.splice(sourceSeq, 1);
+				imageObjects.splice(sourceSeq, 1);
 				source.parentNode.removeChild(source);
 				clone.parentNode.removeChild(clone);
 			} catch(err) {
@@ -2194,27 +2209,27 @@
 			}
 
 			// clear caches
-			var tmpEventCaches = eventCaches.filter(function(elem){
+			var tmpUC = undoCaches.filter(function(elem){
 				if (elem.id === id) {
 					return false;
 				}
 				return true;
 			});
 
-			var tmpEventSubCaches = eventSubCaches.filter(function(elem){
+			var tmpRC = redoCaches.filter(function(elem){
 				if (elem.id === id) {
 					return false;
 				}
 				return true;
 			});
 
-			eventCaches = tmpEventCaches;
-			eventSubCaches = tmpEventSubCaches;
+			undoCaches = tmpUC;
+			redoCaches = tmpRC;
 
 			return true;
 		}
 
-		function showImage(id) {
+		function showImageById(id) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 
@@ -2228,7 +2243,7 @@
 			return true;
 		}
 
-		function hideImage(id) {
+		function hideImageById(id) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 
@@ -2589,17 +2604,6 @@
 		}
 
 		// deprecated
-		function isMobile() {
-			var res = false;
-			// device detection
-			if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent) 
-			    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) { 
-			    res = true;
-			}
-			return res;
-		}
-		
-		// deprecated
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -2858,7 +2862,7 @@
 		}
 
 		// asynchronous
-		function renderImage(file, cb) {
+		function renderObject(file, cb) {
 			if (!file) {
 				if (cb) {
 					cb("File not found");
@@ -2866,7 +2870,7 @@
 				return false;
 			}
 
-			if (sourceElements.length > config.maxNumberOfImages - 1) {
+			if (imageObjects.length > config.maxNumberOfImages - 1) {
 				if (cb) {
 					cb("Exceed max number of images");
 				}
@@ -2876,6 +2880,7 @@
 			var ext;
 			var src;
 			var typ;
+			var data;
 			var newImage = new Image();
 			var id = getShortId();
 
@@ -2884,15 +2889,28 @@
 				typeof(file) === "object" &&
 				file !== null
 			) {
+				if (
+					!file.name ||
+					!file.type ||
+					!file.size
+				) {
+					if (cb) {
+						cb("File not found");
+					}
+					return false;
+				}
+
 				// file
 				typ = "file";
 				ext = file.type.split("/").pop();
-				src = URL.createObjectURL(file);
+				src = file;
+				data = URL.createObjectURL(file);
 			} else if (typeof(file) === "string") {
 				// url
 				typ = "url";
 				ext = getExtension(file);
 				src = file;
+				data = file;
 				// src = file + "?" + new Date().getTime(); // fix ios refresh error, cachebreaker
 			} else {
 				if (cb) {
@@ -2910,7 +2928,7 @@
 			}
 
 			// start load
-			newImage.src = src;
+			newImage.src = data;
 
 			newImage.onerror = function(e) {
 				if (cb) {
@@ -2993,9 +3011,9 @@
 				var drawable = true;
 
 				var newState = {};
+				newState.type = typ;
 				newState.src = src;
 				newState.id = id;
-				newState.type = typ;
 				newState.index = index;
 				newState.originalWidth = originalWidth;
 				newState.originalHeight = originalHeight;
@@ -3022,10 +3040,10 @@
 				newImg.src = newImage.src;
 
 				// create clone element
-				var newClone = newSource.cloneNode();
+				var newClone = document.createElement("div");
+				newClone.classList.add("canvaaas-clone");
 				newClone.innerHTML = newSource.innerHTML;
 				newClone.id = cloneId + id;
-				newClone.classList.replace("canvaaas-image", "canvaaas-clone");
 
 				// set events
 				var rotateHandlesA = newSource.querySelectorAll("div.canvaaas-rotate-handle");
@@ -3063,10 +3081,10 @@
 				// finish
 				imageStates.push(newState);
 
-				setElement(newSource, newState);
-				canvasElement.appendChild(newSource);
-				mirrorElement.appendChild(newClone);
-				sourceElements.push(newSource);
+				setObject(newSource, newState);
+				canvasObject.appendChild(newSource);
+				mirrorObject.appendChild(newClone);
+				imageObjects.push(newSource);
 
 				if (cb) {
 					cb(null, id);
@@ -3075,7 +3093,7 @@
 		}
 
 		function initContainer() {
-			if (!containerElement) {
+			if (!containerObject) {
 				return false;
 			}
 
@@ -3091,8 +3109,8 @@
 			}
 
 			// clear container style
-			containerElement.style.width = "";
-			containerElement.style.height = "";
+			containerObject.style.width = "";
+			containerObject.style.height = "";
 
 			var minWidth = config.minContainerWidth || 0;
 			var minHeight = config.minContainerHeight || 0;
@@ -3122,8 +3140,8 @@
 			var canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
 			var aspectRatio = config.containerAspectRatio || canvasAspectRatio;
 
-			var containerWidth = containerElement.offsetWidth;
-			var containerHeight = containerElement.offsetWidth / aspectRatio;
+			var containerWidth = containerObject.offsetWidth;
+			var containerHeight = containerObject.offsetWidth / aspectRatio;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -3140,7 +3158,7 @@
 
 			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
 			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
-			var offset = containerElement.getBoundingClientRect();
+			var offset = containerObject.getBoundingClientRect();
 
 			// save state
 			setState(containerState, {
@@ -3148,17 +3166,17 @@
 				height: adjHeight,
 				left: offset.left,
 				top: offset.top
-			})
+			});
 
 			// adjust state
-			setElement(containerElement, containerState);
+			setObject(containerObject, containerState);
 
 			// if (hasScrollbar()) {
 			// 	var tmp = containerState.width / containerState.height;
 			// 	containerState.width -= scrollbarWidth;
 			// 	containerState.height = containerState.width / tmp;
 
-			// 	setElement(containerElement, containerState);
+			// 	setObject(containerObject, containerState);
 			// }
 
 			return true;
@@ -3166,7 +3184,7 @@
 
 		function initCanvas() {
 			if (
-				!canvasElement ||
+				!canvasObject ||
 				!containerState.width ||
 				!containerState.height
 			) {
@@ -3217,8 +3235,8 @@
 			});
 
 			// adjust state
-			setElement(canvasElement, canvasState);
-			setElement(mirrorElement, canvasState);
+			setObject(canvasObject, canvasState);
+			setObject(mirrorObject, canvasState);
 
 			return true;
 		}
@@ -3249,9 +3267,9 @@
 			target.innerHTML = conatinerTemplate;
 
 			// set elements
-			containerElement = target.querySelector("div.canvaaas");
-			canvasElement = target.querySelector("div.canvaaas-canvas");
-			mirrorElement = target.querySelector("div.canvaaas-mirror");
+			containerObject = target.querySelector("div.canvaaas");
+			canvasObject = target.querySelector("div.canvaaas-canvas");
+			mirrorObject = target.querySelector("div.canvaaas-mirror");
 
 			// set canvasState
 			canvasState.quality = 0.8;
@@ -3261,7 +3279,7 @@
 			canvasState.backgroundColor = "#FFFFFF";
 
 			// set canvas background
-			canvasElement.style.backgroundColor = canvasState.backgroundColor;
+			canvasObject.style.backgroundColor = canvasState.backgroundColor;
 
 			// check canvas dimensions
 			if (
@@ -3293,7 +3311,6 @@
 			}
 
 			// set events
-
 			windowResizeEvent = handlers.resizeWindow;
 			windowScrollEvent = handlers.debounce( handlers.whereContainer, 300 );
 
@@ -3303,14 +3320,36 @@
 			// window.addEventListener("scroll", handlers.debounce( handlers.whereContainer, 300 ), false);
 			window.addEventListener("scroll", windowScrollEvent, false);
 
-			containerElement.addEventListener('dragenter', handlers.preventDefaults, false);
-			containerElement.addEventListener('dragleave', handlers.preventDefaults, false);
-			containerElement.addEventListener('dragover', handlers.preventDefaults, false);
-			containerElement.addEventListener('drop', handlers.preventDefaults, false);
-			containerElement.addEventListener('drop', handlers.dropImages, false);
+			if (config.dropSpace !== undefined) {
+				if ([
+						"canvas",
+						"container"
+					].indexOf(config.dropSpace) > -1) {
+					containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
+					containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
+					containerObject.addEventListener('dragover', handlers.preventDefaults, false);
+					containerObject.addEventListener('drop', handlers.preventDefaults, false);
+					containerObject.addEventListener('drop', handlers.dropImages, false);
+				} else if (
+					[
+						"window",
+						"document",
+						"page",
+						"screen",
+						"all",
+						"body"
+					].indexOf(config.dropSpace) > -1
+				) {
+					document.addEventListener('dragenter', handlers.preventDefaults, false);
+					document.addEventListener('dragleave', handlers.preventDefaults, false);
+					document.addEventListener('dragover', handlers.preventDefaults, false);
+					document.addEventListener('drop', handlers.preventDefaults, false);
+					document.addEventListener('drop', handlers.dropImages, false);
+				}
+			}
 
 			if (config.checker === true) {
-				canvasElement.classList.add("checker");
+				canvasObject.classList.add("checker");
 			}
 
 			// console.log("canvaaas.js initialized", config);
@@ -3377,7 +3416,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(thisFiles[count], function(err, res) {
+					renderObject(thisFiles[count], function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3458,7 +3497,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(thisFiles[count], function(err, res) {
+					renderObject(thisFiles[count], function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3519,7 +3558,7 @@
 				return false;
 			}
 
-			renderImage(thisFile, function(err, res) {
+			renderObject(thisFile, function(err, res) {
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -3631,8 +3670,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -3711,8 +3749,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -3720,8 +3757,8 @@
 			})
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -3795,8 +3832,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -3804,8 +3840,8 @@
 			})
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -3926,8 +3962,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -3936,8 +3971,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4020,8 +4055,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4031,8 +4065,8 @@
 			})
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4107,8 +4141,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4117,8 +4150,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4239,8 +4272,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4251,8 +4283,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4334,8 +4366,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			var rotate = state.rotate + parseFloat(deg);
 
@@ -4345,8 +4376,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4428,8 +4459,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4437,8 +4467,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4503,8 +4533,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4513,8 +4542,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4579,8 +4608,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4589,8 +4617,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4690,8 +4718,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4701,8 +4728,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4783,8 +4810,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4792,8 +4818,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4879,8 +4905,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4888,8 +4913,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -4951,8 +4976,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// check next index
 			var thisIndex = state.index;
@@ -4967,8 +4991,8 @@
 						index: thisIndex
 					});
 
-					setElement(thisSource, elem);
-					setElement(thisClone, elem);
+					setObject(thisSource, elem);
+					setObject(thisClone, elem);
 				})
 			}
 
@@ -4978,8 +5002,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5051,8 +5075,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// check next index
 			var thisIndex = state.index;
@@ -5067,8 +5090,8 @@
 						index: thisIndex
 					});
 
-					setElement(thisSource, elem);
-					setElement(thisClone, elem);
+					setObject(thisSource, elem);
+					setObject(thisClone, elem);
 				})
 			}
 
@@ -5078,8 +5101,8 @@
 			});
 			
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5188,8 +5211,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// set state
 			setState(targetState, {
@@ -5201,10 +5223,10 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
-			setElement(targetSource, targetState);
-			setElement(targetClone, targetState);
+			setObject(source, state);
+			setObject(clone, state);
+			setObject(targetSource, targetState);
+			setObject(targetClone, targetState);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5281,8 +5303,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5292,8 +5313,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5375,8 +5396,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 			
 			// save state
 			setState(state, {
@@ -5386,8 +5406,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5461,8 +5481,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5470,8 +5489,8 @@
 			});
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5517,7 +5536,7 @@
 			}
 
 			if (eventState.target) {
-				var oldId = getIdBySource(eventState.target);
+				var oldId = getIdByObject(eventState.target);
 				setFocusOut(oldId);
 
 				if (config.focusOut) {
@@ -5548,7 +5567,7 @@
 			}
 
 			var source = eventState.target;
-			var state = getStateBySource(source);
+			var state = getStateByObject(source);
 
 			if (!state) {
 				if (config.focusOut) {
@@ -5623,8 +5642,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5703,8 +5721,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5772,8 +5789,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5839,8 +5855,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5899,8 +5914,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5966,8 +5980,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6044,8 +6057,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6114,8 +6126,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6181,8 +6192,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6237,10 +6247,10 @@
 			}
 
 			// remove element
-			var res = removeImageById(id);
+			var res = removeObjectById(id);
 			if (!res) {
 				if (cb) {
-					cb("`removeImageById()` error");
+					cb("`removeObjectById()` error");
 				}
 				return false;
 			}
@@ -6272,10 +6282,10 @@
 			function recursiveFunc() {
 				if (count < index) {
 					// remove element
-					var res = removeImageById(arr[count]);
+					var res = removeObjectById(arr[count]);
 					if (!res) {
 						results.push({
-							err: "`removeImageById()` error",
+							err: "`removeObjectById()` error",
 							res: arr[count]
 						});
 					} else {
@@ -6359,8 +6369,8 @@
 							index: thisIndex
 						});
 
-						setElement(thisSource, elem);
-						setElement(thisClone, elem);
+						setObject(thisSource, elem);
+						setObject(thisClone, elem);
 					})				
 				}
 			}
@@ -6387,15 +6397,14 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, newState);
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -6474,8 +6483,7 @@
 			}
 
 			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
+			pushUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6494,8 +6502,8 @@
 			});
 			
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -6629,13 +6637,13 @@
 				});
 				
 				// adjust state
-				setElement(source, state);
-				setElement(clone, state);
+				setObject(source, state);
+				setObject(clone, state);
 			});
 
 			// clear cache
-			eventCaches = [];
-			eventSubCaches = [];
+			undoCaches = [];
+			redoCaches = [];
 
 			if (cb) {
 				cb(null, canvasState);
@@ -6740,7 +6748,7 @@
 			}
 
 			canvasState.backgroundColor = colour;
-			canvasElement.style.backgroundColor = colour;
+			canvasObject.style.backgroundColor = colour;
 
 			if (cb) {
 				cb(null, canvasState);
@@ -6832,7 +6840,7 @@
 			}
 
 			if (eventState.target) {
-				var id = getIdBySource(eventState.target);
+				var id = getIdByObject(eventState.target);
 				var res = setFocusOut(id);
 				if (res === true) {
 					if (config.focusOut) {
@@ -6847,12 +6855,14 @@
 			// check drawable
 			imageStates.forEach(function(state){
 				if (!state.drawable) {
-					hideImage(state.id);
+					hideImageById(state.id);
 				}
 			})
 
 			// remove checker
-			canvasElement.classList.remove("checker");
+			if (config.checker === true) {
+				canvasObject.classList.remove("checker");
+			}
 
 			if (cb) {
 				cb(null, true);
@@ -6874,12 +6884,14 @@
 			// check drawable
 			imageStates.forEach(function(state){
 				if (!state.drawable) {
-					showImage(state.id);
+					showImageById(state.id);
 				}
 			})
 
 			// set checker
-			canvasElement.classList.add("checker");
+			if (config.checker === true) {
+				canvasObject.classList.add("checker");
+			}
 
 			if (cb) {
 				cb(null, true);
@@ -6922,14 +6934,17 @@
 			var imageSmoothingQuality;
 			var imageSmoothingEnabled;
 
-			if (typeof(options) === "object" && options !== null) {
+			if (
+				typeof(options) === "object" &&
+				options !== null
+			) {
 				canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
 				canvasWidth = options.width || options.canvasWidth || canvasState.originalWidth;
 				canvasHeight = canvasWidth / canvasAspectRatio;
 				quality = options.quality || canvasState.quality;
 				mimeType = options.mimeType || canvasState.mimeType;
 				imageSmoothingQuality = options.smoothingQuality || canvasState.smoothingQuality;
-				imageSmoothingEnabled = options.smoothingQuality || canvasState.smoothingEnabled;
+				imageSmoothingEnabled = options.smoothingEnabled || canvasState.smoothingEnabled;
 				backgroundColor = options.backgroundColor || canvasState.backgroundColor;
 			} else {
 				canvasWidth = canvasState.originalWidth;
@@ -6979,8 +6994,8 @@
 			canvasResult.backgroundColor = backgroundColor;
 			canvasResult.mimeType = mimeType;
 			canvasResult.quality = quality;
-			canvasResult.imageSmoothingQuality = imageSmoothingQuality;
-			canvasResult.imageSmoothingEnabled = imageSmoothingEnabled;
+			canvasResult.smoothingQuality = imageSmoothingQuality;
+			canvasResult.smoothingEnabled = imageSmoothingEnabled;
 
 			onDraw = true;
 
@@ -7036,7 +7051,7 @@
 				return false;
 			}
 
-			var id = getIdBySource(eventState.target);
+			var id = getIdByObject(eventState.target);
 
 			if (cb) {
 				cb(null, id);
@@ -7052,7 +7067,7 @@
 				return false;
 			}
 
-			var id = getIdBySource(eventState.target);
+			var id = getIdByObject(eventState.target);
 			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
@@ -7069,7 +7084,7 @@
 				return false;
 			}
 
-			var id = getIdBySource(eventState.target);
+			var id = getIdByObject(eventState.target);
 			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
@@ -7110,8 +7125,8 @@
 
 		myObject.getCacheData = function(cb){
 			var tmp = {
-				undo: eventCaches,
-				redo: eventSubCaches
+				undo: undoCaches,
+				redo: redoCaches
 			};
 
 			if (cb) {
@@ -7159,7 +7174,7 @@
 				return false;
 			}
 
-			if (eventCaches.length < 1) {
+			if (undoCaches.length < 1) {
 				if (config.startEdit) {
 					config.startEdit("Cache is empty");
 				}
@@ -7170,11 +7185,15 @@
 			}
 
 			if (eventState.target) {
-				var oldId = getIdBySource(eventState.target);
+				var oldId = getIdByObject(eventState.target);
 				setFocusOut(oldId);
+
+				if (config.focusOut) {
+					config.focusOut(null, oldId);
+				}
 			}
 
-			var recent = eventCaches.pop();
+			var recent = undoCaches.pop();
 			var source = getSourceById(recent.id);
 			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
@@ -7188,8 +7207,8 @@
 			setState(state, recent.state);
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -7211,7 +7230,7 @@
 				return false;
 			}
 
-			if (eventSubCaches.length < 1) {
+			if (redoCaches.length < 1) {
 				if (config.startEdit) {
 					config.startEdit("Cache is empty");
 				}
@@ -7222,7 +7241,7 @@
 			}
 
 			if (eventState.target) {
-				var oldId = getIdBySource(eventState.target);
+				var oldId = getIdByObject(eventState.target);
 				setFocusOut(oldId);
 
 				if (config.focusOut) {
@@ -7230,12 +7249,12 @@
 				}
 			}
 
-			var recent = eventSubCaches.pop();
+			var recent = redoCaches.pop();
 			var source = getSourceById(recent.id);
 			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
-			pushCache(recent.id);
+			pushUndoCache(recent.id);
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
@@ -7244,8 +7263,8 @@
 			setState(state, recent.state);
 
 			// adjust state
-			setElement(source, state);
-			setElement(clone, state);
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -7260,6 +7279,9 @@
 			var newExports = [];
 
 			imageStates.forEach(function(elem){
+				// var tmp = getAdjustedDataById(elem.id);
+				// newExports.push(tmp);
+
 				if (elem.type === "url") {
 					var tmp = getAdjustedDataById(elem.id);
 					newExports.push(tmp);
@@ -7315,7 +7337,6 @@
 				return false;
 			}
 
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
 			var index = exportedStates.length;
 			var count = 0;
 			var results = [];
@@ -7330,46 +7351,51 @@
 					copyObject(thisState, exportedStates[count]);
 					var thisUrl = thisState.url || thisState.src || thisState.path;
 
-					renderImage(thisUrl, function(err, res) {
+					renderObject(thisUrl, function(err, res) {
 						if (err) {
 							results.push({
 								err: err,
 								id: null
 							});
+
 							count++;
 							recursiveFunc();
 							return false;
 						} 
 
+						var scaleRatio = canvasState.width / canvasState.originalWidth;
 						var state = getStateById(res);
 						var source = getSourceById(res);
 						var clone = getCloneById(res);
 
 						if (!state || !source || !clone) {
+							removeObjectById(res);
+							
 							results.push({
 								err: "Image element not found",
 								id: null
 							});
+
 							count++;
 							recursiveFunc();
 							return false;
 						}
 
-						if (thisState.id) {
-							if (
-								typeof(thisState.id) === "string" ||
-								typeof(thisState.id) === "number"
-							) {
-								if (existsId(thisState.id)) {
-									results.push({
-										err: "ID duplicated",
-										id: null
-									});
+						if (
+							typeof(thisState.id) === "string" ||
+							typeof(thisState.id) === "number"
+						) {
+							if (existsId(thisState.id)) {
+								removeObjectById(res);
 
-									count++;
-									recursiveFunc();
-									return false;
-								}
+								results.push({
+									err: "ID duplicated",
+									id: null
+								});
+
+								count++;
+								recursiveFunc();
+								return false;
 							}
 						}
 
@@ -7390,15 +7416,14 @@
 						}
 
 						// save cache
-						pushCache(state.id);
-						eventSubCaches = [];
+						pushUndoCache(state.id, true);
 
 						// save state
 						setState(state, thisState);
 
 						// adjust state
-						setElement(source, state);
-						setElement(clone, state);
+						setObject(source, state);
+						setObject(clone, state);
 
 						results.push({
 							err: null,
@@ -7429,23 +7454,42 @@
 			window.removeEventListener("resize", windowResizeEvent, false);
 			window.removeEventListener("scroll", windowScrollEvent, false);
 
-			containerElement.parentNode.removeChild(containerElement);
+			if (config.dropSpace !== undefined) {
+				if (
+					[
+						"window",
+						"document",
+						"page",
+						"screen",
+						"all",
+						"body"
+					].indexOf(config.dropSpace) > -1
+				) {
+					document.removeEventListener('dragenter', handlers.preventDefaults, false);
+					document.removeEventListener('dragleave', handlers.preventDefaults, false);
+					document.removeEventListener('dragover', handlers.preventDefaults, false);
+					document.removeEventListener('drop', handlers.preventDefaults, false);
+					document.removeEventListener('drop', handlers.dropImages, false);
+				}
+			}
+
+			containerObject.parentNode.removeChild(containerObject);
 
 			config = {};
 
 			copyObject(config, defaultConfig);
 
 			eventState = {};
-			eventCaches = [];
-			eventSubCaches = [];
+			undoCaches = [];
+			redoCaches = [];
 			containerState = {};
 			canvasState = {};
 			imageStates = [];
 
-			containerElement = undefined;
-			canvasElement = undefined;
-			mirrorElement = undefined;
-			sourceElements = [];
+			containerObject = undefined;
+			canvasObject = undefined;
+			mirrorObject = undefined;
+			imageObjects = [];
 
 			windowScrollEvent = undefined;
 			windowResizeEvent = undefined;

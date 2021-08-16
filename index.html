@@ -145,6 +145,16 @@
 		font-size: 0.8rem;
 	}
 
+	.preview-container{
+		font-size: 0;
+	}
+
+	#preview{
+		width: 33%;
+		height: auto;
+	}
+
+	.preview-container.hidden,
 	.container-data.hidden,
 	.canvas-data.hidden,
 	.image-data.hidden{
@@ -204,6 +214,26 @@
 						window.URL.revokeObjectURL(res.file);
 					})
 				">Save</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					// download 
+					canvaaas.draw({
+						width: 256, 
+						quality: 0.5,
+						mimeType: 'png',
+						backgroundColor: '#000000',
+						smoothingQuality: 'high',
+						smoothingEnabled: true
+					}, function(err, res){
+						var link = document.createElement('a');
+						link.setAttribute('href', res.file);
+						link.setAttribute('download', 'untitled');
+						link.style.display = 'none';
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+						window.URL.revokeObjectURL(res.file);
+					})
+				">Save Thumbnail</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res){
@@ -211,8 +241,10 @@
 							console.log(err);
 							return false;
 						}
+						console.log('export callback', res);
 
 						exportedData = res;
+
 
 						canvaaas.removeAll();
 					})
@@ -226,6 +258,7 @@
 							console.log(err);
 							return false;
 						}
+						console.log('import callback', res);
 					})
 				">Import</a></li>
 				<li class="rule"></li>
@@ -246,21 +279,25 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getContainerData(function(err, res){
+						console.log(res);
 						alert(JSON.stringify(res));
 					})
 				">Get Container Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCanvasData(function(err, res){
+						console.log(res);
 						alert(JSON.stringify(res));
 					})
 				">Get Canvas Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getImageDataAll(function(err, res){
+						console.log(res);
 						alert(JSON.stringify(res));
 					})
 				">Get Image Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCacheData(function(err, res){
+						console.log(res);
 						alert(JSON.stringify(res));
 					})
 				">Get Cache Data</a></li>
@@ -501,73 +538,12 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
+				<li><a href="javascript:viewPreview()">View Preview</a></li>
 				<li><a href="javascript:viewContainerData()">View Container Data</a></li>
 				<li><a href="javascript:viewCanvasData()">View Canvas Data</a></li>
 				<li><a href="javascript:viewImageData()">View Image Data</a></li>
 			</ul>
 		</div>
-
-		<script>
-			function viewImageData() {
-				var elem = document.querySelector("div.image-data");
-				if (elem.classList.contains("hidden") === true) {
-					elem.classList.remove("hidden");
-				} else {
-					elem.classList.add("hidden");
-				}
-			}
-
-			function viewContainerData() {
-				var elem = document.querySelector("div.container-data");
-				if (elem.classList.contains("hidden") === true) {
-					elem.classList.remove("hidden");
-				} else {
-					elem.classList.add("hidden");
-				}
-			}
-
-			function viewCanvasData() {
-				var elem = document.querySelector("div.canvas-data");
-				if (elem.classList.contains("hidden") === true) {
-					elem.classList.remove("hidden");
-				} else {
-					elem.classList.add("hidden");
-				}
-			}
-
-			(function(){
-				var header = document.getElementById("header");
-				var tabs = header.querySelectorAll("a.header-subject");
-				var opened;
-
-				tabs.forEach(function(t){
-					t.addEventListener("click", function(e){
-						e.preventDefault();
-						e.stopPropagation();
-
-						var isThis = false;
-						var list = e.target.parentNode.querySelector(".header-list");
-
-						if (opened !== undefined && opened !== null) {
-							if (opened.isSameNode(list)) {
-								isThis = true;
-							}
-							opened.classList.add("hidden");
-							opened = undefined;
-						}
-
-						if (isThis === true) {
-							return false;
-						}
-
-						if (list.classList.contains("hidden") === true) {
-							list.classList.remove("hidden");
-							opened = list;
-						}
-					});
-				});
-			})();
-		</script>
 	</div>
 
 	<div class="logger">
@@ -653,6 +629,83 @@
 
 	<div id="container"></div>
 
+	<div class="preview-conatiner hidden">
+		<img id="preview" src="#" alt="">
+	</div>
+
+	<script>
+		var onPreview = false;
+
+		function viewPreview() {
+			var elem = document.querySelector("div.preview-conatiner");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		function viewImageData() {
+			var elem = document.querySelector("div.image-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		function viewContainerData() {
+			var elem = document.querySelector("div.container-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		function viewCanvasData() {
+			var elem = document.querySelector("div.canvas-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		(function(){
+			var header = document.getElementById("header");
+			var tabs = header.querySelectorAll("a.header-subject");
+			var opened;
+
+			tabs.forEach(function(t){
+				t.addEventListener("click", function(e){
+					e.preventDefault();
+					e.stopPropagation();
+
+					var isThis = false;
+					var list = e.target.parentNode.querySelector(".header-list");
+
+					if (opened !== undefined && opened !== null) {
+						if (opened.isSameNode(list)) {
+							isThis = true;
+						}
+						opened.classList.add("hidden");
+						opened = undefined;
+					}
+
+					if (isThis === true) {
+						return false;
+					}
+
+					if (list.classList.contains("hidden") === true) {
+						list.classList.remove("hidden");
+						opened = list;
+					}
+				});
+			});
+		})();
+	</script>
+
 	<script>
 
 		var inputs = {
@@ -707,70 +760,74 @@
 
 		var elem = document.getElementById("container");
 
-		var testStates1 = [{
-	        "src": "/img/3.jpg",
-	        "width": 3911.961907399141,
-	        "height": 2933.971430549356,
-	        "x": 2114.9767441860463,
-	        "y": 1501.581395348837,
-	        "rotate": 45,
-	        "scaleX": 1,
-	        "scaleY": 1,
-	        "opacity": 1,
+		var testImportData = [{
+	        "id": "8fg880",
+	        "type": "url",
+	        "src": "./img/1.jpeg",
 	        "index": 1,
+	        "originalWidth": 5472,
+	        "originalHeight": 3648,
+	        "width": 7858.705673285891,
+	        "height": 5239.137115523928,
+	        "left": -1892.3193694408035,
+	        "top": -1089.7372324607588,
+	        "x": 2037.033467202142,
+	        "y": 1529.8313253012047,
+	        "rotate": -338.99078178925924,
+	        "scaleX": 1,
+	        "scaleY": -1,
+	        "opacity": 1,
+	        "lockAspectRatio": true,
 	        "focusable": true,
 	        "editable": true,
 	        "drawable": true
 	    }, {
-	        "src": "/img/3.jpeg",
-	        "width": 1835.8343049688174,
-	        "height": 2447.779073291754,
-	        "x": 747.7636254672568,
-	        "y": 2079.813953488372,
-	        "rotate": 335.5923831769435,
+	        "id": "2pino4",
+	        "type": "url",
+	        "src": "./img/1.jpg",
+	        "index": 2,
+	        "originalWidth": 3024,
+	        "originalHeight": 4032,
+	        "width": 1114.5660428353656,
+	        "height": 2131.2238618923093,
+	        "left": 387.4101282337219,
+	        "top": 464.68750456027334,
+	        "x": 944.6931496514046,
+	        "y": 1530.299435506428,
+	        "rotate": -24.166508334467267,
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "index": 9,
+	        "lockAspectRatio": false,
 	        "focusable": true,
-	        "editable": true,
+	        "editable": false,
 	        "drawable": true
 	    }, {
-	        "src": "/img/3.png",
-	        "width": 1591.309449421528,
-	        "height": 1591.309449421528,
-	        "x": 2896.3720930232557,
-	        "y": 1905.84685605785,
-	        "rotate": -335.54985541284424,
+	        "id": "yrh5zx",
+	        "type": "url",
+	        "src": "./img/1.png",
+	        "index": 3,
+	        "originalWidth": 800,
+	        "originalHeight": 800,
+	        "width": 1265.9943059207653,
+	        "height": 1265.9943059207653,
+	        "left": 2615.9301961848964,
+	        "top": 214.07549789433813,
+	        "x": 3248.927349145279,
+	        "y": 847.0726508547208,
+	        "rotate": 333.87162287674744,
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 0.5,
-	        "index": 5,
-	        "lockAspectRatio": false,
+	        "lockAspectRatio": true,
 	        "focusable": true,
-	        "editable": true,
-	        "drawable": false
-	    }, {
-	        "src": "/img/1.png",
-	        "id": "test1.png",
-	        "width": 1591.309449421528,
-	        "height": 1591.309449421528,
-	        "x": 2896.3720930232557,
-	        "y": 1905.84685605785,
-	        "rotate": -335.54985541284424,
-	        "scaleX": 1,
-	        "scaleY": 1,
-	        "opacity": 1,
-	        "index": 4,
-	        "lockAspectRatio": false,
-	        "focusable": true,
-	        "editable": true,
-	        "drawable": false
+	        "editable": false,
+	        "drawable": true
 	    }]
 
 		var testConfig1 = {
-			initCanvasWidth: 3911.961907399141,
-			initCanvasHeight: 2933.971430549356,
+			// initCanvasWidth: 3911.961907399141,
+			// initCanvasHeight: 2933.971430549356,
 			focusIn: function(err, res){
 				if (err) {
 					console.log(err);
@@ -805,6 +862,15 @@
 				writeImageData(res);
 
 				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
 			},
 			onEdit: function(err, res){
 				if (err) {
@@ -816,6 +882,15 @@
 				writeImageData(res);
 
 				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
 			},
 			endEdit: function(err, res){
 				if (err) {
@@ -827,6 +902,15 @@
 				writeImageData(res);
 
 				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
 			},
 			draw: function(err, res){
 				if (err) {
@@ -834,10 +918,9 @@
 					return false;
 				}
 				console.log("config.draw callback", res);
-				// document.getElementById("preview1").src = res.file;
+				// document.getElementById("preview").src = res.file;
 			}
 		}
-
 
 		// config
 		canvaaas.config(testConfig1);
@@ -856,7 +939,7 @@
 		})
 
 		// import
-		canvaaas.import(testStates1, function(err, res){
+		canvaaas.import(testImportData, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
