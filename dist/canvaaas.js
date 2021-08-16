@@ -32,11 +32,9 @@
 
 			editable: true, // boolean
 
+			checker: true, // boolean
+
 			magneticRange: 5, // number, px
-
-			minAutoIndexing: 0, // number
-
-			maxAutoIndexing: 999, // number
 
 			maxNumberOfImages: 999, // number
 
@@ -1619,12 +1617,14 @@
 				width,
 				height,
 				opacity,
+				index,
 				transform = "";
 
 			left = ( state.x - (state.width * 0.5) ) + "px";
 			top = ( state.y - (state.height * 0.5) ) + "px";
 			width = state.width + "px";
 			height = state.height + "px";
+			index = state.index;
 			opacity = state.opacity;
 
 			if (state.scaleX === -1) {
@@ -1637,6 +1637,7 @@
 				transform += "rotate(" + state.rotate + "deg)";
 			}
 
+			elem.style.zIndex = index;
 			elem.style.left = left;
 			elem.style.top = top;
 			elem.style.width = width;
@@ -1814,6 +1815,7 @@
 			return true;
 		}
 
+		// deprecated
 		function setIndex() {
 			var tmpStates = [];
 			var tmpSourceElements = [];
@@ -1823,88 +1825,6 @@
 			var lastCloneChild = undefined;
 
 			var tmpStates = imageStates.sort(function(a, b){
-				if (a.index > b.index) {
-					return 1;
-				}
-				if (a.index < b.index) {
-					return -1;
-				}
-				return 0;
-			});
-
-			tmpStates.forEach(function(state){
-				var source = getSourceById(state.id);
-				var clone = getCloneById(state.id);
-
-				if (!source || !clone) {
-					return false;
-				}
-
-				// set source
-				try {
-					if (!lastSourceChild) {
-						if (!source.isSameNode(firstSourceChild)) {
-							canvasElement.insertBefore(source, firstSourceChild);
-						} else {
-							if (source.nextSibling) {
-								lastSourceChild = source.nextSibling;
-							}
-						}
-					} else {
-						if (!source.isSameNode(lastSourceChild)) {
-							canvasElement.insertBefore(source, lastSourceChild);
-						} else {
-							if (source.nextSibling) {
-								lastSourceChild = source.nextSibling;
-							}
-						}
-					}
-					tmpSourceElements.push(source);
-				} catch (err) {
-					console.log(err);
-					return false;
-				}
-
-				// set clone
-				try {
-					if (!lastCloneChild) {
-						if (!clone.isSameNode(firstCloneChild)) {
-							mirrorElement.insertBefore(clone, firstCloneChild);
-						} else {
-							if (clone.nextSibling) {
-								lastCloneChild = clone.nextSibling;
-							}
-						}
-					} else {
-						if (!clone.isSameNode(lastCloneChild)) {
-							mirrorElement.insertBefore(clone, lastCloneChild);
-						} else {
-							if (clone.nextSibling) {
-								lastCloneChild = clone.nextSibling;
-							}
-						}
-					}
-				} catch (err) {
-					console.log(err);
-					return false;
-				}
-			});
-
-			imageStates = tmpStates;
-			sourceElements = tmpSourceElements;
-
-			return true;
-		}
-
-		function setIndex_BackUp() {
-			var tmpStates = [];
-			var tmpSourceElements = [];
-			var firstSourceChild = canvasElement.firstChild;
-			var lastSourceChild = undefined;
-			var firstCloneChild = mirrorElement.firstChild;
-			var lastCloneChild = undefined;
-
-			tmpStates = imageStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -2101,25 +2021,20 @@
 			return id;
 		}
 
-		function getIndexById(id) {
-			if (!id) {
+		function getStatesByIndex(index) {
+			if (index === undefined) {
 				return false;
 			}
 
-			var idx = imageStates.findIndex(function(elem){
-				if (elem.id === id) {
-					return elem;
+			var arr = [];
+
+			imageStates.forEach(function(elem){
+				if (elem.index === index) {
+					arr.push(elem);
 				}
-			});
+			})
 
-			if (
-				idx === undefined ||
-				idx === null
-			) {
-				return false;
-			}
-
-			return idx;
+			return arr;
 		}
 
 		function getSourceById(id) {
@@ -3031,14 +2946,13 @@
 				}
 
 				// get last index
-				var nextIndex = config.minAutoIndexing;
+				var nextIndex = 0;
 				imageStates.forEach(function(state){
-					if (state.index < config.maxAutoIndexing) {
-						if (nextIndex < state.index) {
-							nextIndex = state.index;
-						}
+					if (nextIndex < state.index) {
+						nextIndex = state.index;
 					}
 				});
+				nextIndex += 1;
 
 				// create states
 				var originalWidth = newImage.width;
@@ -3064,7 +2978,7 @@
 					"cover"
 				);
 
-				var index = nextIndex + 1;
+				var index = nextIndex;
 				var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
 				var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
 				var axisX = canvasState.width * 0.5;
@@ -3154,13 +3068,6 @@
 				mirrorElement.appendChild(newClone);
 				sourceElements.push(newSource);
 
-				var res = setIndex();
-				if (!res) {
-					if (cb) {
-						cb("`setIndex()` error");
-					}
-					return false;
-				}
 				if (cb) {
 					cb(null, id);
 				}
@@ -3402,7 +3309,9 @@
 			containerElement.addEventListener('drop', handlers.preventDefaults, false);
 			containerElement.addEventListener('drop', handlers.dropImages, false);
 
-			canvasElement.classList.add("checker");
+			if (config.checker === true) {
+				canvasElement.classList.add("checker");
+			}
 
 			// console.log("canvaaas.js initialized", config);
 
@@ -3698,14 +3607,25 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			if (existsId(str)) {
+				if (config.startEdit) {
+					config.startEdit("ID duplicated");
+				}
+				if (cb) {
+					cb("ID duplicated");
+				} 
+				return false;
+			}
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -3775,14 +3695,17 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var axisX = state.x - parseFloat(x);
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -3790,8 +3713,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var axisX = state.x - parseFloat(x);
 
 			// save state
 			setState(state, {
@@ -3858,14 +3779,17 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var axisY = state.y - parseFloat(y);
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -3873,8 +3797,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var axisY = state.y - parseFloat(y);
 
 			// save state
 			setState(state, {
@@ -3944,21 +3866,13 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
 
 			var axisX = state.x;
 			var axisY = state.y;
@@ -4005,6 +3919,15 @@
 					axisY = (canvasState.height * 1) - (state.height * 0.5);
 				}
 			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
 
 			// save state
 			setState(state, {
@@ -4075,21 +3998,13 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
 
 			var aspectRatio = state.originalWidth / state.originalHeight;
 			var width = parseFloat(w);
@@ -4098,6 +4013,15 @@
 			if (width !== height * aspectRatio) {
 				lockAspectRatio = false;
 			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
 
 			// save state
 			setState(state, {
@@ -4166,14 +4090,18 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var width = state.width * (1 + parseFloat(ratio));
+			var height = state.height * (1 + parseFloat(ratio));
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4181,9 +4109,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var width = state.width * (1 + parseFloat(ratio));
-			var height = state.height * (1 + parseFloat(ratio));
 
 			// save state
 			setState(state, {
@@ -4254,10 +4179,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -4308,6 +4233,7 @@
 				axisY = state.y;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4384,10 +4310,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -4402,6 +4328,7 @@
 				deg *= -1;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4477,10 +4404,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -4495,6 +4422,7 @@
 				rotate *= -1;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4558,14 +4486,18 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var scaleX = state.scaleX * -1;
+			var rotate = state.rotate * -1;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4573,9 +4505,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var scaleX = state.scaleX * -1;
-			var rotate = state.rotate * -1;
 
 			// save state
 			setState(state, {
@@ -4633,14 +4562,18 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var scaleY = state.scaleY * -1;
+			var rotate = state.rotate * -1;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4648,9 +4581,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var scaleY = state.scaleY * -1;
-			var rotate = state.rotate * -1;
 
 			// save state
 			setState(state, {
@@ -4721,10 +4651,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -4754,6 +4684,7 @@
 				rotate *= -1;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4829,10 +4760,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -4846,6 +4777,7 @@
 				opacity = 0;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -4863,385 +4795,6 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.indexUp = function(id, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-			var seq = getIndexById(id)
-
-			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone || seq === false) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This element has been denied");
-				}
-				if (cb) {
-					cb("This element has been denied");
-				} 
-				return false;
-			}
-
-			// check next index
-			var thisIndex = state.index;
-			var nextIndex;
-			var nextState = imageStates[seq + 1];
-			if (!nextState) {
-				if (config.startEdit) {
-					config.startEdit("Reached the last index in elements");
-				}
-				if (cb) {
-					cb("Reached the last index in elements");
-				}
-				return false;
-			}
-
-			// check index limit
-			if (
-				nextState.index < config.minAutoIndexing ||
-				nextState.index > config.maxAutoIndexing
-			) {
-				if (config.startEdit) {
-					config.startEdit("Reached the last index in elements");
-				}
-				if (cb) {
-					cb("Reached the last index in elements");
-				}
-				return false;
-			} else {
-				nextIndex = nextState.index;
-			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-
-			if (thisIndex === nextIndex) {
-				setState(nextState, {
-					index: thisIndex - 0.00001
-				});
-
-				setState(state, {
-					index: nextIndex + 0.00001
-				});
-
-				setIndex();
-			}
-
-			// save state
-			setState(nextState, {
-				index: thisIndex
-			});
-
-			setState(state, {
-				index: nextIndex
-			});
-
-			var res = setIndex();
-			if (!res) {
-				if (config.endEdit) {
-					config.endEdit("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.indexDown = function(id, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-			var seq = getIndexById(id)
-
-			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone || seq === false) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This element has been denied");
-				}
-				if (cb) {
-					cb("This element has been denied");
-				} 
-				return false;
-			}
-
-			// check next index
-			var thisIndex = state.index;
-			var prevIndex;
-			var prevState = imageStates[seq - 1];
-			if (!prevState) {
-				if (config.startEdit) {
-					config.startEdit("Reached the first index in elements");
-				}
-				if (cb) {
-					cb("Reached the first index in elements");
-				}
-				return false;
-			}
-
-			// check index limit
-			if (
-				prevState.index < config.minAutoIndexing ||
-				prevState.index > config.maxAutoIndexing
-			) {
-				if (config.startEdit) {
-					config.startEdit("Reached the first index in elements");
-				}
-				if (cb) {
-					cb("Reached the first index in elements");
-				}
-				return false;
-			} else {
-				prevIndex = prevState.index;
-
-			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-			if (thisIndex === prevIndex) {
-				setState(prevState, {
-					index: thisIndex + 0.00001
-				});
-
-				setState(state, {
-					index: prevIndex - 0.00001
-				});
-
-				setIndex();
-			}
-
-			// save state
-			setState(prevState, {
-				index: thisIndex
-			});
-			
-			setState(state, {
-				index: prevIndex
-			});
-
-			var res = setIndex();
-			if (!res) {
-				if (config.endEdit) {
-					config.endEdit("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.indexSwap = function(id, targetId, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			var targetSource = getSourceById(targetId);
-			var targetState = getStateById(targetId);
-			var targetClone = getCloneById(targetId);
-
-			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (typeof(targetId) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!targetSource || !targetState || !targetClone) {
-				if (config.startEdit) {
-					config.startEdit("Target not found");
-				}
-				if (cb) {
-					cb("Target not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This element has been denied");
-				}
-				if (cb) {
-					cb("This element has been denied");
-				} 
-				return false;
-			}
-
-			if (!targetState.editable) {
-				if (config.startEdit) {
-					config.startEdit("Target element has been denied");
-				}
-				if (cb) {
-					cb("Target element has been denied");
-				} 
-				return false;
-			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
-			var thisIndex = state.index;
-			var targetIndex = targetState.index;
-
-			if (thisIndex === targetIndex) {
-				setState(targetState, {
-					index: thisIndex - 0.0001
-				});
-
-				setState(state, {
-					index: targetIndex + 0.0001
-				});
-
-				setIndex();
-			}
-
-			setState(targetState, {
-				index: thisIndex
-			});
-
-			setState(state, {
-				index: targetIndex
-			});
-
-			var res = setIndex();
-			if (!res) {
-				if (config.endEdit) {
-					config.endEdit("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
 			}
@@ -5298,10 +4851,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -5309,7 +4862,317 @@
 			var thisIndex = state.index;
 			var nextIndex = parseFloat(num);
 
-			if (thisIndex === nextIndex) {
+			var dupeStates = getStatesByIndex(nextIndex);
+			if (dupeStates.length !== 0) {
+				if (config.startEdit) {
+					config.startEdit("Already exists in the index");
+				}
+				if (cb) {
+					cb("Already exists in the index");
+				} 
+				return false;
+			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// save state
+			setState(state, {
+				index: nextIndex
+			});
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
+		myObject.indexUp = function(id, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.startEdit) {
+					config.startEdit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.startEdit) {
+					config.startEdit("This image has been uneditabled");
+				}
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// check next index
+			var thisIndex = state.index;
+			var nextIndex = state.index + 1;
+			var dupeStates = getStatesByIndex(nextIndex);
+			if (dupeStates.length > 0) {
+				dupeStates.forEach(function(elem){
+					var thisSource = getSourceById(elem.id);
+					var thisClone = getCloneById(elem.id);
+
+					setState(elem, {
+						index: thisIndex
+					});
+
+					setElement(thisSource, elem);
+					setElement(thisClone, elem);
+				})
+			}
+
+			// save state
+			setState(state, {
+				index: nextIndex
+			});
+
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
+		myObject.indexDown = function(id, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.startEdit) {
+					config.startEdit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.startEdit) {
+					config.startEdit("This image has been uneditabled");
+				}
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			if (state.index < 1) {
+				if (config.startEdit) {
+					config.startEdit("This image is first index of images");
+				}
+				if (cb) {
+					cb("This image is first index of images");
+				} 
+				return false;
+			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
+			// check next index
+			var thisIndex = state.index;
+			var prevIndex = state.index - 1;
+			var dupeStates = getStatesByIndex(prevIndex);
+			if (dupeStates.length > 0) {
+				dupeStates.forEach(function(elem){
+					var thisSource = getSourceById(elem.id);
+					var thisClone = getCloneById(elem.id);
+
+					setState(elem, {
+						index: thisIndex
+					});
+
+					setElement(thisSource, elem);
+					setElement(thisClone, elem);
+				})
+			}
+
+			// save state
+			setState(state, {
+				index: prevIndex
+			});
+			
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+
+			if (config.endEdit) {
+				config.endEdit(null, state.id);
+			}
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
+		myObject.indexSwap = function(id, targetId, cb) {
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			var targetSource = getSourceById(targetId);
+			var targetClone = getCloneById(targetId);
+			var targetState = getStateById(targetId);
+
+			if (typeof(id) !== "string") {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (typeof(targetId) !== "string") {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.startEdit) {
+					config.startEdit("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.startEdit) {
+					config.startEdit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!targetSource || !targetState || !targetClone) {
+				if (config.startEdit) {
+					config.startEdit("Target not found");
+				}
+				if (cb) {
+					cb("Target not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.startEdit) {
+					config.startEdit("This image has been uneditabled");
+				}
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			if (!targetState.editable) {
+				if (config.startEdit) {
+					config.startEdit("Target element has been denied");
+				}
+				if (cb) {
+					cb("Target element has been denied");
+				} 
+				return false;
+			}
+
+			var thisIndex = state.index;
+			var targetIndex = targetState.index;
+
+			if (thisIndex === targetIndex) {
 				if (config.startEdit) {
 					config.startEdit("Same index");
 				}
@@ -5319,6 +5182,7 @@
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -5327,59 +5191,21 @@
 			pushCache(state.id);
 			eventSubCaches = [];
 
-			var dupeState = imageStates.find(function(elem){
-				if (nextIndex === elem.index) {
-					return elem;
-				}
+			// set state
+			setState(targetState, {
+				index: thisIndex
 			});
 
-			// save state
-			if (dupeState) {
-				if (nextIndex > thisIndex) {
-					setState(dupeState, {
-						index: nextIndex - 0.0001
-					});
+			setState(state, {
+				index: targetIndex
+			});
 
-					setState(state, {
-						index: nextIndex + 0.0001
-					});
+			// adjust state
+			setElement(source, state);
+			setElement(clone, state);
+			setElement(targetSource, targetState);
+			setElement(targetClone, targetState);
 
-					setIndex();
-				} else if(nextIndex < thisIndex) {
-					setState(dupeState, {
-						index: nextIndex + 0.0001
-					});
-
-					setState(state, {
-						index: nextIndex - 0.0001
-					});
-
-					setIndex();
-				}
-
-				setState(dupeState, {
-					index: nextIndex
-				});
-
-				setState(state, {
-					index: nextIndex
-				});
-			} else {
-				setState(state, {
-					index: nextIndex
-				});
-			}
-
-			var res = setIndex();
-			if (!res) {
-				if (config.endEdit) {
-					config.endEdit("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
 			}
@@ -5426,21 +5252,13 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
-
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
 
 			var aspectRatio = state.originalWidth / state.originalHeight;
 			var lockAspectRatio = state.lockAspectRatio;
@@ -5456,6 +5274,15 @@
 					width = height * aspectRatio;
 				}
 			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
 
 			// save state
 			setState(state, {
@@ -5514,21 +5341,23 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
+			if (state.lockAspectRatio === true) {
+				if (config.startEdit) {
+					config.startEdit("Already locked aspect ratio");
+				}
+				if (cb) {
+					cb("Already locked aspect ratio");
+				} 
+				return false;
 			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
 
 			var aspectRatio = state.originalWidth / state.originalHeight;
 			var lockAspectRatio = true;
@@ -5539,6 +5368,15 @@
 			} else {
 				width = height * aspectRatio;
 			}
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
 			
 			// save state
 			setState(state, {
@@ -5597,14 +5435,27 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			if (state.lockAspectRatio === false) {
+				if (config.startEdit) {
+					config.startEdit("Already unlocked aspect ratio");
+				}
+				if (cb) {
+					cb("Already unlocked aspect ratio");
+				} 
+				return false;
+			}
+
+			var lockAspectRatio = false;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -5612,8 +5463,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var lockAspectRatio = false;
 
 			// save state
 			setState(state, {
@@ -5659,10 +5508,10 @@
 
 			if (!state.focusable) {
 				if (config.focusIn) {
-					config.focusIn("This element has been denied");
+					config.focusIn("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -5688,30 +5537,36 @@
 		}
 
 		myObject.focusOut = function(cb) {
-			var source = eventState.target;
-			var id = getIdBySource(source);
-
-			if (!source) {
+			if (!eventState.target) {
+				if (config.focusOut) {
+					config.focusOut("Target not found");
+				}
 				if (cb) {
 					cb("Target not found");
 				} 
 				return false;
 			}
-			
-			if (!id) {
+
+			var source = eventState.target;
+			var state = getStateBySource(source);
+
+			if (!state) {
+				if (config.focusOut) {
+					config.focusOut("Image not found");
+				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
 			}
 
-			setFocusOut(id);
+			setFocusOut(state.id);
 
 			if (config.focusOut) {
-				config.focusOut(null, id);
+				config.focusOut(null, state.id);
 			}
 			if (cb) {
-				cb(null, id);
+				cb(null, state.id);
 			}
 			return state.id;
 		}
@@ -5752,14 +5607,17 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var focusable = state.focusable === false;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -5767,8 +5625,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var focusable = state.focusable === false;
 
 			// save state
 			setState(state, {
@@ -5839,6 +5695,9 @@
 				return false;
 			}
 
+			var editable = state.editable === false;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -5846,8 +5705,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var editable = state.editable === false;
 
 			// save state
 			setState(state, {
@@ -5899,14 +5756,17 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			var drawable = state.drawable === false;
+
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -5914,8 +5774,6 @@
 			// save cache
 			pushCache(state.id);
 			eventSubCaches = [];
-
-			var drawable = state.drawable === false;
 
 			// save state
 			setState(state, {
@@ -5967,14 +5825,15 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6034,6 +5893,7 @@
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6092,14 +5952,15 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6158,10 +6019,10 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
@@ -6177,6 +6038,7 @@
 				}	
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6238,14 +6100,15 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6304,14 +6167,15 @@
 
 			if (!state.editable) {
 				if (config.startEdit) {
-					config.startEdit("This element has been denied");
+					config.startEdit("This image has been uneditabled");
 				}
 				if (cb) {
-					cb("This element has been denied");
+					cb("This image has been uneditabled");
 				} 
 				return false;
 			}
 
+			// start callback
 			if (config.startEdit) {
 				config.startEdit(null, state.id);
 			}
@@ -6479,16 +6343,27 @@
 				return false;
 			}
 
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
 			// preset state
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			if (isNumeric(newState.index)) {
+				var thisIndex = state.index;
+				var nextIndex = newState.index;
+				var dupeStates = getStatesByIndex(nextIndex);
+				if (dupeStates.length > 0) {
+					dupeStates.forEach(function(elem){
+						var thisSource = getSourceById(elem.id);
+						var thisClone = getCloneById(elem.id);
+
+						setState(elem, {
+							index: thisIndex
+						});
+
+						setElement(thisSource, elem);
+						setElement(thisClone, elem);
+					})				
+				}
+			}
 
 			if (isNumeric(newState.x)) {
 				newState.x = parseFloat(newState.x) * scaleRatio;
@@ -6506,6 +6381,15 @@
 				newState.height = parseFloat(newState.height) * scaleRatio;
 			}
 
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
+
 			// save state
 			setState(state, newState);
 
@@ -6513,16 +6397,6 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			var res = setIndex();
-			if (!res) {
-				if (config.endEdit) {
-					config.endEdit("`setIndex()` error");
-				}
-				if (cb) {
-					cb("`setIndex()` error");
-				}
-				return false;
-			}
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
 			}
@@ -6567,14 +6441,6 @@
 				return false;
 			}
 
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushCache(state.id);
-			eventSubCaches = [];
-
 			var originalWidth = state.originalWidth;
 			var originalHeight = state.originalHeight;
 			var aspectRatio = state.originalWidth / state.originalHeight;
@@ -6601,6 +6467,15 @@
 			var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
 			var axisX = canvasState.width * 0.5;
 			var axisY = canvasState.height * 0.5;
+
+			// start callback
+			if (config.startEdit) {
+				config.startEdit(null, state.id);
+			}
+
+			// save cache
+			pushCache(state.id);
+			eventSubCaches = [];
 
 			// save state
 			setState(state, {
@@ -7316,9 +7191,6 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			// set index
-			setIndex();
-
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
 			}
@@ -7375,9 +7247,6 @@
 			setElement(source, state);
 			setElement(clone, state);
 
-			// set index
-			setIndex();
-
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
 			}
@@ -7413,6 +7282,35 @@
 			if (!config.editable) {
 				if (cb) {
 					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			var hasDupe = false;
+			var noIndex = false;
+			var candidateIndexes = [];
+			exportedStates.forEach(function(elem){
+				if (isNumeric(elem.index)) {
+					if (candidateIndexes.indexOf(elem.index) < 0) {
+						candidateIndexes.push(elem.index);
+					} else {
+						hasDupe = true;
+					}
+				} else {
+					noIndex = true;
+				}
+			});
+
+			if (hasDupe === true) {
+				if (cb) {
+					cb("Duplicate index error");
+				}
+				return false;
+			}
+
+			if (noIndex === true) {
+				if (cb) {
+					cb("No index error");
 				}
 				return false;
 			}
@@ -7457,9 +7355,23 @@
 							return false;
 						}
 
-						// // save cache
-						pushCache(state.id);
-						eventSubCaches = [];
+						if (thisState.id) {
+							if (
+								typeof(thisState.id) === "string" ||
+								typeof(thisState.id) === "number"
+							) {
+								if (existsId(thisState.id)) {
+									results.push({
+										err: "ID duplicated",
+										id: null
+									});
+
+									count++;
+									recursiveFunc();
+									return false;
+								}
+							}
+						}
 
 						if (isNumeric(thisState.x)) {
 							thisState.x = parseFloat(thisState.x) * scaleRatio;
@@ -7476,6 +7388,10 @@
 						if (isNumeric(thisState.height)) {
 							thisState.height = parseFloat(thisState.height) * scaleRatio;
 						}
+
+						// save cache
+						pushCache(state.id);
+						eventSubCaches = [];
 
 						// save state
 						setState(state, thisState);
@@ -7495,13 +7411,6 @@
 				} else {
 					onUpload = false;
 
-					var res = setIndex();
-					if (!res) {
-						if (cb) {
-							cb("`setIndex()` error");
-						}
-						return false;
-					}
 					if (cb) {
 						cb(null, results)
 					}

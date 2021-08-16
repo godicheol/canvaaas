@@ -16,14 +16,14 @@
 	margin-right: auto;
 }
 
-/* canvas */
+/* canvas focused */
 /*.canvaaas-canvas.focus{
 	outline: 1px solid red;
 }*/
 
 /* image focused */
 /*.canvaaas-image.focus{
-	z-index: 1;
+
 }*/
 
 /* image overlay */
