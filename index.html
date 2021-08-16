@@ -169,7 +169,7 @@
 	}
 </style>
 </head>
-<body style="">
+<body style="padding-top: 0px;">
 
 	<div id="header" class="header">
 		<div class="header-hidden">
@@ -404,7 +404,10 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexTo(canvaaas.this(), window.prompt('Number'))
-				">Index</a></li>
+				">Index To</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.indexSwap(canvaaas.this(), window.prompt('Target ID'))
+				">Index Swap</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexUp(canvaaas.this())
 				">Index Up</a></li>
@@ -768,44 +771,28 @@
 		var testConfig1 = {
 			initCanvasWidth: 3911.961907399141,
 			initCanvasHeight: 2933.971430549356,
-			init: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("config.init callback", res);
-
-				writeContainerData();
-				writeCanvasData();
-
-				checkCaches();
-			},
-			canvas: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("config.canvas callback", res);
-
-				writeContainerData();
-				writeCanvasData();
-			},
 			focusIn: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.focusIn callback", res);
 
 				writeContainerData();
 				writeCanvasData();
 				writeImageData(res);
+
+				console.log("config.focusIn callback", res);
 			}, 
 			focusOut: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
+
+				writeContainerData();
+				writeCanvasData();
+				writeImageData();
+
 				console.log("config.focusOut callback", res);
 			},
 			startEdit: function(err, res){
@@ -848,20 +835,6 @@
 				}
 				console.log("config.draw callback", res);
 				// document.getElementById("preview1").src = res.file;
-			},
-			export: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("config.export callback", res);
-			},
-			import: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				console.log("config.import callback", res);
 			}
 		}
 
@@ -875,6 +848,11 @@
 				console.log(err);
 				return false;
 			}
+
+			writeContainerData();
+			writeCanvasData();
+
+			console.log("init callback", res);
 		})
 
 		// import
@@ -883,6 +861,7 @@
 				console.log(err);
 				return false;
 			}
+			console.log("import callback", res);
 		})
 
 		function writeContainerData(){
@@ -912,7 +891,29 @@
 
 		function writeImageData(id){
 			var imageState = canvaaas.getImageData(id);
-			inputs.image.id.value = imageState._id;
+			if (!imageState) {
+				inputs.image.id.value = "";
+				inputs.image.type.value = "";
+				inputs.image.originalWidth.value = "";
+				inputs.image.originalHeight.value = "";
+				inputs.image.width.value = "";
+				inputs.image.height.value = "";
+				inputs.image.left.value = "";
+				inputs.image.top.value = "";
+				inputs.image.x.value = "";
+				inputs.image.y.value = "";
+				inputs.image.index.value = "";
+				inputs.image.rotate.value = "";
+				inputs.image.scaleX.value = "";
+				inputs.image.scaleY.value = "";
+				inputs.image.opacity.value = "";
+				inputs.image.lockAspectRatio.value = "";
+				inputs.image.focusable.value = "";
+				inputs.image.editable.value = "";
+				inputs.image.drawable.value = "";
+				return false;
+			}
+			inputs.image.id.value = imageState.id;
 			inputs.image.type.value = imageState.type;
 			inputs.image.originalWidth.value = Math.floor(imageState.originalWidth * 100) / 100;
 			inputs.image.originalHeight.value = Math.floor(imageState.originalHeight * 100) / 100;
