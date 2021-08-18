@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.4
+ * 0.1.5
  * 
  * eeecheol@gmail.com
  * 
@@ -4729,98 +4729,6 @@
 			return state.id;
 		}
 
-		myObject.indexTo = function(id, num, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (config.index) {
-					config.index("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!isNumeric(num)) {
-				if (config.index) {
-					config.index("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.index) {
-					config.index("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (config.index) {
-					config.index("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.index) {
-					config.index("This image has been uneditabled");
-				}
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			num = parseInt(num);
-
-			var thisIndex = state.index;
-			var nextIndex = num;
-
-			var dupeStates = getStatesByIndex(nextIndex);
-			if (dupeStates.length !== 0) {
-				if (config.index) {
-					config.index("Already exists in the index");
-				}
-				if (cb) {
-					cb("Already exists in the index");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				index: nextIndex
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			if (config.index) {
-				config.index(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
 		myObject.index = function(id, num, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -4901,41 +4809,146 @@
 			// save cache
 			pushUndoCache(state.id, true);
 
+			var nextIndex = state.index + num;
+
+			// save state
+			setState(state, {
+				index: nextIndex
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			// deprecated
 			// check next index
-			var diff = Math.abs(num);
-			for (var i = 0; i < diff; i++) {
-				var thisIndex = state.index;
-				var nextIndex;
-				if (num < 0) {
-					nextIndex = thisIndex - 1;
-				} else {
-					nextIndex = thisIndex + 1;
-				}
+			// var diff = Math.abs(num);
+			// for (var i = 0; i < diff; i++) {
+			// 	var thisIndex = state.index;
+			// 	var nextIndex;
+			// 	if (num < 0) {
+			// 		nextIndex = thisIndex - 1;
+			// 	} else {
+			// 		nextIndex = thisIndex + 1;
+			// 	}
 
-				var dupeStates = getStatesByIndex(nextIndex);
-				if (dupeStates.length > 0) {
-					dupeStates.forEach(function(elem){
-						var thisSource = getSourceById(elem.id);
-						var thisClone = getCloneById(elem.id);
+			// 	var dupeStates = getStatesByIndex(nextIndex);
+			// 	if (dupeStates.length > 0) {
+			// 		dupeStates.forEach(function(elem){
+			// 			var thisSource = getSourceById(elem.id);
+			// 			var thisClone = getCloneById(elem.id);
 
-						setState(elem, {
-							index: thisIndex
-						});
+			// 			setState(elem, {
+			// 				index: thisIndex
+			// 			});
 
-						setObject(thisSource, elem);
-						setObject(thisClone, elem);
-					})
-				}
+			// 			setObject(thisSource, elem);
+			// 			setObject(thisClone, elem);
+			// 		})
+			// 	}
 
-				// save state
-				setState(state, {
-					index: nextIndex
-				});
+			// 	// save state
+			// 	setState(state, {
+			// 		index: nextIndex
+			// 	});
 
-				// adjust state
-				setObject(source, state);
-				setObject(clone, state);
+			// 	// adjust state
+			// 	setObject(source, state);
+			// 	setObject(clone, state);
+			// }
+
+			if (config.index) {
+				config.index(null, state.id);
 			}
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
+		myObject.indexTo = function(id, num, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.index) {
+					config.index("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!isNumeric(num)) {
+				if (config.index) {
+					config.index("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.index) {
+					config.index("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.index) {
+					config.index("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (config.index) {
+					config.index("This image has been uneditabled");
+				}
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			num = parseInt(num);
+
+			var thisIndex = state.index;
+			var nextIndex = num;
+
+			// check duplicate
+			// var dupeStates = getStatesByIndex(nextIndex);
+			// if (dupeStates.length !== 0) {
+			// 	if (config.index) {
+			// 		config.index("Already exists in the index");
+			// 	}
+			// 	if (cb) {
+			// 		cb("Already exists in the index");
+			// 	} 
+			// 	return false;
+			// }
+
+			// save cache
+			pushUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				index: nextIndex
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (config.index) {
 				config.index(null, state.id);
