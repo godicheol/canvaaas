@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.3
+ * 0.1.4
  * 
  * eeecheol@gmail.com
  * 
@@ -35,7 +35,7 @@
 
 			editable: true, // boolean
 
-			checker: true, // boolean
+			initChecker: true, // boolean
 
 			magneticRange: 5, // number, px
 
@@ -1497,7 +1497,6 @@
 				newId = newId.trim();
 
 				if (
-					typeof(newId) === "string" &&
 					newId !== "" &&
 					newId.length > 0
 				) {
@@ -1930,6 +1929,14 @@
 		}
 
 		function existsId(id) {
+			if (
+				id === undefined ||
+				id === null ||
+				id === ""
+			) {
+				return false;
+			}
+
 			var exists = imageStates.find(function(elem){
 				if (elem.id === id) {
 					return elem;
@@ -2603,7 +2610,6 @@
 			return !isNaN(parseFloat(n)) && isFinite(n);
 		}
 
-		// deprecated
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -2638,7 +2644,6 @@
 			return (contentOverflows && overflowShown) || (alwaysShowScroll);
 		}
 
-		// deprecated
 		function getScrollbarWidth() {
 			var tmp = document.createElement('div');
 			tmp.style.overflow = 'scroll';
@@ -3171,13 +3176,14 @@
 			// adjust state
 			setObject(containerObject, containerState);
 
-			// if (hasScrollbar()) {
-			// 	var tmp = containerState.width / containerState.height;
-			// 	containerState.width -= scrollbarWidth;
-			// 	containerState.height = containerState.width / tmp;
+			if (hasScrollbar()) {
+				var sbw = getScrollbarWidth();
+				var tmp = containerState.width / containerState.height;
+				containerState.width -= sbw;
+				containerState.height = containerState.width / tmp;
 
-			// 	setObject(containerObject, containerState);
-			// }
+				setObject(containerObject, containerState);
+			}
 
 			return true;
 		}
@@ -3348,7 +3354,8 @@
 				}
 			}
 
-			if (config.checker === true) {
+			if (config.initChecker === true) {
+				canvasState.checker = true;
 				canvasObject.classList.add("checker");
 			}
 
@@ -3582,7 +3589,7 @@
 		// image
 		// 
 
-		myObject.id = function(id, str, cb) {
+		myObject.id = function(id, newId, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
@@ -3598,8 +3605,8 @@
 			}
 
 			if (
-				typeof(str) !== "string" &&
-				typeof(str) !== "number"
+				typeof(newId) !== "string" &&
+				typeof(newId) !== "number"
 			) {
 				if (config.startEdit) {
 					config.startEdit("Argument error");
@@ -3610,11 +3617,11 @@
 				return false;
 			}
 
-			if (typeof(str) === "number") {
-				str = "" + str;
+			if (typeof(newId) === "number") {
+				newId = "" + newId;
 			}
 
-			if (str.trim() === "") {
+			if (newId.trim() === "") {
 				if (config.startEdit) {
 					config.startEdit("Argument error");
 				}
@@ -3654,7 +3661,7 @@
 				return false;
 			}
 
-			if (existsId(str)) {
+			if (existsId(newId)) {
 				if (config.startEdit) {
 					config.startEdit("ID duplicated");
 				}
@@ -3674,7 +3681,7 @@
 
 			// save state
 			setState(state, {
-				id: str
+				id: newId
 			});
 
 			if (config.endEdit) {
@@ -4925,12 +4932,34 @@
 			return state.id;
 		}
 
-		myObject.indexUp = function(id, cb) {
+		myObject.index = function(id, num, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!isNumeric(num)) {
+				if (config.startEdit) {
+					config.startEdit("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			num = parseInt(num);
+
+			if (num === 0) {
 				if (config.startEdit) {
 					config.startEdit("Argument error");
 				}
@@ -4979,130 +5008,40 @@
 			pushUndoCache(state.id, true);
 
 			// check next index
-			var thisIndex = state.index;
-			var nextIndex = state.index + 1;
-			var dupeStates = getStatesByIndex(nextIndex);
-			if (dupeStates.length > 0) {
-				dupeStates.forEach(function(elem){
-					var thisSource = getSourceById(elem.id);
-					var thisClone = getCloneById(elem.id);
-
-					setState(elem, {
-						index: thisIndex
-					});
-
-					setObject(thisSource, elem);
-					setObject(thisClone, elem);
-				})
-			}
-
-			// save state
-			setState(state, {
-				index: nextIndex
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.indexDown = function(id, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+			var diff = Math.abs(num);
+			for (var i = 0; i < diff; i++) {
+				var thisIndex = state.index;
+				var nextIndex;
+				if (num < 0) {
+					nextIndex = thisIndex - 1;
+				} else {
+					nextIndex = thisIndex + 1;
 				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
 
-			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				var dupeStates = getStatesByIndex(nextIndex);
+				if (dupeStates.length > 0) {
+					dupeStates.forEach(function(elem){
+						var thisSource = getSourceById(elem.id);
+						var thisClone = getCloneById(elem.id);
+
+						setState(elem, {
+							index: thisIndex
+						});
+
+						setObject(thisSource, elem);
+						setObject(thisClone, elem);
+					})
 				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
+
+				// save state
+				setState(state, {
+					index: nextIndex
+				});
+
+				// adjust state
+				setObject(source, state);
+				setObject(clone, state);
 			}
-
-			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			if (state.index < 1) {
-				if (config.startEdit) {
-					config.startEdit("This image is first index of images");
-				}
-				if (cb) {
-					cb("This image is first index of images");
-				} 
-				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// check next index
-			var thisIndex = state.index;
-			var prevIndex = state.index - 1;
-			var dupeStates = getStatesByIndex(prevIndex);
-			if (dupeStates.length > 0) {
-				dupeStates.forEach(function(elem){
-					var thisSource = getSourceById(elem.id);
-					var thisClone = getCloneById(elem.id);
-
-					setState(elem, {
-						index: thisIndex
-					});
-
-					setObject(thisSource, elem);
-					setObject(thisClone, elem);
-				})
-			}
-
-			// save state
-			setState(state, {
-				index: prevIndex
-			});
-			
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
 
 			if (config.endEdit) {
 				config.endEdit(null, state.id);
@@ -5512,6 +5451,16 @@
 				if (cb) {
 					cb("Argument error");
 				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.focusIn) {
+					config.focusIn("Editing has been disabled");
+				}
+				if (cb) {
+					cb("Editing has been disabled");
+				}
 				return false;
 			}
 
@@ -6543,19 +6492,19 @@
 		// 
 
 		myObject.canvas = function(w, h, cb) {
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
 			if (
 				!isNumeric(w) ||
 				!isNumeric(h)
 			) {
 				if (cb) {
 					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
 				}
 				return false;
 			}
@@ -6644,6 +6593,60 @@
 			// clear cache
 			undoCaches = [];
 			redoCaches = [];
+
+			if (cb) {
+				cb(null, canvasState);
+			}
+			return canvasState;
+		}
+
+		myObject.checker = function(bool, cb) {
+			if (
+				typeof(bool) === "undefined" ||
+				typeof(bool) === "object" ||
+				bool === null
+			) {
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			var tmp = canvasState.checker;
+
+			if (
+				bool === true ||
+				bool === 1 ||
+				bool === "true"
+			) {
+				canvasState.checker = true;
+				if (tmp === false) {
+					canvasObject.classList.add("checker");
+				}
+			} else if (
+				bool === false ||
+				bool === 0 ||
+				bool === -1 ||
+				bool === "false" ||
+				bool === "none"
+			) {
+				canvasState.checker = false;
+				if (tmp === true) {
+					canvasObject.classList.remove("checker");
+				}
+			} else {
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
 
 			if (cb) {
 				cb(null, canvasState);
@@ -6859,8 +6862,8 @@
 				}
 			})
 
-			// remove checker
-			if (config.checker === true) {
+			// hide checker
+			if (canvasState.checker === true) {
 				canvasObject.classList.remove("checker");
 			}
 
@@ -6889,7 +6892,7 @@
 			})
 
 			// set checker
-			if (config.checker === true) {
+			if (canvasState.checker === true) {
 				canvasObject.classList.add("checker");
 			}
 
@@ -7193,6 +7196,10 @@
 				}
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, undoCaches[undoCaches.length - 1].id);
+			}
+
 			var recent = undoCaches.pop();
 			var source = getSourceById(recent.id);
 			var clone = getCloneById(recent.id);
@@ -7249,6 +7256,10 @@
 				}
 			}
 
+			if (config.startEdit) {
+				config.startEdit(null, redoCaches[redoCaches.length - 1].id);
+			}
+
 			var recent = redoCaches.pop();
 			var source = getSourceById(recent.id);
 			var clone = getCloneById(recent.id);
@@ -7275,20 +7286,46 @@
 			return state.id;
 		}
 
-		myObject.export = function(cb){
+		myObject.export = function(id, cb){
+			var thisId;
+			var thisCb;
 			var newExports = [];
 
-			imageStates.forEach(function(elem){
-				// var tmp = getAdjustedDataById(elem.id);
-				// newExports.push(tmp);
-
-				if (elem.type === "url") {
-					var tmp = getAdjustedDataById(elem.id);
-					newExports.push(tmp);
+			if (
+				cb === undefined &&
+				typeof(id) === "function"
+			) {
+				thisId = [];
+				thisCb = id;
+			} else {
+				if (typeof(id) === "string") {
+					thisId = [id];
+				} else if (Array.isArray(id) === true) {
+					thisId = id;
+				} else {
+					thisId = [];
 				}
-			})
-			if (cb) {
-				cb(null, newExports);
+				thisCb = cb;
+			}
+
+			var newExports = imageStates.filter(function(elem){
+				if (elem.type !== "url") {
+					return false;
+				}
+
+				if (thisId.length > 0) {
+					if (thisId.indexOf(elem.id) < 0) {
+						return false;
+					}
+				}
+
+				return elem;
+			}).map(function(elem){
+				return getAdjustedDataById(elem.id);
+			});
+
+			if (thisCb) {
+				thisCb(null, newExports);
 			}
 			return newExports;
 		}
@@ -7370,7 +7407,7 @@
 
 						if (!state || !source || !clone) {
 							removeObjectById(res);
-							
+
 							results.push({
 								err: "Image element not found",
 								id: null
@@ -7381,22 +7418,17 @@
 							return false;
 						}
 
-						if (
-							typeof(thisState.id) === "string" ||
-							typeof(thisState.id) === "number"
-						) {
-							if (existsId(thisState.id)) {
-								removeObjectById(res);
+						if (existsId(thisState.id) === true) {
+							removeObjectById(res);
 
-								results.push({
-									err: "ID duplicated",
-									id: null
-								});
+							results.push({
+								err: "ID duplicated",
+								id: null
+							});
 
-								count++;
-								recursiveFunc();
-								return false;
-							}
+							count++;
+							recursiveFunc();
+							return false;
 						}
 
 						if (isNumeric(thisState.x)) {
@@ -7427,7 +7459,7 @@
 
 						results.push({
 							err: null,
-							id: res
+							id: state.id
 						});
 
 						count++;

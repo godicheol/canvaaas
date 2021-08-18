@@ -446,11 +446,17 @@
 					canvaaas.indexSwap(canvaaas.this(), window.prompt('Target ID'))
 				">Index Swap</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.indexUp(canvaaas.this())
-				">Index Up</a></li>
+					canvaaas.index(canvaaas.this(), 1)
+				">Index +1</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.indexDown(canvaaas.this())
-				">Index Down</a></li>
+					canvaaas.index(canvaaas.this(), 3)
+				">Index +3</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.index(canvaaas.this(), -1)
+				">Index -1</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.index(canvaaas.this(), -3)
+				">Index -3</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusIn(window.prompt('ID'))
@@ -518,6 +524,9 @@
 					)
 				">Canvas Size</a></li>
 				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.checker(window.prompt('e.g. `true, false`'))
+				">MimeType</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.mimeType(window.prompt('e.g. `jpg`'))
 				">MimeType</a></li>
