@@ -85,11 +85,17 @@
 
 			focusOut: undefined, // callback function
 
-			startEdit: undefined, // callback function
+			index: undefined, // callback function
 
-			onEdit: undefined, // callback function
+			move: undefined, // callback function
 
-			endEdit: undefined, // callback function
+			resize: undefined, // callback function
+
+			rotate: undefined, // callback function
+
+			flip: undefined, // callback function
+
+			opacity: undefined, // callback function
 		};
 
 		Object.freeze(defaultConfig);
@@ -342,10 +348,6 @@
 					}
 				}
 
-				if (config.startEdit) {
-					config.startEdit(null, state.id);
-				}
-
 				// save cache
 				pushUndoCache(state.id, true);
 
@@ -359,8 +361,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.endEdit) {
-					config.endEdit(null, state.id);
+				if (config.move) {
+					config.move(null, state.id);
 				}
 			},
 
@@ -480,10 +482,6 @@
 
 				document.addEventListener("touchmove", handlers.onMove, false);
 				document.addEventListener("touchend", handlers.endMove, false);
-
-				if (config.startEdit) {
-					config.startEdit(null, state.id);
-				}
 			},
 
 			onMove: function(e) {
@@ -557,8 +555,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.onEdit) {
-					config.onEdit(null, state.id);
+				if (config.move) {
+					config.move(null, state.id);
 				}
 			},
 
@@ -583,10 +581,6 @@
 
 				document.removeEventListener("touchmove", handlers.onMove, false);
 				document.removeEventListener("touchend", handlers.endMove, false);
-
-				if (config.endEdit) {
-					config.endEdit(null, state.id);
-				}
 			},
 
 			startRotate: function(e) {
@@ -657,10 +651,6 @@
 
 				document.addEventListener("touchmove", handlers.onRotate, false);
 				document.addEventListener("touchend", handlers.endRotate, false);
-
-				if (config.startEdit) {
-					config.startEdit(null, state.id);
-				}
 			},
 
 			onRotate: function(e) {
@@ -734,8 +724,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.onEdit) {
-					config.onEdit(null, state.id);
+				if (config.rotate) {
+					config.rotate(null, state.id);
 				}
 			},
 
@@ -759,10 +749,6 @@
 
 				document.removeEventListener("touchmove", handlers.onRotate, false);
 				document.removeEventListener("touchend", handlers.endRotate, false);
-
-				if (config.endEdit) {
-					config.endEdit(null, state.id);
-				}
 			},
 
 			startResize: function(e) {
@@ -830,14 +816,14 @@
 					config.maxImageWidth || 99999,
 					config.maxImageHeight || 99999,
 					state.originalWidth / state.originalHeight
-				)
+				);
 
 				minSizes = getFittedRect(
 					config.minImageWidth || 0,
 					config.minImageHeight || 0,
 					state.originalWidth / state.originalHeight,
 					"cover"
-				)
+				);
 
 				// save initial data
 				eventState.direction = direction;
@@ -864,10 +850,6 @@
 
 				document.addEventListener("touchmove", handlers.onResize, false);
 				document.addEventListener("touchend", handlers.endResize, false);
-
-				if (config.startEdit) {
-					config.startEdit(null, state.id);
-				}
 			},
 
 			onResize: function(e) {
@@ -1088,8 +1070,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.onEdit) {
-					config.onEdit(null, state.id);
+				if (config.resize) {
+					config.resize(null, state.id);
 				}
 			},
 
@@ -1114,10 +1096,6 @@
 
 				document.removeEventListener("touchmove", handlers.onResize, false);
 				document.removeEventListener("touchend", handlers.endResize, false);
-
-				if (config.endEdit) {
-					config.endEdit(null, state.id);
-				}
 			},
 
 			startWheelZoom: function(e){
@@ -1163,14 +1141,14 @@
 					config.maxImageWidth || 99999,
 					config.maxImageHeight || 99999,
 					state.originalWidth / state.originalHeight
-				)
+				);
 
 				minSizes = getFittedRect(
 					config.minImageWidth || 0,
 					config.minImageHeight || 0,
 					state.originalWidth / state.originalHeight,
 					"cover"
-				)
+				);
 
 				maxW = maxSizes[0];
 				maxH = maxSizes[1];
@@ -1189,10 +1167,6 @@
 
 					// save cache
 					pushUndoCache(state.id, true);
-
-					if (config.startEdit) {
-						config.startEdit(null, state.id);
-					}
 				}
 
 				// add timer
@@ -1221,8 +1195,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.onEdit) {
-					config.onEdit(null, state.id);
+				if (config.resize) {
+					config.resize(null, state.id);
 				}
 
 				eventState.wheeling = setTimeout(function() {
@@ -1231,10 +1205,6 @@
 
 					// toggle off
 					onZoom = false;
-
-					if (config.endEdit) {
-						config.endEdit(null, state.id);
-					}
 				}, 300);
 			},
 
@@ -1302,10 +1272,6 @@
 				// add event handles
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
 				document.addEventListener("touchend", handlers.endPinchZoom, false);
-
-				if (config.startEdit) {
-					config.startEdit(null, state.id);
-				}
 			},
 
 			onPinchZoom: function(e){
@@ -1369,8 +1335,8 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.onEdit) {
-					config.onEdit(null, state.id);
+				if (config.resize) {
+					config.resize(null, state.id);
 				}
 			},
 
@@ -1392,10 +1358,6 @@
 				// remove event handles
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
 				document.removeEventListener("touchend", handlers.endPinchZoom, false);
-
-				if (config.endEdit) {
-					config.endEdit(null, state.id);
-				}
 
 				handlers.startMove(e);
 			},
@@ -1461,6 +1423,13 @@
 					// adjust state
 					setObject(source, state);
 					setObject(clone, state);
+
+					// if (config.move) {
+					// 	config.move(null, state.id);
+					// }
+					// if (config.resize) {
+					// 	config.resize(null, state.id);
+					// }
 				});
 			},
 
@@ -3328,24 +3297,22 @@
 
 			if (config.dropSpace !== undefined) {
 				if ([
-						"canvas",
-						"container"
-					].indexOf(config.dropSpace) > -1) {
+					"canvas",
+					"container"
+				].indexOf(config.dropSpace) > -1) {
 					containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
 					containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
 					containerObject.addEventListener('dragover', handlers.preventDefaults, false);
 					containerObject.addEventListener('drop', handlers.preventDefaults, false);
 					containerObject.addEventListener('drop', handlers.dropImages, false);
-				} else if (
-					[
-						"window",
-						"document",
-						"page",
-						"screen",
-						"all",
-						"body"
-					].indexOf(config.dropSpace) > -1
-				) {
+				} else if ([
+					"window",
+					"document",
+					"page",
+					"screen",
+					"all",
+					"body"
+				].indexOf(config.dropSpace) > -1) {
 					document.addEventListener('dragenter', handlers.preventDefaults, false);
 					document.addEventListener('dragleave', handlers.preventDefaults, false);
 					document.addEventListener('dragover', handlers.preventDefaults, false);
@@ -3595,9 +3562,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -3608,9 +3572,6 @@
 				typeof(newId) !== "string" &&
 				typeof(newId) !== "number"
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -3622,9 +3583,6 @@
 			}
 
 			if (newId.trim() === "") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -3632,9 +3590,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				} 
@@ -3642,9 +3597,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -3652,9 +3604,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -3662,18 +3611,10 @@
 			}
 
 			if (existsId(newId)) {
-				if (config.startEdit) {
-					config.startEdit("ID duplicated");
-				}
 				if (cb) {
 					cb("ID duplicated");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -3684,9 +3625,6 @@
 				id: newId
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id)
 			}
@@ -3699,8 +3637,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3709,8 +3647,8 @@
 			}
 
 			if (!isNumeric(x)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3719,8 +3657,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.move) {
+					config.move("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3729,8 +3667,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.move) {
+					config.move("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3739,8 +3677,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.move) {
+					config.move("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -3748,12 +3686,9 @@
 				return false;
 			}
 
-			var axisX = state.x - parseFloat(x);
+			x = parseFloat(x);
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
+			var axisX = state.x - x;
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -3767,8 +3702,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.move) {
+				config.move(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3782,8 +3717,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3792,8 +3727,8 @@
 			}
 
 			if (!isNumeric(y)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3802,8 +3737,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.move) {
+					config.move("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3812,8 +3747,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.move) {
+					config.move("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3822,8 +3757,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.move) {
+					config.move("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -3831,12 +3766,9 @@
 				return false;
 			}
 
-			var axisY = state.y - parseFloat(y);
+			y = parseFloat(y);
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
+			var axisY = state.y - y;
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -3850,8 +3782,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.move) {
+				config.move(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3865,8 +3797,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3878,8 +3810,8 @@
 				(typeof(x) !== "number" && typeof(x) !== "string") ||
 				(typeof(y) !== "number" && typeof(y) !== "string")
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.move) {
+					config.move("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -3888,8 +3820,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.move) {
+					config.move("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -3898,8 +3830,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.move) {
+					config.move("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -3908,8 +3840,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.move) {
+					config.move("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -3963,11 +3895,6 @@
 				}
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -3981,8 +3908,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.move) {
+				config.move(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -3996,8 +3923,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4009,8 +3936,8 @@
 				!isNumeric(w) ||
 				!isNumeric(h)
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4019,8 +3946,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.resize) {
+					config.resize("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4029,8 +3956,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.resize) {
+					config.resize("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4039,8 +3966,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.resize) {
+					config.resize("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4048,17 +3975,16 @@
 				return false;
 			}
 
+
+			w = parseFloat(w);
+			h = parseFloat(h);
+
 			var aspectRatio = state.originalWidth / state.originalHeight;
-			var width = parseFloat(w);
-			var height = parseFloat(h);
+			var width = w;
+			var height = h;
 			var lockAspectRatio;
 			if (width !== height * aspectRatio) {
 				lockAspectRatio = false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4075,8 +4001,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.resize) {
+				config.resize(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -4090,8 +4016,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4100,8 +4026,8 @@
 			}
 
 			if (!isNumeric(ratio)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4110,8 +4036,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.resize) {
+					config.resize("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4120,8 +4046,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.resize) {
+					config.resize("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4130,8 +4056,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.resize) {
+					config.resize("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4139,13 +4065,10 @@
 				return false;
 			}
 
-			var width = state.width * (1 + parseFloat(ratio));
-			var height = state.height * (1 + parseFloat(ratio));
+			ratio = parseFloat(ratio);
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
+			var width = state.width * (1 + ratio);
+			var height = state.height * (1 + ratio);
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -4160,8 +4083,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.resize) {
+				config.resize(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id)
@@ -4175,8 +4098,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4188,8 +4111,8 @@
 				typeof(ratio) !== "number" &&
 				typeof(ratio) !== "string" 
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.resize) {
+					config.resize("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4198,8 +4121,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.resize) {
+					config.resize("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4208,8 +4131,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.resize) {
+					config.resize("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4218,8 +4141,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.resize) {
+					config.resize("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4258,9 +4181,6 @@
 					axisX = canvasState.width * 0.5;
 					axisY = canvasState.height * 0.5;
 				} else {
-					if (config.startEdit) {
-						config.startEdit("Argument error");
-					}
 					if (cb) {
 						cb("Argument error");
 					} 
@@ -4271,11 +4191,6 @@
 				height = state.originalHeight * parseFloat(ratio);
 				axisX = state.x;
 				axisY = state.y;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4293,8 +4208,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.resize) {
+				config.resize(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4308,8 +4223,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.rotate) {
+					config.rotate("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4318,8 +4233,8 @@
 			}
 
 			if (!isNumeric(deg)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.rotate) {
+					config.rotate("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4328,8 +4243,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.rotate) {
+					config.rotate("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4338,8 +4253,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.rotate) {
+					config.rotate("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4348,8 +4263,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.rotate) {
+					config.rotate("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4367,11 +4282,6 @@
 				deg *= -1;
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -4386,8 +4296,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.rotate) {
+				config.rotate(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4401,8 +4311,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.rotate) {
+					config.rotate("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4411,8 +4321,8 @@
 			}
 
 			if (!isNumeric(deg)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.rotate) {
+					config.rotate("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4421,8 +4331,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.rotate) {
+					config.rotate("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4431,8 +4341,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.rotate) {
+					config.rotate("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4441,8 +4351,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.rotate) {
+					config.rotate("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4450,7 +4360,9 @@
 				return false;
 			}
 
-			var rotate = parseFloat(deg);
+			deg = parseFloat(deg);
+
+			var rotate = deg;
 
 			if (state.scaleX === -1) {
 				rotate *= -1;
@@ -4458,11 +4370,6 @@
 
 			if (state.scaleY === -1) {
 				rotate *= -1;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4477,8 +4384,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.rotate) {
+				config.rotate(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4492,8 +4399,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.flip) {
+					config.flip("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4502,8 +4409,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.flip) {
+					config.flip("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4512,8 +4419,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.flip) {
+					config.flip("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4522,8 +4429,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.flip) {
+					config.flip("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4533,11 +4440,6 @@
 
 			var scaleX = state.scaleX * -1;
 			var rotate = state.rotate * -1;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -4552,8 +4454,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.flip) {
+				config.flip(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4567,8 +4469,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.flip) {
+					config.flip("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4577,8 +4479,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.flip) {
+					config.flip("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4587,8 +4489,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.flip) {
+					config.flip("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4597,8 +4499,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.flip) {
+					config.flip("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4608,11 +4510,6 @@
 
 			var scaleY = state.scaleY * -1;
 			var rotate = state.rotate * -1;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -4627,8 +4524,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.flip) {
+				config.flip(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4642,8 +4539,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.flip) {
+					config.flip("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4655,8 +4552,8 @@
 				!isNumeric(x) ||
 				!isNumeric(y)
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.flip) {
+					config.flip("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4665,8 +4562,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.flip) {
+					config.flip("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4675,8 +4572,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.flip) {
+					config.flip("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4685,8 +4582,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.flip) {
+					config.flip("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4694,8 +4591,11 @@
 				return false;
 			}
 
-			var scaleX = parseFloat(x);
-			var scaleY = parseFloat(y);
+			x = parseInt(x);
+			y = parseInt(y);
+
+			var scaleX = x;
+			var scaleY = y;
 			var rotate = state.rotate;
 
 			if (
@@ -4719,11 +4619,6 @@
 				rotate *= -1;
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -4738,8 +4633,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.flip) {
+				config.flip(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4753,8 +4648,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.opacity) {
+					config.opacity("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4763,8 +4658,8 @@
 			}
 
 			if (!isNumeric(num)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.opacity) {
+					config.opacity("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4773,8 +4668,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.opacity) {
+					config.opacity("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4783,8 +4678,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.opacity) {
+					config.opacity("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4793,8 +4688,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.opacity) {
+					config.opacity("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4802,18 +4697,15 @@
 				return false;
 			}
 
-			var opacity = parseFloat(num);
+			num = parseFloat(num);
+
+			var opacity = num;
 
 			if (opacity > 1) {
 				opacity = 1;
 			}
 			if (opacity < 0) {
 				opacity = 0;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4828,8 +4720,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.opacity) {
+				config.opacity(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4843,8 +4735,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4853,8 +4745,8 @@
 			}
 
 			if (!isNumeric(num)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4863,8 +4755,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.index) {
+					config.index("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4873,8 +4765,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.index) {
+					config.index("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4883,8 +4775,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.index) {
+					config.index("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4892,23 +4784,20 @@
 				return false;
 			}
 
+			num = parseInt(num);
+
 			var thisIndex = state.index;
-			var nextIndex = parseFloat(num);
+			var nextIndex = num;
 
 			var dupeStates = getStatesByIndex(nextIndex);
 			if (dupeStates.length !== 0) {
-				if (config.startEdit) {
-					config.startEdit("Already exists in the index");
+				if (config.index) {
+					config.index("Already exists in the index");
 				}
 				if (cb) {
 					cb("Already exists in the index");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -4923,8 +4812,8 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.index) {
+				config.index(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -4938,8 +4827,8 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4948,8 +4837,8 @@
 			}
 
 			if (!isNumeric(num)) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4957,11 +4846,9 @@
 				return false;
 			}
 
-			num = parseInt(num);
-
-			if (num === 0) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+			if (parseInt(num) === 0) {
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -4970,8 +4857,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.index) {
+					config.index("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -4980,8 +4867,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.index) {
+					config.index("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -4990,8 +4877,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.index) {
+					config.index("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -4999,9 +4886,16 @@
 				return false;
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
+			num = parseInt(num);
+
+			if (state.index + num < 0) {
+				if (config.index) {
+					config.index("Index less than 0");
+				}
+				if (cb) {
+					cb("Index less than 0");
+				} 
+				return false;
 			}
 
 			// save cache
@@ -5043,8 +4937,8 @@
 				setObject(clone, state);
 			}
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.index) {
+				config.index(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5062,8 +4956,8 @@
 			var targetState = getStateById(targetId);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5072,8 +4966,8 @@
 			}
 
 			if (typeof(targetId) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
+				if (config.index) {
+					config.index("Argument error");
 				}
 				if (cb) {
 					cb("Argument error");
@@ -5082,8 +4976,8 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
+				if (config.index) {
+					config.index("Editing has been disabled");
 				}
 				if (cb) {
 					cb("Editing has been disabled");
@@ -5092,8 +4986,8 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
+				if (config.index) {
+					config.index("Image not found");
 				}
 				if (cb) {
 					cb("Image not found");
@@ -5102,8 +4996,8 @@
 			}
 
 			if (!targetSource || !targetState || !targetClone) {
-				if (config.startEdit) {
-					config.startEdit("Target not found");
+				if (config.index) {
+					config.index("Target not found");
 				}
 				if (cb) {
 					cb("Target not found");
@@ -5112,8 +5006,8 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
+				if (config.index) {
+					config.index("This image has been uneditabled");
 				}
 				if (cb) {
 					cb("This image has been uneditabled");
@@ -5122,8 +5016,8 @@
 			}
 
 			if (!targetState.editable) {
-				if (config.startEdit) {
-					config.startEdit("Target element has been denied");
+				if (config.index) {
+					config.index("Target element has been denied");
 				}
 				if (cb) {
 					cb("Target element has been denied");
@@ -5135,18 +5029,13 @@
 			var targetIndex = targetState.index;
 
 			if (thisIndex === targetIndex) {
-				if (config.startEdit) {
-					config.startEdit("Same index");
+				if (config.index) {
+					config.index("Same index");
 				}
 				if (cb) {
 					cb("Same index");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5167,8 +5056,8 @@
 			setObject(targetSource, targetState);
 			setObject(targetClone, targetState);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
+			if (config.index) {
+				config.index(null, state.id);
 			}
 			if (cb) {
 				cb(null, state.id);
@@ -5182,9 +5071,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5192,9 +5078,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5202,9 +5085,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5212,9 +5092,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -5236,11 +5113,6 @@
 				}
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -5255,9 +5127,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5270,9 +5139,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5280,9 +5146,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5290,9 +5153,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5300,9 +5160,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -5310,9 +5167,6 @@
 			}
 
 			if (state.lockAspectRatio === true) {
-				if (config.startEdit) {
-					config.startEdit("Already locked aspect ratio");
-				}
 				if (cb) {
 					cb("Already locked aspect ratio");
 				} 
@@ -5329,11 +5183,6 @@
 				width = height * aspectRatio;
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 			
@@ -5348,9 +5197,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5363,9 +5209,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5373,9 +5216,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5383,9 +5223,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5393,9 +5230,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -5403,9 +5237,6 @@
 			}
 
 			if (state.lockAspectRatio === false) {
-				if (config.startEdit) {
-					config.startEdit("Already unlocked aspect ratio");
-				}
 				if (cb) {
 					cb("Already unlocked aspect ratio");
 				} 
@@ -5413,11 +5244,6 @@
 			}
 
 			var lockAspectRatio = false;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -5431,9 +5257,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5486,10 +5309,11 @@
 
 			if (eventState.target) {
 				var oldId = getIdByObject(eventState.target);
-				setFocusOut(oldId);
-
-				if (config.focusOut) {
-					config.focusOut(null, oldId);
+				var res = setFocusOut(oldId);
+				if (res === true) {
+					if (config.focusOut) {
+						config.focusOut(null, oldId);
+					}
 				}
 			}
 
@@ -5544,9 +5368,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5554,9 +5375,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5564,9 +5382,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5574,9 +5389,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -5584,11 +5396,6 @@
 			}
 
 			var focusable = state.focusable === false;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -5619,9 +5426,6 @@
 				source.classList.add("unclickable");
 			}
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5633,9 +5437,6 @@
 			var state = getStateById(id);
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5643,9 +5444,6 @@
 			}
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5653,9 +5451,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5663,11 +5458,6 @@
 			}
 
 			var editable = state.editable === false;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -5677,9 +5467,6 @@
 				editable: editable
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5691,9 +5478,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5701,9 +5485,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5711,9 +5492,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5721,9 +5499,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -5731,11 +5506,6 @@
 			}
 
 			var drawable = state.drawable === false;
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -5745,9 +5515,6 @@
 				drawable: drawable
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5759,9 +5526,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5769,9 +5533,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5779,9 +5540,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5789,18 +5547,10 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5814,9 +5564,6 @@
 			// remove class
 			source.classList.remove("unclickable");
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5828,9 +5575,6 @@
 			var state = getStateById(id);
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5838,9 +5582,6 @@
 			}
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5848,18 +5589,10 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5870,9 +5603,6 @@
 				editable: true
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5884,9 +5614,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5894,9 +5621,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5904,9 +5628,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5914,18 +5635,10 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -5936,9 +5649,6 @@
 				drawable: true
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -5950,9 +5660,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -5960,9 +5667,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -5970,9 +5674,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -5980,9 +5681,6 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -6000,11 +5698,6 @@
 				}	
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -6016,9 +5709,6 @@
 			// add class
 			source.classList.add("unclickable");
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -6030,9 +5720,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -6040,9 +5727,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6050,9 +5734,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -6060,18 +5741,10 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -6082,9 +5755,6 @@
 				editable: false
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -6096,9 +5766,6 @@
 			var state = getStateById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -6106,9 +5773,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6116,9 +5780,6 @@
 			}
 
 			if (!source || !state) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -6126,18 +5787,10 @@
 			}
 
 			if (!state.editable) {
-				if (config.startEdit) {
-					config.startEdit("This image has been uneditabled");
-				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
 				return false;
-			}
-
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
 			}
 
 			// save cache
@@ -6148,9 +5801,6 @@
 				drawable: false
 			});
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -6187,11 +5837,11 @@
 			if (eventState.target) {
 				if (source.isSameNode(eventState.target)) {
 					var res = setFocusOut(id);
-					if (res === true) {
-						if (config.focusOut) {
-							config.focusOut(null, id);
-						}
-					}
+					// if (res === true) {
+					// 	if (config.focusOut) {
+					// 		config.focusOut(null, id);
+					// 	}
+					// }
 				}
 			}
 
@@ -6260,9 +5910,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -6273,9 +5920,6 @@
 				typeof(newState) !== "object" ||
 				newState === null
 			) {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -6283,9 +5927,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6293,9 +5934,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -6340,11 +5978,6 @@
 				newState.height = parseFloat(newState.height) * scaleRatio;
 			}
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -6355,9 +5988,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -6370,9 +6000,6 @@
 			var clone = getCloneById(id);
 
 			if (typeof(id) !== "string") {
-				if (config.startEdit) {
-					config.startEdit("Argument error");
-				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -6380,9 +6007,6 @@
 			}
 
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6390,9 +6014,6 @@
 			}
 
 			if (!source || !state || !clone) {
-				if (config.startEdit) {
-					config.startEdit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -6426,11 +6047,6 @@
 			var axisX = canvasState.width * 0.5;
 			var axisY = canvasState.height * 0.5;
 
-			// start callback
-			if (config.startEdit) {
-				config.startEdit(null, state.id);
-			}
-
 			// save cache
 			pushUndoCache(state.id, true);
 
@@ -6454,9 +6070,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -6845,11 +6458,11 @@
 			if (eventState.target) {
 				var id = getIdByObject(eventState.target);
 				var res = setFocusOut(id);
-				if (res === true) {
-					if (config.focusOut) {
-						config.focusOut(null, id);
-					}
-				}
+				// if (res === true) {
+				// 	if (config.focusOut) {
+				// 		config.focusOut(null, id);
+				// 	}
+				// }
 			}
 
 			config.editable = false;
@@ -7168,9 +6781,6 @@
 
 		myObject.undo = function(cb){
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -7178,9 +6788,6 @@
 			}
 
 			if (undoCaches.length < 1) {
-				if (config.startEdit) {
-					config.startEdit("Cache is empty");
-				}
 				if (cb) {
 					cb("Cache is empty");
 				}
@@ -7189,15 +6796,12 @@
 
 			if (eventState.target) {
 				var oldId = getIdByObject(eventState.target);
-				setFocusOut(oldId);
-
-				if (config.focusOut) {
-					config.focusOut(null, oldId);
-				}
-			}
-
-			if (config.startEdit) {
-				config.startEdit(null, undoCaches[undoCaches.length - 1].id);
+				var res = setFocusOut(oldId);
+				// if (res === true) {
+				// 	if (config.focusOut) {
+				// 		config.focusOut(null, oldId);
+				// 	}
+				// }
 			}
 
 			var recent = undoCaches.pop();
@@ -7217,9 +6821,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -7228,9 +6829,6 @@
 
 		myObject.redo = function(cb){
 			if (!config.editable) {
-				if (config.startEdit) {
-					config.startEdit("Editing has been disabled");
-				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -7238,9 +6836,6 @@
 			}
 
 			if (redoCaches.length < 1) {
-				if (config.startEdit) {
-					config.startEdit("Cache is empty");
-				}
 				if (cb) {
 					cb("Cache is empty");
 				}
@@ -7249,15 +6844,12 @@
 
 			if (eventState.target) {
 				var oldId = getIdByObject(eventState.target);
-				setFocusOut(oldId);
-
-				if (config.focusOut) {
-					config.focusOut(null, oldId);
-				}
-			}
-
-			if (config.startEdit) {
-				config.startEdit(null, redoCaches[redoCaches.length - 1].id);
+				var res = setFocusOut(oldId);
+				// if (res === true) {
+				// 	if (config.focusOut) {
+				// 		config.focusOut(null, oldId);
+				// 	}
+				// }
 			}
 
 			var recent = redoCaches.pop();
@@ -7277,9 +6869,6 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (config.endEdit) {
-				config.endEdit(null, state.id);
-			}
 			if (cb) {
 				cb(null, state.id);
 			}
@@ -7345,34 +6934,35 @@
 				return false;
 			}
 
-			var hasDupe = false;
-			var noIndex = false;
-			var candidateIndexes = [];
-			exportedStates.forEach(function(elem){
-				if (isNumeric(elem.index)) {
-					if (candidateIndexes.indexOf(elem.index) < 0) {
-						candidateIndexes.push(elem.index);
-					} else {
-						hasDupe = true;
-					}
-				} else {
-					noIndex = true;
-				}
-			});
+			// check index
+			// var hasDupe = false;
+			// var noIndex = false;
+			// var candidateIndexes = [];
+			// exportedStates.forEach(function(elem){
+			// 	if (isNumeric(elem.index)) {
+			// 		if (candidateIndexes.indexOf(elem.index) < 0) {
+			// 			candidateIndexes.push(elem.index);
+			// 		} else {
+			// 			hasDupe = true;
+			// 		}
+			// 	} else {
+			// 		noIndex = true;
+			// 	}
+			// });
 
-			if (hasDupe === true) {
-				if (cb) {
-					cb("Duplicate index error");
-				}
-				return false;
-			}
+			// if (hasDupe === true) {
+			// 	if (cb) {
+			// 		cb("Duplicate index error");
+			// 	}
+			// 	return false;
+			// }
 
-			if (noIndex === true) {
-				if (cb) {
-					cb("No index error");
-				}
-				return false;
-			}
+			// if (noIndex === true) {
+			// 	if (cb) {
+			// 		cb("No index error");
+			// 	}
+			// 	return false;
+			// }
 
 			var index = exportedStates.length;
 			var count = 0;
@@ -7487,16 +7077,14 @@
 			window.removeEventListener("scroll", windowScrollEvent, false);
 
 			if (config.dropSpace !== undefined) {
-				if (
-					[
+				if ([
 						"window",
 						"document",
 						"page",
 						"screen",
 						"all",
 						"body"
-					].indexOf(config.dropSpace) > -1
-				) {
+				].indexOf(config.dropSpace) > -1) {
 					document.removeEventListener('dragenter', handlers.preventDefaults, false);
 					document.removeEventListener('dragleave', handlers.preventDefaults, false);
 					document.removeEventListener('dragover', handlers.preventDefaults, false);

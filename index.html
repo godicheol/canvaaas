@@ -861,12 +861,12 @@
 
 				console.log("config.focusOut callback", res);
 			},
-			startEdit: function(err, res){
+			move: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.startEdit callback", res);
+				console.log("config.move callback", res);
 
 				writeImageData(res);
 
@@ -881,12 +881,12 @@
 				// 	document.getElementById("preview").src = res.file;
 				// })
 			},
-			onEdit: function(err, res){
+			rotate: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.onEdit callback", res);
+				console.log("config.rotate callback", res);
 
 				writeImageData(res);
 
@@ -901,12 +901,72 @@
 				// 	document.getElementById("preview").src = res.file;
 				// })
 			},
-			endEdit: function(err, res){
+			resize: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.endEdit callback", res);
+				console.log("config.resize callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
+			},
+			flip: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.flip callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
+			},
+			opacity: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.opacity callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+
+				// preview
+				// canvaaas.draw(null, function(err, res){
+				// 	if (err) {
+				// 		console.log(err);
+				// 		return false;
+				// 	}
+				// 	document.getElementById("preview").src = res.file;
+				// })
+			},
+			index: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.index callback", res);
 
 				writeImageData(res);
 
