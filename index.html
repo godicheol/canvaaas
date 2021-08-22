@@ -145,16 +145,6 @@
 		font-size: 0.8rem;
 	}
 
-	.preview-container{
-		font-size: 0;
-	}
-
-	#preview{
-		width: 33%;
-		height: auto;
-	}
-
-	.preview-container.hidden,
 	.container-data.hidden,
 	.canvas-data.hidden,
 	.image-data.hidden{
@@ -547,7 +537,6 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:viewPreview()">View Preview</a></li>
 				<li><a href="javascript:viewContainerData()">View Container Data</a></li>
 				<li><a href="javascript:viewCanvasData()">View Canvas Data</a></li>
 				<li><a href="javascript:viewImageData()">View Image Data</a></li>
@@ -638,22 +627,7 @@
 
 	<div id="container"></div>
 
-	<div class="preview-conatiner hidden">
-		<img id="preview" src="#" alt="">
-	</div>
-
 	<script>
-		var onPreview = false;
-
-		function viewPreview() {
-			var elem = document.querySelector("div.preview-conatiner");
-			if (elem.classList.contains("hidden") === true) {
-				elem.classList.remove("hidden");
-			} else {
-				elem.classList.add("hidden");
-			}
-		}
-
 		function viewImageData() {
 			var elem = document.querySelector("div.image-data");
 			if (elem.classList.contains("hidden") === true) {
@@ -832,11 +806,15 @@
 	        "focusable": true,
 	        "editable": false,
 	        "drawable": true
-	    }]
+	    }];
+
+	    var testImportDataString = JSON.stringify(testImportData);
 
 		var testConfig1 = {
 			// initCanvasWidth: 3911.961907399141,
 			// initCanvasHeight: 2933.971430549356,
+			// initCanvasWidth: 4096,
+			// initCanvasHeight: 4096,
 			focusIn: function(err, res){
 				if (err) {
 					console.log(err);
@@ -866,128 +844,75 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.move callback", res);
+				console.log("config.move callback");
 
 				writeImageData(res);
 
 				checkCaches();
-
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			rotate: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.rotate callback", res);
+				console.log("config.rotate callback");
 
 				writeImageData(res);
 
 				checkCaches();
-
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			resize: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.resize callback", res);
+				console.log("config.resize callback");
 
 				writeImageData(res);
 
 				checkCaches();
 
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			flip: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.flip callback", res);
+				console.log("config.flip callback");
 
 				writeImageData(res);
 
 				checkCaches();
-
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			opacity: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.opacity callback", res);
+				console.log("config.opacity callback");
 
 				writeImageData(res);
 
 				checkCaches();
-
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			index: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.index callback", res);
+				console.log("config.index callback");
 
 				writeImageData(res);
 
 				checkCaches();
 
-				// preview
-				// canvaaas.draw(null, function(err, res){
-				// 	if (err) {
-				// 		console.log(err);
-				// 		return false;
-				// 	}
-				// 	document.getElementById("preview").src = res.file;
-				// })
 			},
 			draw: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.draw callback", res);
-				// document.getElementById("preview").src = res.file;
+				console.log("config.draw callback");
 			}
 		}
 
@@ -1007,14 +932,23 @@
 			console.log("init callback", res);
 		})
 
-		// import
+		// import object
 		canvaaas.import(testImportData, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
 			}
 			console.log("import callback", res);
-		})
+		});
+
+		// import string
+		// canvaaas.import(testImportDataString, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+		// 	console.log("import callback", res);
+		// })
 
 		function writeContainerData(){
 			var containerState = canvaaas.getContainerData();

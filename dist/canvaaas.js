@@ -268,6 +268,9 @@
 			},
 
 			keydown: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
 				var source = eventState.target;
 				var clone = getCloneByObject(source);
 				var state = getStateByObject(source);
@@ -1718,6 +1721,7 @@
 				source.addEventListener("touchstart", handlers.startMove, false);
 				source.addEventListener("wheel", handlers.startWheelZoom, false);
 
+
 				clone.removeEventListener("mousedown", handlers.startFocusIn, false);
 				clone.removeEventListener("touchstart", handlers.startFocusIn, false);
 
@@ -1726,7 +1730,7 @@
 				clone.addEventListener("wheel", handlers.startWheelZoom, false);
 
 				document.addEventListener("keydown", handlers.keydown, false);
-
+				
 				document.addEventListener("mousedown", handlers.isOutside, false);
 				document.addEventListener("touchstart", handlers.isOutside, false);
 			} catch(err) {
@@ -2579,6 +2583,15 @@
 			return !isNaN(parseFloat(n)) && isFinite(n);
 		}
 
+		function isNodeList(nodes) {
+			var stringRepr = Object.prototype.toString.call(nodes);
+
+			return typeof nodes === 'object' &&
+				/^\[object (HTMLCollection|NodeList|Object)\]$/.test(stringRepr) &&
+				(typeof nodes.length === 'number') &&
+				(nodes.length === 0 || (typeof nodes[0] === "object" && nodes[0].nodeType > 0));
+		}
+
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -3370,87 +3383,6 @@
 			}
 
 			var thisFiles = self.files;
-			if (thisFiles.length < 1) {
-				if (config.upload) {
-					config.upload("File not found");
-				}
-				if (cb) {
-					cb("File not found");
-				} 
-				return false;
-			}
-
-			var index = thisFiles.length;
-			var count = 0;
-			var results = [];
-
-			onUpload = true;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					renderObject(thisFiles[count], function(err, res) {
-						if (err) {
-							if (config.upload) {
-								config.upload(err);
-							}
-						} else {
-							if (config.upload) {
-								config.upload(null, res);
-							}
-						}
-						results.push({
-							err: err,
-							id: res
-						});
-
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					onUpload = false;
-
-					if (cb) {
-						cb(null, results);
-					}
-				}
-			}
-		}
-
-		// asynchronous
-		myObject.uploadUrls = function(imageUrls, cb) {
-			if (onUpload === true) {
-				if (config.upload) {
-					config.upload("Already in progress");
-				}
-				if (cb) {
-					cb("Already in progress");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.upload) {
-					config.upload("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				} 
-				return false;
-			}
-
-			if (!Array.isArray(imageUrls)) {
-				if (config.upload) {
-					config.upload("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			var thisFiles = imageUrls;
 			if (thisFiles.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -5933,10 +5865,30 @@
 				typeof(newState) !== "object" ||
 				newState === null
 			) {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
+				if (typeof(newState) !== "string") {
+					if (cb) {
+						cb("Argument error");
+					} 
+					return false;
+				} else {
+					var tmp;
+					try {
+						tmp = JSON.parse(newState);
+					} catch(err) {
+						tmp = undefined;
+					}
+					if (
+						typeof(tmp) !== "object" ||
+						tmp === null
+					) {
+						if (cb) {
+							cb("Argument error");
+						} 
+						return false;
+					} else {
+						newState = tmp;
+					}
+				}
 			}
 
 			if (!config.editable) {
@@ -6934,10 +6886,28 @@
 
 		myObject.import = function(exportedStates, cb){
 			if (!Array.isArray(exportedStates)) {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
+				if (typeof(exportedStates) !== "string") {
+					if (cb) {
+						cb("Argument error");
+					} 
+					return false;
+				} else {
+					var tmp;
+					try {
+						tmp = JSON.parse(exportedStates);
+					} catch(err) {
+						tmp = undefined;
+					}
+					if (!Array.isArray(tmp)) {
+						if (cb) {
+							cb("Argument error");
+						} 
+						return false;
+					} else {
+						exportedStates = tmp;
+					}
+				}
+
 			}
 
 			if (!config.editable) {
