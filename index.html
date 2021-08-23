@@ -19,33 +19,10 @@
 		padding: 0;
 	}
 
-	#container{
+	#myContainer{
 		padding: 24px;
 		overflow: hidden;
 		/*background-color: #000;*/
-	}
-
-	#logger{
-		display: inline-block;
-		width: 48%;
-		height: 300px;
-		vertical-align: top;
-		overflow-y: scroll;
-	}
-	#logger th{
-		text-align: right;
-	}
-
-	#logger input{
-		max-width: 100%;
-	}
-
-	#buttons{
-		display: inline-block;
-		width: 48%;
-		height: 300px;
-		padding-bottom: 300px;
-		overflow-y: scroll;
 	}
 
 	input[type='file']{
@@ -188,8 +165,18 @@
 				<li><label for="uploadSingle">Upload File</label></li>
 				<li><label for="uploadMultiple">Upload Files</label></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrl(window.prompt('Type image URL.'), console.log)
+					canvaaas.uploadUrl(
+						window.prompt('Type image URL.', '/img/1.jpg'),
+						testImportData[0]
+					)
 				">Upload URL</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.uploadElement(
+						document.getElementById(
+							window.prompt('Type ID', 'image-1')
+						)
+					)
+				">Upload Element</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					// download 
@@ -365,8 +352,8 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize(
 						canvaaas.this(),
-						window.prompt('Type new width(px).'),
-						window.prompt('Type new height(px).')
+						window.prompt('Type new width(px).', '256'),
+						window.prompt('Type new height(px).', '256')
 					)
 				">Resize</a></li>
 				<li class="rule"></li>
@@ -415,7 +402,7 @@
 				">Flip Reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.opacityTo(canvaaas.this(), window.prompt('0 ~ 1'))
+					canvaaas.opacityTo(canvaaas.this(), window.prompt('0 ~ 1', '0.5'))
 				">Opacity</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -430,7 +417,7 @@
 				">Unlock Aspect Ratio</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.indexTo(canvaaas.this(), window.prompt('Number'))
+					canvaaas.indexTo(canvaaas.this(), window.prompt('Number', '5'))
 				">Index To</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexSwap(canvaaas.this(), window.prompt('Target ID'))
@@ -464,6 +451,9 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.toggleDrawable(canvaaas.this())
 				">Toggle Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleIndexable(canvaaas.this())
+				">Toggle Index</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this())
@@ -474,6 +464,9 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawable(canvaaas.this())
 				">Enable Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.indexable(canvaaas.this())
+				">Enable Index</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.unfocusable(canvaaas.this())
@@ -484,6 +477,9 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.undrawable(canvaaas.this())
 				">Disable Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unindexable(canvaaas.this())
+				">Disable Index</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.remove(canvaaas.this())
@@ -509,28 +505,28 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.canvas(
-						window.prompt('Type new canvas width(px).'),
-						window.prompt('Type new canvas height(px).')
+						window.prompt('Type new canvas width(px).', '4096'),
+						window.prompt('Type new canvas height(px).', '4096')
 					)
 				">Canvas Size</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(window.prompt('e.g. `true, false`'))
+					canvaaas.checker(window.prompt('e.g. `true, false`', 'false'))
+				">Background Checker</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.mimeType(window.prompt('e.g. `jpg`', 'png'))
 				">MimeType</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.mimeType(window.prompt('e.g. `jpg`'))
-				">MimeType</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.quality(window.prompt('e.g. 0 ~ 1'))
+					canvaaas.quality(window.prompt('e.g. 0 ~ 1', '0.8'))
 				">Quality</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.backgroundColor(window.prompt('e.g. #FFFFFF'))
+					canvaaas.backgroundColor(window.prompt('e.g. #FFFFFF', '#000000'))
 				">Background Color</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.smoothingEnabled(window.prompt('e.g. 0 ~ 1'))
+					canvaaas.smoothingEnabled(window.prompt('e.g. true, false', 'true'))
 				">Smooth Enabled</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.smoothingQuality(window.prompt('e.g. 0 ~ 1'))
+					canvaaas.smoothingQuality(window.prompt('e.g. 0 ~ 1', '0.8'))
 				">Smooth Quality</a></li>
 			</ul>
 		</div>
@@ -622,10 +618,41 @@
 			<input id="image-editable" type="text">
 			Drawable:
 			<input id="image-drawable" type="text">
+			Indexable:
+			<input id="image-indexable" type="text">
 		</div>
 	</div>
 
-	<div id="container"></div>
+	<div id="myContainer"></div>
+
+	<div style="display: none;">
+		<img
+			id="image-1"
+			src="/img/1.jpg"
+			data-id = "test-1",
+	        data-type = "url",
+	        data-src = "./img/1.jpeg",
+	        data-index = "1",
+	        data-width = "7858.705673285891",
+	        data-height = "5239.137115523928",
+	        data-x = "2037.033467202142",
+	        data-y = "1529.8313253012047",
+	        data-rotate = "-338.99078178925924",
+	        data-scaleX = "1",
+	        data-scaleY = "-1",
+	        data-opacity = "1",
+	        data-lockAspectRatio = "true",
+	        data-focusable = "true",
+	        data-editable = "true",
+	        data-drawable = "true",
+	        data-indexable = "true",
+		>
+		<img 
+			id="image-2" 
+			src="/img/1.jpeg" 
+			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusable":true,"editable":true,"drawable":true,"indexable":true}'
+		>
+	</div>
 
 	<script>
 		function viewImageData() {
@@ -733,6 +760,7 @@
 				focusable: document.getElementById("image-focusable"),
 				editable: document.getElementById("image-editable"),
 				drawable: document.getElementById("image-drawable"),
+				indexable: document.getElementById("image-indexable"),
 			}	
 		}
 
@@ -741,7 +769,7 @@
 			redo: document.getElementById("redo"),
 		}
 
-		var elem = document.getElementById("container");
+		var elem = document.getElementById("myContainer");
 
 		var testImportData = [{
 	        "id": "8fg880",
@@ -763,7 +791,8 @@
 	        "lockAspectRatio": true,
 	        "focusable": true,
 	        "editable": true,
-	        "drawable": true
+	        "drawable": true,
+	        "indexable": true,
 	    }, {
 	        "id": "2pino4",
 	        "type": "url",
@@ -784,7 +813,8 @@
 	        "lockAspectRatio": false,
 	        "focusable": true,
 	        "editable": false,
-	        "drawable": true
+	        "drawable": true,
+	        "indexable": true,
 	    }, {
 	        "id": "yrh5zx",
 	        "type": "url",
@@ -805,8 +835,12 @@
 	        "lockAspectRatio": true,
 	        "focusable": true,
 	        "editable": false,
-	        "drawable": true
+	        "drawable": true,
+	        "indexable": true,
 	    }];
+
+		
+
 
 	    var testImportDataString = JSON.stringify(testImportData);
 
@@ -815,6 +849,7 @@
 			// initCanvasHeight: 2933.971430549356,
 			// initCanvasWidth: 4096,
 			// initCanvasHeight: 4096,
+			containerAspectRatio: 16 / 9,
 			focusIn: function(err, res){
 				if (err) {
 					console.log(err);
@@ -997,6 +1032,7 @@
 				inputs.image.focusable.value = "";
 				inputs.image.editable.value = "";
 				inputs.image.drawable.value = "";
+				inputs.image.indexable.value = "";
 				return false;
 			}
 			inputs.image.id.value = imageState.id;
@@ -1018,6 +1054,7 @@
 			inputs.image.focusable.value = imageState.focusable;
 			inputs.image.editable.value = imageState.editable;
 			inputs.image.drawable.value = imageState.drawable;
+			inputs.image.indexable.value = imageState.indexable;
 		}
 
 		function checkCaches(){

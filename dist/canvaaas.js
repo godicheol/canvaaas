@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.5
+ * 0.1.6
  * 
  * eeecheol@gmail.com
  * 
@@ -69,13 +69,11 @@
 
 			minImageHeight: 64, // number, px
 
-			minImageRenderWidth: 0.2, //number,  0 ~ 1
+			renderImageType: "contain", // string, "cover", "contain"
 
-			minImageRenderHeight: 0.2, // number, 0 ~ 1
+			renderImageWidth: 0.7, // number,  0 ~ 1
 
-			maxImageRenderWidth: 1, // number, 0 ~ 1
-
-			maxImageRenderHeight: 1, // number, 0 ~ 1
+			renderImageHeight: 0.7, // number, 0 ~ 1
 
 			upload: undefined, // callback function
 
@@ -208,7 +206,7 @@
 
 				function recursiveFunc() {
 					if (count < index) {
-						renderObject(files[count], function(err, res) {
+						renderImage(files[count], function(err, res) {
 							if (err) {
 								if (config.upload) {
 									config.upload(err);
@@ -1546,21 +1544,180 @@
 
 			if (typeof(additionalState.lockAspectRatio) === "boolean") {
 				state.lockAspectRatio = additionalState.lockAspectRatio;
+			} else if (typeof(additionalState.lockAspectRatio) === "string") {
+				if (additionalState.lockAspectRatio === "true") {
+					state.lockAspectRatio = true;
+				} else if (additionalState.lockAspectRatio === "false") {
+					state.lockAspectRatio = false;
+				}
 			}
 
 			if (typeof(additionalState.focusable) === "boolean") {
 				state.focusable = additionalState.focusable;
+			} else if (typeof(additionalState.focusable) === "string") {
+				if (additionalState.focusable === "true") {
+					state.focusable = true;
+				} else if (additionalState.focusable === "false") {
+					state.focusable = false;
+				}
 			}
 
 			if (typeof(additionalState.editable) === "boolean") {
 				state.editable = additionalState.editable;
+			} else if (typeof(additionalState.editable) === "string") {
+				if (additionalState.editable === "true") {
+					state.editable = true;
+				} else if (additionalState.editable === "false") {
+					state.editable = false;
+				}
 			}
 
 			if (typeof(additionalState.drawable) === "boolean") {
 				state.drawable = additionalState.drawable;
+			} else if (typeof(additionalState.drawable) === "string") {
+				if (additionalState.drawable === "true") {
+					state.drawable = true;
+				} else if (additionalState.drawable === "false") {
+					state.drawable = false;
+				}
+			}
+
+			if (typeof(additionalState.indexable) === "boolean") {
+				state.indexable = additionalState.indexable;
+			} else if (typeof(additionalState.indexable) === "string") {
+				if (additionalState.indexable === "true") {
+					state.indexable = true;
+				} else if (additionalState.indexable === "false") {
+					state.indexable = false;
+				}
 			}
 
 			return true;
+		}
+
+		function getFittedState(state) {
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			var result = {};
+
+			var tmpId;
+			if (state.id) {
+				tmpId = state.id;
+			} else if (state._id) {
+				tmpId = state._id;
+			}
+
+			if (typeof(tmpId) === "string") {
+				result.id = tmpId;
+			} else if (typeof(tmpId) === "number") {
+				result.id = "" + tmpId;
+			}
+
+			if (isNumeric(state.index)) {
+				result.index = parseFloat(state.index);
+			}
+
+			if (isNumeric(state.x)) {
+				result.x = parseFloat(state.x);
+			}
+
+			if (isNumeric(state.x)) {
+				result.x = parseFloat(state.x) * scaleRatio;
+			}
+
+			if (isNumeric(state.y)) {
+				result.y = parseFloat(state.y) * scaleRatio;
+			}
+
+			if (isNumeric(state.width)) {
+				result.width = parseFloat(state.width) * scaleRatio;
+			}
+
+			if (isNumeric(state.height)) {
+				result.height = parseFloat(state.height) * scaleRatio;
+			}
+
+			if (isNumeric(state.rotate)) {
+				result.rotate = parseFloat(state.rotate);
+			}
+
+			if (isNumeric(state.scaleX)) {
+				if (parseFloat(state.scaleX) > 0) {
+					result.scaleX = 1;
+				} else {
+					result.scaleX = -1;
+				}
+			}
+
+			if (isNumeric(state.scaleY)) {
+				if (parseFloat(state.scaleY) > 0) {
+					result.scaleY = 1;
+				} else {
+					result.scaleY = -1;
+				}
+			}
+
+			if (isNumeric(state.opacity)) {
+				if (parseFloat(state.opacity) > 1) {
+					result.opacity = 1;
+				} else if (parseFloat(state.opacity) < 0) {
+					result.opacity = 0;
+				} else {
+					result.opacity = parseFloat(state.opacity);
+				}
+			}
+
+			if (typeof(state.lockAspectRatio) === "boolean") {
+				result.lockAspectRatio = state.lockAspectRatio;
+			} else if (typeof(state.lockAspectRatio) === "string") {
+				if (state.lockAspectRatio === "true") {
+					result.lockAspectRatio = true;
+				} else if (state.lockAspectRatio === "false") {
+					result.lockAspectRatio = false;
+				}
+			}
+
+			if (typeof(state.focusable) === "boolean") {
+				result.focusable = state.focusable;
+			} else if (typeof(state.focusable) === "string") {
+				if (state.focusable === "true") {
+					result.focusable = true;
+				} else if (state.focusable === "false") {
+					result.focusable = false;
+				}
+			}
+
+			if (typeof(state.editable) === "boolean") {
+				result.editable = state.editable;
+			} else if (typeof(state.editable) === "string") {
+				if (state.editable === "true") {
+					result.editable = true;
+				} else if (state.editable === "false") {
+					result.editable = false;
+				}
+			}
+
+			if (typeof(state.drawable) === "boolean") {
+				result.drawable = state.drawable;
+			} else if (typeof(state.drawable) === "string") {
+				if (state.drawable === "true") {
+					result.drawable = true;
+				} else if (state.drawable === "false") {
+					result.drawable = false;
+				}
+			}
+
+			if (typeof(state.indexable) === "boolean") {
+				result.indexable = state.indexable;
+			} else if (typeof(state.indexable) === "string") {
+				if (state.indexable === "true") {
+					result.indexable = true;
+				} else if (state.indexable === "false") {
+					result.indexable = false;
+				}
+			}
+
+			return result;
 		}
 
 		function setObject(elem, state) {
@@ -1897,6 +2054,7 @@
 			tmp.focusable = state.focusable;
 			tmp.editable = state.editable;
 			tmp.drawable = state.drawable;
+			tmp.indexable = state.indexable;
 
 			return tmp;
 		}
@@ -1969,6 +2127,28 @@
 			state.id = candidateId;
 
 			return true;
+		}
+
+		function existsIndex(idx) {
+			if (
+				idx === undefined ||
+				idx === null ||
+				idx === ""
+			) {
+				return false;
+			}
+
+			var exists = imageStates.find(function(elem){
+				if (elem.index === idx) {
+					return elem;
+				}
+			});
+
+			if (exists) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
 		function getIdByObject(obj) {
@@ -2849,7 +3029,7 @@
 		}
 
 		// asynchronous
-		function renderObject(file, cb) {
+		function renderImage(file, cb) {
 			if (!file) {
 				if (cb) {
 					cb("File not found");
@@ -2925,7 +3105,6 @@
 			}
 
 			newImage.onload = function(e) {
-
 				// check initialized canvas
 				if (!isInitialized) {
 					canvasState.originalWidth = newImage.width;
@@ -2965,27 +3144,16 @@
 
 				var aspectRatio = originalWidth / originalHeight;
 
-				var maxWidth = canvasState.width * config.maxImageRenderWidth;
-				var maxHeight = canvasState.height * config.maxImageRenderHeight;
-				var minWidth = canvasState.width * config.minImageRenderWidth;
-				var minHeight = canvasState.height * config.minImageRenderHeight;				
-
-				var maxSizes = getFittedRect(
-					maxWidth,
-					maxHeight,
+				var fittedSizes = getFittedRect(
+					canvasState.width * config.renderImageWidth,
+					canvasState.height * config.renderImageHeight,
 					aspectRatio,
-				);
-
-				var minSizes = getFittedRect(
-					minWidth,
-					minHeight,
-					aspectRatio,
-					"cover"
+					config.renderImageType
 				);
 
 				var index = nextIndex;
-				var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
-				var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
+				var width = fittedSizes[0];
+				var height = fittedSizes[1];
 				var axisX = canvasState.width * 0.5;
 				var axisY = canvasState.height * 0.5;
 				var rotate = 0;
@@ -2996,6 +3164,7 @@
 				var focusable = true;
 				var editable = true;
 				var drawable = true;
+				var indexable = true;
 
 				var newState = {};
 				newState.type = typ;
@@ -3016,6 +3185,7 @@
 				newState.focusable = focusable;
 				newState.editable = editable;
 				newState.drawable = drawable;
+				newState.indexable = indexable;
 
 				// create wrap element
 				var newSource = document.createElement("div");
@@ -3403,7 +3573,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderObject(thisFiles[count], function(err, res) {
+					renderImage(thisFiles[count], function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -3432,7 +3602,100 @@
 		}
 
 		// asynchronous
-		myObject.uploadUrl = function(imageUrl, cb) {
+		myObject.uploadUrl = function(imageUrl, imageState, cb) {
+			var thisState,
+				thisCb;
+
+			if (typeof(imageState) === "object") {
+				thisState = imageState;
+				thisCb = cb;
+			} else if (typeof(imageState) === "funciton") {
+				thisState = {};
+				thisCb = imageState;
+			} else if (typeof(imageState) === "string") {
+				var tmp;
+				try {
+					tmp = JSON.parse(imageState);
+				} catch(err) {
+					tmp = {};
+				}
+
+				thisState = tmp;
+				thisCb = cb;
+			} else {
+				thisState = {};
+				thisCb = cb;
+			}
+
+			if (onUpload === true) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (thisCb) {
+					thisCb("Already in progress");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.upload) {
+					config.upload("Editing has been disabled");
+				}
+				if (thisCb) {
+					thisCb("Editing has been disabled");
+				} 
+				return false;
+			}
+
+			var thisFile = imageUrl;
+			if (!thisFile) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (thisCb) {
+					thisCb("File not found");
+				} 
+				return false;
+			}
+
+			renderImage(thisFile, function(err, res) {
+				if (err) {
+					if (config.upload) {
+						config.upload(err);
+					}
+					if (thisCb) {
+						thisCb(err);
+					}
+					return false;
+				}
+
+				var state = getStateById(res);
+				var source = getSourceById(res);
+				var clone = getCloneById(res);
+
+				var fittedState = getFittedState(thisState);
+
+				// save cache
+				pushUndoCache(res, true);
+
+				// save state
+				setState(state, fittedState);
+
+				// adjust state
+				setObject(source, state);
+				setObject(clone, state);
+
+				if (config.upload) {
+					config.upload(null, res);
+				}
+				if (thisCb) {
+					thisCb(null, res);
+				}
+			});
+		}
+
+		// asynchronous
+		myObject.uploadElement = function(imgElement, cb) {
 			if (onUpload === true) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -3453,7 +3716,20 @@
 				return false;
 			}
 
-			var thisFile = imageUrl;
+			if (
+				typeof(imgElement) !== "object" ||
+				imgElement === null
+			) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				} 
+				return false;
+			}
+
+			var thisFile = imgElement.src;
 			if (!thisFile) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -3464,7 +3740,46 @@
 				return false;
 			}
 
-			renderObject(thisFile, function(err, res) {
+			var hasState = false;
+			var stateKeys = [
+				"state",
+				"id",
+				"index",
+				"x",
+				"y",
+				"width",
+				"height",
+				"rotate",
+				"scaleX",
+				"scaleY",
+				"opacity",
+				"lockAspectRatio",
+				"focusable",
+				"editable",
+				"drawable",
+				"indexable",
+			];
+
+			var thisState = {};
+			stateKeys.forEach(function(elem){
+				thisState[elem] = imgElement.getAttribute("data-" + elem);
+			});
+
+			if (thisState.id) {
+				hasState = true;
+			} else if (thisState.state) {
+				var tmp;
+				try {
+					tmp = JSON.parse(thisState.state);
+				} catch(err) {
+					tmp = {};
+				}
+
+				thisState = tmp;
+				hasState = true;
+			}
+
+			renderImage(thisFile, function(err, res) {
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -3473,6 +3788,24 @@
 						cb(err);
 					}
 					return false;
+				}
+
+				if (hasState === true) {
+					var state = getStateById(res);
+					var source = getSourceById(res);
+					var clone = getCloneById(res);
+
+					var fittedState = getFittedState(thisState);
+
+					// save cache
+					pushUndoCache(res, true);
+
+					// save state
+					setState(state, fittedState);
+
+					// adjust state
+					setObject(source, state);
+					setObject(clone, state);
 				}
 
 				if (config.upload) {
@@ -4716,78 +5049,69 @@
 				return false;
 			}
 
-			if (!state.editable) {
+			if (!state.indexable) {
 				if (config.index) {
-					config.index("This image has been uneditabled");
+					config.index("This image has been unindexabled");
 				}
 				if (cb) {
-					cb("This image has been uneditabled");
+					cb("This image has been unindexabled");
 				} 
 				return false;
 			}
 
 			num = parseInt(num);
 
-			if (state.index + num < 0) {
-				if (config.index) {
-					config.index("Index less than 0");
+			// recursive
+			var diff = Math.abs(num);
+			for (var i = 0; i < diff; i++) {
+				var thisIndex = state.index;
+				var nextIndex;
+				if (num < 0) {
+					nextIndex = thisIndex - 1;
+				} else {
+					nextIndex = thisIndex + 1;
 				}
-				if (cb) {
-					cb("Index less than 0");
-				} 
-				return false;
+
+				if (nextIndex < 0) {
+					continue;
+				}
+
+				// check next index
+				var isIndexable = true;
+				var dupeStates = getStatesByIndex(nextIndex);
+				if (dupeStates.length > 0) {
+					dupeStates.forEach(function(elem){
+						if (!elem.indexable) {
+							isIndexable = false;
+						}
+					})
+
+					if (isIndexable === true) {
+						dupeStates.forEach(function(elem){
+							var thisSource = getSourceById(elem.id);
+							var thisClone = getCloneById(elem.id);
+
+							setState(elem, {
+								index: thisIndex
+							});
+
+							setObject(thisSource, elem);
+							setObject(thisClone, elem);
+						})
+					}
+				}
+
+				if (isIndexable === true) {
+					// save state
+					setState(state, {
+						index: nextIndex
+					});
+
+					// adjust state
+					setObject(source, state);
+					setObject(clone, state);
+				}
 			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			var nextIndex = state.index + num;
-
-			// save state
-			setState(state, {
-				index: nextIndex
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			// deprecated
-			// check next index
-			// var diff = Math.abs(num);
-			// for (var i = 0; i < diff; i++) {
-			// 	var thisIndex = state.index;
-			// 	var nextIndex;
-			// 	if (num < 0) {
-			// 		nextIndex = thisIndex - 1;
-			// 	} else {
-			// 		nextIndex = thisIndex + 1;
-			// 	}
-
-			// 	var dupeStates = getStatesByIndex(nextIndex);
-			// 	if (dupeStates.length > 0) {
-			// 		dupeStates.forEach(function(elem){
-			// 			var thisSource = getSourceById(elem.id);
-			// 			var thisClone = getCloneById(elem.id);
-
-			// 			setState(elem, {
-			// 				index: thisIndex
-			// 			});
-
-			// 			setObject(thisSource, elem);
-			// 			setObject(thisClone, elem);
-			// 		})
-			// 	}
-
-			// 	// save state
-			// 	setState(state, {
-			// 		index: nextIndex
-			// 	});
-
-			// 	// adjust state
-			// 	setObject(source, state);
-			// 	setObject(clone, state);
-			// }
 
 			if (config.index) {
 				config.index(null, state.id);
@@ -4843,12 +5167,12 @@
 				return false;
 			}
 
-			if (!state.editable) {
+			if (!state.indexable) {
 				if (config.index) {
-					config.index("This image has been uneditabled");
+					config.index("This image has been unindexabled");
 				}
 				if (cb) {
-					cb("This image has been uneditabled");
+					cb("This image has been unindexabled");
 				} 
 				return false;
 			}
@@ -4858,17 +5182,39 @@
 			var thisIndex = state.index;
 			var nextIndex = num;
 
+			var isIndexable = true;
+
 			// check duplicate
-			// var dupeStates = getStatesByIndex(nextIndex);
-			// if (dupeStates.length !== 0) {
-			// 	if (config.index) {
-			// 		config.index("Already exists in the index");
-			// 	}
-			// 	if (cb) {
-			// 		cb("Already exists in the index");
-			// 	} 
-			// 	return false;
-			// }
+			var dupeStates = getStatesByIndex(nextIndex);
+			if (dupeStates.length > 0) {
+				dupeStates.forEach(function(elem){
+					if (!elem.indexable) {
+						isIndexable = false;
+					}
+				})
+
+				if (!isIndexable) {
+					if (config.index) {
+						config.index("Target image has been unindexabled");
+					}
+					if (cb) {
+						cb("Target image has been unindexabled");
+					} 
+					return false;
+				}
+
+				dupeStates.forEach(function(elem){
+					var thisSource = getSourceById(elem.id);
+					var thisClone = getCloneById(elem.id);
+
+					setState(elem, {
+						index: thisIndex
+					});
+
+					setObject(thisSource, elem);
+					setObject(thisClone, elem);
+				})
+			}
 
 			// save cache
 			pushUndoCache(state.id, true);
@@ -4950,22 +5296,22 @@
 				return false;
 			}
 
-			if (!state.editable) {
+			if (!state.indexable) {
 				if (config.index) {
-					config.index("This image has been uneditabled");
+					config.index("This image has been unindexabled");
 				}
 				if (cb) {
-					cb("This image has been uneditabled");
+					cb("This image has been unindexabled");
 				} 
 				return false;
 			}
 
-			if (!targetState.editable) {
+			if (!targetState.indexable) {
 				if (config.index) {
-					config.index("Target element has been denied");
+					config.index("Target image has been unindexabled");
 				}
 				if (cb) {
-					cb("Target element has been denied");
+					cb("Target image has been unindexabled");
 				} 
 				return false;
 			}
@@ -5466,6 +5812,54 @@
 			return state.id;
 		}
 
+		myObject.toggleIndexable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			var indexable = state.indexable === false;
+
+			// save cache
+			pushUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: indexable
+			});
+
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
 		myObject.focusable = function(id, cb){
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -5592,6 +5986,52 @@
 			// save state
 			setState(state, {
 				drawable: true
+			});
+
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
+		myObject.indexable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: true
 			});
 
 			if (cb) {
@@ -5752,6 +6192,52 @@
 			return state.id;
 		}
 
+		myObject.unindexable = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			// save cache
+			pushUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: false
+			});
+
+			if (cb) {
+				cb(null, state.id);
+			}
+			return state.id;
+		}
+
 		myObject.remove = function(id, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -5849,6 +6335,7 @@
 			}
 		}
 
+		// force
 		myObject.state = function(id, newState, cb) {
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -5891,56 +6378,18 @@
 				}
 			}
 
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
+			// if (!config.editable) {
+			// 	if (cb) {
+			// 		cb("Editing has been disabled");
+			// 	}
+			// 	return false;
+			// }
 
 			if (!source || !state || !clone) {
 				if (cb) {
 					cb("Image not found");
 				} 
 				return false;
-			}
-
-			// preset state
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
-
-			if (isNumeric(newState.index)) {
-				var thisIndex = state.index;
-				var nextIndex = newState.index;
-				var dupeStates = getStatesByIndex(nextIndex);
-				if (dupeStates.length > 0) {
-					dupeStates.forEach(function(elem){
-						var thisSource = getSourceById(elem.id);
-						var thisClone = getCloneById(elem.id);
-
-						setState(elem, {
-							index: thisIndex
-						});
-
-						setObject(thisSource, elem);
-						setObject(thisClone, elem);
-					})				
-				}
-			}
-
-			if (isNumeric(newState.x)) {
-				newState.x = parseFloat(newState.x) * scaleRatio;
-			}
-
-			if (isNumeric(newState.y)) {
-				newState.y = parseFloat(newState.y) * scaleRatio;
-			}
-
-			if (isNumeric(newState.width)) {
-				newState.width = parseFloat(newState.width) * scaleRatio;
-			}
-
-			if (isNumeric(newState.height)) {
-				newState.height = parseFloat(newState.height) * scaleRatio;
 			}
 
 			// save cache
@@ -5989,26 +6438,15 @@
 			var originalHeight = state.originalHeight;
 			var aspectRatio = state.originalWidth / state.originalHeight;
 
-			var maxWidth = canvasState.width * config.maxImageRenderWidth;
-			var maxHeight = canvasState.height * config.maxImageRenderHeight;
-			var minWidth = canvasState.width * config.minImageRenderWidth;
-			var minHeight = canvasState.height * config.minImageRenderHeight;
-
-			var maxSizes = getFittedRect(
-				maxWidth,
-				maxHeight,
+			var fittedSizes = getFittedRect(
+				canvasState.width * config.renderImageWidth,
+				canvasState.height * config.renderImageHeight,
 				aspectRatio,
+				config.renderImageType
 			);
 
-			var minSizes = getFittedRect(
-				minWidth,
-				minHeight,
-				aspectRatio,
-				"cover"
-			);
-
-			var width = Math.min(maxSizes[0], Math.max(minSizes[0], originalWidth));
-			var height = Math.min(maxSizes[1], Math.max(minSizes[1], originalHeight));
+			var width = fittedSizes[0];
+			var height = fittedSizes[1];
 			var axisX = canvasState.width * 0.5;
 			var axisY = canvasState.height * 0.5;
 
@@ -6029,6 +6467,7 @@
 				focusable: true,
 				editable: true,
 				drawable: true,
+				indexable: true,
 			});
 			
 			// adjust state
@@ -6366,11 +6805,11 @@
 			return canvasState;
 		}
 
-		myObject.smoothingEnabled = function(num, cb) {
+		myObject.smoothingEnabled = function(str, cb) {
 			if (
-				!isNumeric(num) &&
-				typeof(num) !== "boolean" &&
-				typeof(num) !== "string"
+				!isNumeric(str) &&
+				typeof(str) !== "boolean" &&
+				typeof(str) !== "string"
 			) {
 				if (cb) {
 					cb("Argument error");
@@ -6379,20 +6818,20 @@
 			}
 
 			var enabled;
-			if (isNumeric(num) === true) {
-				num = parseInt(num);
+			if (isNumeric(str) === true) {
+				str = parseInt(str);
 
-				if (num < 1) {
+				if (str === 1) {
+					enabled = true;
+				} else if (str === 0){
 					enabled = false;
-				} else {
-					enabled = true;
 				}
-			} else if (typeof(num) === "boolean") {
-				enabled = num;
-			} else if (typeof(num) === "string") {
-				if (num === "true") {
+			} else if (typeof(str) === "boolean") {
+				enabled = str;
+			} else if (typeof(str) === "string") {
+				if (str === "true") {
 					enabled = true;
-				} else if (num === "false") {
+				} else if (str === "false") {
 					enabled = false;
 				}
 			}
@@ -6961,7 +7400,7 @@
 					copyObject(thisState, exportedStates[count]);
 					var thisUrl = thisState.url || thisState.src || thisState.path;
 
-					renderObject(thisUrl, function(err, res) {
+					renderImage(thisUrl, function(err, res) {
 						if (err) {
 							results.push({
 								err: err,
@@ -6973,7 +7412,6 @@
 							return false;
 						} 
 
-						var scaleRatio = canvasState.width / canvasState.originalWidth;
 						var state = getStateById(res);
 						var source = getSourceById(res);
 						var clone = getCloneById(res);
@@ -7004,27 +7442,13 @@
 							return false;
 						}
 
-						if (isNumeric(thisState.x)) {
-							thisState.x = parseFloat(thisState.x) * scaleRatio;
-						}
-
-						if (isNumeric(thisState.y)) {
-							thisState.y = parseFloat(thisState.y) * scaleRatio;
-						}
-
-						if (isNumeric(thisState.width)) {
-							thisState.width = parseFloat(thisState.width) * scaleRatio;
-						}
-
-						if (isNumeric(thisState.height)) {
-							thisState.height = parseFloat(thisState.height) * scaleRatio;
-						}
+						var fittedState = getFittedState(thisState);
 
 						// save cache
 						pushUndoCache(state.id, true);
 
 						// save state
-						setState(state, thisState);
+						setState(state, fittedState);
 
 						// adjust state
 						setObject(source, state);
@@ -7061,12 +7485,12 @@
 
 			if (config.dropSpace !== undefined) {
 				if ([
-						"window",
-						"document",
-						"page",
-						"screen",
-						"all",
-						"body"
+					"window",
+					"document",
+					"page",
+					"screen",
+					"all",
+					"body"
 				].indexOf(config.dropSpace) > -1) {
 					document.removeEventListener('dragenter', handlers.preventDefaults, false);
 					document.removeEventListener('dragleave', handlers.preventDefaults, false);
