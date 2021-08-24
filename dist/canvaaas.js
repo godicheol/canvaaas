@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.6
+ * 0.1.7
  * 
  * eeecheol@gmail.com
  * 
@@ -82,6 +82,8 @@
 			focusIn: undefined, // callback function
 
 			focusOut: undefined, // callback function
+
+			id: undefined, // callback function
 
 			index: undefined, // callback function
 
@@ -1443,6 +1445,41 @@
 				if (!canvasState.isInitialized) {
 					return false;
 				}
+
+				var oldWidth = containerObject.offsetWidth;
+
+				initContainer();
+
+				var newWidth = containerState.width;
+				var scaleRatio = newWidth / oldWidth;
+
+				initCanvas();
+
+				imageStates.forEach(function(state){
+					var source = getSourceById(state.id);
+					var clone = getCloneById(state.id);
+
+					if (!source || !clone) {
+						return;
+					}
+
+					// save state
+					setState(state, {
+						x: state.x * scaleRatio,
+						y: state.y * scaleRatio,
+						width: state.width * scaleRatio,
+						height: state.height * scaleRatio
+					});
+
+					// adjust state
+					setObject(source, state);
+					setObject(clone, state);
+				});
+			},
+
+			resizeWindowForPreview: function(e){
+				e.preventDefault();
+				e.stopPropagation();
 
 				var oldWidth = containerObject.offsetWidth;
 
@@ -4006,6 +4043,9 @@
 				typeof(newId) !== "string" &&
 				typeof(newId) !== "number"
 			) {
+				if (config.id) {
+					config.id("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -4017,6 +4057,9 @@
 			}
 
 			if (newId.trim() === "") {
+				if (config.id) {
+					config.id("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				} 
@@ -4024,6 +4067,9 @@
 			}
 
 			if (!config.editable) {
+				if (config.id) {
+					config.id("Editing has been disabled");
+				}
 				if (cb) {
 					cb("Editing has been disabled");
 				} 
@@ -4031,6 +4077,9 @@
 			}
 
 			if (!source || !state || !clone) {
+				if (config.id) {
+					config.id("Image not found");
+				}
 				if (cb) {
 					cb("Image not found");
 				} 
@@ -4038,6 +4087,9 @@
 			}
 
 			if (!state.editable) {
+				if (config.id) {
+					config.id("This image has been uneditabled");
+				}
 				if (cb) {
 					cb("This image has been uneditabled");
 				} 
@@ -4045,6 +4097,9 @@
 			}
 
 			if (existsId(newId)) {
+				if (config.id) {
+					config.id("ID duplicated");
+				}
 				if (cb) {
 					cb("ID duplicated");
 				} 
@@ -4063,10 +4118,13 @@
 			setObject(source, state);
 			setObject(clone, state);
 
-			if (cb) {
-				cb(null, state.id)
+			if (config.id) {
+				config.id(null, getDataByState(state));
 			}
-			return state.id;
+			if (cb) {
+				cb(null, getDataByState(state))
+			}
+			return getDataByState(state);
 		}
 
 		myObject.moveX = function(id, x, cb) {
@@ -5467,12 +5525,12 @@
 			setFocusIn(id);
 
 			if (config.focusIn) {
-				config.focusIn(null, id);
+				config.focusIn(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.focusOut = function(cb) {
@@ -5502,12 +5560,12 @@
 			setFocusOut(state.id);
 
 			if (config.focusOut) {
-				config.focusOut(null, state.id);
+				config.focusOut(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.toggleAspectRatio = function(id, cb){

@@ -944,6 +944,17 @@
 
 				console.log("config.focusOut callback", res);
 			},
+			id: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.id callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
 			move: function(err, res){
 				if (err) {
 					console.log(err);
@@ -1033,13 +1044,12 @@
 
 				checkCaches();
 			},
-			
 		}
 
 		// #0 config
 		canvaaas.config(testConfig1);
 
-		// #1 init canvaaas.js
+		// #1 init
 		canvaaas.init(elem, function(err, res){
 			if (err) {
 				console.log(err);
