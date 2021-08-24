@@ -6994,6 +6994,10 @@
 				}
 			}
 
+			drawables.sort(function(a, b){
+				return a.index - b.index;
+			});
+
 			var result = {};
 			var canvasResult = {};
 			var drawResults = [];

@@ -267,27 +267,33 @@
 				">Draw to New Tab</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.getConfigData(function(err, res){
+						console.log(res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Get Config Data</a></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getContainerData(function(err, res){
 						console.log(res);
-						alert(JSON.stringify(res));
+						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Container Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCanvasData(function(err, res){
 						console.log(res);
-						alert(JSON.stringify(res));
+						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Canvas Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getImageDataAll(function(err, res){
 						console.log(res);
-						alert(JSON.stringify(res));
+						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Image Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCacheData(function(err, res){
 						console.log(res);
-						alert(JSON.stringify(res));
+						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Cache Data</a></li>
 				<li class="rule"></li>
@@ -535,7 +541,7 @@
 					canvaaas.smoothingEnabled(window.prompt('e.g. true, false', 'true'))
 				">Smooth Enabled</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.smoothingQuality(window.prompt('e.g. 0 ~ 1', '0.8'))
+					canvaaas.smoothingQuality(window.prompt('e.g. log, middle, high', 'high'))
 				">Smooth Quality</a></li>
 			</ul>
 		</div>
