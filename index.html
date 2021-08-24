@@ -150,8 +150,8 @@
 
 	<div id="header" class="header">
 		<div class="header-hidden">
-			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this, console.log)" accept="image/*">
-			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this, console.log)" accept="image/*" multiple>
+			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this)" accept="image/*">
+			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this)" accept="image/*" multiple>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
@@ -166,14 +166,14 @@
 				<li><label for="uploadMultiple">Upload Files</label></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadUrl(
-						window.prompt('Type image URL.', '/img/1.jpg'),
+						window.prompt('Type image URL', '/img/1.jpg'),
 						testImportData[0]
 					)
 				">Upload URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
-							window.prompt('Type ID', 'image-1')
+							window.prompt('Type element ID', 'image-1')
 						)
 					)
 				">Upload Element</a></li>
@@ -195,6 +195,7 @@
 					// download 
 					canvaaas.draw({
 						width: 256, 
+						height: 256, 
 						quality: 0.5,
 						mimeType: 'png',
 						backgroundColor: '#000000',
@@ -221,22 +222,33 @@
 						console.log('export callback', res);
 
 						exportedData = res;
-
+						exportedCanvasData = canvaaas.getCanvasData();
 
 						canvaaas.removeAll();
 					})
 				">Export</a></li>
 				<script>
 					var exportedData;
+					var exportedCanvasData;
 				</script>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(exportedData, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
+					canvaaas.canvas(
+						exportedCanvasData.originalWidth,
+						exportedCanvasData.originalHeight,
+						function(err, res){
+							if (err) {
+								console.log(err);
+								return false;
+							}
+							canvaaas.import(exportedData, function(err, res){
+								if (err) {
+									console.log(err);
+									return false;
+								}
+								console.log('import callback', res);
+							})
 						}
-						console.log('import callback', res);
-					})
+					)
 				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -420,9 +432,6 @@
 					canvaaas.indexTo(canvaaas.this(), window.prompt('Number', '5'))
 				">Index To</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.indexSwap(canvaaas.this(), window.prompt('Target ID'))
-				">Index Swap</a></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.index(canvaaas.this(), 1)
 				">Index +1</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -512,7 +521,7 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.checker(window.prompt('e.g. `true, false`', 'false'))
-				">Background Checker</a></li>
+				">Checker</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.mimeType(window.prompt('e.g. `jpg`', 'png'))
 				">MimeType</a></li>
@@ -542,6 +551,8 @@
 
 	<div class="logger">
 		<div class="container-data hidden">
+			Is Initialized:
+			<input id="container-isInitialized" type="text">
 			Left:
 			<input id="container-left" type="text">
 			Top:
@@ -552,6 +563,8 @@
 			<input id="container-height" type="text">
 		</div>
 		<div class="canvas-data hidden">
+			Is Initialized:
+			<input id="canvas-isInitialized" type="text">
 			Original Width:
 			<input id="canvas-originalWidth" type="text">
 			Original Height:
@@ -570,6 +583,8 @@
 			<input id="canvas-height" type="text">
 			Background:
 			<div id="canvas-backgroundColor"></div>
+			Checker:
+			<input id="canvas-checker" type="text">
 			MimeType:
 			<input id="canvas-mimeType" type="text">
 			Quality:
@@ -720,12 +735,14 @@
 
 		var inputs = {
 			container: {
+				isInitialized: document.getElementById("container-isInitialized"),
 				width: document.getElementById("container-width"),
 				height: document.getElementById("container-height"),
 				left: document.getElementById("container-left"),
 				top: document.getElementById("container-top"),
 			},
 			canvas:{
+				isInitialized: document.getElementById("canvas-isInitialized"),
 				originalWidth: document.getElementById("canvas-originalWidth"),
 				originalHeight: document.getElementById("canvas-originalHeight"),
 				width: document.getElementById("canvas-width"),
@@ -734,6 +751,7 @@
 				top: document.getElementById("canvas-top"),
 				x: document.getElementById("canvas-x"),
 				y: document.getElementById("canvas-y"),
+				checker: document.getElementById("canvas-checker"),
 				quality: document.getElementById("canvas-quality"),
 				mimeType: document.getElementById("canvas-mimeType"),
 				backgroundColor: document.getElementById("canvas-backgroundColor"),
@@ -839,18 +857,11 @@
 	        "indexable": true,
 	    }];
 
-		
-
-
 	    var testImportDataString = JSON.stringify(testImportData);
 
 		var testConfig1 = {
-			// initCanvasWidth: 3911.961907399141,
-			// initCanvasHeight: 2933.971430549356,
-			// initCanvasWidth: 4096,
-			// initCanvasHeight: 4096,
-			containerAspectRatio: 16 / 9,
-			focusIn: function(err, res){
+			// containerAspectRatio: 16 / 9,
+			canvas: function(err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -858,6 +869,15 @@
 
 				writeContainerData();
 				writeCanvasData();
+
+				console.log("config.canvas callback", res);
+			},
+			focusIn: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
 				writeImageData(res);
 
 				console.log("config.focusIn callback", res);
@@ -868,8 +888,6 @@
 					return false;
 				}
 
-				writeContainerData();
-				writeCanvasData();
 				writeImageData();
 
 				console.log("config.focusOut callback", res);
@@ -947,15 +965,42 @@
 					console.log(err);
 					return false;
 				}
+
 				console.log("config.draw callback");
 			}
 		}
 
-		// config
+		// #0 config
 		canvaaas.config(testConfig1);
 
-		// init
+		// #1 init canvaaas.js
 		canvaaas.init(elem, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+
+			console.log("init callback", res);
+		});
+
+		// #2 init canvas
+		// canvaaas.canvas(2000, 2000);
+
+		// #3.1 import object
+		// canvaaas.import(testImportData, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+
+		// 	writeContainerData();
+		// 	writeCanvasData();
+
+		// 	console.log("import callback", res);
+		// });
+
+		// #3.2 import string
+		canvaaas.import(testImportDataString, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
@@ -964,29 +1009,19 @@
 			writeContainerData();
 			writeCanvasData();
 
-			console.log("init callback", res);
+			console.log("import callback", res);
 		})
 
-		// import object
-		canvaaas.import(testImportData, function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("import callback", res);
-		});
 
-		// import string
-		// canvaaas.import(testImportDataString, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log("import callback", res);
-		// })
+
+
+		// 
+		// log
+		// 
 
 		function writeContainerData(){
 			var containerState = canvaaas.getContainerData();
+			inputs.container.isInitialized.value = containerState.isInitialized;
 			inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
 			inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
 			inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
@@ -995,6 +1030,7 @@
 
 		function writeCanvasData(){
 			var canvasState = canvaaas.getCanvasData();
+			inputs.canvas.isInitialized.value = canvasState.isInitialized;
 			inputs.canvas.originalWidth.value = Math.floor(canvasState.originalWidth * 100) / 100;
 			inputs.canvas.originalHeight.value = Math.floor(canvasState.originalHeight * 100) / 100;
 			inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
@@ -1003,6 +1039,7 @@
 			inputs.canvas.top.value = Math.floor(canvasState.top * 100) / 100;
 			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
 			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
+			inputs.canvas.checker.value = canvasState.checker;
 			inputs.canvas.mimeType.value = canvasState.mimeType;
 			inputs.canvas.quality.value = canvasState.quality;
 			inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;

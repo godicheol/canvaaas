@@ -29,13 +29,9 @@
 				"svg+xml",
 				"tiff",
 				"tif"
-			], // string, jpg, jpeg, ,gif, png, webp, svg...
-
-			dropSpace: "document", // undefined, canvas, document
+			], // array, jpg, jpeg, ,gif, png, webp, svg...
 
 			editable: true, // boolean
-
-			initChecker: true, // boolean
 
 			magneticRange: 5, // number, px
 
@@ -43,37 +39,39 @@
 
 			cacheLevels: 999, // number
 
-			containerAspectRatio: undefined, // width / height
+			containerAspectRatio: undefined, // number, width / height
 
-			minContainerWidth: 0, // number, px
+			minContainerWidth: undefined, // number, px
 
-			minContainerHeight: 0, // number, px
+			minContainerHeight: undefined, // number, px
 
-			maxContainerWidth: 1, // number, px, (0 ~ 1) => viewportWidth * (0 ~ 1)
+			maxContainerWidth: 1, // number, px, 0 ~ 1
 
-			maxContainerHeight: 0.7, // number, px, (0 ~ 1) => viewportHeight * (0 ~ 1)
+			maxContainerHeight: 0.7, // number, px, 0 ~ 1
 
-			initCanvasWidth: undefined, // number, px
+			minDrawWidth: 64, // number, px
 
-			initCanvasHeight: undefined, // number, px
+			minDrawHeight: 64, // number, px
 
-			minCanvasWidth: 64, // number, px
+			maxDrawWidth: 4096, // number, px, for Mobile
 
-			minCanvasHeight: 64, // number, px
-
-			maxCanvasWidth: 4096, // number, px, for Mobile
-
-			maxCanvasHeight: 4096, // number, px, for Mobile
+			maxDrawHeight: 4096, // number, px, for Mobile
 
 			minImageWidth: 64, // number, px
 
 			minImageHeight: 64, // number, px
+
+			maxImageWidth: undefined, // number, px
+
+			maxImageHeight: undefined, // number, px
 
 			renderImageType: "contain", // string, "cover", "contain"
 
 			renderImageWidth: 0.7, // number,  0 ~ 1
 
 			renderImageHeight: 0.7, // number, 0 ~ 1
+
+			canvas: undefined, // callback function
 
 			upload: undefined, // callback function
 
@@ -102,8 +100,6 @@
 
 		var sourceId = "canvaaas-" + getShortId() + "-";
 		var cloneId = "canvaaas-" + getShortId() + "-";
-
-		var isInitialized = false;
 
 		var onUpload = false;
 		var onMove = false;
@@ -322,7 +318,7 @@
 				}
 
 				// check magnetic
-				if (config.magneticRange !== 0) {
+				if (config.magneticRange) {
 					if (
 						axisX > canvasR - config.magneticRange &&
 						axisX < canvasR + config.magneticRange
@@ -519,7 +515,7 @@
 				axisY = eventState.initialY + mouseY;
 
 				// check magnetic
-				if (config.magneticRange !== 0) {
+				if (config.magneticRange) {
 					if (
 						axisX > eventState.canvasR - config.magneticRange &&
 						axisX < eventState.canvasR + config.magneticRange
@@ -768,6 +764,7 @@
 				var direction;
 				var maxSizes;
 				var minSizes;
+				var aspectRatio;
 
 				if (!config.editable) {
 					return false;
@@ -813,16 +810,18 @@
 
 				direction = getDirection(dire, state.scaleX, state.scaleY);
 
+				aspectRatio = state.originalWidth / state.originalHeight;
+
 				maxSizes = getFittedRect(
 					config.maxImageWidth || 99999,
 					config.maxImageHeight || 99999,
-					state.originalWidth / state.originalHeight
+					aspectRatio
 				);
 
 				minSizes = getFittedRect(
 					config.minImageWidth || 0,
 					config.minImageHeight || 0,
-					state.originalWidth / state.originalHeight,
+					aspectRatio,
 					"cover"
 				);
 
@@ -1117,6 +1116,7 @@
 				var maxH;
 				var minSizes;
 				var maxSizes;
+				var aspectRatio;
 
 				if (!config.editable) {
 					return false;
@@ -1138,24 +1138,6 @@
 					return false;
 				}
 
-				maxSizes = getFittedRect(
-					config.maxImageWidth || 99999,
-					config.maxImageHeight || 99999,
-					state.originalWidth / state.originalHeight
-				);
-
-				minSizes = getFittedRect(
-					config.minImageWidth || 0,
-					config.minImageHeight || 0,
-					state.originalWidth / state.originalHeight,
-					"cover"
-				);
-
-				maxW = maxSizes[0];
-				maxH = maxSizes[1];
-				minW = minSizes[0];
-				minH = minSizes[1];
-
 				ratio = -e.deltaY * 0.001;
 				diffX = state.width * ratio;
 				diffY = state.height * ratio;
@@ -1168,7 +1150,34 @@
 
 					// save cache
 					pushUndoCache(state.id, true);
+
+					aspectRatio = state.originalWidth / state.originalHeight;
+
+					maxSizes = getFittedRect(
+						config.maxImageWidth || 99999,
+						config.maxImageHeight || 99999,
+						aspectRatio
+					);
+
+					minSizes = getFittedRect(
+						config.minImageWidth || 0,
+						config.minImageHeight || 0,
+						aspectRatio,
+						"cover"
+					);
+
+					eventState.maxW = maxSizes[0];
+					eventState.maxH = maxSizes[1];
+					eventState.minW = minSizes[0];
+					eventState.minH = minSizes[1];
 				}
+
+				maxW = eventState.maxW;
+				maxH = eventState.maxH;
+				minW = eventState.minW;
+				minH = eventState.minH;
+
+				console.log(maxW, maxH, minW, minH)
 
 				// add timer
 				clearTimeout(eventState.wheeling);
@@ -1221,6 +1230,7 @@
 				var mouseY;
 				var maxSizes;
 				var minSizes;
+				var aspectRatio;
 
 				if (onMove === true) {
 					handlers.endMove(e)
@@ -1242,16 +1252,18 @@
 				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
 				diagonal = getDiagonal(mouseX, mouseY);
 
+				aspectRatio = state.originalWidth / state.originalHeight;
+
 				maxSizes = getFittedRect(
 					config.maxImageWidth || 99999,
 					config.maxImageHeight || 99999,
-					state.originalWidth / state.originalHeight
+					aspectRatio
 				)
 
 				minSizes = getFittedRect(
 					config.minImageWidth || 0,
 					config.minImageHeight || 0,
-					state.originalWidth / state.originalHeight,
+					aspectRatio,
 					"cover"
 				)
 
@@ -1375,11 +1387,11 @@
 			},
 
 			whereContainer: function(e){
-				if (!isInitialized) {
+				if (!containerObject || !containerState) {
 					return false;
 				}
 
-				if (!containerObject || !containerState) {
+				if (!containerState.isInitialized) {
 					return false;
 				}
 
@@ -1392,7 +1404,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (!isInitialized) {
+				if (!canvasState.isInitialized) {
 					return false;
 				}
 
@@ -1589,6 +1601,16 @@
 					state.indexable = true;
 				} else if (additionalState.indexable === "false") {
 					state.indexable = false;
+				}
+			}
+
+			if (typeof(additionalState.isInitialized) === "boolean") {
+				state.isInitialized = additionalState.isInitialized;
+			} else if (typeof(additionalState.isInitialized) === "string") {
+				if (additionalState.isInitialized === "true") {
+					state.isInitialized = true;
+				} else if (additionalState.isInitialized === "false") {
+					state.isInitialized = false;
 				}
 			}
 
@@ -2389,6 +2411,28 @@
 			return true;
 		}
 
+
+
+
+		// 
+		// DOM
+		// 
+
+		function showChecker() {
+			if (canvasState.checker === true) {
+				if (!canvasObject.classList.contains("checker")) {
+					canvasObject.classList.add("checker");
+				}
+			}
+		}
+
+		function hideChecker() {
+			if (canvasObject.classList.contains("checker")) {
+				canvasObject.classList.remove("checker");
+			}
+		}
+
+
 		function showImageById(id) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
@@ -2397,8 +2441,8 @@
 				return false;
 			}
 
-			source.classList.remove("hidden");
-			clone.classList.remove("hidden");
+			source.style.visibility = "";
+			clone.style.visibility = "";
 
 			return true;
 		}
@@ -2411,11 +2455,22 @@
 				return false;
 			}
 
-			source.classList.add("hidden");
-			clone.classList.add("hidden");
+			source.style.visibility = "hidden";
+			clone.style.visibility = "hidden";
 
 			return true;
 		}
+
+
+
+
+
+
+
+
+
+
+
 
 		function getDegrees(x, y) {
 			if (
@@ -2772,6 +2827,17 @@
 				(nodes.length === 0 || (typeof nodes[0] === "object" && nodes[0].nodeType > 0));
 		}
 
+		function isIos() {
+			return [
+				'iPad Simulator',
+				'iPhone Simulator',
+				'iPod Simulator',
+				'iPad',
+				'iPhone',
+				'iPod'
+			].includes(navigator.platform) || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+		}
+
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -2854,22 +2920,12 @@
 			var width = options.width;
 			var height = options.height;
 			var aspectRatio = options.width / options.height;
-			var maxWidth = options.maxWidth;
-			var maxHeight = options.maxHeight;
-			var minWidth = options.minWidth || 0;
-			var minHeight = options.minHeight || 0;
 			var fillStyle = options.backgroundColor || "#FFFFFF";
 
-			if (
-				!width ||
-				!height ||
-				!aspectRatio ||
-				!fillStyle ||
-				!maxWidth ||
-				!maxHeight
-			) {
-				return false;
-			}
+			var maxWidth = config.maxDrawWidth || 99999;
+			var maxHeight = config.maxDrawHeight || 99999;
+			var minWidth = config.minDrawWidth || 0;
+			var minHeight = config.minDrawHeight || 0;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -2931,10 +2987,10 @@
 				return cb(e);
 			}
 			virtualImg.onload = function(e) {
-				var maxCanvasWidth = config.maxCanvasWidth || 99999;
-				var maxCanvasHeight = config.maxCanvasHeight || 99999;
-				var minCanvasWidth = config.minCanvasWidth || 0;
-				var minCanvasHeight = config.minCanvasHeight || 0;
+				var maxWidth = config.maxDrawWidth || 99999;
+				var maxHeight = config.maxDrawHeight || 99999;
+				var minWidth = config.minDrawWidth || 0;
+				var minHeight = config.minDrawHeight || 0;
 
 				// original
 				var scaleRatio = canvasState.width / canvas.width;
@@ -2955,14 +3011,14 @@
 				var rotatedTop = Math.floor(adjY - (adjSizes[1] * 0.5));
 
 				var maxSizes = getFittedRect(
-					maxCanvasWidth,
-					maxCanvasHeight,
+					maxWidth,
+					maxHeight,
 					rotatedWidth / rotatedHeight,
 				);
 
 				var minSizes = getFittedRect(
-					minCanvasWidth,
-					minCanvasHeight,
+					minWidth,
+					minHeight,
 					rotatedWidth / rotatedHeight,
 					'cover'
 				);
@@ -3106,9 +3162,11 @@
 
 			newImage.onload = function(e) {
 				// check initialized canvas
-				if (!isInitialized) {
-					canvasState.originalWidth = newImage.width;
-					canvasState.originalHeight = newImage.height;
+				if (!canvasState.isInitialized) {
+					setState(canvasState, {
+						originalWidth: newImage.width,
+						originalHeight: newImage.height
+					})
 
 					var resA = initContainer();
 					if (!resA) {
@@ -3126,7 +3184,6 @@
 						return false;
 					}
 
-					isInitialized = true;
 				}
 
 				// get last index
@@ -3235,12 +3292,14 @@
 				newClone.addEventListener("mousedown", handlers.startFocusIn, false);
 				newClone.addEventListener("touchstart", handlers.startFocusIn, false);
 
-				// finish
-				imageStates.push(newState);
-
+				// adjust state
 				setObject(newSource, newState);
+				setObject(newClone, newState);
+
 				canvasObject.appendChild(newSource);
 				mirrorObject.appendChild(newClone);
+
+				imageStates.push(newState);
 				imageObjects.push(newSource);
 
 				if (cb) {
@@ -3322,7 +3381,8 @@
 				width: adjWidth,
 				height: adjHeight,
 				left: offset.left,
-				top: offset.top
+				top: offset.top,
+				isInitialized: true
 			});
 
 			// adjust state
@@ -3350,10 +3410,10 @@
 			}
 
 			var aspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var maxWidth = config.maxCanvasWidth || 99999;
-			var maxHeight = config.maxCanvasHeight || 99999;
-			var minWidth = config.minCanvasWidth || 0;
-			var minHeight = config.minCanvasHeight || 0;
+			var maxWidth = config.maxDrawWidth || 99999;
+			var maxHeight = config.maxDrawHeight || 99999;
+			var minWidth = config.minDrawWidth || 0;
+			var minHeight = config.minDrawHeight || 0;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -3390,6 +3450,7 @@
 				top: rectT,
 				width: fittedSizes[0],
 				height: fittedSizes[1],
+				isInitialized: true
 			});
 
 			// adjust state
@@ -3404,7 +3465,7 @@
 		// 
 
 		myObject.init = function(target, cb) {
-			if (isInitialized === true) {
+			if (containerState.isInitialized === true) {
 				if (cb) {
 					cb("Already initialized");
 				}
@@ -3430,6 +3491,8 @@
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 
 			// set canvasState
+			canvasState.isInitialized = false;
+			canvasState.checker = true;
 			canvasState.quality = 0.8;
 			canvasState.mimeType = "image/jpeg";
 			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
@@ -3439,75 +3502,47 @@
 			// set canvas background
 			canvasObject.style.backgroundColor = canvasState.backgroundColor;
 
-			// check canvas dimensions
-			if (
-				typeof(config.initCanvasWidth) === "number" &&
-				typeof(config.initCanvasHeight) === "number"
-			) {
-				canvasState.originalWidth = config.initCanvasWidth;
-				canvasState.originalHeight = config.initCanvasHeight;
-
-				// set container
-				var resA = initContainer();
-				if (!resA) {
-					if (cb) {
-						cb("`initContainer()` error");
-					}
-					return false;
-				}
-
-				// set canvas
-				var resB = initCanvas();
-				if (!resB) {
-					if (cb) {
-						cb("`initCanvas()` error");
-					}
-					return false;
-				}
-
-				isInitialized = true;
-			}
+			showChecker();
 
 			// set events
 			windowResizeEvent = handlers.resizeWindow;
 			windowScrollEvent = handlers.debounce( handlers.whereContainer, 300 );
 
-			// window.addEventListener("resize", handlers.debounce( handlers.resizeWindow, 100 ), false);
 			window.addEventListener("resize", windowResizeEvent, false);
-
-			// window.addEventListener("scroll", handlers.debounce( handlers.whereContainer, 300 ), false);
 			window.addEventListener("scroll", windowScrollEvent, false);
 
-			if (config.dropSpace !== undefined) {
-				if ([
-					"canvas",
-					"container"
-				].indexOf(config.dropSpace) > -1) {
-					containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
-					containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
-					containerObject.addEventListener('dragover', handlers.preventDefaults, false);
-					containerObject.addEventListener('drop', handlers.preventDefaults, false);
-					containerObject.addEventListener('drop', handlers.dropImages, false);
-				} else if ([
-					"window",
-					"document",
-					"page",
-					"screen",
-					"all",
-					"body"
-				].indexOf(config.dropSpace) > -1) {
-					document.addEventListener('dragenter', handlers.preventDefaults, false);
-					document.addEventListener('dragleave', handlers.preventDefaults, false);
-					document.addEventListener('dragover', handlers.preventDefaults, false);
-					document.addEventListener('drop', handlers.preventDefaults, false);
-					document.addEventListener('drop', handlers.dropImages, false);
-				}
-			}
+			containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
+			containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
+			containerObject.addEventListener('dragover', handlers.preventDefaults, false);
+			containerObject.addEventListener('drop', handlers.preventDefaults, false);
+			containerObject.addEventListener('drop', handlers.dropImages, false);
 
-			if (config.initChecker === true) {
-				canvasState.checker = true;
-				canvasObject.classList.add("checker");
-			}
+			// deprecated
+			// if (config.dropSpace !== undefined) {
+			// 	if ([
+			// 		"canvas",
+			// 		"container"
+			// 	].indexOf(config.dropSpace) > -1) {
+			// 		containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
+			// 		containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
+			// 		containerObject.addEventListener('dragover', handlers.preventDefaults, false);
+			// 		containerObject.addEventListener('drop', handlers.preventDefaults, false);
+			// 		containerObject.addEventListener('drop', handlers.dropImages, false);
+			// 	} else if ([
+			// 		"window",
+			// 		"document",
+			// 		"page",
+			// 		"screen",
+			// 		"all",
+			// 		"body"
+			// 	].indexOf(config.dropSpace) > -1) {
+			// 		document.addEventListener('dragenter', handlers.preventDefaults, false);
+			// 		document.addEventListener('dragleave', handlers.preventDefaults, false);
+			// 		document.addEventListener('dragover', handlers.preventDefaults, false);
+			// 		document.addEventListener('drop', handlers.preventDefaults, false);
+			// 		document.addEventListener('drop', handlers.dropImages, false);
+			// 	}
+			// }
 
 			// console.log("canvaaas.js initialized", config);
 
@@ -5237,125 +5272,6 @@
 			return state.id;
 		}
 
-		myObject.indexSwap = function(id, targetId, cb) {
-			var source = getSourceById(id);
-			var clone = getCloneById(id);
-			var state = getStateById(id);
-
-			var targetSource = getSourceById(targetId);
-			var targetClone = getCloneById(targetId);
-			var targetState = getStateById(targetId);
-
-			if (typeof(id) !== "string") {
-				if (config.index) {
-					config.index("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (typeof(targetId) !== "string") {
-				if (config.index) {
-					config.index("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.index) {
-					config.index("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (config.index) {
-					config.index("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!targetSource || !targetState || !targetClone) {
-				if (config.index) {
-					config.index("Target not found");
-				}
-				if (cb) {
-					cb("Target not found");
-				} 
-				return false;
-			}
-
-			if (!state.indexable) {
-				if (config.index) {
-					config.index("This image has been unindexabled");
-				}
-				if (cb) {
-					cb("This image has been unindexabled");
-				} 
-				return false;
-			}
-
-			if (!targetState.indexable) {
-				if (config.index) {
-					config.index("Target image has been unindexabled");
-				}
-				if (cb) {
-					cb("Target image has been unindexabled");
-				} 
-				return false;
-			}
-
-			var thisIndex = state.index;
-			var targetIndex = targetState.index;
-
-			if (thisIndex === targetIndex) {
-				if (config.index) {
-					config.index("Same index");
-				}
-				if (cb) {
-					cb("Same index");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// set state
-			setState(targetState, {
-				index: thisIndex
-			});
-
-			setState(state, {
-				index: targetIndex
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-			setObject(targetSource, targetState);
-			setObject(targetClone, targetState);
-
-			if (config.index) {
-				config.index(null, state.id);
-			}
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
 		myObject.toggleAspectRatio = function(id, cb){
 			var source = getSourceById(id);
 			var state = getStateById(id);
@@ -6335,77 +6251,96 @@
 			}
 		}
 
-		// force
-		myObject.state = function(id, newState, cb) {
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (
-				typeof(newState) !== "object" ||
-				newState === null
-			) {
-				if (typeof(newState) !== "string") {
-					if (cb) {
-						cb("Argument error");
-					} 
-					return false;
-				} else {
-					var tmp;
-					try {
-						tmp = JSON.parse(newState);
-					} catch(err) {
-						tmp = undefined;
-					}
-					if (
-						typeof(tmp) !== "object" ||
-						tmp === null
-					) {
+		// deprecated
+		myObject.state = function(newStates, cb) {
+			if (!Array.isArray(newStates)) {
+				if (
+					typeof(newStates) !== "object" ||
+					newStates === null
+				) {
+					if (typeof(newStates) !== "string") {
 						if (cb) {
 							cb("Argument error");
 						} 
 						return false;
 					} else {
-						newState = tmp;
+						var tmp;
+						try {
+							tmp = JSON.parse(newStates);
+						} catch(err) {
+							tmp = undefined;
+						}
+						if (
+							typeof(tmp) !== "object" ||
+							tmp === null
+						) {
+							if (cb) {
+								cb("Argument error");
+							} 
+							return false;
+						} else {
+							newStates = tmp;
+						}
+					}
+
+					if (!Array.isArray(newStates)) {
+						newStates = [newStates];
 					}
 				}
 			}
 
-			// if (!config.editable) {
-			// 	if (cb) {
-			// 		cb("Editing has been disabled");
-			// 	}
-			// 	return false;
-			// }
-
-			if (!source || !state || !clone) {
+			if (!config.editable) {
 				if (cb) {
-					cb("Image not found");
-				} 
+					cb("Editing has been disabled");
+				}
 				return false;
 			}
 
-			// save cache
-			pushUndoCache(state.id, true);
+			var results = [];
 
-			// save state
-			setState(state, newState);
+			for (var i = 0; i < newStates.length; i++) {
+				var newState = newStates[i];
 
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
+				if (!existsId(newState.id)) {
+					results.push({
+						err: "Image not found",
+						id: undefined
+					});
+					continue;
+				}
+
+				var source = getSourceById(newState.id);
+				var clone = getCloneById(newState.id);
+				var state = getStateById(newState.id);
+
+				if (!source || !clone || !state) {
+					results.push({
+						err: "Image not found",
+						id: undefined
+					});
+					continue;
+				}
+
+				// save cache
+				pushUndoCache(state.id, true);
+
+				// save state
+				setState(state, newState);
+
+				// adjust state
+				setObject(source, state);
+				setObject(clone, state);
+
+				results.push({
+					err: undefined,
+					id: state.id
+				});
+			}
 
 			if (cb) {
-				cb(null, state.id);
+				cb(null, results);
 			}
-			return state.id;
+			return results;
 		}
 
 		myObject.reset = function(id, cb) {
@@ -6513,6 +6448,9 @@
 				!isNumeric(w) ||
 				!isNumeric(h)
 			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6520,6 +6458,9 @@
 			}
 
 			if (!config.editable) {
+				if (config.canvas) {
+					config.canvas("Editing has been disabled");
+				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6528,10 +6469,12 @@
 
 			var oldW = canvasState.originalWidth;
 			var oldH = canvasState.originalHeight;
+			var newW = parseFloat(w);
+			var newH = parseFloat(h);
 
 			setState(canvasState, {
-				originalWidth: w,
-				originalHeight: h,
+				originalWidth: newW,
+				originalHeight: newH,
 			});
 
 			// set container
@@ -6542,6 +6485,9 @@
 					originalHeight: oldH,
 				});
 
+				if (config.canvas) {
+					config.canvas("`initContainer()` error");
+				}
 				if (cb) {
 					cb("`initContainer()` error");
 				}
@@ -6556,15 +6502,14 @@
 					originalHeight: oldH,
 				});
 
+				if (config.canvas) {
+					config.canvas("`initCanvas()` error");
+				}
 				if (cb) {
 					cb("`initCanvas()` error");
 				}
 				return false;
 			}
-
-			// set images
-			var newW = canvasState.originalWidth;
-			var newH = canvasState.originalHeight;
 
 			// new state adjust to images
 			imageStates.forEach(function(state){
@@ -6611,6 +6556,9 @@
 			undoCaches = [];
 			redoCaches = [];
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6623,6 +6571,9 @@
 				typeof(bool) === "object" ||
 				bool === null
 			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6630,13 +6581,14 @@
 			}
 
 			if (!config.editable) {
+				if (config.canvas) {
+					config.canvas("Editing has been disabled");
+				}
 				if (cb) {
 					cb("Editing has been disabled");
 				}
 				return false;
 			}
-
-			var tmp = canvasState.checker;
 
 			if (
 				bool === true ||
@@ -6644,9 +6596,7 @@
 				bool === "true"
 			) {
 				canvasState.checker = true;
-				if (tmp === false) {
-					canvasObject.classList.add("checker");
-				}
+				showChecker();
 			} else if (
 				bool === false ||
 				bool === 0 ||
@@ -6655,16 +6605,20 @@
 				bool === "none"
 			) {
 				canvasState.checker = false;
-				if (tmp === true) {
-					canvasObject.classList.remove("checker");
-				}
+				hideChecker();
 			} else {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
 				return false;
 			}
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6673,6 +6627,9 @@
 
 		myObject.quality = function(num, cb) {
 			if (!isNumeric(num)) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6691,6 +6648,9 @@
 
 			canvasState.quality = quality;
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6699,6 +6659,9 @@
 
 		myObject.mimeType = function(mimeType, cb) {
 			if (typeof(mimeType) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6736,6 +6699,9 @@
 				) {
 					mimeType = "image/webp";
 				} else {
+					if (config.canvas) {
+						config.canvas("Argument error");
+					}
 					if (cb) {
 						cb("Argument error");
 					}
@@ -6745,6 +6711,9 @@
 
 			canvasState.mimeType = mimeType;
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6753,6 +6722,9 @@
 
 		myObject.backgroundColor = function(colour, cb) {
 			if (typeof(colour) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6770,6 +6742,9 @@
 			canvasState.backgroundColor = colour;
 			canvasObject.style.backgroundColor = colour;
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6778,6 +6753,9 @@
 
 		myObject.smoothingQuality = function(str, cb) {
 			if (typeof(str) !== "string") {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6791,6 +6769,9 @@
 				str !== "medium" &&
 				str !== "high"
 			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6799,6 +6780,9 @@
 
 			canvasState.smoothingQuality = str;
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6811,6 +6795,9 @@
 				typeof(str) !== "boolean" &&
 				typeof(str) !== "string"
 			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6837,6 +6824,9 @@
 			}
 
 			if (enabled === undefined) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
 				if (cb) {
 					cb("Argument error");
 				}
@@ -6845,6 +6835,9 @@
 
 			canvasState.smoothingEnabled = enabled;
 
+			if (config.canvas) {
+				config.canvas(null, canvasState);
+			}
 			if (cb) {
 				cb(null, canvasState);
 			}
@@ -6880,9 +6873,7 @@
 			})
 
 			// hide checker
-			if (canvasState.checker === true) {
-				canvasObject.classList.remove("checker");
-			}
+			hideChecker();
 
 			if (cb) {
 				cb(null, true);
@@ -6909,9 +6900,7 @@
 			})
 
 			// set checker
-			if (canvasState.checker === true) {
-				canvasObject.classList.add("checker");
-			}
+			showChecker();
 
 			if (cb) {
 				cb(null, true);
@@ -6927,6 +6916,7 @@
 			/*!
 			 * options = {
 			 * width, 
+			 * height,
 			 * quality,
 			 * mimeType,
 			 * backgroundColor,
@@ -6945,7 +6935,6 @@
 				return false;
 			}
 
-			var canvasAspectRatio;
 			var canvasWidth;
 			var canvasHeight;
 			var quality;
@@ -6953,14 +6942,19 @@
 			var backgroundColor;
 			var imageSmoothingQuality;
 			var imageSmoothingEnabled;
-
 			if (
 				typeof(options) === "object" &&
 				options !== null
 			) {
-				canvasAspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-				canvasWidth = options.width || options.canvasWidth || canvasState.originalWidth;
-				canvasHeight = canvasWidth / canvasAspectRatio;
+				var fittedSizes = getFittedRect(
+					options.width || canvasState.originalWidth,
+					options.height || canvasState.originalHeight,
+					canvasState.originalWidth / canvasState.originalHeight,
+					"contain"
+				);
+				
+				canvasWidth = fittedSizes[0];
+				canvasHeight = fittedSizes[1];
 				quality = options.quality || canvasState.quality;
 				mimeType = options.mimeType || canvasState.mimeType;
 				imageSmoothingQuality = options.smoothingQuality || canvasState.smoothingQuality;
@@ -6979,10 +6973,6 @@
 			var drawOption = {
 				width: canvasWidth,
 				height: canvasHeight,
-				maxWidth: config.maxCanvasWidth || 99999,
-				maxHeight: config.maxCanvasHeight || 99999,
-				minWidth: config.minCanvasWidth || 0,
-				minHeight: config.minCanvasHeight || 0,
 				backgroundColor: backgroundColor
 			}
 
@@ -7473,13 +7463,6 @@
 		}
 
 		myObject.destroy = function(cb){
-			if (isInitialized !== true) {
-				if (cb) {
-					cb("Canvas not initialized");
-				}
-				return false;
-			}
-
 			window.removeEventListener("resize", windowResizeEvent, false);
 			window.removeEventListener("scroll", windowScrollEvent, false);
 
@@ -7520,8 +7503,6 @@
 
 			windowScrollEvent = undefined;
 			windowResizeEvent = undefined;
-
-			isInitialized = false;
 
 			onUpload = false;
 			onMove = false;
