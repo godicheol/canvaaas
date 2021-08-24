@@ -526,9 +526,6 @@
 				">Canvas Size</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(window.prompt('e.g. `true, false`', 'false'))
-				">Checker</a></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.mimeType(window.prompt('e.g. `jpg`', 'png'))
 				">MimeType</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -543,6 +540,10 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.smoothingQuality(window.prompt('e.g. log, middle, high', 'high'))
 				">Smooth Quality</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.checker(window.prompt('e.g. `true, false`', 'false'))
+				">Background Checker</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -589,8 +590,6 @@
 			<input id="canvas-height" type="text">
 			Background:
 			<div id="canvas-backgroundColor"></div>
-			Checker:
-			<input id="canvas-checker" type="text">
 			MimeType:
 			<input id="canvas-mimeType" type="text">
 			Quality:
@@ -757,7 +756,6 @@
 				top: document.getElementById("canvas-top"),
 				x: document.getElementById("canvas-x"),
 				y: document.getElementById("canvas-y"),
-				checker: document.getElementById("canvas-checker"),
 				quality: document.getElementById("canvas-quality"),
 				mimeType: document.getElementById("canvas-mimeType"),
 				backgroundColor: document.getElementById("canvas-backgroundColor"),
@@ -866,7 +864,47 @@
 	    var testImportDataString = JSON.stringify(testImportData);
 
 		var testConfig1 = {
-			// containerAspectRatio: 16 / 9,
+			filename: undefined, // string
+			allowedExtensions: [
+				"jpg",
+				"jpeg",
+				"png",
+				"webp",
+				"gif",
+				"svg",
+				"svg+xml",
+				"tiff",
+				"tif"
+			], // array, jpg, jpeg, ,gif, png, webp, svg...
+			editable: true, // boolean
+			checker: true, // boolean
+			magneticRange: 5, // number, px
+			maxNumberOfImages: 999, // number
+			cacheLevels: 999, // number
+			containerAspectRatio: undefined, // number, width / height
+			minContainerWidth: undefined, // number, px
+			minContainerHeight: undefined, // number, px
+			maxContainerWidth: 1, // number, px, 0 ~ 1
+			maxContainerHeight: 0.7, // number, px, 0 ~ 1
+			minDrawWidth: 64, // number, px
+			minDrawHeight: 64, // number, px
+			maxDrawWidth: 4096, // number, px, for Mobile
+			maxDrawHeight: 4096, // number, px, for Mobile
+			minImageWidth: 64, // number, px
+			minImageHeight: 64, // number, px
+			maxImageWidth: undefined, // number, px
+			maxImageHeight: undefined, // number, px
+			renderImageType: "contain", // string, "cover", "contain"
+			renderImageWidth: 0.7, // number,  0 ~ 1
+			renderImageHeight: 0.7, // number, 0 ~ 1
+			upload: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				console.log("config.upload callback", res);
+			},
 			canvas: function(err, res) {
 				if (err) {
 					console.log(err);
@@ -877,6 +915,14 @@
 				writeCanvasData();
 
 				console.log("config.canvas callback", res);
+			},
+			draw: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				console.log("config.draw callback", res);
 			},
 			focusIn: function(err, res){
 				if (err) {
@@ -903,7 +949,7 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.move callback");
+				console.log("config.move callback", res);
 
 				writeImageData(res);
 
@@ -914,7 +960,7 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.rotate callback");
+				console.log("config.rotate callback", res);
 
 				writeImageData(res);
 
@@ -925,19 +971,18 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.resize callback");
+				console.log("config.resize callback", res);
 
 				writeImageData(res);
 
 				checkCaches();
-
 			},
 			flip: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
-				console.log("config.flip callback");
+				console.log("config.flip callback", res);
 
 				writeImageData(res);
 
@@ -948,7 +993,7 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.opacity callback");
+				console.log("config.opacity callback", res);
 
 				writeImageData(res);
 
@@ -959,21 +1004,36 @@
 					console.log(err);
 					return false;
 				}
-				console.log("config.index callback");
+				console.log("config.index callback", res);
 
 				writeImageData(res);
 
 				checkCaches();
 
 			},
-			draw: function(err, res){
+			permission: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
 
-				console.log("config.draw callback");
-			}
+				console.log("config.permission callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			remove: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				console.log("config.remove callback", res);
+
+				checkCaches();
+			},
+			
 		}
 
 		// #0 config
@@ -1045,7 +1105,6 @@
 			inputs.canvas.top.value = Math.floor(canvasState.top * 100) / 100;
 			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
 			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
-			inputs.canvas.checker.value = canvasState.checker;
 			inputs.canvas.mimeType.value = canvasState.mimeType;
 			inputs.canvas.quality.value = canvasState.quality;
 			inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
@@ -1053,8 +1112,7 @@
 			inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
 		}
 
-		function writeImageData(id){
-			var imageState = canvaaas.getImageData(id);
+		function writeImageData(imageState){
 			if (!imageState) {
 				inputs.image.id.value = "";
 				inputs.image.type.value = "";

@@ -33,6 +33,8 @@
 
 			editable: true, // boolean
 
+			checker: true, // boolean
+
 			magneticRange: 5, // number, px
 
 			maxNumberOfImages: 999, // number
@@ -71,9 +73,9 @@
 
 			renderImageHeight: 0.7, // number, 0 ~ 1
 
-			canvas: undefined, // callback function
-
 			upload: undefined, // callback function
+
+			canvas: undefined, // callback function
 
 			draw: undefined, // callback function
 
@@ -92,9 +94,25 @@
 			flip: undefined, // callback function
 
 			opacity: undefined, // callback function
+
+			permission: undefined, // callback function
+
+			remove: undefined, // callback function
 		};
 
 		Object.freeze(defaultConfig);
+
+		var classNames = {
+			unfocusable: "unfocusabled",
+			uneditable: "uneditabled",
+			undrawable: "undrawabled",
+			unindexable:"unindexabled",
+			onFocused: "focused",
+			onFrozen: "frozen",
+			onChecker: "checker"
+		}
+		
+		Object.freeze(classNames);
 
 		var config = {};
 
@@ -107,7 +125,7 @@
 		var onResize = false;
 		var onRotate = false;
 		var onFlip = false;
-		var onFreeze = false;
+		var onFrozen = false;
 		var onDraw = false;
 
 		var conatinerTemplate = "";
@@ -209,7 +227,7 @@
 								}
 							} else {
 								if (config.upload) {
-									config.upload(null, res);
+									config.upload(null, getDataById(res));
 								}
 							}
 							count++;
@@ -255,7 +273,7 @@
 						setFocusOut(id);
 
 						if (config.focusOut) {
-							config.focusOut(null, id);
+							config.focusOut(null, getDataById(id));
 						}
 					}
 				}
@@ -346,7 +364,7 @@
 				}
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// save state
 				setState(state, {
@@ -359,7 +377,7 @@
 				setObject(clone, state);
 
 				if (config.move) {
-					config.move(null, state.id);
+					config.move(null, getDataByState(state));
 				}
 			},
 
@@ -404,7 +422,7 @@
 					setFocusOut(oldId);
 
 					if (config.focusOut) {
-						config.focusOut(null, oldId);
+						config.focusOut(null, getDataById(oldId));
 					}
 				}
 
@@ -413,7 +431,7 @@
 				handlers.startMove(e);
 
 				if (config.focusIn) {
-					config.focusIn(null, state.id);
+					config.focusIn(null, getDataByState(state));
 				}
 			},
 
@@ -471,7 +489,7 @@
 				onMove = true;
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onMove, false);
@@ -552,9 +570,9 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.move) {
-					config.move(null, state.id);
-				}
+				// if (config.move) {
+				// 	config.move(null, getDataByState(state));
+				// }
 			},
 
 			endMove: function(e) {
@@ -578,6 +596,10 @@
 
 				document.removeEventListener("touchmove", handlers.onMove, false);
 				document.removeEventListener("touchend", handlers.endMove, false);
+
+				if (config.move) {
+					config.move(null, getDataByState(state));
+				}
 			},
 
 			startRotate: function(e) {
@@ -640,7 +662,7 @@
 				onRotate = true;
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onRotate, false);
@@ -721,9 +743,9 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.rotate) {
-					config.rotate(null, state.id);
-				}
+				// if (config.rotate) {
+				// 	config.rotate(null, getDataByState(state));
+				// }
 			},
 
 			endRotate: function(e) {
@@ -746,6 +768,10 @@
 
 				document.removeEventListener("touchmove", handlers.onRotate, false);
 				document.removeEventListener("touchend", handlers.endRotate, false);
+
+				if (config.rotate) {
+					config.rotate(null, getDataByState(state));
+				}
 			},
 
 			startResize: function(e) {
@@ -842,7 +868,7 @@
 				onResize = true;
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -1070,9 +1096,9 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.resize) {
-					config.resize(null, state.id);
-				}
+				// if (config.resize) {
+				// 	config.resize(null, getDataByState(state));
+				// }
 			},
 
 			endResize: function(e) {
@@ -1096,6 +1122,10 @@
 
 				document.removeEventListener("touchmove", handlers.onResize, false);
 				document.removeEventListener("touchend", handlers.endResize, false);
+
+				if (config.resize) {
+					config.resize(null, getDataByState(state));
+				}
 			},
 
 			startWheelZoom: function(e){
@@ -1149,7 +1179,7 @@
 					onZoom = true;
 
 					// save cache
-					pushUndoCache(state.id, true);
+					saveUndoCache(state.id, true);
 
 					aspectRatio = state.originalWidth / state.originalHeight;
 
@@ -1177,8 +1207,6 @@
 				minW = eventState.minW;
 				minH = eventState.minH;
 
-				console.log(maxW, maxH, minW, minH)
-
 				// add timer
 				clearTimeout(eventState.wheeling);
 
@@ -1205,9 +1233,9 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.resize) {
-					config.resize(null, state.id);
-				}
+				// if (config.resize) {
+				// 	config.resize(null, getDataByState(state));
+				// }
 
 				eventState.wheeling = setTimeout(function() {
 					// remove timer
@@ -1215,6 +1243,10 @@
 
 					// toggle off
 					onZoom = false;
+
+					if (config.resize) {
+						config.resize(null, getDataByState(state));
+					}
 				}, 300);
 			},
 
@@ -1280,7 +1312,7 @@
 				onZoom = true;
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// add event handles
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
@@ -1348,9 +1380,9 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				if (config.resize) {
-					config.resize(null, state.id);
-				}
+				// if (config.resize) {
+				// 	config.resize(null, getDataByState(state));
+				// }
 			},
 
 			endPinchZoom: function(e) {
@@ -1371,6 +1403,10 @@
 				// remove event handles
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
 				document.removeEventListener("touchend", handlers.endPinchZoom, false);
+
+				if (config.resize) {
+					config.resize(null, getDataByState(state));
+				}
 
 				handlers.startMove(e);
 			},
@@ -1436,13 +1472,6 @@
 					// adjust state
 					setObject(source, state);
 					setObject(clone, state);
-
-					// if (config.move) {
-					// 	config.move(null, state.id);
-					// }
-					// if (config.resize) {
-					// 	config.resize(null, state.id);
-					// }
 				});
 			},
 
@@ -1617,10 +1646,74 @@
 			return true;
 		}
 
+		function getDataById(id) {
+			var state = getStateById(id);
+
+			if (!state) {
+				return false;
+			}
+
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			var tmp = {};
+			tmp.id = state.id;
+			tmp.type = state.type;
+			tmp.src = state.src;
+			tmp.index = state.index;
+			tmp.originalWidth = state.originalWidth;
+			tmp.originalHeight = state.originalHeight;
+			tmp.width = state.width / scaleRatio;
+			tmp.height = state.height / scaleRatio;
+			tmp.x = state.x / scaleRatio;
+			tmp.y = state.y / scaleRatio;
+			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
+			tmp.rotate = state.rotate;
+			tmp.scaleX = state.scaleX;
+			tmp.scaleY = state.scaleY;
+			tmp.opacity = state.opacity;
+			tmp.lockAspectRatio = state.lockAspectRatio;
+			tmp.focusable = state.focusable;
+			tmp.editable = state.editable;
+			tmp.drawable = state.drawable;
+			tmp.indexable = state.indexable;
+
+			return tmp;
+		}
+
+		function getDataByState(state) {
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			var tmp = {};
+			tmp.id = state.id;
+			tmp.type = state.type;
+			tmp.src = state.src;
+			tmp.index = state.index;
+			tmp.originalWidth = state.originalWidth;
+			tmp.originalHeight = state.originalHeight;
+			tmp.width = state.width / scaleRatio;
+			tmp.height = state.height / scaleRatio;
+			tmp.x = state.x / scaleRatio;
+			tmp.y = state.y / scaleRatio;
+			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
+			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
+			tmp.rotate = state.rotate;
+			tmp.scaleX = state.scaleX;
+			tmp.scaleY = state.scaleY;
+			tmp.opacity = state.opacity;
+			tmp.lockAspectRatio = state.lockAspectRatio;
+			tmp.focusable = state.focusable;
+			tmp.editable = state.editable;
+			tmp.drawable = state.drawable;
+			tmp.indexable = state.indexable;
+
+			return tmp;
+		}
+
 		function getFittedState(state) {
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
-			var result = {};
+			var tmp = {};
 
 			var tmpId;
 			if (state.id) {
@@ -1630,116 +1723,116 @@
 			}
 
 			if (typeof(tmpId) === "string") {
-				result.id = tmpId;
+				tmp.id = tmpId;
 			} else if (typeof(tmpId) === "number") {
-				result.id = "" + tmpId;
+				tmp.id = "" + tmpId;
 			}
 
 			if (isNumeric(state.index)) {
-				result.index = parseFloat(state.index);
+				tmp.index = parseFloat(state.index);
 			}
 
 			if (isNumeric(state.x)) {
-				result.x = parseFloat(state.x);
+				tmp.x = parseFloat(state.x);
 			}
 
 			if (isNumeric(state.x)) {
-				result.x = parseFloat(state.x) * scaleRatio;
+				tmp.x = parseFloat(state.x) * scaleRatio;
 			}
 
 			if (isNumeric(state.y)) {
-				result.y = parseFloat(state.y) * scaleRatio;
+				tmp.y = parseFloat(state.y) * scaleRatio;
 			}
 
 			if (isNumeric(state.width)) {
-				result.width = parseFloat(state.width) * scaleRatio;
+				tmp.width = parseFloat(state.width) * scaleRatio;
 			}
 
 			if (isNumeric(state.height)) {
-				result.height = parseFloat(state.height) * scaleRatio;
+				tmp.height = parseFloat(state.height) * scaleRatio;
 			}
 
 			if (isNumeric(state.rotate)) {
-				result.rotate = parseFloat(state.rotate);
+				tmp.rotate = parseFloat(state.rotate);
 			}
 
 			if (isNumeric(state.scaleX)) {
 				if (parseFloat(state.scaleX) > 0) {
-					result.scaleX = 1;
+					tmp.scaleX = 1;
 				} else {
-					result.scaleX = -1;
+					tmp.scaleX = -1;
 				}
 			}
 
 			if (isNumeric(state.scaleY)) {
 				if (parseFloat(state.scaleY) > 0) {
-					result.scaleY = 1;
+					tmp.scaleY = 1;
 				} else {
-					result.scaleY = -1;
+					tmp.scaleY = -1;
 				}
 			}
 
 			if (isNumeric(state.opacity)) {
 				if (parseFloat(state.opacity) > 1) {
-					result.opacity = 1;
+					tmp.opacity = 1;
 				} else if (parseFloat(state.opacity) < 0) {
-					result.opacity = 0;
+					tmp.opacity = 0;
 				} else {
-					result.opacity = parseFloat(state.opacity);
+					tmp.opacity = parseFloat(state.opacity);
 				}
 			}
 
 			if (typeof(state.lockAspectRatio) === "boolean") {
-				result.lockAspectRatio = state.lockAspectRatio;
+				tmp.lockAspectRatio = state.lockAspectRatio;
 			} else if (typeof(state.lockAspectRatio) === "string") {
 				if (state.lockAspectRatio === "true") {
-					result.lockAspectRatio = true;
+					tmp.lockAspectRatio = true;
 				} else if (state.lockAspectRatio === "false") {
-					result.lockAspectRatio = false;
+					tmp.lockAspectRatio = false;
 				}
 			}
 
 			if (typeof(state.focusable) === "boolean") {
-				result.focusable = state.focusable;
+				tmp.focusable = state.focusable;
 			} else if (typeof(state.focusable) === "string") {
 				if (state.focusable === "true") {
-					result.focusable = true;
+					tmp.focusable = true;
 				} else if (state.focusable === "false") {
-					result.focusable = false;
+					tmp.focusable = false;
 				}
 			}
 
 			if (typeof(state.editable) === "boolean") {
-				result.editable = state.editable;
+				tmp.editable = state.editable;
 			} else if (typeof(state.editable) === "string") {
 				if (state.editable === "true") {
-					result.editable = true;
+					tmp.editable = true;
 				} else if (state.editable === "false") {
-					result.editable = false;
+					tmp.editable = false;
 				}
 			}
 
 			if (typeof(state.drawable) === "boolean") {
-				result.drawable = state.drawable;
+				tmp.drawable = state.drawable;
 			} else if (typeof(state.drawable) === "string") {
 				if (state.drawable === "true") {
-					result.drawable = true;
+					tmp.drawable = true;
 				} else if (state.drawable === "false") {
-					result.drawable = false;
+					tmp.drawable = false;
 				}
 			}
 
 			if (typeof(state.indexable) === "boolean") {
-				result.indexable = state.indexable;
+				tmp.indexable = state.indexable;
 			} else if (typeof(state.indexable) === "string") {
 				if (state.indexable === "true") {
-					result.indexable = true;
+					tmp.indexable = true;
 				} else if (state.indexable === "false") {
-					result.indexable = false;
+					tmp.indexable = false;
 				}
 			}
 
-			return result;
+			return tmp;
 		}
 
 		function setObject(elem, state) {
@@ -1763,7 +1856,16 @@
 				height,
 				opacity,
 				index,
-				transform = "";
+				transform = "",
+				isImage = false;
+
+			if (
+				elem.classList.contains("canvaaas-image") ||
+				elem.classList.contains("canvaaas-clone")
+			) {
+				isImage = true;
+			}
+
 
 			left = ( state.x - (state.width * 0.5) ) + "px";
 			top = ( state.y - (state.height * 0.5) ) + "px";
@@ -1789,11 +1891,49 @@
 			elem.style.height = height;
 			elem.style.transform = transform;
 
-			if (
-				elem.classList.contains("canvaaas-image") ||
-				elem.classList.contains("canvaaas-clone")
-			) {
+			if (isImage === true) {
+
 				elem.querySelector("img").style.opacity = opacity;
+
+				if (!state.editable) {
+					if (!elem.classList.contains(classNames.uneditable)) {
+						elem.classList.add(classNames.uneditable);
+					}
+				} else {
+					if (elem.classList.contains(classNames.uneditable)) {
+						elem.classList.remove(classNames.uneditable);
+					}
+				}
+
+				if (!state.focusable) {
+					if (!elem.classList.contains(classNames.unfocusable)) {
+						elem.classList.add(classNames.unfocusable);
+					}
+				} else {
+					if (elem.classList.contains(classNames.unfocusable)) {
+						elem.classList.remove(classNames.unfocusable);
+					}
+				}
+
+				if (!state.drawable) {
+					if (!elem.classList.contains(classNames.undrawable)) {
+						elem.classList.add(classNames.undrawable);
+					}
+				} else {
+					if (elem.classList.contains(classNames.undrawable)) {
+						elem.classList.remove(classNames.undrawable);
+					}
+				}
+
+				if (!state.indexable) {
+					if (!elem.classList.contains(classNames.unindexable)) {
+						elem.classList.add(classNames.unindexable);
+					}
+				} else {
+					if (elem.classList.contains(classNames.unindexable)) {
+						elem.classList.remove(classNames.unindexable);
+					}
+				}
 			}
 
 			return true;
@@ -1816,7 +1956,7 @@
 			return true;
 		};
 
-		function pushUndoCache(id, clearRedoCaches) {
+		function saveUndoCache(id, clearRedoCaches) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 			var state = getStateById(id);
@@ -1851,7 +1991,7 @@
 			return true;
 		}
 
-		function pushSubCache(id) {
+		function saveSubCache(id) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 			var state = getStateById(id);
@@ -1887,11 +2027,19 @@
 			}
 
 			try {
-				canvasObject.classList.add("focus");
-				mirrorObject.classList.add("focus");
+				if (!canvasObject.classList.contains(classNames.onFocused)) {
+					canvasObject.classList.add(classNames.onFocused);
+				}
+				if (!mirrorObject.classList.contains(classNames.onFocused)) {
+					mirrorObject.classList.add(classNames.onFocused);
+				}
 
-				source.classList.add("focus");
-				clone.classList.add("focus");
+				if (!source.classList.contains(classNames.onFocused)) {
+					source.classList.add(classNames.onFocused);
+				}
+				if (!clone.classList.contains(classNames.onFocused)) {
+					clone.classList.add(classNames.onFocused);
+				}
 
 				source.removeEventListener("mousedown", handlers.startFocusIn, false);
 				source.removeEventListener("touchstart", handlers.startFocusIn, false);
@@ -1931,11 +2079,19 @@
 			}
 
 			try {
-				canvasObject.classList.remove("focus");
-				mirrorObject.classList.remove("focus");
+				if (canvasObject.classList.contains(classNames.onFocused)) {
+					canvasObject.classList.remove(classNames.onFocused);
+				}
+				if (mirrorObject.classList.contains(classNames.onFocused)) {
+					mirrorObject.classList.remove(classNames.onFocused);
+				}
 
-				source.classList.remove("focus");
-				clone.classList.remove("focus");
+				if (source.classList.contains(classNames.onFocused)) {
+					source.classList.remove(classNames.onFocused);
+				}
+				if (clone.classList.contains(classNames.onFocused)) {
+					clone.classList.remove(classNames.onFocused);
+				}
 
 				source.removeEventListener("mousedown", handlers.startMove, false);
 				source.removeEventListener("touchstart", handlers.startMove, false);
@@ -2048,35 +2204,63 @@
 			return true;
 		}
 
-		function getAdjustedDataById(id) {
-			var state = getStateById(id);
-			if (!state) {
-				return false;
-			}
-
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
+		function getConfigData(obj) {
 			var tmp = {};
-			tmp.id = state.id;
-			tmp.type = state.type;
-			tmp.src = state.src;
-			tmp.index = state.index;
-			tmp.originalWidth = state.originalWidth;
-			tmp.originalHeight = state.originalHeight;
-			tmp.width = state.width / scaleRatio;
-			tmp.height = state.height / scaleRatio;
-			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
-			tmp.top = (state.y - (state.height * 0.5)) / scaleRatio;
-			tmp.x = state.x / scaleRatio;
-			tmp.y = state.y / scaleRatio;
-			tmp.rotate = state.rotate;
-			tmp.scaleX = state.scaleX;
-			tmp.scaleY = state.scaleY;
-			tmp.opacity = state.opacity;
-			tmp.lockAspectRatio = state.lockAspectRatio;
-			tmp.focusable = state.focusable;
-			tmp.editable = state.editable;
-			tmp.drawable = state.drawable;
-			tmp.indexable = state.indexable;
+			var candidtaeKeys = [
+				"filename",
+				"allowedExtensions",
+				"editable",
+				"checker",
+				"magneticRange",
+				"maxNumberOfImages",
+				"cacheLevels",
+				"containerAspectRatio",
+				"minContainerWidth",
+				"minContainerHeight",
+				"maxContainerWidth",
+				"maxContainerHeight",
+				"minDrawWidth",
+				"minDrawHeight",
+				"maxDrawWidth",
+				"maxDrawHeight",
+				"minImageWidth",
+				"minImageHeight",
+				"maxImageWidth",
+				"maxImageHeight",
+				"renderImageType",
+				"renderImageWidth",
+				"renderImageHeight",
+			];
+
+			candidtaeKeys.forEach(function(elem){
+				tmp[elem] = obj[elem];
+			});
+
+			return tmp;
+		}
+
+		function getCanvasData(obj) {
+			var tmp = {};
+			var candidtaeKeys = [
+				"isInitialized",
+				"originalWidth",
+				"originalHeight",
+				"width",
+				"height",
+				"left",
+				"top",
+				"x",
+				"y",
+				"backgroundColor",
+				"mimeType",
+				"quality",
+				"smoothingEnabled",
+				"smoothingQuality"
+			];
+
+			candidtaeKeys.forEach(function(elem){
+				tmp[elem] = obj[elem];
+			});
 
 			return tmp;
 		}
@@ -2413,64 +2597,9 @@
 
 
 
-
 		// 
-		// DOM
+		// calculate
 		// 
-
-		function showChecker() {
-			if (canvasState.checker === true) {
-				if (!canvasObject.classList.contains("checker")) {
-					canvasObject.classList.add("checker");
-				}
-			}
-		}
-
-		function hideChecker() {
-			if (canvasObject.classList.contains("checker")) {
-				canvasObject.classList.remove("checker");
-			}
-		}
-
-
-		function showImageById(id) {
-			var source = getSourceById(id);
-			var clone = getCloneById(id);
-
-			if (!source || !clone) {
-				return false;
-			}
-
-			source.style.visibility = "";
-			clone.style.visibility = "";
-
-			return true;
-		}
-
-		function hideImageById(id) {
-			var source = getSourceById(id);
-			var clone = getCloneById(id);
-
-			if (!source || !clone) {
-				return false;
-			}
-
-			source.style.visibility = "hidden";
-			clone.style.visibility = "hidden";
-
-			return true;
-		}
-
-
-
-
-
-
-
-
-
-
-
 
 		function getDegrees(x, y) {
 			if (
@@ -3485,6 +3614,8 @@
 			// set template
 			target.innerHTML = conatinerTemplate;
 
+			containerState.isInitialized = true;
+
 			// set elements
 			containerObject = target.querySelector("div.canvaaas");
 			canvasObject = target.querySelector("div.canvaaas-canvas");
@@ -3492,7 +3623,6 @@
 
 			// set canvasState
 			canvasState.isInitialized = false;
-			canvasState.checker = true;
 			canvasState.quality = 0.8;
 			canvasState.mimeType = "image/jpeg";
 			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
@@ -3502,7 +3632,11 @@
 			// set canvas background
 			canvasObject.style.backgroundColor = canvasState.backgroundColor;
 
-			showChecker();
+			if (config.checker === true) {
+				if (!canvasObject.classList.contains(classNames.onChecker)) {
+					canvasObject.classList.add(classNames.onChecker);
+				}
+			}
 
 			// set events
 			windowResizeEvent = handlers.resizeWindow;
@@ -3547,9 +3681,9 @@
 			// console.log("canvaaas.js initialized", config);
 
 			if (cb) {
-				cb(null, config);
+				cb(null, getConfigData(config));
 			}
-			return config;
+			return getConfigData(config);
 		}
 
 		// asynchronous
@@ -3600,7 +3734,7 @@
 
 			var index = thisFiles.length;
 			var count = 0;
-			var results = [];
+			var tmps = [];
 
 			onUpload = true;
 
@@ -3618,7 +3752,7 @@
 								config.upload(null, res);
 							}
 						}
-						results.push({
+						tmps.push({
 							err: err,
 							id: res
 						});
@@ -3630,7 +3764,7 @@
 					onUpload = false;
 
 					if (cb) {
-						cb(null, results);
+						cb(null, tmps);
 					}
 				}
 			}
@@ -3711,7 +3845,7 @@
 				var fittedState = getFittedState(thisState);
 
 				// save cache
-				pushUndoCache(res, true);
+				saveUndoCache(res, true);
 
 				// save state
 				setState(state, fittedState);
@@ -3833,7 +3967,7 @@
 					var fittedState = getFittedState(thisState);
 
 					// save cache
-					pushUndoCache(res, true);
+					saveUndoCache(res, true);
 
 					// save state
 					setState(state, fittedState);
@@ -3918,12 +4052,16 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
 				id: newId
 			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
 
 			if (cb) {
 				cb(null, state.id)
@@ -3991,7 +4129,7 @@
 			var axisX = state.x - x;
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4003,12 +4141,12 @@
 			setObject(clone, state);
 
 			if (config.move) {
-				config.move(null, state.id);
+				config.move(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id)
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.moveY = function(id, y, cb) {
@@ -4071,7 +4209,7 @@
 			var axisY = state.y - y;
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4083,12 +4221,12 @@
 			setObject(clone, state);
 
 			if (config.move) {
-				config.move(null, state.id);
+				config.move(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id)
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.moveTo = function(id, x, y, cb) {
@@ -4196,7 +4334,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4209,12 +4347,12 @@
 			setObject(clone, state);
 
 			if (config.move) {
-				config.move(null, state.id);
+				config.move(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id)
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.resize = function(id, w, h, cb) {
@@ -4288,7 +4426,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4302,12 +4440,12 @@
 			setObject(clone, state);
 
 			if (config.resize) {
-				config.resize(null, state.id);
+				config.resize(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id)
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.zoom = function(id, ratio, cb) {
@@ -4371,7 +4509,7 @@
 			var height = state.height * (1 + ratio);
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4384,12 +4522,12 @@
 			setObject(clone, state);
 
 			if (config.resize) {
-				config.resize(null, state.id);
+				config.resize(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id)
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.zoomTo = function(id, ratio, cb) {
@@ -4494,7 +4632,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4509,12 +4647,12 @@
 			setObject(clone, state);
 
 			if (config.resize) {
-				config.resize(null, state.id);
+				config.resize(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.rotate = function(id, deg, cb){
@@ -4583,7 +4721,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			var rotate = state.rotate + parseFloat(deg);
 
@@ -4597,12 +4735,12 @@
 			setObject(clone, state);
 
 			if (config.rotate) {
-				config.rotate(null, state.id);
+				config.rotate(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.rotateTo = function(id, deg, cb){
@@ -4673,7 +4811,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4685,12 +4823,12 @@
 			setObject(clone, state);
 
 			if (config.rotate) {
-				config.rotate(null, state.id);
+				config.rotate(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.flipX = function(id, cb){
@@ -4742,7 +4880,7 @@
 			var rotate = state.rotate * -1;
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4755,12 +4893,12 @@
 			setObject(clone, state);
 
 			if (config.flip) {
-				config.flip(null, state.id);
+				config.flip(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			} 
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.flipY = function(id, cb){
@@ -4812,7 +4950,7 @@
 			var rotate = state.rotate * -1;
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4825,12 +4963,12 @@
 			setObject(clone, state);
 
 			if (config.flip) {
-				config.flip(null, state.id);
+				config.flip(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			} 
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.flipTo = function(id, x, y, cb){
@@ -4920,7 +5058,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -4934,12 +5072,12 @@
 			setObject(clone, state);
 
 			if (config.flip) {
-				config.flip(null, state.id);
+				config.flip(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			} 
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.opacityTo = function(id, num, cb){
@@ -5009,7 +5147,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5021,12 +5159,12 @@
 			setObject(clone, state);
 
 			if (config.opacity) {
-				config.opacity(null, state.id);
+				config.opacity(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.index = function(id, num, cb) {
@@ -5149,12 +5287,12 @@
 			}
 
 			if (config.index) {
-				config.index(null, state.id);
+				config.index(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.indexTo = function(id, num, cb) {
@@ -5252,7 +5390,7 @@
 			}
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -5264,210 +5402,12 @@
 			setObject(clone, state);
 
 			if (config.index) {
-				config.index(null, state.id);
+				config.index(null, getDataByState(state));
 			}
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
-		}
-
-		myObject.toggleAspectRatio = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			var aspectRatio = state.originalWidth / state.originalHeight;
-			var lockAspectRatio = state.lockAspectRatio;
-			var width = state.width;
-			var height = state.height;
-			if (lockAspectRatio === true) {
-				lockAspectRatio = false;
-			} else {
-				lockAspectRatio = true;
-				if (width > height / aspectRatio) {
-					height = width / aspectRatio;
-				} else {
-					width = height * aspectRatio;
-				}
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				width: width,
-				height: height,
-				lockAspectRatio: lockAspectRatio
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.lockAspectRatio = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			if (state.lockAspectRatio === true) {
-				if (cb) {
-					cb("Already locked aspect ratio");
-				} 
-				return false;
-			}
-
-			var aspectRatio = state.originalWidth / state.originalHeight;
-			var lockAspectRatio = true;
-			var width = state.width;
-			var height = state.height;
-			if (width > height / aspectRatio) {
-				height = width / aspectRatio;
-			} else {
-				width = height * aspectRatio;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-			
-			// save state
-			setState(state, {
-				width: width,
-				height: height,
-				lockAspectRatio: lockAspectRatio
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.unlockAspectRatio = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-			var clone = getCloneById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state || !clone) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			if (state.lockAspectRatio === false) {
-				if (cb) {
-					cb("Already unlocked aspect ratio");
-				} 
-				return false;
-			}
-
-			var lockAspectRatio = false;
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				lockAspectRatio: lockAspectRatio
-			});
-
-			// adjust state
-			setObject(source, state);
-			setObject(clone, state);
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.focusIn = function(id, cb) {
@@ -5570,591 +5510,7 @@
 			return state.id;
 		}
 
-		myObject.toggleFocusable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			var focusable = state.focusable === false;
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				focusable: focusable
-			});
-
-			// focus out
-			if (focusable === false) {
-				if (eventState.target) {
-					if (source.isSameNode(eventState.target)) {
-						var res = setFocusOut(id);
-						if (res === true) {
-							if (config.focusOut) {
-								config.focusOut(null, id);
-							}
-						}
-					}	
-				}
-			}
-
-			// remove class
-			if (focusable === true) {
-				source.classList.remove("unclickable");
-			} else {
-				source.classList.add("unclickable");
-			}
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.toggleEditable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			var editable = state.editable === false;
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				editable: editable
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.toggleDrawable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			var drawable = state.drawable === false;
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				drawable: drawable
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.toggleIndexable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			var indexable = state.indexable === false;
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				indexable: indexable
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.focusable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				focusable: true
-			});
-
-			// remove class
-			source.classList.remove("unclickable");
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.editable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				editable: true
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.drawable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				drawable: true
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.indexable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				indexable: true
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.unfocusable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			if (eventState.target) {
-				if (source.isSameNode(eventState.target)) {
-					var res = setFocusOut(id);
-					if (res === true) {
-						if (config.focusOut) {
-							config.focusOut(null, id);
-						}
-					}
-				}	
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				focusable: false
-			});
-
-			// add class
-			source.classList.add("unclickable");
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.uneditable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				editable: false
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.undrawable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				drawable: false
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.unindexable = function(id, cb){
-			var source = getSourceById(id);
-			var state = getStateById(id);
-
-			if (typeof(id) !== "string") {
-				if (cb) {
-					cb("Argument error");
-				} 
-				return false;
-			}
-
-			if (!config.editable) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (!source || !state) {
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!state.editable) {
-				if (cb) {
-					cb("This image has been uneditabled");
-				} 
-				return false;
-			}
-
-			// save cache
-			pushUndoCache(state.id, true);
-
-			// save state
-			setState(state, {
-				indexable: false
-			});
-
-			if (cb) {
-				cb(null, state.id);
-			}
-			return state.id;
-		}
-
-		myObject.remove = function(id, cb) {
+		myObject.toggleAspectRatio = function(id, cb){
 			var source = getSourceById(id);
 			var state = getStateById(id);
 			var clone = getCloneById(id);
@@ -6180,6 +5536,909 @@
 				return false;
 			}
 
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			var lockAspectRatio = state.lockAspectRatio;
+			var width = state.width;
+			var height = state.height;
+			if (lockAspectRatio === true) {
+				lockAspectRatio = false;
+			} else {
+				lockAspectRatio = true;
+				if (width > height / aspectRatio) {
+					height = width / aspectRatio;
+				} else {
+					width = height * aspectRatio;
+				}
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				lockAspectRatio: lockAspectRatio
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.lockAspectRatio = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			if (state.lockAspectRatio === true) {
+				if (cb) {
+					cb("Already locked aspect ratio");
+				} 
+				return false;
+			}
+
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			var lockAspectRatio = true;
+			var width = state.width;
+			var height = state.height;
+			if (width > height / aspectRatio) {
+				height = width / aspectRatio;
+			} else {
+				width = height * aspectRatio;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+			
+			// save state
+			setState(state, {
+				width: width,
+				height: height,
+				lockAspectRatio: lockAspectRatio
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.unlockAspectRatio = function(id, cb){
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (!state.editable) {
+				if (cb) {
+					cb("This image has been uneditabled");
+				} 
+				return false;
+			}
+
+			if (state.lockAspectRatio === false) {
+				if (cb) {
+					cb("Already unlocked aspect ratio");
+				} 
+				return false;
+			}
+
+			var lockAspectRatio = false;
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				lockAspectRatio: lockAspectRatio
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.toggleFocusable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			var focusable = state.focusable === false;
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				focusable: focusable
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			// focus out
+			if (focusable === false) {
+				if (eventState.target) {
+					if (source.isSameNode(eventState.target)) {
+						var res = setFocusOut(id);
+						if (res === true) {
+							if (config.focusOut) {
+								config.focusOut(null, getDataById(id));
+							}
+						}
+					}	
+				}
+			}
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.toggleEditable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			var editable = state.editable === false;
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				editable: editable
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.toggleDrawable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state) {
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			var drawable = state.drawable === false;
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				drawable: drawable
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.toggleIndexable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			var indexable = state.indexable === false;
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: indexable
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.focusable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				focusable: true
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.editable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				editable: true
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.drawable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				drawable: true
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.indexable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: true
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.unfocusable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			if (eventState.target) {
+				if (source.isSameNode(eventState.target)) {
+					var res = setFocusOut(id);
+					if (res === true) {
+						if (config.focusOut) {
+							config.focusOut(null, getDataById(id));
+						}
+					}
+				}	
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				focusable: false
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.uneditable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				editable: false
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.undrawable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				drawable: false
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.unindexable = function(id, cb){
+			var source = getSourceById(id);
+			var clone = getCloneById(id);
+			var state = getStateById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.permission) {
+					config.permission("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.permission) {
+					config.permission("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.permission) {
+					config.permission("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
+			// save cache
+			saveUndoCache(state.id, true);
+
+			// save state
+			setState(state, {
+				indexable: false
+			});
+
+			// adjust state
+			setObject(source, state);
+			setObject(clone, state);
+
+			if (config.permission) {
+				config.permission(null, getDataByState(state));
+			}
+			if (cb) {
+				cb(null, getDataByState(state));
+			}
+			return getDataByState(state);
+		}
+
+		myObject.remove = function(id, cb) {
+			var source = getSourceById(id);
+			var state = getStateById(id);
+			var clone = getCloneById(id);
+
+			if (typeof(id) !== "string") {
+				if (config.remove) {
+					config.remove("Argument error");
+				} 
+				if (cb) {
+					cb("Argument error");
+				} 
+				return false;
+			}
+
+			if (!config.editable) {
+				if (config.remove) {
+					config.remove("Editing has been disabled");
+				} 
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (!source || !state || !clone) {
+				if (config.remove) {
+					config.remove("Image not found");
+				} 
+				if (cb) {
+					cb("Image not found");
+				} 
+				return false;
+			}
+
 			// check focus
 			if (eventState.target) {
 				if (source.isSameNode(eventState.target)) {
@@ -6193,21 +6452,31 @@
 			}
 
 			// remove element
+			var tmp = getDataById(id)
 			var res = removeObjectById(id);
 			if (!res) {
+				if (config.remove) {
+					config.remove("`removeObjectById()` error");
+				} 
 				if (cb) {
 					cb("`removeObjectById()` error");
 				}
 				return false;
 			}
+			if (config.remove) {
+				config.remove(null, tmp);
+			} 
 			if (cb) {
-				cb(null, id);
+				cb(null, tmp);
 			}
-			return id;
+			return tmp;
 		}
 
 		myObject.removeAll = function(cb) {
 			if (!config.editable) {
+				if (config.remove) {
+					config.remove("Editing has been disabled");
+				} 
 				if (cb) {
 					cb("Editing has been disabled");
 				}
@@ -6228,17 +6497,24 @@
 			function recursiveFunc() {
 				if (count < index) {
 					// remove element
+					var tmp = getDataById(arr[count]);
 					var res = removeObjectById(arr[count]);
 					if (!res) {
 						results.push({
 							err: "`removeObjectById()` error",
-							res: arr[count]
+							res: null
 						});
+						if (config.remove) {
+							config.remove("`removeObjectById()` error");
+						} 
 					} else {
 						results.push({
 							err: null,
-							res: arr[count]
+							res: tmp
 						});
+						if (config.remove) {
+							config.remove(null, tmp);
+						} 
 					}
 					count++;
 					recursiveFunc();
@@ -6297,14 +6573,13 @@
 			}
 
 			var results = [];
-
 			for (var i = 0; i < newStates.length; i++) {
 				var newState = newStates[i];
 
 				if (!existsId(newState.id)) {
 					results.push({
 						err: "Image not found",
-						id: undefined
+						res: undefined
 					});
 					continue;
 				}
@@ -6316,13 +6591,13 @@
 				if (!source || !clone || !state) {
 					results.push({
 						err: "Image not found",
-						id: undefined
+						res: undefined
 					});
 					continue;
 				}
 
 				// save cache
-				pushUndoCache(state.id, true);
+				saveUndoCache(state.id, true);
 
 				// save state
 				setState(state, newState);
@@ -6333,7 +6608,7 @@
 
 				results.push({
 					err: undefined,
-					id: state.id
+					res: getDataByState(state)
 				});
 			}
 
@@ -6386,7 +6661,7 @@
 			var axisY = canvasState.height * 0.5;
 
 			// save cache
-			pushUndoCache(state.id, true);
+			saveUndoCache(state.id, true);
 
 			// save state
 			setState(state, {
@@ -6410,9 +6685,9 @@
 			setObject(clone, state);
 
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		// 
@@ -6434,9 +6709,61 @@
 			copyObject(config, newConfig);
 
 			if (cb) {
-				cb(null, config);
+				cb(null, getConfigData(config));
 			}
-			return config;
+			return getConfigData(config);
+		}
+
+		myObject.checker = function(bool, cb) {
+			if (
+				typeof(bool) === "undefined" ||
+				typeof(bool) === "object" ||
+				bool === null
+			) {
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (!config.editable) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (
+				bool === true ||
+				bool === 1 ||
+				bool === "true"
+			) {
+				config.checker = true;
+				if (!canvasObject.classList.contains(classNames.onChecker)) {
+					canvasObject.classList.add(classNames.onChecker);
+				}
+			} else if (
+				bool === false ||
+				bool === 0 ||
+				bool === -1 ||
+				bool === "false" ||
+				bool === "none"
+			) {
+				config.checker = false;
+				if (canvasObject.classList.contains(classNames.onChecker)) {
+					canvasObject.classList.remove(classNames.onChecker);
+				}
+			} else {
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (cb) {
+				cb(null, getConfigData(config));
+			}
+			return getConfigData(config);
 		}
 
 		// 
@@ -6557,72 +6884,12 @@
 			redoCaches = [];
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
-		}
-
-		myObject.checker = function(bool, cb) {
-			if (
-				typeof(bool) === "undefined" ||
-				typeof(bool) === "object" ||
-				bool === null
-			) {
-				if (config.canvas) {
-					config.canvas("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			if (!config.editable) {
-				if (config.canvas) {
-					config.canvas("Editing has been disabled");
-				}
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (
-				bool === true ||
-				bool === 1 ||
-				bool === "true"
-			) {
-				canvasState.checker = true;
-				showChecker();
-			} else if (
-				bool === false ||
-				bool === 0 ||
-				bool === -1 ||
-				bool === "false" ||
-				bool === "none"
-			) {
-				canvasState.checker = false;
-				hideChecker();
-			} else {
-				if (config.canvas) {
-					config.canvas("Argument error");
-				}
-				if (cb) {
-					cb("Argument error");
-				}
-				return false;
-			}
-
-			if (config.canvas) {
-				config.canvas(null, canvasState);
-			}
-			if (cb) {
-				cb(null, canvasState);
-			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.quality = function(num, cb) {
@@ -6649,12 +6916,12 @@
 			canvasState.quality = quality;
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.mimeType = function(mimeType, cb) {
@@ -6712,12 +6979,12 @@
 			canvasState.mimeType = mimeType;
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.backgroundColor = function(colour, cb) {
@@ -6743,12 +7010,12 @@
 			canvasObject.style.backgroundColor = colour;
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.smoothingQuality = function(str, cb) {
@@ -6781,12 +7048,12 @@
 			canvasState.smoothingQuality = str;
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.smoothingEnabled = function(str, cb) {
@@ -6836,16 +7103,16 @@
 			canvasState.smoothingEnabled = enabled;
 
 			if (config.canvas) {
-				config.canvas(null, canvasState);
+				config.canvas(null, getCanvasData(canvasState));
 			}
 			if (cb) {
-				cb(null, canvasState);
+				cb(null, getCanvasData(canvasState));
 			}
-			return canvasState;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.freeze = function(cb){
-			if (onFreeze === true) {
+			if (onFrozen === true) {
 				if (cb) {
 					cb("Already in progress");
 				}
@@ -6863,17 +7130,17 @@
 			}
 
 			config.editable = false;
-			onFreeze = true;
+			onFrozen = true;
 
-			// check drawable
-			imageStates.forEach(function(state){
-				if (!state.drawable) {
-					hideImageById(state.id);
+			if (!canvasObject.classList.contains(classNames.onFrozen)) {
+				canvasObject.classList.add(classNames.onFrozen);
+			}
+
+			if (config.checker === true) {
+				if (canvasObject.classList.contains(classNames.onChecker)) {
+					canvasObject.classList.remove(classNames.onChecker);
 				}
-			})
-
-			// hide checker
-			hideChecker();
+			}
 
 			if (cb) {
 				cb(null, true);
@@ -6882,7 +7149,7 @@
 		}
 
 		myObject.thaw = function(cb){
-			if (onFreeze === false) {
+			if (onFrozen === false) {
 				if (cb) {
 					cb("No progress in");
 				}
@@ -6890,17 +7157,17 @@
 			}
 
 			config.editable = true;
-			onFreeze = false;
+			onFrozen = false;
 
-			// check drawable
-			imageStates.forEach(function(state){
-				if (!state.drawable) {
-					showImageById(state.id);
+			if (canvasObject.classList.contains(classNames.onFrozen)) {
+				canvasObject.classList.remove(classNames.onFrozen);
+			}
+
+			if (config.checker === true) {
+				if (!canvasObject.classList.contains(classNames.onChecker)) {
+					canvasObject.classList.add(classNames.onChecker);
 				}
-			})
-
-			// set checker
-			showChecker();
+			}
 
 			if (cb) {
 				cb(null, true);
@@ -6989,8 +7256,10 @@
 
 			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					drawables.push(imageStates[i]);
+				if (imageStates[i].drawable === true) {
+					drawables.push(
+						getDataByState(imageStates[i])
+					);
 				}
 			}
 
@@ -7022,10 +7291,12 @@
 				if (count < index) {
 					// recursive
 					drawImage(canvas, drawables[count].id, function(err) {
-						drawResults.push({
-							err: err,
-							res: drawables[count]
-						});
+						if (err) {
+							drawables[count].err = err;
+						}
+
+						drawResults.push(drawables[count]);
+
 						count++;
 						recursiveFunc();
 					});
@@ -7082,12 +7353,11 @@
 			}
 
 			var id = getIdByObject(eventState.target);
-			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
-				cb(null, tmp);
+				cb(null, getDataById(id));
 			}
-			return tmp;
+			return getDataById(id);
 		}
 
 		myObject.getThisData = function(cb){
@@ -7099,22 +7369,18 @@
 			}
 
 			var id = getIdByObject(eventState.target);
-			var tmp = getAdjustedDataById(id);
 
 			if (cb) {
-				cb(null, tmp);
+				cb(null, getDataById(id));
 			}
-			return tmp;
+			return getDataById(id);
 		}
 
 		myObject.getConfigData = function(cb){
-			var tmp = {};
-			copyObject(tmp, config);
-
 			if (cb) {
-				cb(null, tmp);
+				cb(null, getConfigData(config));
 			}
-			return tmp;
+			return getConfigData(config);
 		}
 
 		myObject.getContainerData = function(cb){
@@ -7128,13 +7394,10 @@
 		}
 
 		myObject.getCanvasData = function(cb){
-			var tmp = {};
-			copyObject(tmp, canvasState);
-
 			if (cb) {
-				cb(null, tmp);
+				cb(null, getCanvasData(canvasState));
 			}
-			return tmp;
+			return getCanvasData(canvasState);
 		}
 
 		myObject.getCacheData = function(cb){
@@ -7157,7 +7420,7 @@
 				return false;
 			}
 
-			var tmp = getAdjustedDataById(id);
+			var tmp = getDataById(id);
 
 			if (cb) {
 				cb(null, tmp);
@@ -7168,7 +7431,9 @@
 		myObject.getImageDataAll = function(cb){
 			var tmp = [];
 			imageStates.forEach(function(state){
-				tmp.push(getAdjustedDataById(state.id));
+				tmp.push(
+					getDataByState(state)
+				);
 			});
 
 			if (cb) {
@@ -7207,7 +7472,7 @@
 			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
-			pushSubCache(recent.id);
+			saveSubCache(recent.id);
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
@@ -7220,9 +7485,9 @@
 			setObject(clone, state);
 
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.redo = function(cb){
@@ -7255,7 +7520,7 @@
 			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
-			pushUndoCache(recent.id);
+			saveUndoCache(recent.id);
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
@@ -7268,9 +7533,9 @@
 			setObject(clone, state);
 
 			if (cb) {
-				cb(null, state.id);
+				cb(null, getDataByState(state));
 			}
-			return state.id;
+			return getDataByState(state);
 		}
 
 		myObject.export = function(id, cb){
@@ -7308,7 +7573,7 @@
 
 				return elem;
 			}).map(function(elem){
-				return getAdjustedDataById(elem.id);
+				return getDataByState(elem);
 			});
 
 			if (thisCb) {
@@ -7398,7 +7663,7 @@
 						if (err) {
 							results.push({
 								err: err,
-								id: null
+								res: null
 							});
 
 							count++;
@@ -7415,7 +7680,7 @@
 
 							results.push({
 								err: "Image element not found",
-								id: null
+								res: null
 							});
 
 							count++;
@@ -7428,7 +7693,7 @@
 
 							results.push({
 								err: "ID duplicated",
-								id: null
+								res: null
 							});
 
 							count++;
@@ -7439,7 +7704,7 @@
 						var fittedState = getFittedState(thisState);
 
 						// save cache
-						pushUndoCache(state.id, true);
+						saveUndoCache(state.id, true);
 
 						// save state
 						setState(state, fittedState);
@@ -7450,7 +7715,7 @@
 
 						results.push({
 							err: null,
-							id: state.id
+							res: getDataByState(state)
 						});
 
 						count++;
@@ -7470,22 +7735,22 @@
 			window.removeEventListener("resize", windowResizeEvent, false);
 			window.removeEventListener("scroll", windowScrollEvent, false);
 
-			if (config.dropSpace !== undefined) {
-				if ([
-					"window",
-					"document",
-					"page",
-					"screen",
-					"all",
-					"body"
-				].indexOf(config.dropSpace) > -1) {
-					document.removeEventListener('dragenter', handlers.preventDefaults, false);
-					document.removeEventListener('dragleave', handlers.preventDefaults, false);
-					document.removeEventListener('dragover', handlers.preventDefaults, false);
-					document.removeEventListener('drop', handlers.preventDefaults, false);
-					document.removeEventListener('drop', handlers.dropImages, false);
-				}
-			}
+			// if (config.dropSpace !== undefined) {
+			// 	if ([
+			// 		"window",
+			// 		"document",
+			// 		"page",
+			// 		"screen",
+			// 		"all",
+			// 		"body"
+			// 	].indexOf(config.dropSpace) > -1) {
+			// 		document.removeEventListener('dragenter', handlers.preventDefaults, false);
+			// 		document.removeEventListener('dragleave', handlers.preventDefaults, false);
+			// 		document.removeEventListener('dragover', handlers.preventDefaults, false);
+			// 		document.removeEventListener('drop', handlers.preventDefaults, false);
+			// 		document.removeEventListener('drop', handlers.dropImages, false);
+			// 	}
+			// }
 
 			containerObject.parentNode.removeChild(containerObject);
 
@@ -7514,7 +7779,7 @@
 			onResize = false;
 			onRotate = false;
 			onFlip = false;
-			onFreeze = false;
+			onFrozen = false;
 			onDraw = false;
 
 			sourceId = "canvaaas-" + getShortId() + "-";
