@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.7
+ * 0.1.8
  * 
  * eeecheol@gmail.com
  * 
@@ -129,6 +129,7 @@
 		var onFlip = false;
 		var onFrozen = false;
 		var onDraw = false;
+		var onDrawRect = false;
 
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
@@ -1719,6 +1720,9 @@
 		}
 
 		function getDataByState(state) {
+			if (!state) {
+				return false;
+			}
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
 			var tmp = {};
@@ -1894,6 +1898,7 @@
 				opacity,
 				index,
 				transform = "",
+				backgroundColor,
 				isImage = false;
 
 			if (
@@ -1910,6 +1915,7 @@
 			height = state.height + "px";
 			index = state.index;
 			opacity = state.opacity;
+			backgroundColor = state.backgroundColor;
 
 			if (state.scaleX === -1) {
 				transform += "scaleX(" + state.scaleX + ")";
@@ -1927,10 +1933,15 @@
 			elem.style.width = width;
 			elem.style.height = height;
 			elem.style.transform = transform;
+			elem.style.backgroundColor = backgroundColor;
 
 			if (isImage === true) {
 
-				elem.querySelector("img").style.opacity = opacity;
+				var img = elem.querySelector("img");
+
+				if (img) {
+					img.style.opacity = opacity;
+				}
 
 				if (!state.editable) {
 					if (!elem.classList.contains(classNames.uneditable)) {
@@ -2003,16 +2014,13 @@
 			}
 
 			var tmpState = {};
-			var res = copyObject(tmpState, state);
-			if (!res) {
-				return false;
-			}
+			copyObject(tmpState, state);
 
 			var tmp = {};
 			tmp.id = id;
 			tmp.state = tmpState;
-			tmp.sourceClass = source.className.replace(" focus", "").split(' ');
-			tmp.cloneClass = clone.className.replace(" focus", "").split(' ');
+			tmp.sourceClass = source.className.replace(" "+classNames.onFocused, "").split(' ');
+			tmp.cloneClass = clone.className.replace(" "+classNames.onFocused, "").split(' ');
 			tmp.updatedAt = Date.now();
 
 			undoCaches.push(tmp);
@@ -2021,14 +2029,14 @@
 				undoCaches.shift();
 			}
 
-			if (clearRedoCaches === true) {
+			if (clearRedoCaches) {
 				redoCaches = [];
 			}
 			
 			return true;
 		}
 
-		function saveSubCache(id) {
+		function saveRedoCache(id) {
 			var source = getSourceById(id);
 			var clone = getCloneById(id);
 			var state = getStateById(id);
@@ -2038,16 +2046,13 @@
 			}
 
 			var tmpState = {};
-			var res = copyObject(tmpState, state);
-			if (!res) {
-				return false;
-			}
+			copyObject(tmpState, state);
 
 			var tmp = {};
 			tmp.id = id;
 			tmp.state = tmpState;
-			tmp.sourceClass = source.className.replace(" focus", "").split(' ');
-			tmp.cloneClass = clone.className.replace(" focus", "").split(' ');
+			tmp.sourceClass = source.className.replace(" "+classNames.onFocused, "").split(' ');
+			tmp.cloneClass = clone.className.replace(" "+classNames.onFocused, "").split(' ');
 			tmp.updatedAt = Date.now();
 
 			redoCaches.push(tmp);
@@ -2084,7 +2089,6 @@
 				source.addEventListener("mousedown", handlers.startMove, false);
 				source.addEventListener("touchstart", handlers.startMove, false);
 				source.addEventListener("wheel", handlers.startWheelZoom, false);
-
 
 				clone.removeEventListener("mousedown", handlers.startFocusIn, false);
 				clone.removeEventListener("touchstart", handlers.startFocusIn, false);
@@ -2632,8 +2636,6 @@
 			return true;
 		}
 
-
-
 		// 
 		// calculate
 		// 
@@ -3073,13 +3075,6 @@
 		}
 
 		function drawCanvas(options) {
-			if (
-				typeof(options) !== "object" ||
-				options === null
-			) {
-				return false;
-			}
-
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
 
@@ -3149,8 +3144,8 @@
 			var virtualImg = new Image();
 			virtualImg.src = originalImg.src;
 
-			virtualImg.onerror = function(e) {
-				return cb(e);
+			virtualImg.onerror = function(err) {
+				return cb(err);
 			}
 			virtualImg.onload = function(e) {
 				var maxWidth = config.maxDrawWidth || 99999;
@@ -3159,41 +3154,39 @@
 				var minHeight = config.minDrawHeight || 0;
 
 				// original
-				var scaleRatio = canvasState.width / canvas.width;
-				var adjW = state.width / scaleRatio;
-				var adjH = state.height / scaleRatio;
-				var adjX = state.x / scaleRatio;
-				var adjY = state.y / scaleRatio;
+				var scaleRatio = canvas.width / canvasState.width;
+				var adjW = state.width * scaleRatio;
+				var adjH = state.height * scaleRatio;
+				var adjX = state.x * scaleRatio;
+				var adjY = state.y * scaleRatio;
 
-				// original > rotate
-				var adjSizes = getRotatedRect(
+				// original & rotate
+				var rotatedSizes = getRotatedRect(
 					adjW,
 					adjH,
 					state.rotate
 				);
-				var rotatedWidth = Math.floor(adjSizes[0]);
-				var rotatedHeight = Math.floor(adjSizes[1]);
-				var rotatedLeft = Math.floor(adjX - (adjSizes[0] * 0.5));
-				var rotatedTop = Math.floor(adjY - (adjSizes[1] * 0.5));
+				var rotatedWidth = Math.floor(rotatedSizes[0]);
+				var rotatedHeight = Math.floor(rotatedSizes[1]);
+				var rotatedLeft = Math.floor(adjX - (rotatedSizes[0] * 0.5));
+				var rotatedTop = Math.floor(adjY - (rotatedSizes[1] * 0.5));
 
+				// original & rotate & resize
 				var maxSizes = getFittedRect(
 					maxWidth,
 					maxHeight,
 					rotatedWidth / rotatedHeight,
 				);
-
 				var minSizes = getFittedRect(
 					minWidth,
 					minHeight,
 					rotatedWidth / rotatedHeight,
 					'cover'
 				);
-
-				// original > rotate > resize
 				var canvasWidth = Math.min(maxSizes[0], Math.max(minSizes[0], rotatedWidth));
 				var canvasHeight = Math.min(maxSizes[1], Math.max(minSizes[1], rotatedHeight));
 
-				// orignal > resize
+				// orignal & resize
 				var scaleRatioX = canvasWidth / rotatedWidth;
 				var scaleRatioY = canvasHeight / rotatedHeight;
 				var absWidth = adjW * scaleRatioX;
@@ -3332,7 +3325,7 @@
 					setState(canvasState, {
 						originalWidth: newImage.width,
 						originalHeight: newImage.height
-					})
+					});
 
 					var resA = initContainer();
 					if (!resA) {
@@ -3666,9 +3659,6 @@
 			canvasState.smoothingEnabled = false; // false, true
 			canvasState.backgroundColor = "#FFFFFF";
 
-			// set canvas background
-			canvasObject.style.backgroundColor = canvasState.backgroundColor;
-
 			if (config.checker === true) {
 				if (!canvasObject.classList.contains(classNames.onChecker)) {
 					canvasObject.classList.add(classNames.onChecker);
@@ -3687,33 +3677,6 @@
 			containerObject.addEventListener('dragover', handlers.preventDefaults, false);
 			containerObject.addEventListener('drop', handlers.preventDefaults, false);
 			containerObject.addEventListener('drop', handlers.dropImages, false);
-
-			// deprecated
-			// if (config.dropSpace !== undefined) {
-			// 	if ([
-			// 		"canvas",
-			// 		"container"
-			// 	].indexOf(config.dropSpace) > -1) {
-			// 		containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
-			// 		containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
-			// 		containerObject.addEventListener('dragover', handlers.preventDefaults, false);
-			// 		containerObject.addEventListener('drop', handlers.preventDefaults, false);
-			// 		containerObject.addEventListener('drop', handlers.dropImages, false);
-			// 	} else if ([
-			// 		"window",
-			// 		"document",
-			// 		"page",
-			// 		"screen",
-			// 		"all",
-			// 		"body"
-			// 	].indexOf(config.dropSpace) > -1) {
-			// 		document.addEventListener('dragenter', handlers.preventDefaults, false);
-			// 		document.addEventListener('dragleave', handlers.preventDefaults, false);
-			// 		document.addEventListener('dragover', handlers.preventDefaults, false);
-			// 		document.addEventListener('drop', handlers.preventDefaults, false);
-			// 		document.addEventListener('drop', handlers.dropImages, false);
-			// 	}
-			// }
 
 			// console.log("canvaaas.js initialized", config);
 
@@ -3771,7 +3734,7 @@
 
 			var index = thisFiles.length;
 			var count = 0;
-			var tmps = [];
+			var results = [];
 
 			onUpload = true;
 
@@ -3784,16 +3747,15 @@
 							if (config.upload) {
 								config.upload(err);
 							}
+							results.push({
+								err: err
+							});
 						} else {
 							if (config.upload) {
 								config.upload(null, res);
 							}
+							results.push(getDataById(res));
 						}
-						tmps.push({
-							err: err,
-							id: res
-						});
-
 						count++;
 						recursiveFunc();
 					});
@@ -3801,7 +3763,7 @@
 					onUpload = false;
 
 					if (cb) {
-						cb(null, tmps);
+						cb(null, results);
 					}
 				}
 			}
@@ -6558,21 +6520,17 @@
 					var tmp = getDataById(arr[count]);
 					var res = removeObjectById(arr[count]);
 					if (!res) {
-						results.push({
-							err: "`removeObjectById()` error",
-							res: null
-						});
 						if (config.remove) {
 							config.remove("`removeObjectById()` error");
-						} 
-					} else {
+						}
 						results.push({
-							err: null,
-							res: tmp
+							err: "`removeObjectById()` error"
 						});
+					} else {
 						if (config.remove) {
 							config.remove(null, tmp);
 						} 
+						results.push(tmp);
 					}
 					count++;
 					recursiveFunc();
@@ -6636,8 +6594,7 @@
 
 				if (!existsId(newState.id)) {
 					results.push({
-						err: "Image not found",
-						res: undefined
+						err: "Image not found"
 					});
 					continue;
 				}
@@ -6648,8 +6605,7 @@
 
 				if (!source || !clone || !state) {
 					results.push({
-						err: "Image not found",
-						res: undefined
+						err: "Image not found"
 					});
 					continue;
 				}
@@ -6664,10 +6620,7 @@
 				setObject(source, state);
 				setObject(clone, state);
 
-				results.push({
-					err: undefined,
-					res: getDataByState(state)
-				});
+				results.push(getDataByState(state));
 			}
 
 			if (cb) {
@@ -7065,7 +7018,8 @@
 			}
 
 			canvasState.backgroundColor = colour;
-			canvasObject.style.backgroundColor = colour;
+
+			setObject(canvasObject, canvasState);
 
 			if (config.canvas) {
 				config.canvas(null, getCanvasData(canvasState));
@@ -7315,9 +7269,7 @@
 			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawable === true) {
-					drawables.push(
-						getDataByState(imageStates[i])
-					);
+					drawables.push(getDataByState(imageStates[i]));
 				}
 			}
 
@@ -7350,11 +7302,13 @@
 					// recursive
 					drawImage(canvas, drawables[count].id, function(err) {
 						if (err) {
-							drawables[count].err = err;
+							drawResults.push({
+								err: err,
+								id: drawables[count].id
+							});
+						} else {
+							drawResults.push(drawables[count]);
 						}
-
-						drawResults.push(drawables[count]);
-
 						count++;
 						recursiveFunc();
 					});
@@ -7489,15 +7443,29 @@
 		myObject.getImageDataAll = function(cb){
 			var tmp = [];
 			imageStates.forEach(function(state){
-				tmp.push(
-					getDataByState(state)
-				);
+				tmp.push(getDataByState(state));
 			});
 
 			if (cb) {
 				cb(null, tmp);
 			}
 			return tmp;
+		}
+
+		myObject.getImageElement = function(id, cb){
+			if (!id) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var elem = getSourceById(id);
+
+			if (cb) {
+				cb(null, elem);
+			}
+			return elem;
 		}
 
 		myObject.undo = function(cb){
@@ -7530,7 +7498,7 @@
 			var clone = getCloneById(recent.id);
 			var state = getStateById(recent.id);
 
-			saveSubCache(recent.id);
+			saveRedoCache(recent.id);
 
 			source.className = recent.sourceClass.join(" ");
 			clone.className = recent.cloneClass.join(" ");
@@ -7720,8 +7688,7 @@
 					renderImage(thisUrl, function(err, res) {
 						if (err) {
 							results.push({
-								err: err,
-								res: null
+								err: err
 							});
 
 							count++;
@@ -7737,8 +7704,7 @@
 							removeObjectById(res);
 
 							results.push({
-								err: "Image element not found",
-								res: null
+								err: "Image element not found"
 							});
 
 							count++;
@@ -7750,8 +7716,7 @@
 							removeObjectById(res);
 
 							results.push({
-								err: "ID duplicated",
-								res: null
+								err: "ID duplicated"
 							});
 
 							count++;
@@ -7771,10 +7736,7 @@
 						setObject(source, state);
 						setObject(clone, state);
 
-						results.push({
-							err: null,
-							res: getDataByState(state)
-						});
+						results.push(getDataByState(state));
 
 						count++;
 						recursiveFunc();
@@ -7792,23 +7754,6 @@
 		myObject.destroy = function(cb){
 			window.removeEventListener("resize", windowResizeEvent, false);
 			window.removeEventListener("scroll", windowScrollEvent, false);
-
-			// if (config.dropSpace !== undefined) {
-			// 	if ([
-			// 		"window",
-			// 		"document",
-			// 		"page",
-			// 		"screen",
-			// 		"all",
-			// 		"body"
-			// 	].indexOf(config.dropSpace) > -1) {
-			// 		document.removeEventListener('dragenter', handlers.preventDefaults, false);
-			// 		document.removeEventListener('dragleave', handlers.preventDefaults, false);
-			// 		document.removeEventListener('dragover', handlers.preventDefaults, false);
-			// 		document.removeEventListener('drop', handlers.preventDefaults, false);
-			// 		document.removeEventListener('drop', handlers.dropImages, false);
-			// 	}
-			// }
 
 			containerObject.parentNode.removeChild(containerObject);
 

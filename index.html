@@ -316,10 +316,22 @@
 			<a href="javascript:void(0)" class="header-subject">Edit</a>
 			<ul class="header-list hidden">
 				<li><a id="undo" href="javascript:void(0)" onclick="
-					canvaaas.undo()
+					canvaaas.undo(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						checkCaches();
+					})
 				">Undo</a></li>
 				<li><a id="redo" href="javascript:void(0)" onclick="
-					canvaaas.redo()
+					canvaaas.redo(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						checkCaches();
+					})
 				">Redo</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -903,6 +915,8 @@
 					return false;
 				}
 
+				checkCaches();
+
 				console.log("config.upload callback", res);
 			},
 			canvas: function(err, res) {
@@ -913,6 +927,7 @@
 
 				writeContainerData();
 				writeCanvasData();
+				checkCaches();
 
 				console.log("config.canvas callback", res);
 			},
@@ -921,6 +936,8 @@
 					console.log(err);
 					return false;
 				}
+
+				checkCaches();
 
 				console.log("config.draw callback", res);
 			},
@@ -932,6 +949,8 @@
 
 				writeImageData(res);
 
+				checkCaches();
+
 				console.log("config.focusIn callback", res);
 			}, 
 			focusOut: function(err, res){
@@ -941,6 +960,8 @@
 				}
 
 				writeImageData();
+
+				checkCaches();
 
 				console.log("config.focusOut callback", res);
 			},
@@ -1085,11 +1106,10 @@
 			writeContainerData();
 			writeCanvasData();
 
+			checkCaches();
+
 			console.log("import callback", res);
-		})
-
-
-
+		});
 
 		// 
 		// log
