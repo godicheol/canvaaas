@@ -3854,10 +3854,10 @@
 				setObject(clone, state);
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, getDataByState(state));
 				}
 				if (thisCb) {
-					thisCb(null, res);
+					thisCb(null, getDataByState(state));
 				}
 			});
 		}
@@ -3977,10 +3977,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, getDataByState(state));
 				}
 				if (cb) {
-					cb(null, res);
+					cb(null, getDataByState(state));
 				}
 			});
 		}
