@@ -232,23 +232,24 @@
 					var exportedCanvasData;
 				</script>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas(
-						exportedCanvasData.originalWidth,
-						exportedCanvasData.originalHeight,
-						function(err, res){
+					canvaaas.canvas({
+						width: exportedCanvasData.originalWidth,
+						height: exportedCanvasData.originalHeight,
+						unit: 'px',
+						dpi: 1
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						canvaaas.import(exportedData, function(err, res){
 							if (err) {
 								console.log(err);
 								return false;
 							}
-							canvaaas.import(exportedData, function(err, res){
-								if (err) {
-									console.log(err);
-									return false;
-								}
-								console.log('import callback', res);
-							})
-						}
-					)
+							console.log('import callback', res);
+						})
+					})
 				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -531,10 +532,12 @@
 				">Thaw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas(
-						window.prompt('Type new canvas width(px).', '4096'),
-						window.prompt('Type new canvas height(px).', '4096')
-					)
+					canvaaas.canvas({
+						width: window.prompt('Type width', '6'),
+						height: window.prompt('Type height', '4'),
+						unit: window.prompt('Type unit', 'in'),
+						dpi: window.prompt('Type dpi', '300'),
+					})
 				">Canvas Size</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="

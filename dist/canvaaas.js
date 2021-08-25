@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.8
+ * 0.1.9
  * 
  * eeecheol@gmail.com
  * 
@@ -29,7 +29,7 @@
 				"svg+xml",
 				"tiff",
 				"tif"
-			], // array, jpg, jpeg, ,gif, png, webp, svg...
+			], // array
 
 			editable: true, // boolean
 
@@ -194,9 +194,6 @@
 			},
 
 			dropImages: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
 				var dt = e.dataTransfer;
 				var files = dt.files;
 
@@ -2970,6 +2967,99 @@
 			} else {
 				return false;
 			}
+		}
+
+		function convertToPx(width, height, unit, dpi) {
+			if (!isNumeric(width)) {
+				return false;
+			}
+			if (!isNumeric(height)) {
+				return false;
+			}
+			if (
+				typeof(unit) !== "string" ||
+				unit === ""
+			) {
+				return false;
+			}
+			if (!isNumeric(dpi)) {
+				return false;
+			}
+
+			var w, h;
+			switch(unit.toLowerCase()) {
+				case "nm":
+				case "nanometer":
+				case "nanometers":
+					w = parseFloat(width) * 3.937e-8;
+					h = parseFloat(height) * 3.937e-8;
+					break;
+				case "mm":
+				case "millimeter":
+				case "millimeters":
+					w = parseFloat(width) * 0.0393701;
+					h = parseFloat(height) * 0.0393701;
+					break;
+				case "cm":
+				case "centimeter":
+				case "centimeters":
+					w = parseFloat(width) * 0.393701;
+					h = parseFloat(height) * 0.393701;
+					break;
+				case "m":
+				case "meter":
+				case "meters":
+					w = parseFloat(width) * 39.3701;
+					h = parseFloat(height) * 39.3701;
+					break;
+				case "km":
+				case "kilometer":
+				case "kilometers":
+					w = parseFloat(width) * 39370.1;
+					h = parseFloat(height) * 39370.1;
+					break;
+				case "in":
+				case "inch":
+				case "inches":
+					w = parseFloat(width);
+					h = parseFloat(height);
+					break;
+				case "mile":
+				case "miles":
+					w = parseFloat(width) * 63360;
+					h = parseFloat(height) * 63360;
+					break;
+				case "yard":
+				case "yards":
+					w = parseFloat(width) * 36;
+					h = parseFloat(height) * 36;
+					break;
+				case "nautical mile":
+				case "nauticalmile":
+				case "nmi":
+					w = parseFloat(width) * 72913.4;
+					h = parseFloat(height) * 72913.4;
+					break;
+				case "px":
+				case "pixel":
+				case "pixels":
+					w = parseFloat(width);
+					h = parseFloat(height);
+					dpi = 1;
+					break;
+			}
+
+			if (
+				!w ||
+				!h
+			) {
+				return false;
+			}
+
+			w *= parseFloat(dpi);
+			h *= parseFloat(dpi);
+
+			return [w, h]
 		}
 
 		function getShortId() {
@@ -6781,10 +6871,23 @@
 		// canvas
 		// 
 
-		myObject.canvas = function(w, h, cb) {
+		myObject.canvas = function(options, cb) {
 			if (
-				!isNumeric(w) ||
-				!isNumeric(h)
+				typeof(options) !== "object" ||
+				options === null
+			) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			if (
+				!isNumeric(options.width) ||
+				!isNumeric(options.height)
 			) {
 				if (config.canvas) {
 					config.canvas("Argument error");
@@ -6807,8 +6910,26 @@
 
 			var oldW = canvasState.originalWidth;
 			var oldH = canvasState.originalHeight;
-			var newW = parseFloat(w);
-			var newH = parseFloat(h);
+
+			var inputW = parseFloat(options.width);
+			var inputH = parseFloat(options.height);
+			var inputU = options.unit ? options.unit : "px";
+			var inputD = isNumeric(options.dpi) ? parseFloat(options.dpi) : 300;
+
+			var sizes = convertToPx(inputW, inputH, inputU, inputD);
+
+			if (!sizes) {
+				if (config.canvas) {
+					config.canvas("Argument error");
+				}
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
+			}
+
+			var newW = sizes[0];
+			var newH = sizes[1];
 
 			setState(canvasState, {
 				originalWidth: newW,
