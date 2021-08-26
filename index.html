@@ -664,29 +664,39 @@
 		<img
 			id="image-1"
 			src="/img/1.jpg"
-			data-id = "test-1",
-	        data-type = "url",
-	        data-src = "./img/1.jpeg",
-	        data-index = "1",
-	        data-width = "7858.705673285891",
-	        data-height = "5239.137115523928",
-	        data-x = "2037.033467202142",
-	        data-y = "1529.8313253012047",
-	        data-rotate = "-338.99078178925924",
-	        data-scaleX = "1",
-	        data-scaleY = "-1",
-	        data-opacity = "1",
-	        data-lockAspectRatio = "true",
-	        data-focusable = "true",
-	        data-editable = "true",
-	        data-drawable = "true",
-	        data-indexable = "true",
-		>
+			data-id = "test-1"
+	        data-type = "url"
+	        data-src = "./img/1.jpeg"
+	        data-index = "1"
+	        data-width = "7858.705673285891"
+	        data-height = "5239.137115523928"
+	        data-x = "2037.033467202142"
+	        data-y = "1529.8313253012047"
+	        data-rotate = "-338.99078178925924"
+	        data-scaleX = "1"
+	        data-scaleY = "-1"
+	        data-opacity = "1"
+	        data-lockAspectRatio = "true"
+	        data-focusable = "true"
+	        data-editable = "true"
+	        data-drawable = "true"
+	        data-indexable = "true">
 		<img 
 			id="image-2" 
 			src="/img/1.jpeg" 
-			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusable":true,"editable":true,"drawable":true,"indexable":true}'
-		>
+			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusable":true,"editable":true,"drawable":true,"indexable":true}'>
+		<img
+			id="image-11"
+			src="/img/1.jpg"
+	        data-width = "7858.705673285891">
+		<img
+			id="image-12"
+			src="/img/1.jpg">
+		<img 
+			id="image-21" 
+			src="/img/1.jpeg" 
+			data-state='{"width":7858.705673285891}'>
+
 	</div>
 
 	<script>
@@ -1070,10 +1080,25 @@
 			},
 		}
 
-		// #0 config
+		// #1 config
 		canvaaas.config(testConfig1);
 
-		// #1 init
+		// #1.1 canvas size
+		// canvaaas.canvas({
+		// 	width: 6,
+		// 	height: 4,
+		// 	unit: "in",
+		// 	dpi: 300
+		// });
+
+		// #1.1 canvas size
+		canvaaas.canvas({
+			width: 7858.705673285892,
+			height: 5239.137115523928,
+			unit: "px"
+		});
+
+		// #2 init
 		canvaaas.init(elem, function(err, res){
 			if (err) {
 				console.log(err);
@@ -1083,15 +1108,14 @@
 			console.log("init callback", res);
 		});
 
-		// #2 init canvas
+		// #2.1 canvas size
 		// canvaaas.canvas({
-		// 	width: 6,
-		// 	height: 4,
-		// 	unit: "in",
-		// 	dpi: 300
+		// 	width: 7858.705673285892,
+		// 	height: 5239.137115523928,
+		// 	unit: "px"
 		// });
 
-		// #3.1 import object
+		// #3 import object
 		// canvaaas.import(testImportData, function(err, res){
 		// 	if (err) {
 		// 		console.log(err);
@@ -1104,7 +1128,7 @@
 		// 	console.log("import callback", res);
 		// });
 
-		// #3.2 import string
+		// #3 import string
 		canvaaas.import(testImportDataString, function(err, res){
 			if (err) {
 				console.log(err);
@@ -1120,7 +1144,7 @@
 		});
 
 		// 
-		// log
+		// logger
 		// 
 
 		function writeContainerData(){
