@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.1.9
+ * 0.2.0
  * 
  * eeecheol@gmail.com
  * 
@@ -35,6 +35,8 @@
 
 			checker: true, // boolean
 
+			shortcut: false, // boolean
+
 			magneticRange: 5, // number, px
 
 			maxNumberOfImages: 999, // number
@@ -51,13 +53,13 @@
 
 			maxContainerHeight: 0.7, // number, px, 0 ~ 1
 
-			minDrawWidth: 64, // number, px
+			minCanvasWidth: 64, // number, px
 
-			minDrawHeight: 64, // number, px
+			minCanvasHeight: 64, // number, px
 
-			maxDrawWidth: 4096, // number, px, for Mobile
+			maxCanvasWidth: 4096, // number, px, for Mobile
 
-			maxDrawHeight: 4096, // number, px, for Mobile
+			maxCanvasHeight: 4096, // number, px, for Mobile
 
 			minImageWidth: 64, // number, px
 
@@ -188,12 +190,15 @@
 
 		var handlers = {
 
-			preventDefaults: function(e) {
+			stopEvents: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			},
 
 			dropImages: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
 				var dt = e.dataTransfer;
 				var files = dt.files;
 
@@ -239,49 +244,9 @@
 				}
 			},
 
-			isOutside: function(e) {
-				if (onMove === true) {
-					if (e.touches !== undefined) {
-						if (e.touches.length === 2) {
-							handlers.startPinchZoom(e);
-							return false;
-						}
-					}
-				}
-
-				if (
-					e.target.tagName === "BUTTON" ||
-					e.target.tagName === "INPUT" ||
-					e.target.tagName === "LABEL" ||
-					e.target.tagName === "TEXTAREA" ||
-					e.target.tagName === "SELECT" ||
-					e.target.tagName === "OPTION" ||
-					e.target.tagName === "A"
-				) {
-					return false;
-				}
-
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (
-					!e.target.classList.contains("canvaaas-image") &&
-					!e.target.classList.contains("canvaaas-clone")
-				) {
-					if (eventState.target) {
-						var id = getIdByObject(eventState.target);
-						setFocusOut(id);
-
-						if (config.focusOut) {
-							config.focusOut(null, getDataById(id));
-						}
-					}
-				}
-			},
-
 			keydown: function(e) {
 				e.preventDefault();
-				e.stopPropagation();
+				// e.stopPropagation();
 
 				var source = eventState.target;
 				var clone = getCloneByObject(source);
@@ -382,27 +347,39 @@
 			},
 
 			startFocusIn: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				// fix startZoom
+				if (onMove === true) {
+					return handlers.startMove(e);
+				}
+
 				if (!config.editable) {
 					return false;
 				}
 
-				if (onMove === true) {
+				var source;
+				try {
+					if (!e.target.classList.contains("canvaaas-image")) {
+						if (!e.target.parentNode.classList.contains("canvaaas-image")) {
+							return false;
+						} else {
+							source = e.target.parentNode;
+						}
+					} else {
+						source = e.target;
+					}
+				} catch (err) {
 					return false;
 				}
 
-				e.preventDefault();
-				e.stopPropagation();
-
-				var source;
-				if (!e.target.classList.contains("canvaaas-image")) {
-					if (!e.target.parentNode.classList.contains("canvaaas-image")) {
+				if (eventState.target) {
+					if (source.isSameNode(eventState.target)) {
 						return false;
-					} else {
-						source = e.target.parentNode;
 					}
-				} else {
-					source = e.target;
 				}
+
 				var state = getStateByObject(source);
 
 				if (!source || !state) {
@@ -414,10 +391,6 @@
 				}
 
 				if (eventState.target) {
-					if (source.isSameNode(eventState.target)) {
-						return false;
-					}
-
 					var oldId = getIdByObject(eventState.target);
 					setFocusOut(oldId);
 
@@ -433,6 +406,50 @@
 				if (config.focusIn) {
 					config.focusIn(null, getDataByState(state));
 				}
+			},
+
+			startFocusOut: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (!eventState.target) {
+					return false;
+				}
+
+				if (onMove === true) {
+					if (e.touches !== undefined) {
+						if (e.touches.length === 2) {
+							handlers.startPinchZoom(e);
+							return false;
+						}
+					}
+				}
+
+				if (
+					e.target.tagName === "BUTTON" ||
+					e.target.tagName === "INPUT" ||
+					e.target.tagName === "LABEL" ||
+					e.target.tagName === "TEXTAREA" ||
+					e.target.tagName === "SELECT" ||
+					e.target.tagName === "OPTION" ||
+					e.target.tagName === "A"
+				) {
+					return false;
+				}
+
+				try {
+					if (!eventState.target.isSameNode(e.target)) {
+						var id = getIdByObject(eventState.target);
+						setFocusOut(id);
+
+						if (config.focusOut) {
+							config.focusOut(null, getDataById(id));
+						}
+					}
+				} catch (err) {
+					return false;
+				}
+
 			},
 
 			startMove: function(e) {
@@ -1771,10 +1788,12 @@
 			tmp.type = state.type;
 			tmp.src = state.src;
 			tmp.index = state.index;
+			tmp.originalAspectRatio = getAspectRatio(state.originalWidth, state.originalHeight);
 			tmp.originalWidth = state.originalWidth;
 			tmp.originalHeight = state.originalHeight;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
+			tmp.aspectRatio = getAspectRatio(tmp.width, tmp.height);
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
@@ -1797,16 +1816,20 @@
 				return false;
 			}
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
+			var oas = getAspectRatio(state.originalWidth, state.originalHeight);
+			var as = getAspectRatio(state.width / scaleRatio, state.height / scaleRatio);
 
 			var tmp = {};
 			tmp.id = state.id;
 			tmp.type = state.type;
 			tmp.src = state.src;
 			tmp.index = state.index;
+			tmp.originalAspectRatio = oas[0] + ":" + oas[1];
 			tmp.originalWidth = state.originalWidth;
 			tmp.originalHeight = state.originalHeight;
 			tmp.width = state.width / scaleRatio;
 			tmp.height = state.height / scaleRatio;
+			tmp.aspectRatio = as[0] + ":" + as[1];
 			tmp.x = state.x / scaleRatio;
 			tmp.y = state.y / scaleRatio;
 			tmp.left = (state.x - (state.width * 0.5)) / scaleRatio;
@@ -2122,10 +2145,12 @@
 				clone.addEventListener("touchstart", handlers.startMove, false);
 				clone.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				document.addEventListener("keydown", handlers.keydown, false);
-				
-				document.addEventListener("mousedown", handlers.isOutside, false);
-				document.addEventListener("touchstart", handlers.isOutside, false);
+				if (config.shortcut) {
+					document.addEventListener("keydown", handlers.keydown, false);
+				}
+
+				document.addEventListener("mousedown", handlers.startFocusOut, false);
+				document.addEventListener("touchstart", handlers.startFocusOut, false);
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -2173,10 +2198,12 @@
 				clone.addEventListener("mousedown", handlers.startFocusIn, false);
 				clone.addEventListener("touchstart", handlers.startFocusIn, false);
 
-				document.removeEventListener("keydown", handlers.keydown, false);
+				if (config.shortcut) {
+					document.removeEventListener("keydown", handlers.keydown, false);
+				}
 
-				document.removeEventListener("mousedown", handlers.isOutside, false);
-				document.removeEventListener("touchstart", handlers.isOutside, false);
+				document.removeEventListener("mousedown", handlers.startFocusOut, false);
+				document.removeEventListener("touchstart", handlers.startFocusOut, false);
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -2202,10 +2229,10 @@
 				"minContainerHeight",
 				"maxContainerWidth",
 				"maxContainerHeight",
-				"minDrawWidth",
-				"minDrawHeight",
-				"maxDrawWidth",
-				"maxDrawHeight",
+				"minCanvasWidth",
+				"minCanvasHeight",
+				"maxCanvasWidth",
+				"maxCanvasHeight",
 				"minImageWidth",
 				"minImageHeight",
 				"maxImageWidth",
@@ -2244,6 +2271,9 @@
 			candidtaeKeys.forEach(function(elem){
 				tmp[elem] = obj[elem];
 			});
+
+			var as = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
+			tmp.aspectRatio = as[0] + ":" + as[1];
 
 			return tmp;
 		}
@@ -2344,12 +2374,17 @@
 			if (!obj) {
 				return false;
 			}
-			if (
-				!obj.classList.contains("canvaaas-image") &&
-				!obj.classList.contains("canvaaas-clone")
-			) {
+			try {
+				if (
+					!obj.classList.contains("canvaaas-image") &&
+					!obj.classList.contains("canvaaas-clone")
+				) {
+					return false;
+				}
+			} catch (err) {
 				return false;
 			}
+			
 			if (
 				obj.id === undefined ||
 				obj.id === null ||
@@ -2429,10 +2464,14 @@
 			if (!obj) {
 				return false;
 			}
-			if (
-				!obj.classList.contains("canvaaas-image") &&
-				!obj.classList.contains("canvaaas-clone")
-			) {
+			try {
+				if (
+					!obj.classList.contains("canvaaas-image") &&
+					!obj.classList.contains("canvaaas-clone")
+				) {
+					return false;
+				}
+			} catch (err) {
 				return false;
 			}
 			if (
@@ -2484,10 +2523,14 @@
 			if (!obj) {
 				return false;
 			}
-			if (
-				!obj.classList.contains("canvaaas-image") &&
-				!obj.classList.contains("canvaaas-clone")
-			) {
+			try {
+				if (
+					!obj.classList.contains("canvaaas-image") &&
+					!obj.classList.contains("canvaaas-clone")
+				) {
+					return false;
+				}
+			} catch (err) {
 				return false;
 			}
 			if (
@@ -2914,7 +2957,7 @@
 			}
 		}
 
-		function convertToPx(width, height, unit, dpi) {
+		function dimensionsToPx(width, height, unit, dpi) {
 			if (!isNumeric(width)) {
 				return false;
 			}
@@ -3005,6 +3048,38 @@
 			h *= parseFloat(dpi);
 
 			return [w, h]
+		}
+
+		function getAspectRatio(width, height, limited) {
+			var val = width / height;
+			var lim = limited || 50;
+
+			var lower = [0, 1];
+			var upper = [1, 0];
+
+			while (true) {
+				var mediant = [lower[0] + upper[0], lower[1] + upper[1]];
+
+				if (val * mediant[1] > mediant[0]) {
+					if (lim < mediant[1]) {
+						return upper;
+					}
+					lower = mediant;
+				} else if (val * mediant[1] == mediant[0]) {
+					if (lim >= mediant[1]) {
+						return mediant;
+					}
+					if (lower[1] < upper[1]) {
+						return lower;
+					}
+					return upper;
+				} else {
+					if (lim < mediant[1]) {
+						return lower;
+					}
+					upper = mediant;
+				}
+			}
 		}
 
 		function getShortId() {
@@ -3118,10 +3193,10 @@
 			var aspectRatio = options.width / options.height;
 			var fillStyle = options.backgroundColor || "#FFFFFF";
 
-			var maxWidth = config.maxDrawWidth || 99999;
-			var maxHeight = config.maxDrawHeight || 99999;
-			var minWidth = config.minDrawWidth || 0;
-			var minHeight = config.minDrawHeight || 0;
+			var maxWidth = config.maxCanvasWidth || 99999;
+			var maxHeight = config.maxCanvasHeight || 99999;
+			var minWidth = config.minCanvasWidth || 0;
+			var minHeight = config.minCanvasHeight || 0;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -3183,10 +3258,10 @@
 				return cb(err);
 			}
 			virtualImg.onload = function(e) {
-				var maxWidth = config.maxDrawWidth || 99999;
-				var maxHeight = config.maxDrawHeight || 99999;
-				var minWidth = config.minDrawWidth || 0;
-				var minHeight = config.minDrawHeight || 0;
+				var maxWidth = config.maxCanvasWidth || 99999;
+				var maxHeight = config.maxCanvasHeight || 99999;
+				var minWidth = config.minCanvasWidth || 0;
+				var minHeight = config.minCanvasHeight || 0;
 
 				// original
 				var scaleRatio = canvas.width / canvasState.width;
@@ -3604,10 +3679,10 @@
 			}
 
 			var aspectRatio = canvasState.originalWidth / canvasState.originalHeight;
-			var maxWidth = config.maxDrawWidth || 99999;
-			var maxHeight = config.maxDrawHeight || 99999;
-			var minWidth = config.minDrawWidth || 0;
-			var minHeight = config.minDrawHeight || 0;
+			var maxWidth = config.maxCanvasWidth || 99999;
+			var maxHeight = config.maxCanvasHeight || 99999;
+			var minWidth = config.minCanvasWidth || 0;
+			var minHeight = config.minCanvasHeight || 0;
 
 			var maxSizes = getFittedRect(
 				maxWidth,
@@ -3750,10 +3825,9 @@
 			window.addEventListener("resize", windowResizeEvent, false);
 			window.addEventListener("scroll", windowScrollEvent, false);
 
-			containerObject.addEventListener('dragenter', handlers.preventDefaults, false);
-			containerObject.addEventListener('dragleave', handlers.preventDefaults, false);
-			containerObject.addEventListener('dragover', handlers.preventDefaults, false);
-			containerObject.addEventListener('drop', handlers.preventDefaults, false);
+			containerObject.addEventListener('dragenter', handlers.stopEvents, false);
+			containerObject.addEventListener('dragleave', handlers.stopEvents, false);
+			containerObject.addEventListener('dragover', handlers.stopEvents, false);
 			containerObject.addEventListener('drop', handlers.dropImages, false);
 
 			// console.log("canvaaas.js initialized", config);
@@ -6869,7 +6943,7 @@
 			var inputU = options.unit || "px";
 			var inputD = isNumeric(options.dpi) ? parseFloat(options.dpi) : 300;
 
-			var sizes = convertToPx(inputW, inputH, inputU, inputD);
+			var sizes = dimensionsToPx(inputW, inputH, inputU, inputD);
 			if (!sizes) {
 				if (config.canvas) {
 					config.canvas("Argument error");
