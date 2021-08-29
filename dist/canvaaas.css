@@ -42,11 +42,11 @@
 /* image overlay */
 .canvaaas-image .canvaaas-overlay{
 	background-color: rgba(255,255,255);
-	opacity: 0.4;
+	opacity: 0.7;
 }
 .canvaaas-clone .canvaaas-overlay{
 	background-color: rgba(0,0,0);
-	opacity: 0.4;
+	opacity: 0.7;
 }
 
 /* image outline */

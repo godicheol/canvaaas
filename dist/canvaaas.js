@@ -1530,7 +1530,6 @@
 				isImage = true;
 			}
 
-
 			left = ( state.x - (state.width * 0.5) ) + "px";
 			top = ( state.y - (state.height * 0.5) ) + "px";
 			width = state.width + "px";
@@ -1998,40 +1997,45 @@
 				"dpi",
 			];
 
-			var tmpState = {};
-			stateKeys.forEach(function(elem){
-				var tmp = target.getAttribute("data-" + elem);
+			var thisAttrs = {};
+			for (var i = 0; i < stateKeys.length; i++) {
+				var j = stateKeys[i];
+				var tmp = target.getAttribute("data-" + j);
 				if (
 					tmp !== undefined &&
 					tmp !== null &&
 					tmp !== ""
 				) {
 					if (isNumeric(tmp)) {
-						tmpState[elem] = parseFloat(tmp);
+						thisAttrs[j] = parseFloat(tmp);
 					} else {
-						tmpState[elem] = tmp;
+						thisAttrs[j] = tmp;
 					}
 				}
-			});
+			}
 
-			if (tmpState.state) {
-				var tmp;
+
+			if (thisAttrs.state) {
+				var tmp = {};
 				try {
-					tmp = JSON.parse(tmpState.state);
-					tmp.map(function(elem){
-						if (isNumeric(elem)) {
-							return parseFloat(elem);
-						} else {
-							return elem;
+					var parsed = JSON.parse(thisAttrs.state);
+					var parsedKeys = Object.keys(parsed);
+					for (var i = 0; i < stateKeys.length; i++) {
+						var j = stateKeys[i];
+						if (isNumeric(parsed[j])) {
+							tmp[j] = parseFloat(parsed[j]);
+						} else if (typeof(parsed[j] === "string")) {
+							tmp[j] = parsed[j];
 						}
-					});
+					}
 				} catch(err) {
+					console.log(err);
 					tmp = {};
 				}
 
 				return tmp;
 			} else {
-				return tmpState;
+				return thisAttrs;
 			}
 		}
 
@@ -3037,10 +3041,7 @@
 					break;
 			}
 
-			if (
-				!w ||
-				!h
-			) {
+			if (!w || !h) {
 				return false;
 			}
 
@@ -3080,6 +3081,20 @@
 					upper = mediant;
 				}
 			}
+		}
+
+		function dataURLtoFile(dataurl, filename) {
+			var arr = dataurl.split(','),
+				mime = arr[0].match(/:(.*?);/)[1],
+				bstr = atob(arr[1]), 
+				n = bstr.length, 
+				u8arr = new Uint8Array(n);
+
+			while(n--){
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+
+			return new File([u8arr], filename, {type:mime});
 		}
 
 		function getShortId() {
@@ -3437,22 +3452,9 @@
 						originalHeight: newImage.height
 					});
 
-					var resA = initContainer();
-					if (!resA) {
-						if (cb) {
-							cb("`initContainer()` error");
-						}
-						return false;
-					}
+					initContainer();
 
-					var resB = initCanvas();
-					if (!resB) {
-						if (cb) {
-							cb("`initCanvas()` error");
-						}
-						return false;
-					}
-
+					initCanvas();
 				}
 
 				// get last index
@@ -3583,15 +3585,8 @@
 			}
 
 			var viewportSizes = getViewportSizes();
-			var viewportWidth = viewportSizes[0];
-			var viewportHeight = viewportSizes[1];
-
-			if (
-				viewportSizes === false ||
-				viewportSizes === undefined
-			) {
-				return false;
-			}
+			var viewportWidth = viewportSizes[0] || 99999;
+			var viewportHeight = viewportSizes[1] || 99999;
 
 			// clear container style
 			containerObject.style.width = "";
@@ -3641,14 +3636,14 @@
 				"cover"
 			);
 
-			var adjWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
-			var adjHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
+			var width = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
+			var height = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
 			var offset = containerObject.getBoundingClientRect();
 
 			// save state
 			setState(containerState, {
-				width: adjWidth,
-				height: adjHeight,
+				width: width,
+				height: height,
 				left: offset.left,
 				top: offset.top,
 				isInitialized: true
@@ -3670,11 +3665,7 @@
 		}
 
 		function initCanvas() {
-			if (
-				!canvasObject ||
-				!containerState.width ||
-				!containerState.height
-			) {
+			if (!containerState.isInitialized) {
 				return false;
 			}
 
@@ -3706,8 +3697,8 @@
 			var originalHeight = Math.min(maxSizes[1], Math.max(minSizes[1], canvasState.originalHeight));
 			var axisX = 0.5 * containerState.width;
 			var axisY = 0.5 * containerState.height;
-			var rectL = Math.round( 0.5 * (containerState.width - fittedSizes[0]) );
-			var rectT = Math.round( 0.5 * (containerState.height - fittedSizes[1]) );
+			var left = Math.round( 0.5 * (containerState.width - fittedSizes[0]) );
+			var top = Math.round( 0.5 * (containerState.height - fittedSizes[1]) );
 
 			// save state
 			setState(canvasState, {
@@ -3715,8 +3706,8 @@
 				originalHeight: originalHeight,
 				x: axisX,
 				y: axisY,
-				left: rectL,
-				top: rectT,
+				left: left,
+				top: top,
 				width: fittedSizes[0],
 				height: fittedSizes[1],
 				isInitialized: true
@@ -3758,7 +3749,7 @@
 			// set template
 			target.innerHTML = conatinerTemplate;
 
-			containerState.isInitialized = true;
+			containerState.isInitialized = false;
 
 			// set elements
 			containerObject = target.querySelector("div.canvaaas");
@@ -3767,8 +3758,8 @@
 
 			// set canvasState
 			canvasState.isInitialized = false;
-			canvasState.quality = 0.8;
-			canvasState.mimeType = "image/jpeg";
+			canvasState.quality = 0.92;
+			canvasState.mimeType = "image/png";
 			canvasState.smoothingQuality = "low"; // "low", "medium", "high"
 			canvasState.smoothingEnabled = false; // false, true
 			canvasState.backgroundColor = "#FFFFFF";
@@ -3784,38 +3775,10 @@
 				canvasState.originalHeight
 			) {
 				// set container
-				var resA = initContainer();
-				if (!resA) {
-					setState(canvasState, {
-						originalWidth: oldW,
-						originalHeight: oldH,
-					});
-
-					if (config.canvas) {
-						config.canvas("`initContainer()` error");
-					}
-					if (cb) {
-						cb("`initContainer()` error");
-					}
-					return false;
-				}
+				initContainer();
 
 				// set canvas
-				var resB = initCanvas();
-				if (!resB) {
-					setState(canvasState, {
-						originalWidth: oldW,
-						originalHeight: oldH,
-					});
-
-					if (config.canvas) {
-						config.canvas("`initCanvas()` error");
-					}
-					if (cb) {
-						cb("`initCanvas()` error");
-					}
-					return false;
-				}
+				initCanvas();
 			}
 
 			// set events
@@ -3971,8 +3934,8 @@
 				return false;
 			}
 
-			var thisFile = imageUrl;
-			if (!thisFile) {
+			var thisSrc = imageUrl;
+			if (!thisSrc) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
@@ -3982,7 +3945,9 @@
 				return false;
 			}
 
-			renderImage(thisFile, function(err, res) {
+			onUpload = true;
+
+			renderImage(thisSrc, function(err, res) {
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -4008,6 +3973,8 @@
 				// adjust state
 				setObject(source, state);
 				setObject(clone, state);
+
+				onUpload = false;
 
 				if (config.upload) {
 					config.upload(null, getDataByState(state));
@@ -4053,8 +4020,14 @@
 				return false;
 			}
 
-			var thisFile = target.src;
-			if (!thisFile) {
+			var thisState = getStateByAttribute(target);
+
+			var thisSrc;
+			if (target.src) {
+				thisSrc = target.src;
+			} else if (thisState.src) {
+				thisSrc = thisState.src;
+			} else {
 				if (config.upload) {
 					config.upload("File not found");
 				}
@@ -4064,9 +4037,9 @@
 				return false;
 			}
 
-			var thisState = getStateByAttribute(target);
+			onUpload = true;
 
-			renderImage(thisFile, function(err, res) {
+			renderImage(thisSrc, function(err, res) {
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -4092,6 +4065,8 @@
 				// adjust state
 				setObject(source, state);
 				setObject(clone, state);
+
+				onUpload = false;
 
 				if (config.upload) {
 					config.upload(null, getDataByState(state));
@@ -6981,38 +6956,10 @@
 			});
 
 			// set container
-			var resA = initContainer();
-			if (!resA) {
-				setState(canvasState, {
-					originalWidth: oldW,
-					originalHeight: oldH,
-				});
-
-				if (config.canvas) {
-					config.canvas("`initContainer()` error");
-				}
-				if (cb) {
-					cb("`initContainer()` error");
-				}
-				return false;
-			}
+			initContainer();
 
 			// set canvas
-			var resB = initCanvas();
-			if (!resB) {
-				setState(canvasState, {
-					originalWidth: oldW,
-					originalHeight: oldH,
-				});
-
-				if (config.canvas) {
-					config.canvas("`initCanvas()` error");
-				}
-				if (cb) {
-					cb("`initCanvas()` error");
-				}
-				return false;
-			}
+			initCanvas();
 
 			// new state adjust to images
 			imageStates.forEach(function(state){
@@ -7501,6 +7448,159 @@
 			}
 		}
 
+		myObject.drawToFile = function(options, cb){
+			/*!
+			 * options = {
+			 * width, 
+			 * height,
+			 * quality,
+			 * mimeType,
+			 * backgroundColor,
+			 * smoothingQuality,
+			 * smoothingEnabled
+			 * }
+			 */
+
+			if (onDraw === true) {
+				if (config.draw) {
+					config.draw("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				}
+				return false;
+			}
+
+			var canvasWidth;
+			var canvasHeight;
+			var quality;
+			var mimeType;
+			var backgroundColor;
+			var imageSmoothingQuality;
+			var imageSmoothingEnabled;
+			if (
+				typeof(options) === "object" &&
+				options !== null
+			) {
+				var fittedSizes = getFittedRect(
+					options.width || canvasState.originalWidth,
+					options.height || canvasState.originalHeight,
+					canvasState.originalWidth / canvasState.originalHeight,
+					"contain"
+				);
+				
+				canvasWidth = fittedSizes[0];
+				canvasHeight = fittedSizes[1];
+				quality = options.quality || canvasState.quality;
+				mimeType = options.mimeType || canvasState.mimeType;
+				imageSmoothingQuality = options.smoothingQuality || canvasState.smoothingQuality;
+				imageSmoothingEnabled = options.smoothingEnabled || canvasState.smoothingEnabled;
+				backgroundColor = options.backgroundColor || canvasState.backgroundColor;
+			} else {
+				canvasWidth = canvasState.originalWidth;
+				canvasHeight = canvasState.originalHeight;
+				quality = canvasState.quality;
+				mimeType = canvasState.mimeType;
+				imageSmoothingQuality = canvasState.smoothingQuality;
+				imageSmoothingEnabled = canvasState.smoothingEnabled;
+				backgroundColor = canvasState.backgroundColor;
+			}
+
+			var drawOption = {
+				width: canvasWidth,
+				height: canvasHeight,
+				backgroundColor: backgroundColor
+			}
+
+			var canvas = drawCanvas(drawOption);
+			if (!canvas) {
+				if (config.draw) {
+					config.draw("`drawCanvas()` error");
+				}
+				if (cb) {
+					cb("`drawCanvas()` error");
+				}
+				return false;
+			}
+
+			var drawables = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable === true) {
+					drawables.push(getDataByState(imageStates[i]));
+				}
+			}
+
+			drawables.sort(function(a, b){
+				return a.index - b.index;
+			});
+
+			var result = {};
+			var canvasResult = {};
+			var drawResults = [];
+
+			canvasResult.width = canvas.width;
+			canvasResult.height = canvas.height;
+			canvasResult.numberOfImages = drawables.length;
+			canvasResult.backgroundColor = backgroundColor;
+			canvasResult.mimeType = mimeType;
+			canvasResult.quality = quality;
+			canvasResult.smoothingQuality = imageSmoothingQuality;
+			canvasResult.smoothingEnabled = imageSmoothingEnabled;
+
+			onDraw = true;
+
+			var index = drawables.length;
+			var count = 0;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					// recursive
+					drawImage(canvas, drawables[count].id, function(err) {
+						if (err) {
+							drawResults.push({
+								err: err,
+								id: drawables[count].id
+							});
+						} else {
+							drawResults.push(drawables[count]);
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					// end
+					var ctx = canvas.getContext("2d");
+					ctx.imageSmoothingQuality = imageSmoothingQuality;
+					ctx.imageSmoothingEnabled = imageSmoothingEnabled;
+					ctx.restore();
+
+					var filename = config.filename || "untitled";
+					filename += "." + mimeType.split("/").pop();
+					var data = canvas.toDataURL(mimeType, quality);
+					var file = dataURLtoFile(
+						data,
+						filename
+					);
+
+					result.states = drawResults;
+					result.canvas = canvasResult;
+					result.file = file;
+
+					onDraw = false;
+
+					if (config.draw) {
+						config.draw(null, result);
+					}
+					if (cb) {
+						cb(null, result);
+					}
+					return result;
+				}
+			}
+		}
+
 		// 
 		// data
 		// 
@@ -7763,6 +7863,8 @@
 				}
 
 				return elem;
+			}).sort(function(a, b){
+				return a.index - b.index;
 			}).map(function(elem){
 				return getDataByState(elem);
 			});
@@ -7796,7 +7898,6 @@
 						exportedStates = tmp;
 					}
 				}
-
 			}
 
 			if (!config.editable) {
@@ -7848,9 +7949,9 @@
 				if (count < index) {
 					var thisState = {};
 					copyObject(thisState, exportedStates[count]);
-					var thisUrl = thisState.url || thisState.src || thisState.path;
+					var thisSrc = thisState.src || thisState.url || thisState.path;
 
-					renderImage(thisUrl, function(err, res) {
+					renderImage(thisSrc, function(err, res) {
 						if (err) {
 							results.push({
 								err: err
