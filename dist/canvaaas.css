@@ -6,169 +6,83 @@
  * 
  */
 
-/*!
- * customize
- */
+ /*!
+  * custom
+  */
 
- /* container */
-.canvaaas{
-	margin-left: auto;
-	margin-right: auto;
+.canvaaas-image.editing,
+.canvaaas-clone.editing{
+
+}
+.canvaaas-image.editing .canvaaas-overlay,
+.canvaaas-clone.editing .canvaaas-overlay{
+	display: block;
 }
 
-/* canvas focused */
-/*.canvaaas-canvas.focused{
-	outline: 1px solid red;
-}*/
+.canvaaas-image.focused,
+.canvaaas-clone.focused{
 
-/* image focused */
-/*.canvaaas-image.focused{
-
-}*/
-
-/* image previliges */
-.canvaaas-image.unfocusabled,
-.canvaaas-clone.unfocusabled{}
-
-.canvaaas-image.uneditabled,
-.canvaaas-clone.uneditabled{}
-
-.canvaaas-image.undrawabled,
-.canvaaas-clone.undrawabled{}
-
-.canvaaas-image.unindexabled,
-.canvaaas-clone.unindexabled{}
-
-/* image overlay */
-.canvaaas-image .canvaaas-overlay{
-	background-color: rgba(255,255,255);
-	opacity: 0.7;
-}
-.canvaaas-clone .canvaaas-overlay{
-	background-color: rgba(0,0,0);
-	opacity: 0.7;
 }
 
-/* image outline */
-.canvaaas-image .canvaaas-outline{
+.canvaaas-image.focused .canvaaas-innerline{
+	border-color: #777;
+}
+.canvaaas-clone.focused .canvaaas-innerline{
+	border-color: red;
+}
+.canvaaas-image.focused .canvaaas-outline{
 	border-color: #000;
 }
-.canvaaas-clone .canvaaas-outline{
+.canvaaas-clone.focused .canvaaas-outline{
 	border-color: red;
 }
-.canvaaas-image.uneditabled .canvaaas-outline,
-.canvaaas-clone.uneditabled .canvaaas-outline{
-	border-color: orange;
+.canvaaas-image.focused .canvaaas-handle{
+	border-color: #000;
 }
-
-.canvaaas-outline-top{
-	border-top-width: 1px;
-	border-top-style: solid;
-}
-.canvaaas-outline-bottom{
-	border-bottom-width: 1px;
-	border-bottom-style: solid;
-}
-.canvaaas-outline-left{
-	border-left-width: 1px;
-	border-left-style: solid;
-}
-.canvaaas-outline-right{
-	border-right-width: 1px;
-	border-right-style: solid;
-}
-
-/* image innerline */
-/*.canvaaas-innerline{
-	visibility: hidden;
-}*/
-.canvaaas-image .canvaaas-innerline{
-	border-color: #888;
-}
-.canvaaas-clone .canvaaas-innerline{
+.canvaaas-clone.focused .canvaaas-handle{
 	border-color: red;
+}
+.canvaaas-image.focused .canvaaas-handle,
+/*.canvaaas-image.focused .canvaaas-innerline,*/
+.canvaaas-image.focused .canvaaas-outline,
+.canvaaas-clone.focused .canvaaas-handle,
+/*.canvaaas-clone.focused .canvaaas-innerline,*/
+.canvaaas-clone.focused .canvaaas-outline{
+	display: block;
 }
 .canvaaas-image.uneditabled .canvaaas-innerline,
-.canvaaas-clone.uneditabled .canvaaas-innerline{
+.canvaaas-clone.uneditabled .canvaaas-innerline,
+.canvaaas-image.uneditabled .canvaaas-outline,
+.canvaaas-clone.uneditabled .canvaaas-outline,
+.canvaaas-image.uneditabled .canvaaas-handle,
+.canvaaas-clone.uneditabled .canvaaas-handle{
 	border-color: orange;
 }
-
-
-.canvaaas-innerline-top{
-	border-top-width: 1px;
-	border-top-style: dashed;
-}
-.canvaaas-innerline-bottom{
-	border-bottom-width: 1px;
-	border-bottom-style: dashed;
-}
-.canvaaas-innerline-left{
-	border-left-width: 1px;
-	border-left-style: dashed;
-}
-.canvaaas-innerline-right{
-	border-right-width: 1px;
-	border-right-style: dashed;
+.canvaaas-image.unfocusabled,
+.canvaaas-clone.unfocusabled{
+	pointer-events: none;
+	cursor: default;
 }
 
-/* north rotate handle */
-.canvaaas-rotate-n{
-	top: -24px !important;
-}
+ /*! 
+  * container 
+  */
 
-/* rotate handles */
-.canvaaas-rotate-ne,
-.canvaaas-rotate-e,
-.canvaaas-rotate-se,
-.canvaaas-rotate-s,
-.canvaaas-rotate-sw,
-.canvaaas-rotate-w,
-.canvaaas-rotate-nw{
- 	display: none !important;
-}
-
-/* handle innerbox */
-.canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
-	width: 6px;
-	height: 6px;
-	border: 1px solid; 
-	background-color: #fff;
-}
-.canvaaas-image .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: #000;
-}
-.canvaaas-clone .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: red;
-}
-
-.canvaaas-image.uneditabled .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-image.uneditabled .canvaaas-rotate-handle .canvaaas-handle,
-.canvaaas-clone.uneditabled .canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-clone.uneditabled .canvaaas-rotate-handle .canvaaas-handle{
-	border-color: orange;
-}
-
-/*!
- * initial
- */
-
-.canvaaas{
+ .canvaaas{
 	display: block;
 	position: relative;
 	line-height: 0;
 	font-size: 0;
-	background-color: #FFF;
+	background-color: #FFFFFF;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+
+	margin-left: auto;
+	margin-right: auto;
 }
 .canvaaas.hidden{
 	position: fixed;
@@ -177,6 +91,13 @@
 	z-index: -1;
 	visibility: hidden;
 }
+.canvaaas.frozen .undrawabled{
+	visibility: hidden;
+}
+
+/*!
+ * canvas
+ */
 
 .canvaaas-canvas,
 .canvaaas-mirror{
@@ -194,11 +115,13 @@
 }
 .canvaaas-canvas{
 	overflow: hidden;
+	z-index: 2;
 }
 .canvaaas-mirror{
 	overflow: visible;
+	z-index: 1;
 }
-.canvaaas-canvas.checker{
+.canvaaas-checker{
 	background-color: unset !important;
 	background-image: 
 		linear-gradient(45deg, #aaa 25%, transparent 25%),
@@ -209,26 +132,10 @@
 	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
-.canvaaas-canvas.frozen .undrawabled,
-.canvaaas-mirror.frozen .undrawabled{
-	visibility: hidden;
-}
+/*!
+ * image
+ */
 
-/* rect */
-.canvaaas-rectangle{
-	position: absolute;
-	transform-origin: center center !important;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
-
-
-
-/* image & clone */
 .canvaaas-image,
 .canvaaas-clone{
 	position: absolute;
@@ -239,17 +146,8 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	cursor: pointer;
 }
-.canvaaas-image{
-	display: block;
-}
-.canvaaas-clone{
-	display: none;
-}
-.canvaaas-clone.focused{
-	display: block;
-}
-
 .canvaaas-clone img,
 .canvaaas-image img{
 	display: block;
@@ -266,140 +164,152 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
+	/*pointer-events: none;*/
 }
-.canvaaas-image.focused,
-.canvaaas-clone.focused{
-	cursor: move;
-}
-
-.canvaaas-image.unfocusabled,
-.canvaaas-clone.unfocusabled{
-	pointer-events: none;
+.canvaaas-image,
+.canvaaas-clone{
+	border-color: black;
 }
 
-/* overlay */
-.canvaaas-image .canvaaas-overlay,
-.canvaaas-clone .canvaaas-overlay{
-	display: none;
+/*!
+ * innerline
+ */
+
+.canvaaas-innerline{
 	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-.canvaaas-canvas.focused .canvaaas-image .canvaaas-overlay{
-	display: block;
-}
-.canvaaas-canvas.focused .canvaaas-image.focused .canvaaas-overlay{
-	display: none;
-}
-.canvaaas-clone.focused .canvaaas-overlay{
-	display: block;
-}
-
-/* outlines */
-.canvaaas-image .canvaaas-outline,
-.canvaaas-clone .canvaaas-outline{
-	position: absolute;
-	display: none;
 	pointer-events: none;
-}
-.canvaaas-image.focused .canvaaas-outline,
-.canvaaas-clone.focused .canvaaas-outline{
-	display: block;
-}
+	border-color: inherit;
 
-.canvaaas-outline-top{
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 0;
-}
-.canvaaas-outline-bottom{
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	height: 0;
-}
-.canvaaas-outline-left{
-	top: 0;
-	left: 0;
-	width: 0;
-	height: 100%;
-}
-.canvaaas-outline-right{
-	top: 0;
-	right: 0;
-	width: 0;
-	height: 100%;
-}
-
-/* innerlines */
-.canvaaas-image .canvaaas-innerline,
-.canvaaas-clone .canvaaas-innerline{
-	position: absolute;
+	/* hide */
 	display: none;
-	pointer-events: none;
 }
-.canvaaas-image.focused .canvaaas-innerline,
-.canvaaas-clone.focused .canvaaas-innerline{
-	display: block;
-}
-
 .canvaaas-innerline-top{
 	top: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
+	border-top-width: 1px;
+	border-top-style: dashed;
 }
 .canvaaas-innerline-bottom{
 	bottom: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
+	border-bottom-width: 1px;
+	border-bottom-style: dashed;
 }
 .canvaaas-innerline-left{
 	top: 0;
 	left: 33%;
 	width: 0;
 	height: 100%;
+	border-left-width: 1px;
+	border-left-style: dashed;
 }
 .canvaaas-innerline-right{
 	top: 0;
 	right: 33%;
 	width: 0;
 	height: 100%;
+	border-right-width: 1px;
+	border-right-style: dashed;
 }
 
-/* handle wrapper */
-.canvaaas-resize-handle,
-.canvaaas-rotate-handle{
+/*!
+ * outline
+ */
+
+.canvaaas-outline{
 	position: absolute;
+	pointer-events: none;
+	border-color: inherit;
+
+	/* hide */
 	display: none;
-	width: 24px; /* click space */
-	height: 24px; /* click space */
-	cursor: grab;
+}
+.canvaaas-outline-top{
+	top: 0;
+	left: 0;
+	width: 100%;
+	border-top-width: 1px;
+	border-top-style: solid;
+}
+.canvaaas-outline-bottom{
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+.canvaaas-outline-left{
+	top: 0;
+	left: 0;
+	height: 100%;
+	border-left-width: 1px;
+	border-left-style: solid;
+}
+.canvaaas-outline-right{
+	top: 0;
+	right: 0;
+	height: 100%;
+	border-right-width: 1px;
+	border-right-style: solid;
 }
 
-.canvaaas-clone.focused .canvaaas-resize-handle,
-.canvaaas-clone.focused .canvaaas-rotate-handle{
-	display: block;
+/*!
+ * overlay
+ */
+
+.canvaaas-overlay{
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	pointer-events: none;
 }
-.canvaaas-image.focused .canvaaas-resize-handle,
-.canvaaas-image.focused .canvaaas-rotate-handle{
+.canvaaas-image .canvaaas-overlay{
+	display: none;
+	background-color: rgba(0,0,0);
+	opacity: 0.3;
+}
+.canvaaas-clone .canvaaas-overlay{
 	display: block;
+	background-color: rgba(0,0,0);
+	opacity: 0.7;
 }
 
-/* handle inner */
-.canvaaas-resize-handle .canvaaas-handle,
-.canvaaas-rotate-handle .canvaaas-handle{
-	display: block;
+/*!
+ * handles
+ */
+
+.canvaaas-handle{
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 	pointer-events: none;
+	/* box */
+	width: 6px;
+	height: 6px;
+	border: 1px solid; 
+	background-color: #fff;
+	border-color: inherit;
+
+	/* hide */
+	display: none;
 }
+.canvaaas-resize-handle,
+.canvaaas-rotate-handle{
+	position: absolute;
+	display: block;
+	width: 24px; /* click space */
+	height: 24px; /* click space */
+	cursor: grab;
+	border-color: inherit;
+}
+
 .canvaaas-resize-n,
 .canvaaas-rotate-n{
 	top: 0;
@@ -449,6 +359,19 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
+.canvaaas-rotate-n{
+	top: -24px !important;
+}
+.canvaaas-rotate-ne,
+.canvaaas-rotate-e,
+.canvaaas-rotate-se,
+.canvaaas-rotate-s,
+.canvaaas-rotate-sw,
+.canvaaas-rotate-w,
+.canvaaas-rotate-nw{
+ 	display: none !important;
+}
+
 /*!
  * mobile
  */ 
@@ -462,3 +385,21 @@
 	}
 
 }
+
+/*!
+ * cursor
+ */
+
+.canvaaas-cursor-auto{cursor:auto !important;}
+.canvaaas-cursor-default{cursor: default !important;}
+.canvaaas-cursor-none{cursor: none !important;}
+.canvaaas-cursor-help{cursor: help !important;}
+.canvaaas-cursor-pointer{cursor: pointer !important;}
+.canvaaas-cursor-progress{cursor: progress !important;}
+.canvaaas-cursor-wait{cursor: wait !important;}
+.canvaaas-cursor-crosshair{cursor: crosshair !important;}
+.canvaaas-cursor-move{cursor: move !important;}
+.canvaaas-cursor-grab{cursor: grab !important;}
+.canvaaas-cursor-grabbing{cursor: grabbing !important;}
+.canvaaas-cursor-zoomIn{cursor: zoom-in !important;}
+.canvaaas-cursor-zoomOut{cursor: zoom-out !important;}

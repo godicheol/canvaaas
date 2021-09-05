@@ -146,12 +146,12 @@
 	}
 </style>
 </head>
-<body style="padding-top: 0px; padding-bottom: 1000px;">
+<body style="padding-top: 0px;">
 
 	<div id="header" class="header">
 		<div class="header-hidden">
-			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
-			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*" multiple>
+			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this)" accept="image/*">
+			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this)" accept="image/*" multiple>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
@@ -166,14 +166,10 @@
 				<li><label for="uploadMultiple">Upload Files</label></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadUrl(
-						window.prompt('Type image URL', '/img/1.jpg')
-					)
-				">Upload URL</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrl(
+						window.prompt('Type image URL', '/img/1.jpg'),
 						testImportData[0]
 					)
-				">Upload URL With State</a></li>
+				">Upload URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
@@ -183,40 +179,37 @@
 				">Upload Element</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'original',
-						datatype: 'url'
-					}, function(err, res, result){
-						console.log(err, result);
+					// download 
+					canvaaas.draw(null, function(err, res){
 						var link = document.createElement('a');
-						link.setAttribute('href', res);
-						link.setAttribute('download', result.filename);
+						link.setAttribute('href', res.file);
+						link.setAttribute('download', 'untitled');
 						link.style.display = 'none';
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
-						window.URL.revokeObjectURL(res);
-					});
+						window.URL.revokeObjectURL(res.file);
+					})
 				">Save</a></li>
 				<li><a href="javascript:void(0)" onclick="
+					// download 
 					canvaaas.draw({
-						filename: 'thumbnail',
-						datatype: 'url',
 						width: 256, 
 						height: 256, 
 						quality: 0.5,
 						mimeType: 'png',
 						backgroundColor: '#000000',
-					}, function(err, res, result){
-						console.log(err, result);
+						smoothingQuality: 'high',
+						smoothingEnabled: true
+					}, function(err, res){
 						var link = document.createElement('a');
-						link.setAttribute('href', res);
-						link.setAttribute('download', result.filename);
+						link.setAttribute('href', res.file);
+						link.setAttribute('download', 'untitled');
 						link.style.display = 'none';
 						document.body.appendChild(link);
 						link.click();
 						document.body.removeChild(link);
-						window.URL.revokeObjectURL(res);
+						window.URL.revokeObjectURL(res.file);
 					})
 				">Save Thumbnail</a></li>
 				<li class="rule"></li>
@@ -347,16 +340,16 @@
 				">Set ID</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 0, -10)
+					canvaaas.moveY(canvaaas.this(), 10)
 				">Move Top</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 0, 10)
+					canvaaas.moveY(canvaaas.this(), -10)
 				">Move Bottom</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), -10, 0)
+					canvaaas.moveX(canvaaas.this(), 10)
 				">Move Left</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 10, 0)
+					canvaaas.moveX(canvaaas.this(), -10)
 				">Move Right</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -435,10 +428,24 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.flipY(canvaaas.this())
 				">Flip Vertically</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.flipTo(canvaaas.this(), 1, 1)
+				">Flip Reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.opacity(canvaaas.this(), window.prompt('0 ~ 1', '0.5'))
+					canvaaas.opacityTo(canvaaas.this(), window.prompt('0 ~ 1', '0.5'))
 				">Opacity</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleAspectRatio(canvaaas.this())
+				">Toggle Aspect Ratio</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.lockAspectRatio(canvaaas.this())
+				">Lock Aspect Ratio</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unlockAspectRatio(canvaaas.this())
+				">Unlock Aspect Ratio</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexTo(canvaaas.this(), window.prompt('Number', '5'))
@@ -447,8 +454,14 @@
 					canvaaas.index(canvaaas.this(), 1)
 				">Index +1</a></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.index(canvaaas.this(), 3)
+				">Index +3</a></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.index(canvaaas.this(), -1)
 				">Index -1</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.index(canvaaas.this(), -3)
+				">Index -3</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusIn(window.prompt('ID'))
@@ -458,17 +471,43 @@
 				">Focus Out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.aspectRatio(canvaaas.this())
-				">Toggle Aspect Ratio</a></li>
+					canvaaas.toggleFocusable(canvaaas.this())
+				">Toggle Focus</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleEditable(canvaaas.this())
+				">Toggle Edit</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleDrawable(canvaaas.this())
+				">Toggle Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.toggleIndexable(canvaaas.this())
+				">Toggle Index</a></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this())
-				">Toggle Focusable</a></li>
+				">Enable Focus</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.editable(canvaaas.this())
-				">Toggle Editable</a></li>
+				">Enable Edit</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawable(canvaaas.this())
-				">Toggle Drawable</a></li>
+				">Enable Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.indexable(canvaaas.this())
+				">Enable Index</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unfocusable(canvaaas.this())
+				">Disable Focus</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.uneditable(canvaaas.this())
+				">Disable Edit</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.undrawable(canvaaas.this())
+				">Disable Draw</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unindexable(canvaaas.this())
+				">Disable Index</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.remove(canvaaas.this())
@@ -502,17 +541,30 @@
 				">Canvas Size</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'))
+					canvaaas.mimeType(window.prompt('e.g. `jpg`', 'png'))
+				">MimeType</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.quality(window.prompt('e.g. 0 ~ 1', '0.8'))
+				">Quality</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.backgroundColor(window.prompt('e.g. #FFFFFF', '#000000'))
 				">Background Color</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.smoothingEnabled(window.prompt('e.g. true, false', 'true'))
+				">Smooth Enabled</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.smoothingQuality(window.prompt('e.g. log, middle, high', 'high'))
+				">Smooth Quality</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker()
-				">Toggle Checker</a></li>
+					canvaaas.checker(window.prompt('e.g. `true, false`', 'false'))
+				">Background Checker</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
+				<li><a href="javascript:viewContainerData()">View Container Data</a></li>
 				<li><a href="javascript:viewCanvasData()">View Canvas Data</a></li>
 				<li><a href="javascript:viewImageData()">View Image Data</a></li>
 			</ul>
@@ -520,31 +572,57 @@
 	</div>
 
 	<div class="logger">
+		<div class="container-data hidden">
+			Is Initialized:
+			<input id="container-isInitialized" type="text">
+			Left:
+			<input id="container-left" type="text">
+			Top:
+			<input id="container-top" type="text">
+			Width:
+			<input id="container-width" type="text">
+			Height:
+			<input id="container-height" type="text">
+		</div>
 		<div class="canvas-data hidden">
+			Is Initialized:
+			<input id="canvas-isInitialized" type="text">
+			Original Width:
+			<input id="canvas-originalWidth" type="text">
+			Original Height:
+			<input id="canvas-originalHeight" type="text">
+			X:
+			<input id="canvas-x" type="text">
+			Y:
+			<input id="canvas-y" type="text">
+			Left:
+			<input id="canvas-left" type="text">
+			Top:
+			<input id="canvas-top" type="text">
 			Width:
 			<input id="canvas-width" type="text">
 			Height:
 			<input id="canvas-height" type="text">
 			Background:
 			<div id="canvas-backgroundColor"></div>
-			Editabled:
-			<input id="canvas-editabled" type="text">
+			MimeType:
+			<input id="canvas-mimeType" type="text">
+			Quality:
+			<input id="canvas-quality" type="text">
+			Smoothing Quality:
+			<input id="canvas-smoothingQuality" type="text">
+			Smoothing Enabled:
+			<input id="canvas-smoothingEnabled" type="text">
 		</div>
 		<div class="image-data hidden">
 			ID:
 			<input id="image-id" type="text">
+			Type:
+			<input id="image-type" type="text">
 			Original Width:
 			<input id="image-originalWidth" type="text">
 			Original Height:
 			<input id="image-originalHeight" type="text">
-			Original Aspect Ratio:
-			<input id="image-originalAspectRatio" type="text">
-			Width:
-			<input id="image-width" type="text">
-			Height:
-			<input id="image-height" type="text">
-			Aspect Ratio:
-			<input id="image-aspectRatio" type="text">
 			X:
 			<input id="image-x" type="text">
 			Y:
@@ -553,6 +631,10 @@
 			<input id="image-left" type="text">
 			Top:
 			<input id="image-top" type="text">
+			Width:
+			<input id="image-width" type="text">
+			Height:
+			<input id="image-height" type="text">
 			Rotate:
 			<input id="image-rotate" type="text">
 			ScaleX:
@@ -565,12 +647,14 @@
 			<input id="image-index" type="text">
 			LockAspectRatio
 			<input id="image-lockAspectRatio" type="text">
-			Focusabled:
-			<input id="image-focusabled" type="text">
-			Editabled:
-			<input id="image-editabled" type="text">
-			Drawabled:
-			<input id="image-drawabled" type="text">
+			Focusable:
+			<input id="image-focusable" type="text">
+			Editable:
+			<input id="image-editable" type="text">
+			Drawable:
+			<input id="image-drawable" type="text">
+			Indexable:
+			<input id="image-indexable" type="text">
 		</div>
 	</div>
 
@@ -627,6 +711,15 @@
 			}
 		}
 
+		function viewContainerData() {
+			var elem = document.querySelector("div.container-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
 		function viewCanvasData() {
 			var elem = document.querySelector("div.canvas-data");
 			if (elem.classList.contains("hidden") === true) {
@@ -673,20 +766,36 @@
 	<script>
 
 		var inputs = {
+			container: {
+				isInitialized: document.getElementById("container-isInitialized"),
+				width: document.getElementById("container-width"),
+				height: document.getElementById("container-height"),
+				left: document.getElementById("container-left"),
+				top: document.getElementById("container-top"),
+			},
 			canvas:{
+				isInitialized: document.getElementById("canvas-isInitialized"),
+				originalWidth: document.getElementById("canvas-originalWidth"),
+				originalHeight: document.getElementById("canvas-originalHeight"),
 				width: document.getElementById("canvas-width"),
 				height: document.getElementById("canvas-height"),
-				editabled: document.getElementById("canvas-editabled"),
+				left: document.getElementById("canvas-left"),
+				top: document.getElementById("canvas-top"),
+				x: document.getElementById("canvas-x"),
+				y: document.getElementById("canvas-y"),
+				quality: document.getElementById("canvas-quality"),
+				mimeType: document.getElementById("canvas-mimeType"),
 				backgroundColor: document.getElementById("canvas-backgroundColor"),
+				smoothingEnabled: document.getElementById("canvas-smoothingEnabled"),
+				smoothingQuality: document.getElementById("canvas-smoothingQuality"),
 			},
 			image:{
 				id: document.getElementById("image-id"),
+				type: document.getElementById("image-type"),
 				originalWidth: document.getElementById("image-originalWidth"),
 				originalHeight: document.getElementById("image-originalHeight"),
-				originalAspectRatio: document.getElementById("image-originalAspectRatio"),
 				width: document.getElementById("image-width"),
 				height: document.getElementById("image-height"),
-				aspectRatio: document.getElementById("image-aspectRatio"),
 				left: document.getElementById("image-left"),
 				top: document.getElementById("image-top"),
 				x: document.getElementById("image-x"),
@@ -697,9 +806,10 @@
 				opacity: document.getElementById("image-opacity"),
 				index: document.getElementById("image-index"),
 				lockAspectRatio: document.getElementById("image-lockAspectRatio"),
-				focusabled: document.getElementById("image-focusabled"),
-				editabled: document.getElementById("image-editabled"),
-				drawabled: document.getElementById("image-drawabled"),
+				focusable: document.getElementById("image-focusable"),
+				editable: document.getElementById("image-editable"),
+				drawable: document.getElementById("image-drawable"),
+				indexable: document.getElementById("image-indexable"),
 			}	
 		}
 
@@ -708,17 +818,112 @@
 			redo: document.getElementById("redo"),
 		}
 
-		var target = document.getElementById("myContainer");
+		var elem = document.getElementById("myContainer");
 
-		// 
-		// 
-		// 
-		// MAIN START
-		// 
-		// 
+		var testImportData = [{
+	        "id": "8fg880",
+	        "type": "url",
+	        "src": "./img/1.jpeg",
+	        "index": 1,
+	        "originalWidth": 5472,
+	        "originalHeight": 3648,
+	        "width": 7858.705673285891,
+	        "height": 5239.137115523928,
+	        "left": -1892.3193694408035,
+	        "top": -1089.7372324607588,
+	        "x": 2037.033467202142,
+	        "y": 1529.8313253012047,
+	        "rotate": -338.99078178925924,
+	        "scaleX": 1,
+	        "scaleY": -1,
+	        "opacity": 1,
+	        "lockAspectRatio": true,
+	        "focusable": true,
+	        "editable": true,
+	        "drawable": true,
+	        "indexable": true,
+	    }, {
+	        "id": "2pino4",
+	        "type": "url",
+	        "src": "./img/1.jpg",
+	        "index": 2,
+	        "originalWidth": 3024,
+	        "originalHeight": 4032,
+	        "width": 1114.5660428353656,
+	        "height": 2131.2238618923093,
+	        "left": 387.4101282337219,
+	        "top": 464.68750456027334,
+	        "x": 944.6931496514046,
+	        "y": 1530.299435506428,
+	        "rotate": -24.166508334467267,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "lockAspectRatio": false,
+	        "focusable": true,
+	        "editable": false,
+	        "drawable": true,
+	        "indexable": true,
+	    }, {
+	        "id": "yrh5zx",
+	        "type": "url",
+	        "src": "./img/1.png",
+	        "index": 3,
+	        "originalWidth": 800,
+	        "originalHeight": 800,
+	        "width": 1265.9943059207653,
+	        "height": 1265.9943059207653,
+	        "left": 2615.9301961848964,
+	        "top": 214.07549789433813,
+	        "x": 3248.927349145279,
+	        "y": 847.0726508547208,
+	        "rotate": 333.87162287674744,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 0.5,
+	        "lockAspectRatio": true,
+	        "focusable": true,
+	        "editable": false,
+	        "drawable": true,
+	        "indexable": true,
+	    }];
 
-		// #1 config
-		canvaaas.config({
+	    var testImportDataString = JSON.stringify(testImportData);
+
+		var testConfig1 = {
+			// filename: undefined, // string
+			// allowedExtensions: [
+			// 	"jpg",
+			// 	"jpeg",
+			// 	"png",
+			// 	"webp",
+			// 	"gif",
+			// 	"svg",
+			// 	"svg+xml",
+			// 	"tiff",
+			// 	"tif"
+			// ], // array, jpg, jpeg, ,gif, png, webp, svg...
+			// editable: true, // boolean
+			// checker: true, // boolean
+			// magneticRange: 5, // number, px
+			// maxNumberOfImages: 999, // number
+			// cacheLevels: 999, // number
+			// containerAspectRatio: undefined, // number, width / height
+			// minContainerWidth: undefined, // number, px
+			// minContainerHeight: undefined, // number, px
+			// maxContainerWidth: 1, // number, px, 0 ~ 1
+			// maxContainerHeight: 0.7, // number, px, 0 ~ 1
+			// minCanvasWidth: 64, // number, px
+			// minCanvasHeight: 64, // number, px
+			// maxCanvasWidth: 4096, // number, px, for Mobile
+			// maxCanvasHeight: 4096, // number, px, for Mobile
+			// minImageWidth: 64, // number, px
+			// minImageHeight: 64, // number, px
+			// maxImageWidth: undefined, // number, px
+			// maxImageHeight: undefined, // number, px
+			// renderImageType: "contain", // string, "cover", "contain"
+			// renderImageWidth: 0.7, // number,  0 ~ 1
+			// renderImageHeight: 0.7, // number, 0 ~ 1
 			upload: function(err, res){
 				if (err) {
 					console.log(err);
@@ -735,69 +940,174 @@
 					return false;
 				}
 
+				writeContainerData();
 				writeCanvasData();
 				checkCaches();
 
 				console.log("config.canvas callback", res);
 			},
-			remove: function(err, res) {
+			draw: function(err, res){
 				if (err) {
 					console.log(err);
 					return false;
 				}
 
 				checkCaches();
+
+				console.log("config.draw callback", res);
+			},
+			focusIn: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				writeImageData(res);
+
+				checkCaches();
+
+				console.log("config.focusIn callback", res);
+			}, 
+			focusOut: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				writeImageData();
+
+				checkCaches();
+
+				console.log("config.focusOut callback", res);
+			},
+			id: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.id callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			move: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.move callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			rotate: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.rotate callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			resize: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.resize callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			flip: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.flip callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			opacity: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.opacity callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			index: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+				console.log("config.index callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+
+			},
+			permission: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				console.log("config.permission callback", res);
+
+				writeImageData(res);
+
+				checkCaches();
+			},
+			remove: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
 
 				console.log("config.remove callback", res);
-			},
-			focus: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
 
-				writeImageData(res);
 				checkCaches();
-
-				console.log("config.focus callback", res);
 			},
-			edit: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
+		}
 
-				writeImageData(res);
-				checkCaches();
+		// #1 config
+		canvaaas.config(testConfig1);
 
-				console.log("config.edit callback", res);
-			},
-		});
+		// #1.1 canvas size
+		// canvaaas.canvas({
+		// 	width: 6,
+		// 	height: 4,
+		// 	unit: "in",
+		// 	dpi: 300
+		// });
 
-		// #1.1 init canvas
-		canvaaas.initCanvas({
+		// #1.1 canvas size
+		canvaaas.canvas({
 			width: 7858.705673285892,
 			height: 5239.137115523928,
 			unit: "px"
 		});
 
-		// #1.1 error
-		// canvaaas.canvas({
-		// 	width: 7858.705673285892,
-		// 	height: 5239.137115523928,
-		// 	unit: "px"
-		// });
-
 		// #2 init
-		canvaaas.init(target, function(err, res){
+		canvaaas.init(elem, function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
 			}
 
-			writeCanvasData();
-
-			console.log("canvaaas.init callback", res);
+			console.log("init callback", res);
 		});
 
 		// #2.1 canvas size
@@ -807,68 +1117,114 @@
 		// 	unit: "px"
 		// });
 
-		// #2.1 error
-		// canvaaas.initCanvas({
-		// 	width: 7858.705673285892,
-		// 	height: 5239.137115523928,
-		// 	unit: "px"
-		// }, function(err, res){
-		// 	console.log(err, res);
+		// #3 import object
+		// canvaaas.import(testImportData, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+
+		// 	writeContainerData();
+		// 	writeCanvasData();
+
+		// 	console.log("import callback", res);
 		// });
 
+		// #3 import string
+		canvaaas.import(testImportDataString, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
 
+			writeContainerData();
+			writeCanvasData();
 
+			checkCaches();
 
-
-
+			console.log("import callback", res);
+		});
 
 		// 
+		// logger
 		// 
-		// MAIN END
-		// 
-		// 
+
+		function writeContainerData(){
+			var containerState = canvaaas.getContainerData();
+			inputs.container.isInitialized.value = containerState.isInitialized;
+			inputs.container.width.value = Math.floor(containerState.width * 100) / 100;
+			inputs.container.height.value = Math.floor(containerState.height * 100) / 100;
+			inputs.container.left.value = Math.floor(containerState.left * 100) / 100;
+			inputs.container.top.value = Math.floor(containerState.top * 100) / 100;
+		}
 
 		function writeCanvasData(){
-			var state = canvaaas.getCanvasData();
-			inputs.canvas.width.value = Math.floor(state.width * 100) / 100;
-			inputs.canvas.height.value = Math.floor(state.height * 100) / 100;
-			inputs.canvas.backgroundColor.style.backgroundColor = state.backgroundColor;
-			inputs.canvas.editabled.value = state.editabled;
+			var canvasState = canvaaas.getCanvasData();
+			inputs.canvas.isInitialized.value = canvasState.isInitialized;
+			inputs.canvas.originalWidth.value = Math.floor(canvasState.originalWidth * 100) / 100;
+			inputs.canvas.originalHeight.value = Math.floor(canvasState.originalHeight * 100) / 100;
+			inputs.canvas.width.value = Math.floor(canvasState.width * 100) / 100;
+			inputs.canvas.height.value = Math.floor(canvasState.height * 100) / 100;
+			inputs.canvas.left.value = Math.floor(canvasState.left * 100) / 100;
+			inputs.canvas.top.value = Math.floor(canvasState.top * 100) / 100;
+			inputs.canvas.x.value = Math.floor(canvasState.x * 100) / 100;
+			inputs.canvas.y.value = Math.floor(canvasState.y * 100) / 100;
+			inputs.canvas.mimeType.value = canvasState.mimeType;
+			inputs.canvas.quality.value = canvasState.quality;
+			inputs.canvas.backgroundColor.style.backgroundColor = canvasState.backgroundColor;
+			inputs.canvas.smoothingEnabled.value = canvasState.smoothingEnabled;
+			inputs.canvas.smoothingQuality.value = canvasState.smoothingQuality;
 		}
 
 		function writeImageData(imageState){
 			if (!imageState) {
-				for(key in inputs.image) {
-					if (inputs.image.hasOwnProperty(key)) {
-						inputs.image[key].value = "";
-					}
-				}
+				inputs.image.id.value = "";
+				inputs.image.type.value = "";
+				inputs.image.originalWidth.value = "";
+				inputs.image.originalHeight.value = "";
+				inputs.image.width.value = "";
+				inputs.image.height.value = "";
+				inputs.image.left.value = "";
+				inputs.image.top.value = "";
+				inputs.image.x.value = "";
+				inputs.image.y.value = "";
+				inputs.image.index.value = "";
+				inputs.image.rotate.value = "";
+				inputs.image.scaleX.value = "";
+				inputs.image.scaleY.value = "";
+				inputs.image.opacity.value = "";
+				inputs.image.lockAspectRatio.value = "";
+				inputs.image.focusable.value = "";
+				inputs.image.editable.value = "";
+				inputs.image.drawable.value = "";
+				inputs.image.indexable.value = "";
 				return false;
 			}
 			inputs.image.id.value = imageState.id;
-			inputs.image.originalAspectRatio.value = imageState.originalAspectRatio;
-			inputs.image.aspectRatio.value = imageState.aspectRatio;
+			inputs.image.type.value = imageState.type;
 			inputs.image.originalWidth.value = Math.floor(imageState.originalWidth * 100) / 100;
 			inputs.image.originalHeight.value = Math.floor(imageState.originalHeight * 100) / 100;
-			inputs.image.index.value = imageState.index;
 			inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
 			inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
 			inputs.image.left.value = Math.floor(imageState.left * 100) / 100;
 			inputs.image.top.value = Math.floor(imageState.top * 100) / 100;
 			inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
 			inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
+			inputs.image.index.value = imageState.index;
 			inputs.image.rotate.value = Math.floor(imageState.rotate * 100) / 100;
 			inputs.image.scaleX.value = imageState.scaleX;
 			inputs.image.scaleY.value = imageState.scaleY;
 			inputs.image.opacity.value = imageState.opacity;
 			inputs.image.lockAspectRatio.value = imageState.lockAspectRatio;
-			inputs.image.focusabled.value = imageState.focusabled;
-			inputs.image.editabled.value = imageState.editabled;
-			inputs.image.drawabled.value = imageState.drawabled;
+			inputs.image.focusable.value = imageState.focusable;
+			inputs.image.editable.value = imageState.editable;
+			inputs.image.drawable.value = imageState.drawable;
+			inputs.image.indexable.value = imageState.indexable;
 		}
 
 		function checkCaches(){
-			if (canvaaas.getUndoData() < 1) {
+			var caches = canvaaas.getCacheData();
+			if (caches.undo.length < 1) {
 				buttons.undo.style.pointerEvents = "none";
 				buttons.undo.style.cursor = "default";
 				buttons.undo.style.color = "#777";
@@ -877,7 +1233,7 @@
 				buttons.undo.style.cursor = "";
 				buttons.undo.style.color = "";
 			}
-			if (canvaaas.getRedoData() < 1) {
+			if (caches.redo.length < 1) {
 				buttons.redo.style.pointerEvents = "none";
 				buttons.redo.style.cursor = "default";
 				buttons.redo.style.color = "#777";
