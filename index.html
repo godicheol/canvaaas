@@ -146,7 +146,7 @@
 	}
 </style>
 </head>
-<body style="padding-top: 0px; padding-bottom: 1000px;">
+<body style="padding-top: 0px;">
 
 	<div id="header" class="header">
 		<div class="header-hidden">
@@ -162,6 +162,21 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">File</a>
 			<ul class="header-list hidden">
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.newCanvas({
+						width: window.prompt('Type width', '6'),
+						height: window.prompt('Type height', '4'),
+						unit: window.prompt('Type unit', 'in'),
+						dpi: window.prompt('Type dpi', '300'),
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log(res);
+					})
+				">New</a></li>
+				<li class="rule"></li>
 				<li><label for="uploadSingle">Upload File</label></li>
 				<li><label for="uploadMultiple">Upload Files</label></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -169,11 +184,6 @@
 						window.prompt('Type image URL', '/img/1.jpg')
 					)
 				">Upload URL</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrl(
-						testImportData[0]
-					)
-				">Upload URL With State</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
@@ -219,6 +229,30 @@
 						window.URL.revokeObjectURL(res);
 					})
 				">Save Thumbnail</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					// new tab
+					canvaaas.draw({
+						filename: 'original',
+						datatype: 'url'
+					}, function(err, res){
+						var image = new Image();
+						image.src = res;
+						image.style.position = 'absolute';
+						image.style.top = '50%';
+						image.style.left = '50%';
+						image.style.transform = 'translate(-50%, -50%)';
+						image.style.width = '100%';
+						image.style.maxHeight = '100%';
+
+				        var newTab = window.open('');
+				        newTab.document.write(image.outerHTML);
+				        newTab.document.body.style.backgroundColor = '#000000';
+				        newTab.document.body.style.padding = '24px';
+				        newTab.document.body.style.position = 'relative';
+
+						window.URL.revokeObjectURL(res);
+					})
+				">New Tab</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res){
@@ -228,86 +262,109 @@
 						}
 						console.log('export callback', res);
 
-						exportedData = res;
-						exportedCanvasData = canvaaas.getCanvasData();
-
-						canvaaas.removeAll();
+						alert(JSON.stringify(res, null, 2));
 					})
 				">Export</a></li>
-				<script>
-					var exportedData;
-					var exportedCanvasData;
-				</script>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						width: exportedCanvasData.originalWidth,
-						height: exportedCanvasData.originalHeight,
-						unit: 'px',
-						dpi: 1
-					}, function(err, res){
+					canvaaas.import(JSON.stringify(testImport), function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
 						}
-						canvaaas.import(exportedData, function(err, res){
-							if (err) {
-								console.log(err);
-								return false;
-							}
-							console.log('import callback', res);
-						})
+						console.log('import callback', res);
 					})
 				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					// new tab
-					canvaaas.draw(null, function(err, res){
-						var image = new Image();
-						image.src = res.file;
-						image.style.maxWidth = '100%';
-						image.style.maxHeight = '100%';
-
-				        var newTab = window.open('');
-				        newTab.document.write(image.outerHTML);
-
-						window.URL.revokeObjectURL(res.file);
-					})
-				">Draw to New Tab</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getConfigData(function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Config Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getContainerData(function(err, res){
-						console.log(res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get Container Data</a></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCanvasData(function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Canvas Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getImageDataAll(function(err, res){
+					canvaaas.findOne({
+						id: canvaaas.this()
+					}, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Get Image Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getCacheData(function(err, res){
+					canvaaas.getUndoData(function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Cache Data</a></li>
+				">Get Undo Data</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.getRedoData(function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log(res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Get Redo Data</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.config(testConfig1, function(err, res){
-						canvaaas.init(elem)
+					canvaaas.findOne({
+						index: 2
+					}, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log(res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Find One {index: 2}</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({
+						index: 2
+					}, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log(res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Find Many {index: 2}</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.config(testConfig, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						canvaaas.init(document.getElementById('myContainer'), function(err, res){
+							if (err) {
+								console.log(err);
+								return false;
+							}
+						})
 					})
 				">Init</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -521,6 +578,8 @@
 
 	<div class="logger">
 		<div class="canvas-data hidden">
+			Aspect Ratio:
+			<input id="canvas-aspectRatio" type="text">
 			Width:
 			<input id="canvas-width" type="text">
 			Height:
@@ -583,7 +642,6 @@
 			id="image-1"
 			src="/img/1.jpg"
 			data-id = "test-1"
-	        data-type = "url"
 	        data-src = "./img/1.jpeg"
 	        data-index = "1"
 	        data-width = "7858.705673285891"
@@ -595,85 +653,31 @@
 	        data-scaleY = "-1"
 	        data-opacity = "1"
 	        data-lockAspectRatio = "true"
-	        data-focusable = "true"
-	        data-editable = "true"
-	        data-drawable = "true"
-	        data-indexable = "true">
+	        data-focusabled = "true"
+	        data-editabled = "true"
+	        data-drawabled = "true">
 		<img 
 			id="image-2" 
 			src="/img/1.jpeg" 
-			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusable":true,"editable":true,"drawable":true,"indexable":true}'>
+			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusabled":true,"editabled":true,"drawabled":true}'>
 		<img
-			id="image-11"
+			id="image-3"
 			src="/img/1.jpg"
 	        data-width = "7858.705673285891">
 		<img
-			id="image-12"
+			id="image-4"
 			src="/img/1.jpg">
 		<img 
-			id="image-21" 
+			id="image-5" 
 			src="/img/1.jpeg" 
 			data-state='{"width":7858.705673285891}'>
-
 	</div>
-
-	<script>
-		function viewImageData() {
-			var elem = document.querySelector("div.image-data");
-			if (elem.classList.contains("hidden") === true) {
-				elem.classList.remove("hidden");
-			} else {
-				elem.classList.add("hidden");
-			}
-		}
-
-		function viewCanvasData() {
-			var elem = document.querySelector("div.canvas-data");
-			if (elem.classList.contains("hidden") === true) {
-				elem.classList.remove("hidden");
-			} else {
-				elem.classList.add("hidden");
-			}
-		}
-
-		(function(){
-			var header = document.getElementById("header");
-			var tabs = header.querySelectorAll("a.header-subject");
-			var opened;
-
-			tabs.forEach(function(t){
-				t.addEventListener("click", function(e){
-					e.preventDefault();
-					e.stopPropagation();
-
-					var isThis = false;
-					var list = e.target.parentNode.querySelector(".header-list");
-
-					if (opened !== undefined && opened !== null) {
-						if (opened.isSameNode(list)) {
-							isThis = true;
-						}
-						opened.classList.add("hidden");
-						opened = undefined;
-					}
-
-					if (isThis === true) {
-						return false;
-					}
-
-					if (list.classList.contains("hidden") === true) {
-						list.classList.remove("hidden");
-						opened = list;
-					}
-				});
-			});
-		})();
-	</script>
 
 	<script>
 
 		var inputs = {
 			canvas:{
+				aspectRatio: document.getElementById("canvas-aspectRatio"),
 				width: document.getElementById("canvas-width"),
 				height: document.getElementById("canvas-height"),
 				editabled: document.getElementById("canvas-editabled"),
@@ -797,6 +801,8 @@
 
 			writeCanvasData();
 
+			checkCaches();
+
 			console.log("canvaaas.init callback", res);
 		});
 
@@ -830,6 +836,7 @@
 
 		function writeCanvasData(){
 			var state = canvaaas.getCanvasData();
+			inputs.canvas.aspectRatio.value = state.aspectRatio;
 			inputs.canvas.width.value = Math.floor(state.width * 100) / 100;
 			inputs.canvas.height.value = Math.floor(state.height * 100) / 100;
 			inputs.canvas.backgroundColor.style.backgroundColor = state.backgroundColor;
@@ -887,6 +894,193 @@
 				buttons.redo.style.color = "";
 			}
 		}
+
+		function viewImageData() {
+			var elem = document.querySelector("div.image-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		function viewCanvasData() {
+			var elem = document.querySelector("div.canvas-data");
+			if (elem.classList.contains("hidden") === true) {
+				elem.classList.remove("hidden");
+			} else {
+				elem.classList.add("hidden");
+			}
+		}
+
+		(function(){
+			var header = document.getElementById("header");
+			var tabs = header.querySelectorAll("a.header-subject");
+			var opened;
+
+			tabs.forEach(function(t){
+				t.addEventListener("click", function(e){
+					e.preventDefault();
+					e.stopPropagation();
+
+					var isThis = false;
+					var list = e.target.parentNode.querySelector(".header-list");
+
+					if (opened) {
+						if (opened.isSameNode(list)) {
+							isThis = true;
+						}
+						opened.classList.add("hidden");
+						opened = undefined;
+					}
+
+					if (isThis === true) {
+						return false;
+					}
+
+					if (list.classList.contains("hidden") === true) {
+						list.classList.remove("hidden");
+						opened = list;
+					}
+				});
+
+				var btns = t.parentNode.querySelector(".header-list").querySelectorAll("li");
+				btns.forEach(function(b){
+					if (!b.classList.contains("rule")) {
+						b.addEventListener("click", function(e){
+							if (opened) {
+								opened.classList.add("hidden");
+								opened = undefined;
+							}
+						})
+					}
+				});
+			});
+		})();
+
+		var testConfig = {
+			upload: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				checkCaches();
+
+				console.log("config.upload callback", res);
+			},
+			canvas: function(err, res) {
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				writeCanvasData();
+				checkCaches();
+
+				console.log("config.canvas callback", res);
+			},
+			remove: function(err, res) {
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				checkCaches();
+
+				console.log("config.remove callback", res);
+			},
+			focus: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				writeImageData(res);
+				checkCaches();
+
+				console.log("config.focus callback", res);
+			},
+			edit: function(err, res){
+				if (err) {
+					console.log(err);
+					return false;
+				}
+
+				writeImageData(res);
+				checkCaches();
+
+				console.log("config.edit callback", res);
+			},
+		}
+
+		var testImport = [{
+	        "id": "db3783",
+	        "index": 1,
+	        "originalWidth": 3024,
+	        "originalHeight": 4032,
+	        "width": 5058.658727201191,
+	        "height": 6744.878302934924,
+	        "x": 5295.4455985412405,
+	        "y": 1003.7599146564536,
+	        "rotate": -46.416011804284835,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 0.5,
+	        "lockAspectRatio": true,
+	        "focusabled": true,
+	        "editabled": true,
+	        "drawabled": true,
+	        "originalAspectRatio": "3:4",
+	        "aspectRatio": "3:4",
+	        "left": 2766.116234940645,
+	        "top": -2368.6792368110086,
+	        "src": "http://192.168.123.103:3000/img/1.jpg"
+	    }, {
+	        "id": "gptrx6",
+	        "index": 2,
+	        "originalWidth": 5472,
+	        "originalHeight": 3648,
+	        "width": 6516.947545957242,
+	        "height": 4344.631697304831,
+	        "x": 1696.5990752607859,
+	        "y": 4235.377200867475,
+	        "rotate": 22.791923828768304,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "lockAspectRatio": true,
+	        "focusabled": true,
+	        "editabled": true,
+	        "drawabled": true,
+	        "originalAspectRatio": "3:2",
+	        "aspectRatio": "3:2",
+	        "left": -1561.8746977178353,
+	        "top": 2063.0613522150597,
+	        "src": "http://192.168.123.103:3000/img/1.jpeg"
+	    }, {
+	        "id": "ihhyd6",
+	        "index": 3,
+	        "originalWidth": 800,
+	        "originalHeight": 800,
+	        "width": 3048.60471766451,
+	        "height": 3048.60471766451,
+	        "x": 6734.984207853423,
+	        "y": 4059.107167074146,
+	        "rotate": 0,
+	        "scaleX": 1,
+	        "scaleY": 1,
+	        "opacity": 1,
+	        "lockAspectRatio": true,
+	        "focusabled": true,
+	        "editabled": true,
+	        "drawabled": true,
+	        "originalAspectRatio": "1:1",
+	        "aspectRatio": "1:1",
+	        "left": 5210.681849021168,
+	        "top": 2534.804808241891,
+	        "src": "http://192.168.123.103:3000/img/1.png"
+	    }];
 
 	</script>
 </body>

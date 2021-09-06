@@ -10,6 +10,7 @@
   * custom
   */
 
+/* on editing (mouse down) */
 .canvaaas-image.editing,
 .canvaaas-clone.editing{
 
@@ -19,6 +20,8 @@
 	display: block;
 }
 
+
+/* on focus */
 .canvaaas-image.focused,
 .canvaaas-clone.focused{
 
@@ -42,14 +45,35 @@
 .canvaaas-clone.focused .canvaaas-handle{
 	border-color: red;
 }
-.canvaaas-image.focused .canvaaas-handle,
+
+.canvaaas-image.focused .canvaaas-rotate-handle,
+.canvaaas-image.focused .canvaaas-resize-handle,
 /*.canvaaas-image.focused .canvaaas-innerline,*/
 .canvaaas-image.focused .canvaaas-outline,
-.canvaaas-clone.focused .canvaaas-handle,
+.canvaaas-clone.focused .canvaaas-rotate-handle,
+.canvaaas-clone.focused .canvaaas-resize-handle,
 /*.canvaaas-clone.focused .canvaaas-innerline,*/
 .canvaaas-clone.focused .canvaaas-outline{
 	display: block;
 }
+
+/* on frozen */
+.canvaaas.frozen .canvaaas-image .canvaaas-rotate-handle,
+.canvaaas.frozen .canvaaas-image .canvaaas-resize-handle,
+.canvaaas.frozen .canvaaas-image .canvaaas-innerline,
+.canvaaas.frozen .canvaaas-image .canvaaas-outline,
+.canvaaas.frozen .canvaaas-clone .canvaaas-rotate-handle,
+.canvaaas.frozen .canvaaas-clone .canvaaas-resize-handle,
+.canvaaas.frozen .canvaaas-clone .canvaaas-innerline,
+.canvaaas.frozen .canvaaas-clone .canvaaas-outline{
+	display: none;
+}
+
+.canvaaas.frozen .undrawabled{
+	visibility: hidden;
+}
+
+/* uneditabled */
 .canvaaas-image.uneditabled .canvaaas-innerline,
 .canvaaas-clone.uneditabled .canvaaas-innerline,
 .canvaaas-image.uneditabled .canvaaas-outline,
@@ -58,6 +82,8 @@
 .canvaaas-clone.uneditabled .canvaaas-handle{
 	border-color: orange;
 }
+
+/* unfocusabled */
 .canvaaas-image.unfocusabled,
 .canvaaas-clone.unfocusabled{
 	pointer-events: none;
@@ -89,9 +115,6 @@
 	top: -100%;
 	left: 0;
 	z-index: -1;
-	visibility: hidden;
-}
-.canvaaas.frozen .undrawabled{
 	visibility: hidden;
 }
 
@@ -165,10 +188,6 @@
 	-ms-user-select: none;
 	user-select: none;
 	/*pointer-events: none;*/
-}
-.canvaaas-image,
-.canvaaas-clone{
-	border-color: black;
 }
 
 /*!
@@ -296,9 +315,6 @@
 	border: 1px solid; 
 	background-color: #fff;
 	border-color: inherit;
-
-	/* hide */
-	display: none;
 }
 .canvaaas-resize-handle,
 .canvaaas-rotate-handle{
@@ -308,6 +324,9 @@
 	height: 24px; /* click space */
 	cursor: grab;
 	border-color: inherit;
+
+	/* hide */
+	display: none;
 }
 
 .canvaaas-resize-n,

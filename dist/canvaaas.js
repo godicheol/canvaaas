@@ -92,23 +92,6 @@
 		
 		Object.freeze(classNames);
 
-		var msg = {
-			noArgument: "Argument not found",
-			errArgument: "Argument Error",
-			argumentNotString: "Argument not String",
-			argumentNotNumber: "Argument not Number",
-			argumentNotArray: "Argument not Array",
-			argumentNotObject: "Argument not Object",
-			argumentNotNodeList: "Argument not NodeList",
-			alreadyInProgress: "Already in Progress",
-			uneditableCanvas: "The canvas editing not enabled",
-			uneditableImage: "This image editing not enabled",
-			noFile: "File not found",
-			noMultipleUpload: "Muliple upload not allowed",
-		}
-
-		Object.freeze(msg);
-
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
@@ -188,7 +171,9 @@
 
 				var id = getTarget(e);
 				var state = getState(id);
-
+				if (!state) {
+					return false;
+				}
 				if (!state.focusabled) {
 					return false;
 				}
@@ -1110,14 +1095,21 @@
 			var cloneObj = document.getElementById(cloneId + id);
 
 			var idChanged = false;
+			var oldId;
 			for(var key in newState) {
 				if (newState.hasOwnProperty(key)) {
 					if ([
 						"id"
 					].indexOf(key) > -1) {
-						state[key] = toString(newState[key]);
-						if (newState[key] !== state[key]) {
+						if (state[key] !== newState[key]) {
 							idChanged = true;
+							oldId = state[key];
+						}
+						if (
+							isString(newState[key]) &&
+							!isExist(newState[key])
+						) {
+							state[key] = toString(newState[key]);
 						}
 					} else if ([
 						"index",
@@ -1167,6 +1159,28 @@
 			if (idChanged === true) {
 				originObj.id = originId + state.id;
 				cloneObj.id = cloneId + state.id;
+
+				undoCaches.forEach(function(elem){
+					if (elem.id === oldId) {
+						elem.id = state.id;
+					}
+					if (elem.state) {
+						if (elem.state.id === oldId) {
+							elem.state.id = state.id;
+						}
+					}
+				});
+
+				redoCaches.forEach(function(elem){
+					if (elem.id === oldId) {
+						elem.id = state.id;
+					}
+					if (elem.state) {
+						if (elem.state.id === oldId) {
+							elem.state.id = state.id;
+						}
+					}
+				});
 			}
 
 			originObj.style.zIndex = index;
@@ -1399,6 +1413,7 @@
 				}
 			}
 
+
 			if (thisAttrs.state) {
 				var tmp = {};
 				try {
@@ -1406,7 +1421,7 @@
 					var parsedKeys = Object.keys(parsed);
 					for (var i = 0; i < parsedKeys.length; i++) {
 						var j = parsedKeys[i];
-						if (parsedKeys.hasOwnProperty(j)) {
+						if (parsed.hasOwnProperty(j)) {
 							if (isNumeric(parsed[j])) {
 								tmp[j] = toNumber(parsed[j]);
 							} else if (isBoolean(parsed[j])) {
@@ -1517,6 +1532,7 @@
 						}
 					}
 				}
+
 
 				var id = getId(found);
 				if (!id) {
@@ -2018,11 +2034,11 @@
 		}
 
 		function isString(str) {
-			return str !== undefined && typeof(str) === "string";
+			return str !== undefined && (typeof(str) === "string" || (typeof(str) === "number" && !isNaN(str)));
 		}
 
 		function isObject(obj) {
-			return obj !== undefined && typeof(obj) === "object" && obj !== null;
+			return obj !== undefined && typeof(obj) === "object" && obj !== null && !Array.isArray(obj);
 		}
 
 		function isFunction(func) {
@@ -2087,7 +2103,7 @@
 			if (Array.isArray(str)) {
 				return str;
 			} else {
-				return [str]
+				return [str];
 			}
 		}
 
@@ -2902,6 +2918,10 @@
 					cb("ID duplicated");
 				} 
 				return false;
+			}
+
+			if (eventState.target === id) {
+				focusOut(id);
 			}
 
 			// save cache
@@ -4080,6 +4100,81 @@
 			return getCanvas();
 		}
 
+		myObject.newCanvas = function(options, cb) {
+			if (!isObject(options)) {
+				if (config.canvas) {
+					config.canvas("Argument not object");
+				}
+				if (cb) {
+					cb("Argument not object");
+				}
+				return false;
+			}
+
+			if (
+				!isNumeric(options.width) ||
+				!isNumeric(options.height) ||
+				(!isString(options.unit) && options.unit !== undefined) ||
+				(!isNumeric(options.dpi) && options.dpi !== undefined)
+			) {
+				if (config.canvas) {
+					config.canvas("Argument not allowed");
+				}
+				if (cb) {
+					cb("Argument not allowed");
+				}
+				return false;
+			}
+
+			var inputW = toNumber(options.width);
+			var inputH = toNumber(options.height);
+			var inputU = options.unit || "px";
+			var inputD = isNumeric(options.dpi) ? toNumber(options.dpi) : 300;
+
+			var sizes = dimensionsToPx(inputW, inputH, inputU, inputD);
+			if (!sizes) {
+				if (config.canvas) {
+					config.canvas("Argument not allowed");
+				}
+				if (cb) {
+					cb("Argument not allowed");
+				}
+				return false;
+			}
+
+			// remove image
+			var tmp = [];
+			imageStates.forEach(function(elem){
+				tmp.push(elem.id);
+			});
+
+			tmp.forEach(function(elem){
+				removeImage(elem);
+			});
+
+			canvasState.originalWidth = sizes[0];
+			canvasState.originalHeight = sizes[1];
+
+			// set canvas
+			initCanvas();
+
+			// reset background
+			canvasState.backgroundColor = undefined;
+			canvasObject.style.backgroundColor = "";
+
+			// clear caches
+			undoCaches = [];
+			redoCaches = [];
+
+			if (config.canvas) {
+				config.canvas(null, getCanvas());
+			}
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
 		myObject.canvas = function(options, cb) {
 			if (!canvasState.editabled) {
 				if (config.canvas) {
@@ -4139,14 +4234,14 @@
 			initCanvas();
 
 			// set images
-			imageStates.forEach(function(state){
+			imageStates.forEach(function(elem){
 				var minX = 0;
 				var minY = 0;
 				var maxX = canvasState.width;
 				var maxY = canvasState.height;
 
-				var axisX = state.x;
-				var axisY = state.y;
+				var axisX = elem.x;
+				var axisY = elem.y;
 
 				if (axisX > maxX) {
 					axisX = maxX;
@@ -4162,7 +4257,7 @@
 				}
 
 				// save state
-				setState(state.id, {
+				setState(elem.id, {
 					x: axisX,
 					y: axisY
 				});
@@ -4253,8 +4348,8 @@
 			canvasState.editabled = false;
 			eventState.onFrozen = true;
 
-			if (!canvasObject.classList.contains(classNames.onFrozen)) {
-				canvasObject.classList.add(classNames.onFrozen);
+			if (!containerObject.classList.contains(classNames.onFrozen)) {
+				containerObject.classList.add(classNames.onFrozen);
 			}
 
 			if (canvasObject.classList.contains(classNames.checker)) {
@@ -4279,8 +4374,8 @@
 			canvasState.editabled = true;
 			eventState.onFrozen = false;
 
-			if (canvasObject.classList.contains(classNames.onFrozen)) {
-				canvasObject.classList.remove(classNames.onFrozen);
+			if (containerObject.classList.contains(classNames.onFrozen)) {
+				containerObject.classList.remove(classNames.onFrozen);
 			}
 
 			if (eventState.checker) {
@@ -4468,21 +4563,6 @@
 			return getCanvas();
 		}
 
-		myObject.getImageData = function(id, cb){
-			var state = getState(id);
-			if (!state) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			} else {
-				if (cb) {
-					cb(null, state);
-				}
-				return state;
-			}
-		}
-
 		myObject.getUndoData = function(cb){
 			if (cb) {
 				cb(null, undoCaches.length);
@@ -4495,6 +4575,77 @@
 				cb(null, redoCaches.length);
 			}
 			return redoCaches.length;
+		}
+
+		myObject.findOne = function(query, cb){
+			if (!isObject(query)) {
+				if (cb) {
+					cb("Argument not obejct");
+				}
+				return false;
+			}
+
+			var found = imageStates.find(function(elem){
+				var isMatch = true;
+				for(var key in query) {
+					if (query.hasOwnProperty(key)) {
+						if (elem[key] !== query[key]) {
+							isMatch = false;
+						}
+					}
+				}
+				if (isMatch === true) {
+					return elem;
+				}
+			})
+
+			if (!found) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			} else {
+				if (cb) {
+					cb(null, exportState(found.id));
+				}
+				return exportState(found.id);
+			}			
+		}
+
+		myObject.findMany = function(query, cb){
+			if (!isObject(query)) {
+				if (cb) {
+					cb("Argument not obejct");
+				}
+				return false;
+			}
+
+			var founds = [];
+			imageStates.forEach(function(elem){
+				var isMatch = true;
+				for(var key in query) {
+					if (query.hasOwnProperty(key)) {
+						if (elem[key] !== query[key]) {
+							isMatch = false;
+						}
+					}
+				}
+				if (isMatch === true) {
+					founds.push(exportState(elem.id));
+				}
+			});
+
+			if (founds.length < 1) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			} else {
+				if (cb) {
+					cb(null, founds);
+				}
+				return founds;
+			}			
 		}
 
 		myObject.undo = function(cb){
@@ -4559,9 +4710,7 @@
 			var states = [];
 
 			imageStates.forEach(function(elem){
-				if (elem.type === "url") {
-					states.push(exportState(elem.id));
-				}
+				states.push(exportState(elem.id));
 			});
 
 			states.sort(function(a, b){
@@ -4570,72 +4719,46 @@
 				elem.src = getSrc(elem.id);
 			});
 
-			console.log(states);
+			if (cb) {
+				cb(null, states)
+			}
+			return states;
 		}
 
-		myObject.import = function(exportedStates, cb){
-			if (!Array.isArray(exportedStates)) {
-				if (typeof(exportedStates) !== "string") {
+		myObject.import = function(states, cb){
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!isArray(states)) {
+				if (!isString(states)) {
 					if (cb) {
-						cb("Argument error");
+						cb("Argument not array");
 					} 
 					return false;
 				} else {
 					var tmp;
 					try {
-						tmp = JSON.parse(exportedStates);
+						tmp = JSON.parse(states);
 					} catch(err) {
+						console.log(err);
 						tmp = undefined;
 					}
-					if (!Array.isArray(tmp)) {
+					if (!isArray(tmp)) {
 						if (cb) {
-							cb("Argument error");
+							cb("Argument not array");
 						} 
 						return false;
 					} else {
-						exportedStates = tmp;
+						states = tmp;
 					}
 				}
 			}
 
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			// check index
-			// var hasDupe = false;
-			// var noIndex = false;
-			// var candidateIndexes = [];
-			// exportedStates.forEach(function(elem){
-			// 	if (isNumeric(elem.index)) {
-			// 		if (candidateIndexes.indexOf(elem.index) < 0) {
-			// 			candidateIndexes.push(elem.index);
-			// 		} else {
-			// 			hasDupe = true;
-			// 		}
-			// 	} else {
-			// 		noIndex = true;
-			// 	}
-			// });
-
-			// if (hasDupe === true) {
-			// 	if (cb) {
-			// 		cb("Duplicate index error");
-			// 	}
-			// 	return false;
-			// }
-
-			// if (noIndex === true) {
-			// 	if (cb) {
-			// 		cb("No index error");
-			// 	}
-			// 	return false;
-			// }
-
-			var index = exportedStates.length;
+			var index = states.length;
 			var count = 0;
 			var results = [];
 
@@ -4645,63 +4768,18 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var thisState = {};
-					copyObject(thisState, exportedStates[count]);
+					var thisState = states[count];
 					var thisSrc = thisState.src || thisState.url || thisState.path;
-
-					initImage(thisSrc, function(err, res) {
+					initImage(thisSrc, thisState, function(err, res) {
 						if (err) {
 							results.push({
 								err: err
 							});
-
-							count++;
-							recursiveFunc();
-							return false;
-						} 
-
-						var state = getStateById(res);
-						var source = getSourceById(res);
-						var clone = getCloneById(res);
-
-						if (!state || !source || !clone) {
-							removeObjectById(res);
-
-							results.push({
-								err: "Image element not found"
-							});
-
-							count++;
-							recursiveFunc();
-							return false;
+						} else {
+							results.push(
+								exportState(res)
+							);
 						}
-
-						if (existsId(thisState.id) === true) {
-							removeObjectById(res);
-
-							results.push({
-								err: "ID duplicated"
-							});
-
-							count++;
-							recursiveFunc();
-							return false;
-						}
-
-						var fittedState = getFittedState(thisState);
-
-						// save cache
-						saveUndo(state.id);
-
-						// save state
-						setState(state, fittedState);
-
-						// adjust state
-						setObject(source, state);
-						setObject(clone, state);
-
-						results.push(getDataByState(state));
-
 						count++;
 						recursiveFunc();
 					});
@@ -4709,7 +4787,7 @@
 					eventState.onUpload = false;
 
 					if (cb) {
-						cb(null, results)
+						cb(null, results);
 					}
 				}
 			}
@@ -4717,31 +4795,27 @@
 
 		myObject.destroy = function(cb){
 			window.removeEventListener("resize", windowResizeEvent, false);
-			window.removeEventListener("scroll", windowScrollEvent, false);
 
 			containerObject.parentNode.removeChild(containerObject);
 
 			config = {};
-
 			copyObject(config, defaultConfig);
 
 			eventState = {};
-			undoCaches = [];
-			redoCaches = [];
 			containerState = {};
 			canvasState = {};
 			imageStates = [];
+			undoCaches = [];
+			redoCaches = [];
 
 			containerObject = undefined;
 			canvasObject = undefined;
 			mirrorObject = undefined;
-			imageObjects = [];
 
-			windowScrollEvent = undefined;
 			windowResizeEvent = undefined;
 
-			originId = "canvaaas-" + getShortId() + "-";
-			cloneId = "canvaaas-" + getShortId() + "-";
+			originId = "canvaaas-o";
+			cloneId = "canvaaas-c";
 
 			if (cb) {
 				cb(null, true);
