@@ -2,7 +2,7 @@
  * 
  * canvaaas.js
  * 
- * 0.2.1
+ * 0.2.2
  * 
  * eeecheol@gmail.com
  * 
@@ -52,6 +52,8 @@
 			maxContainerHeight: 0.7, // number, 0 ~ 1
 
 			initImageScale: 0.5, // number,
+
+			hover: undefined, // callback function
 
 			upload: undefined, // callback function
 
@@ -126,6 +128,23 @@
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
 
+		var loadingTemplate = "";
+		loadingTemplate += "<div class='canvaaas-loading'>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "<div></div>";
+		loadingTemplate += "</div>";
+
 		var config = {};
 
 		var originId = "canvaaas-o";
@@ -159,10 +178,32 @@
 			},
 
 			hover: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				var mouseX;
+				var mouseY;
 
-				var id = getTarget(e);
+				if (!whereContainer()) {
+					return false;
+				}
+
+				if (typeof(e.touches) === "undefined") {
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
+				} else if(e.touches.length === 1) {
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+				}
+
+				var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+				var result = {
+					x: mouseX / scaleRatio,
+					y: mouseY / scaleRatio,
+					target: getTarget(e)
+				}
+
+				if (config.hover) {
+					config.hover(null, result)
+				}
 			},
 
 			focusIn: function(e) {
@@ -1377,6 +1418,59 @@
 			return tmp;
 		}
 
+		function parseState(obj) {
+			var result = {};
+
+			if (isObject(obj)) {
+				var stateKeys = Object.keys(obj);
+				for (var i = 0; i < stateKeys.length; i++) {
+					var j = stateKeys[i];
+					if (obj.hasOwnProperty(j)) {
+						if (isNumeric(obj[j])) {
+							result[j] = toNumber(obj[j]);
+						} else if (isBoolean(obj[j])) {
+							result[j] = toBoolean(obj[j]);
+						} else if (isString(obj[j])) {
+							result[j] = toString(obj[j]);
+						}
+					}
+					
+				}
+			} else if (isString(obj)) {
+				try {
+					var parsed = JSON.parse(obj);
+					var parsedKeys = Object.keys(parsed);
+					for (var i = 0; i < parsedKeys.length; i++) {
+						var j = parsedKeys[i];
+						if (parsed.hasOwnProperty(j)) {
+							if (isNumeric(parsed[j])) {
+								result[j] = toNumber(parsed[j]);
+							} else if (isBoolean(parsed[j])) {
+								result[j] = toBoolean(parsed[j]);
+							} else if (isString(parsed[j])) {
+								result[j] = parsed[j];
+							}
+						}
+					}
+				} catch(err) {
+					console.log(err);
+					result = {};
+				}
+			} else {
+				return false;
+			}
+
+			if (!result.src) {
+				if (result.url) {
+					result.src = result.url;
+				} else if (result.path) {
+					result.src = result.path;
+				}
+			}
+
+			return result;
+		}
+
 		function getDataset(elem) {
 			var stateKeys = [
 				"state",
@@ -1413,50 +1507,14 @@
 				}
 			}
 
-
+			var result;
 			if (thisAttrs.state) {
-				var tmp = {};
-				try {
-					var parsed = JSON.parse(thisAttrs.state);
-					var parsedKeys = Object.keys(parsed);
-					for (var i = 0; i < parsedKeys.length; i++) {
-						var j = parsedKeys[i];
-						if (parsed.hasOwnProperty(j)) {
-							if (isNumeric(parsed[j])) {
-								tmp[j] = toNumber(parsed[j]);
-							} else if (isBoolean(parsed[j])) {
-								tmp[j] = toBoolean(parsed[j]);
-							} else if (isString(parsed[j])) {
-								tmp[j] = parsed[j];
-							}
-						}
-					}
-				} catch(err) {
-					console.log(err);
-					tmp = {};
-				}
-
-				if (!tmp.src) {
-					if (tmp.url) {
-						tmp.src = tmp.url;
-					} else if (tmp.path) {
-						tmp.src = tmp.path;
-					}
-				}
-
-				return tmp;
+				result = parseState(thisAttrs.state);
 			} else {
-
-				if (!thisAttrs.src) {
-					if (thisAttrs.url) {
-						thisAttrs.src = thisAttrs.url;
-					} else if (thisAttrs.path) {
-						thisAttrs.src = thisAttrs.path;
-					}
-				}
-
-				return thisAttrs;
+				result = parseState(thisAttrs);
 			}
+			console.log(result);
+			return result;
 		}
 
 		function isAvailable(id) {
@@ -1981,6 +2039,33 @@
 			}
 		}
 
+		function startLoading(target) {
+			var wrapper = document.createElement("div");
+			wrapper.classList.add("canvaaas-loading-wrapper");
+			wrapper.innerHTML = loadingTemplate;
+
+			eventState.scrollTop = document.documentElement.scrollTop || document.querySelector('html').scrollTop;
+
+			document.body.classList.add("canvaaas-fixed");
+
+			target.appendChild(wrapper);
+
+			return wrapper;
+		}
+
+		function endLoading(wrapper) {
+			document.body.classList.remove("canvaaas-fixed");
+
+			window.scrollTo({
+				top: eventState.scrollTop,
+				behavior:'smooth'
+			});
+
+			eventState.scrollTop = undefined;
+
+			wrapper.parentNode.removeChild(wrapper);
+		}
+
 		function dataURLtoFile(dataurl, filename) {
 			var arr = dataurl.split(','),
 				mime = arr[0].match(/:(.*?);/)[1],
@@ -2049,13 +2134,27 @@
 			return Array.isArray(arr);
 		}
 
-		function isNodeList(nodes) {
-			var stringRepr = Object.prototype.toString.call(nodes);
+		function isNode(obj){
+			return (
+				typeof Node === "object" ? obj instanceof Node : 
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName==="string"
+			);
+		}
 
-			return typeof nodes === 'object' &&
+		function isElement(obj){
+			return (
+				typeof HTMLElement === "object" ? obj instanceof HTMLElement :
+				obj && typeof obj === "object" && obj !== null && obj.nodeType === 1 && typeof obj.nodeName==="string"
+			);
+		}
+
+		function isNodeList(obj) {
+			var stringRepr = Object.prototype.toString.call(obj);
+
+			return typeof obj === 'object' &&
 				/^\[object (HTMLCollection|NodeList|Object)\]$/.test(stringRepr) &&
-				(typeof nodes.length === 'number') &&
-				(nodes.length === 0 || (typeof nodes[0] === "object" && nodes[0].nodeType > 0));
+				(typeof obj.length === 'number') &&
+				(obj.length === 0 || (typeof obj[0] === "object" && obj[0].nodeType > 0));
 		}
 
 		function isIos() {
@@ -2683,6 +2782,8 @@
 
 			window.addEventListener("resize", windowResizeEvent, false);
 
+			canvasObject.addEventListener("mousemove", handlers.hover, true);
+
 			if (
 				canvasState.originalWidth &&
 				canvasState.originalHeight
@@ -2739,9 +2840,13 @@
 			}
 
 			eventState.onUpload = true;
+			var loading = startLoading(document.body);
 
 			initImage(thisFiles[0], null, function(err, res) {
+
 				eventState.onUpload = false;
+				endLoading(loading);
+
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -2762,7 +2867,7 @@
 		}
 
 		// asynchronous
-		myObject.uploadUrl = function(imageState, cb) {
+		myObject.uploadUrl = function(imageUrl, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -2773,33 +2878,95 @@
 				return false;
 			}
 
-			var thisSrc;
-			if (isString(imageState)) {
-				thisSrc = imageState;
-			} else if (isObject(imageState)) {
-				if (imageState.src) {
-					thisSrc = imageState.src;
-				} else if (imageState.url) {
-					thisSrc = imageState.url;
-				} else if (imageState.path) {
-					thisSrc = imageState.path;
-				}
-			}
-
-			if (!thisSrc) {
+			if (!imageUrl) {
 				if (config.upload) {
-					config.upload("File not found");
+					config.upload("URL not found");
 				}
 				if (cb) {
-					cb("File not found");
+					cb("URL not found");
+				} 
+				return false;
+			}
+
+			if (!isString(imageUrl)) {
+				if (config.upload) {
+					config.upload("Argument not string");
+				}
+				if (cb) {
+					cb("Argument not string");
 				} 
 				return false;
 			}
 
 			eventState.onUpload = true;
+			var loading = startLoading(document.body);
 
-			initImage(thisSrc, imageState, function(err, res) {
+			initImage(imageUrl, null, function(err, res) {
+
 				eventState.onUpload = false;
+				endLoading(loading);
+
+				if (err) {
+					if (config.upload) {
+						config.upload(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+
+				if (config.upload) {
+					config.upload(null, res);
+				}
+				if (cb) {
+					cb(null, res);
+				}
+			});
+		}
+
+		// asynchronous
+		myObject.uploadState = function(imageState, cb) {
+			if (eventState.onUpload) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				} 
+				return false;
+			}
+
+			var thisState = parseState(imageState);
+			if (!thisState) {
+				if (config.upload) {
+					config.upload("State not found");
+				}
+				if (cb) {
+					cb("State not found");
+				} 
+				return false;
+			}
+			if (!thisState.src) {
+				if (config.upload) {
+					config.upload("URL not found");
+				}
+				if (cb) {
+					cb("URL not found");
+				} 
+				return false;
+			}
+
+			var thisSrc = thisState.src;
+
+			eventState.onUpload = true;
+			var loading = startLoading(document.body);
+
+			initImage(thisSrc, thisState, function(err, res) {
+
+				eventState.onUpload = false;
+				endLoading(loading);
+
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -2830,19 +2997,26 @@
 				} 
 				return false;
 			}
-
-			if (!isObject(target)) {
+			if (!target) {
 				if (config.upload) {
-					config.upload("Element not found");
+					config.upload("Target not found");
 				}
 				if (cb) {
-					cb("Element not found");
+					cb("Target not found");
+				} 
+				return false;
+			}
+			if (!isElement(target)) {
+				if (config.upload) {
+					config.upload("Target is not DOM Object");
+				}
+				if (cb) {
+					cb("Target is not DOM Object");
 				} 
 				return false;
 			}
 
 			var thisState = getDataset(target);
-
 			var thisSrc;
 			if (!target.src) {
 				if (!thisState.src) {
@@ -2861,9 +3035,13 @@
 			}
 
 			eventState.onUpload = true;
+			var loading = startLoading(document.body);
 
 			initImage(thisSrc, thisState, function(err, res) {
+
 				eventState.onUpload = false;
+				endLoading(loading);
+
 				if (err) {
 					if (config.upload) {
 						config.upload(err);
@@ -4015,9 +4193,9 @@
 				scaleY: 1,
 				opacity: 1,
 				lockAspectRatio: true,
-				focusable: true,
-				editable: true,
-				drawable: true
+				focusabled: true,
+				editabled: true,
+				drawabled: true
 			});
 
 			if (cb) {
@@ -4489,6 +4667,7 @@
 			var imageResults = [];
 
 			eventState.onDraw = true;
+			var loading = startLoading(document.body);
 
 			var index = drawables.length;
 			var count = 0;
@@ -4519,6 +4698,8 @@
 					result.images = imageResults;
 
 					eventState.onDraw = false;
+
+					endLoading(loading);
 
 					if (config.draw) {
 						config.draw(null, data, result);
@@ -4585,7 +4766,8 @@
 				return false;
 			}
 
-			var found = imageStates.find(function(elem){
+			var founds = [];
+			imageStates.forEach(function(elem){
 				var isMatch = true;
 				for(var key in query) {
 					if (query.hasOwnProperty(key)) {
@@ -4595,21 +4777,28 @@
 					}
 				}
 				if (isMatch === true) {
-					return elem;
+					founds.push(exportState(elem.id));
 				}
-			})
+			});
 
-			if (!found) {
+			if (founds.length < 1) {
 				if (cb) {
 					cb("Image not found");
 				}
 				return false;
-			} else {
+			}
+
+			if (founds.length > 1) {
 				if (cb) {
-					cb(null, exportState(found.id));
+					cb("Image found more than one");
 				}
-				return exportState(found.id);
-			}			
+				return false;
+			}
+
+			if (cb) {
+				cb(null, founds[0]);
+			}
+			return founds[0];
 		}
 
 		myObject.findMany = function(query, cb){
@@ -4640,12 +4829,106 @@
 					cb("Image not found");
 				}
 				return false;
-			} else {
+			}
+
+			if (cb) {
+				cb(null, founds);
+			}
+			return founds;
+		}
+
+		myObject.updateOne = function(query, updates, cb){
+			if (
+				!isObject(query) ||
+				!isObject(updates)
+			) {
 				if (cb) {
-					cb(null, founds);
+					cb("Argument not obejct");
 				}
-				return founds;
-			}			
+				return false;
+			}
+
+			var founds = [];
+			imageStates.forEach(function(elem){
+				var isMatch = true;
+				for(var key in query) {
+					if (query.hasOwnProperty(key)) {
+						if (elem[key] !== query[key]) {
+							isMatch = false;
+						}
+					}
+				}
+				if (isMatch === true) {
+					founds.push(elem.id);
+				}
+			});
+
+			if (founds.length < 1) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (founds.length > 1) {
+				if (cb) {
+					cb("Image found more than one");
+				}
+				return false;
+			}
+
+			setState(founds[0], updates);
+
+			if (cb) {
+				cb(null, exportState(founds[0]));
+			}
+			return exportState(founds[0]);
+		}
+
+		myObject.updateMany = function(query, updates, cb){
+			if (
+				!isObject(query) ||
+				!isObject(updates)
+			) {
+				if (cb) {
+					cb("Argument not obejct");
+				}
+				return false;
+			}
+
+			var founds = [];
+			imageStates.forEach(function(elem){
+				var isMatch = true;
+				for(var key in query) {
+					if (query.hasOwnProperty(key)) {
+						if (elem[key] !== query[key]) {
+							isMatch = false;
+						}
+					}
+				}
+				if (isMatch === true) {
+					founds.push(elem.id);
+				}
+			});
+
+			if (founds.length < 1) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var results = [];
+			for (var i = 0; i < founds.length; i++) {
+				setState(founds[i], updates);
+
+				results.push(exportState(founds[i]));
+			}
+
+			if (cb) {
+				cb(null, results);
+			}
+			return results;
 		}
 
 		myObject.undo = function(cb){
@@ -4713,16 +4996,20 @@
 				states.push(exportState(elem.id));
 			});
 
-			states.sort(function(a, b){
+			var results = states.sort(function(a, b){
 				return a.index - b.index;
 			}).map(function(elem){
 				elem.src = getSrc(elem.id);
+				return elem;
 			});
 
-			if (cb) {
-				cb(null, states)
+			if (config.export) {
+				config.export(null, results);
 			}
-			return states;
+			if (cb) {
+				cb(null, results);
+			}
+			return results;
 		}
 
 		myObject.import = function(states, cb){
@@ -4763,6 +5050,7 @@
 			var results = [];
 
 			eventState.onUpload = true;
+			var loading = startLoading(document.body);
 
 			recursiveFunc()
 
@@ -4785,6 +5073,7 @@
 					});
 				} else {
 					eventState.onUpload = false;
+					endLoading(loading);
 
 					if (cb) {
 						cb(null, results);
