@@ -57,19 +57,19 @@
 	display: block;
 }
 
-/* on frozen */
-.canvaaas.frozen .canvaaas-image .canvaaas-rotate-handle,
-.canvaaas.frozen .canvaaas-image .canvaaas-resize-handle,
-.canvaaas.frozen .canvaaas-image .canvaaas-innerline,
-.canvaaas.frozen .canvaaas-image .canvaaas-outline,
-.canvaaas.frozen .canvaaas-clone .canvaaas-rotate-handle,
-.canvaaas.frozen .canvaaas-clone .canvaaas-resize-handle,
-.canvaaas.frozen .canvaaas-clone .canvaaas-innerline,
-.canvaaas.frozen .canvaaas-clone .canvaaas-outline{
+/* on freezed */
+.canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
+.canvaaas.freezed .canvaaas-image .canvaaas-resize-handle,
+.canvaaas.freezed .canvaaas-image .canvaaas-innerline,
+.canvaaas.freezed .canvaaas-image .canvaaas-outline,
+.canvaaas.freezed .canvaaas-clone .canvaaas-rotate-handle,
+.canvaaas.freezed .canvaaas-clone .canvaaas-resize-handle,
+.canvaaas.freezed .canvaaas-clone .canvaaas-innerline,
+.canvaaas.freezed .canvaaas-clone .canvaaas-outline{
 	display: none;
 }
 
-.canvaaas.frozen .undrawabled{
+.canvaaas.freezed .undrawabled{
 	visibility: hidden;
 }
 

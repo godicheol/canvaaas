@@ -80,7 +80,7 @@
 			onActivated: "activated",
 			onEditing: "editing",
 			onFocused: "focused",
-			onFrozen: "frozen",
+			onFreezed: "freezed",
 			cursorCrosshair: "canvaaas-cursor-crosshair",
 			cursorProgress: "canvaaas-cursor-progress",
 			cursorHelp: "canvaaas-cursor-help",
@@ -2783,6 +2783,7 @@
 			window.addEventListener("resize", windowResizeEvent, false);
 
 			canvasObject.addEventListener("mousemove", handlers.hover, true);
+			canvasObject.addEventListener("touchmove", handlers.hover, true);
 
 			if (
 				canvasState.originalWidth &&
@@ -4454,6 +4455,32 @@
 			return getCanvas();
 		}
 
+		myObject.lock = function(cb) {
+			if (eventState.onFreezed === true) {
+				if (config.canvas) {
+					config.canvas("Canvas has been freezed");
+				}
+				if (cb) {
+					cb("Canvas has been freezed");
+				}
+				return false;
+			}
+
+			if (canvasState.editabled) {
+				canvasState.editabled = false;
+			} else {
+				canvasState.editabled = true;
+			}
+
+			if (config.canvas) {
+				config.canvas(null, getCanvas());
+			}
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
 		myObject.checker = function(cb) {
 			if (!canvasObject.classList.contains(classNames.checker)) {
 				canvasObject.classList.add(classNames.checker);
@@ -4512,7 +4539,7 @@
 		}
 
 		myObject.freeze = function(cb){
-			if (eventState.onFrozen === true) {
+			if (eventState.onFreezed === true) {
 				if (cb) {
 					cb("Already in progress");
 				}
@@ -4524,10 +4551,10 @@
 			}
 
 			canvasState.editabled = false;
-			eventState.onFrozen = true;
+			eventState.onFreezed = true;
 
-			if (!containerObject.classList.contains(classNames.onFrozen)) {
-				containerObject.classList.add(classNames.onFrozen);
+			if (!containerObject.classList.contains(classNames.onFreezed)) {
+				containerObject.classList.add(classNames.onFreezed);
 			}
 
 			if (canvasObject.classList.contains(classNames.checker)) {
@@ -4542,7 +4569,7 @@
 		}
 
 		myObject.thaw = function(cb){
-			if (eventState.onFrozen === false) {
+			if (eventState.onFreezed === false) {
 				if (cb) {
 					cb("No progress in");
 				}
@@ -4550,10 +4577,10 @@
 			}
 
 			canvasState.editabled = true;
-			eventState.onFrozen = false;
+			eventState.onFreezed = false;
 
-			if (containerObject.classList.contains(classNames.onFrozen)) {
-				containerObject.classList.remove(classNames.onFrozen);
+			if (containerObject.classList.contains(classNames.onFreezed)) {
+				containerObject.classList.remove(classNames.onFreezed);
 			}
 
 			if (eventState.checker) {

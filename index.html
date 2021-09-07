@@ -20,28 +20,55 @@
 	}
 
 	#myContainer{
+		margin-top: 27px;
 		padding: 24px;
 		overflow: hidden;
 		/*background-color: #000;*/
 	}
 
-	#myStatus{
-		/*background-color: #ccc;*/
+	#myCursor,
+	#myImage,
+	#myCanvas{
+		/*color: #FFF;*/
+		/*background-color: #000;*/
+		/*border-top: 1px solid black;*/
 		font-size: 0.8rem;
-		padding: 0 24px;
+		padding: 3px 24px;
 	}
 
-	#myStatus div{
-		display: inline-block;
+	#myCursor.hidden,
+	#myCanvas.hidden,
+	#myImage.hidden{
+		display: none;
 	}
 
-	#myId{
+	#myCursor-id{
 		float: left;
 	}
-	#myAxis{
+	#myCursor-state{
 		float: right;
 	}
 
+	#myCanvas-editabled{
+		float: left;
+	}
+	#myCanvas-backgroundColor{
+		width: 1rem;
+		height: 1rem;
+		margin-right: 6px;
+		outline: 1px solid black;
+		float: right;
+	}
+	#myCanvas-state{
+		float: right;
+	}
+
+	#myImage-id{
+		float: left;
+	}
+	#myImage-state{
+		float: right;
+	}
 
 	input[type='file']{
 		display: none;
@@ -72,6 +99,7 @@
 		right: 0;
 		font-size: 0;
 		font-family: sans-serif;
+		/*border-bottom: 1px solid black;*/
 	}
 	.header-hidden{
 		display: none;
@@ -129,38 +157,6 @@
 		margin: 6px;
 		border-top: 1px solid #575757;
 		color: #e7e7e7;
-	}
-
-	.logger{
-		padding-top: 32px;
-	}
-	.container-data,
-	.canvas-data,
-	.image-data{
-		font-size: 0.8rem;
-	}
-
-	.container-data.hidden,
-	.canvas-data.hidden,
-	.image-data.hidden{
-		display: none;
-	}
-
-	.container-data input,
-	.canvas-data input,
-	.image-data input{
-		width: 50px;
-		text-align: right;
-		font-size: 0.8rem;
-	}
-
-	.logger #canvas-backgroundColor{
-		display: inline-block;
-		width: 50px;
-		height: 20px;
-		border: 1px solid #878787;
-		border-radius: 3px;
-		vertical-align: middle;
 	}
 </style>
 </head>
@@ -586,9 +582,6 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.remove(canvaaas.this())
 				">Remove</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.removeAll()
-				">Remove All</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.reset(canvaaas.this())
@@ -598,6 +591,10 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.lock()
+				">Lock</a></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.freeze()
 				">Freeze</a></li>
@@ -626,74 +623,32 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:viewCanvasData()">View Canvas Data</a></li>
-				<li><a href="javascript:viewImageData()">View Image Data</a></li>
+				<li><a id="showCursor" href="javascript:void(0)">Show Cursor Data</a></li>
+				<li><a id="showCanvas" href="javascript:void(0)">Show Canvas Data</a></li>
+				<li><a id="showImage" href="javascript:void(0)">Show Focus Data</a></li>
 			</ul>
-		</div>
-	</div>
-
-	<div class="logger">
-		<div class="canvas-data hidden">
-			Aspect Ratio:
-			<input id="canvas-aspectRatio" type="text">
-			Width:
-			<input id="canvas-width" type="text">
-			Height:
-			<input id="canvas-height" type="text">
-			Background:
-			<div id="canvas-backgroundColor"></div>
-			Editabled:
-			<input id="canvas-editabled" type="text">
-		</div>
-		<div class="image-data hidden">
-			ID:
-			<input id="image-id" type="text">
-			Original Width:
-			<input id="image-originalWidth" type="text">
-			Original Height:
-			<input id="image-originalHeight" type="text">
-			Original Aspect Ratio:
-			<input id="image-originalAspectRatio" type="text">
-			Width:
-			<input id="image-width" type="text">
-			Height:
-			<input id="image-height" type="text">
-			Aspect Ratio:
-			<input id="image-aspectRatio" type="text">
-			X:
-			<input id="image-x" type="text">
-			Y:
-			<input id="image-y" type="text">
-			Left:
-			<input id="image-left" type="text">
-			Top:
-			<input id="image-top" type="text">
-			Rotate:
-			<input id="image-rotate" type="text">
-			ScaleX:
-			<input id="image-scaleX" type="text">
-			ScaleY:
-			<input id="image-scaleY" type="text">
-			Opacity:
-			<input id="image-opacity" type="text">
-			Index:
-			<input id="image-index" type="text">
-			LockAspectRatio
-			<input id="image-lockAspectRatio" type="text">
-			Focusabled:
-			<input id="image-focusabled" type="text">
-			Editabled:
-			<input id="image-editabled" type="text">
-			Drawabled:
-			<input id="image-drawabled" type="text">
 		</div>
 	</div>
 
 	<div id="myContainer"></div>
 
-	<div id="myStatus">
-		<div id="myId">ID</div>
-		<div id="myAxis">Axis</div>
+	<div id="myCanvas" class="hidden">
+		<div id="myCanvas-editabled"></div>
+		<div id="myCanvas-state"></div>
+		<div id="myCanvas-backgroundColor"></div>
+		<span style="float: right; font-size: 0.8rem; margin-right: 0.1rem;">bg:</span>
+		<div style="clear: both;"></div>
+	</div>
+
+	<div id="myImage" class="hidden">
+		<div id="myImage-id"></div>
+		<div id="myImage-state"></div>
+		<div style="clear: both;"></div>
+	</div>
+
+	<div id="myCursor" class="hidden">
+		<div id="myCursor-id"></div>
+		<div id="myCursor-state"></div>
 		<div style="clear: both;"></div>
 	</div>
 
@@ -735,38 +690,6 @@
 
 	<script>
 
-		var inputs = {
-			canvas:{
-				aspectRatio: document.getElementById("canvas-aspectRatio"),
-				width: document.getElementById("canvas-width"),
-				height: document.getElementById("canvas-height"),
-				editabled: document.getElementById("canvas-editabled"),
-				backgroundColor: document.getElementById("canvas-backgroundColor"),
-			},
-			image:{
-				id: document.getElementById("image-id"),
-				originalWidth: document.getElementById("image-originalWidth"),
-				originalHeight: document.getElementById("image-originalHeight"),
-				originalAspectRatio: document.getElementById("image-originalAspectRatio"),
-				width: document.getElementById("image-width"),
-				height: document.getElementById("image-height"),
-				aspectRatio: document.getElementById("image-aspectRatio"),
-				left: document.getElementById("image-left"),
-				top: document.getElementById("image-top"),
-				x: document.getElementById("image-x"),
-				y: document.getElementById("image-y"),
-				rotate: document.getElementById("image-rotate"),
-				scaleX: document.getElementById("image-scaleX"),
-				scaleY: document.getElementById("image-scaleY"),
-				opacity: document.getElementById("image-opacity"),
-				index: document.getElementById("image-index"),
-				lockAspectRatio: document.getElementById("image-lockAspectRatio"),
-				focusabled: document.getElementById("image-focusabled"),
-				editabled: document.getElementById("image-editabled"),
-				drawabled: document.getElementById("image-drawabled"),
-			}	
-		}
-
 		var buttons = {
 			undo: document.getElementById("undo"),
 			redo: document.getElementById("redo"),
@@ -791,7 +714,7 @@
 
 				writeStatus(res);
 
-				console.log("config.hover callback", res);
+				// console.log("config.hover callback", res);
 			},
 			upload: function(err, res){
 				if (err) {
@@ -914,57 +837,53 @@
 
 		function writeCanvasData(){
 			var state = canvaaas.getCanvasData();
-			inputs.canvas.aspectRatio.value = state.aspectRatio;
-			inputs.canvas.width.value = Math.floor(state.width * 100) / 100;
-			inputs.canvas.height.value = Math.floor(state.height * 100) / 100;
-			inputs.canvas.backgroundColor.style.backgroundColor = state.backgroundColor;
-			inputs.canvas.editabled.value = state.editabled;
+
+			var sEditabled = document.getElementById("myCanvas-editabled");
+			var sBackground = document.getElementById("myCanvas-backgroundColor");
+			var sState = document.getElementById("myCanvas-state");
+
+			sState.innerHTML = "";
+			sState.innerHTML += "w:" + Math.floor(state.width);
+			sState.innerHTML += " h:" + Math.floor(state.height);
+
+			sEditabled.innerHTML = state.editabled ? 
+				"<span style='color: black;'>Editabled</span>" : 
+				"<span style='color: red;'>Uneditabled</span>";
+
+			sBackground.style.backgroundColor = state.backgroundColor;
 		}
 
-		function writeImageData(imageState){
-			if (!imageState) {
-				for(key in inputs.image) {
-					if (inputs.image.hasOwnProperty(key)) {
-						inputs.image[key].value = "";
-					}
-				}
+		function writeImageData(state){
+			var sId = document.getElementById("myImage-id");
+			var sState = document.getElementById("myImage-state");
+
+			if (!state) {
+				sId.innerHTML = "";
+				sState.innerHTML = "";
 				return false;
 			}
-			inputs.image.id.value = imageState.id;
-			inputs.image.originalAspectRatio.value = imageState.originalAspectRatio;
-			inputs.image.aspectRatio.value = imageState.aspectRatio;
-			inputs.image.originalWidth.value = Math.floor(imageState.originalWidth * 100) / 100;
-			inputs.image.originalHeight.value = Math.floor(imageState.originalHeight * 100) / 100;
-			inputs.image.index.value = imageState.index;
-			inputs.image.width.value = Math.floor(imageState.width * 100) / 100;
-			inputs.image.height.value = Math.floor(imageState.height * 100) / 100;
-			inputs.image.left.value = Math.floor(imageState.left * 100) / 100;
-			inputs.image.top.value = Math.floor(imageState.top * 100) / 100;
-			inputs.image.x.value = Math.floor(imageState.x * 100) / 100;
-			inputs.image.y.value = Math.floor(imageState.y * 100) / 100;
-			inputs.image.rotate.value = Math.floor(imageState.rotate * 100) / 100;
-			inputs.image.scaleX.value = imageState.scaleX;
-			inputs.image.scaleY.value = imageState.scaleY;
-			inputs.image.opacity.value = imageState.opacity;
-			inputs.image.lockAspectRatio.value = imageState.lockAspectRatio;
-			inputs.image.focusabled.value = imageState.focusabled;
-			inputs.image.editabled.value = imageState.editabled;
-			inputs.image.drawabled.value = imageState.drawabled;
+
+			sId.innerHTML = state.id;
+
+			sState.innerHTML = "";
+			sState.innerHTML += "x:" + Math.floor(state.x);
+			sState.innerHTML += " y:" + Math.floor(state.y);
+			sState.innerHTML += " w:" + Math.floor(state.width);
+			sState.innerHTML += " h:" + Math.floor(state.height);
 		}
 
 		function writeStatus(res) {
-			var id = document.getElementById("myId");
-			var axis = document.getElementById("myAxis");
+			var sId = document.getElementById("myCursor-id");
+			var sState = document.getElementById("myCursor-state");
 			if (res.target) {
-				id.innerHTML = res.target;
+				sId.innerHTML = res.target;
 			} else {
-				id.innerHTML = "";
+				sId.innerHTML = "";
 			}
 
-			axis.innerHTML = "";
-			axis.innerHTML += Math.floor(res.x);
-			axis.innerHTML += ", ";
-			axis.innerHTML += Math.floor(res.y);
+			sState.innerHTML = "";
+			sState.innerHTML += "x:" + Math.floor(res.x);
+			sState.innerHTML += " y:" + Math.floor(res.y);
 		}
 
 		function checkCaches(){
@@ -1005,6 +924,46 @@
 				elem.classList.add("hidden");
 			}
 		}
+
+		(function(){
+			var sCursor = document.getElementById("showCursor");
+			var sCanvas = document.getElementById("showCanvas");
+			var sImage = document.getElementById("showImage");
+
+			var aCursor = document.getElementById("myCursor");
+			var aCanvas = document.getElementById("myCanvas");
+			var aImage = document.getElementById("myImage");
+
+			var opened;
+
+			function evtHandle(e) {
+				if (opened) {
+					if (opened.isSameNode(aCursor)) {
+						aCursor.classList.add("hidden");
+					} else if (opened.isSameNode(aCanvas)) {
+						aCanvas.classList.add("hidden");
+					} else if (opened.isSameNode(aImage)) {
+						aImage.classList.add("hidden");
+					}
+					opened = undefined;
+				}
+
+				if (e.target.isSameNode(sCursor)) {
+					aCursor.classList.remove("hidden");
+					opened = aCursor;
+				} else if (e.target.isSameNode(sCanvas)) {
+					aCanvas.classList.remove("hidden");
+					opened = aCanvas;
+				} else if (e.target.isSameNode(sImage)) {
+					aImage.classList.remove("hidden");
+					opened = aImage;
+				}
+			}
+
+			sCursor.addEventListener("click", evtHandle, false);
+			sCanvas.addEventListener("click", evtHandle, false);
+			sImage.addEventListener("click", evtHandle, false);
+		})();
 
 		(function(){
 			var header = document.getElementById("header");
