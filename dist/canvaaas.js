@@ -2556,7 +2556,7 @@
 				// check mimeType
 				if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
 					if (cb) {
-						cb("This extention not allowed => " + ext.toLowerCase());
+						cb("Extention not allowed => " + ext.toLowerCase());
 					}
 					return false;
 				}
