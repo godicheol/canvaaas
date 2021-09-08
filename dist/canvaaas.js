@@ -2543,7 +2543,7 @@
 			} else if (isString(file)) {
 				// url
 				typ = "url";
-				ext = file.split('.').pop();;
+				ext = file.split('.').pop();
 				src = file;
 			} else {
 				if (cb) {
@@ -2553,9 +2553,9 @@
 			}
 
 			// check mimeType
-			if (config.allowedExtensions.indexOf(ext) < 0) {
+			if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
 				if (cb) {
-					cb("This extention not allowed =>" + ext);
+					cb("This extention not allowed => " + ext.toLowerCase());
 				}
 				return false;
 			}
