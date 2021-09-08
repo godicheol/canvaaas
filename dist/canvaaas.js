@@ -103,7 +103,7 @@
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
 		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "</div>";
-
+		
 		var imageTemplate = "";
 		imageTemplate += "<img>";
 		imageTemplate += "<div class='canvaaas-overlay'></div>";
@@ -115,7 +115,19 @@
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'><div class='canvaaas-handle'></div></div>";
+		// imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'><div class='canvaaas-handle'></div></div>";
+		
+		// svg test
+		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'>";
+		imageTemplate += '<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg">';
+		imageTemplate += '<g>';
+		imageTemplate += '<path d="m24.93853,12.18696c-0.25002,0.50005 -0.38952,0.74555 -0.50005,1.12511c-0.14411,0.49488 -0.40306,1.36298 -0.50005,1.62516c-0.17883,0.48342 -0.25002,0.62506 -0.37504,1.0001l0,0.12501l0,0.25002l0,0" id="svg_11" stroke="#000" fill="none"/>';
+		imageTemplate += '<path d="m20.06306,14.68721c0.12501,0.12501 0.49182,0.14305 0.75007,0.25002c0.73046,0.30257 1.12511,0.50005 1.87518,0.75007c0.37504,0.12501 0.62506,0.37504 0.87508,0.37504l0,0l0.12501,0" id="svg_12" stroke="#000" fill="none"/>';
+		imageTemplate += '<path d="m23.68841,15.18725c0,0 -0.03608,-0.23356 -0.25002,-0.75007c-0.15128,-0.36523 -0.61162,-1.01431 -0.87508,-1.25012c-0.59645,-0.53385 -0.87509,-0.75007 -1.25012,-1.12511c-0.12501,-0.12501 -0.48164,-0.39668 -0.62506,-0.50005c-0.22677,-0.16345 -0.41379,-0.04219 -0.75007,-0.25002c-0.15039,-0.09295 -0.50166,-0.23 -0.62506,-0.25002c-0.39022,-0.06332 -0.61353,-0.18705 -1.12511,-0.25002c-0.24815,-0.03055 -0.62506,-0.12501 -1.25012,-0.12501c-0.37504,0 -1.12511,0 -1.50014,0c-0.62506,0 -0.87508,0 -1.50014,0c-0.25002,0 -0.62693,-0.03055 -0.87508,0c-0.51158,0.06298 -0.60988,0.1867 -1.0001,0.25002c-0.1234,0.02002 -0.33671,0.05736 -0.50005,0.12501c-0.23099,0.09568 -0.22799,0.1858 -0.50005,0.25002c-0.12167,0.02872 -0.37504,0.25002 -0.50005,0.37504c-0.25002,0.25002 -0.50005,0.50005 -0.75007,0.75007c-0.12501,0.12501 -0.3366,0.39829 -0.50005,0.62506c-0.10337,0.14342 -0.38796,0.48834 -0.50005,0.62506c-0.28576,0.34857 -0.42146,0.46839 -0.75007,1.0001c-0.14696,0.23779 -0.30258,0.63579 -0.37504,0.87508c-0.13062,0.4314 -0.43239,0.58674 -0.50005,0.75007c-0.04784,0.1155 -0.18237,0.33671 -0.25002,0.50005c-0.09568,0.23099 -0.12501,0.37504 -0.12501,0.62506c0,0.12501 0,0.25002 0,0.25002c-0.12501,0.12501 -0.12501,0.25002 -0.12501,0.37504l0,0l0,0.12501" id="svg_15" stroke="#000" fill="none"/>'
+		imageTemplate += '</g>';
+		imageTemplate += '</svg>';
+		imageTemplate += "</div>";
+		
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-e'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-s'><div class='canvaaas-handle'></div></div>";
 		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-w'><div class='canvaaas-handle'></div></div>";
@@ -3303,6 +3315,16 @@
 			}
 
 			var state = getState(id);
+			
+			if (isEmpty(newId)) {
+				if (config.edit) {
+					config.edit("Argument is null");
+				}
+				if (cb) {
+					cb("Argument is null");
+				} 
+				return false;
+			}
 
 			if (isExist(newId)) {
 				if (config.edit) {
