@@ -6,9 +6,20 @@
  * 
  */
 
- /*!
-  * custom
-  */
+/* on freezed */
+.canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
+.canvaaas.freezed .canvaaas-image .canvaaas-resize-handle,
+.canvaaas.freezed .canvaaas-image .canvaaas-innerline,
+.canvaaas.freezed .canvaaas-image .canvaaas-outline,
+.canvaaas.freezed .canvaaas-clone .canvaaas-rotate-handle,
+.canvaaas.freezed .canvaaas-clone .canvaaas-resize-handle,
+.canvaaas.freezed .canvaaas-clone .canvaaas-innerline,
+.canvaaas.freezed .canvaaas-clone .canvaaas-outline{
+	display: none;
+}
+.canvaaas.freezed .undrawabled{
+	visibility: hidden;
+}
 
 /* on editing (mouse down) */
 .canvaaas-image.editing,
@@ -57,23 +68,6 @@
 	display: block;
 }
 
-/* on freezed */
-.canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
-.canvaaas.freezed .canvaaas-image .canvaaas-resize-handle,
-.canvaaas.freezed .canvaaas-image .canvaaas-innerline,
-.canvaaas.freezed .canvaaas-image .canvaaas-outline,
-.canvaaas.freezed .canvaaas-clone .canvaaas-rotate-handle,
-.canvaaas.freezed .canvaaas-clone .canvaaas-resize-handle,
-.canvaaas.freezed .canvaaas-clone .canvaaas-innerline,
-.canvaaas.freezed .canvaaas-clone .canvaaas-outline{
-	display: none;
-}
-
-/* undrawabled */
-.canvaaas.freezed .undrawabled{
-	visibility: hidden;
-}
-
 /* uneditabled */
 .canvaaas-image.uneditabled .canvaaas-innerline,
 .canvaaas-clone.uneditabled .canvaaas-innerline,
@@ -91,10 +85,7 @@
 	cursor: default;
 }
 
- /*! 
-  * container 
-  */
-
+/* container */
  .canvaaas{
 	display: block;
 	position: relative;
@@ -119,10 +110,7 @@
 	visibility: hidden;
 }
 
-/*!
- * canvas
- */
-
+/* canvas & mirror */
 .canvaaas-canvas,
 .canvaaas-mirror{
 	display: block;
@@ -156,10 +144,7 @@
 	background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
-/*!
- * image
- */
-
+/* image & clone */
 .canvaaas-image,
 .canvaaas-clone{
 	position: absolute;
@@ -191,10 +176,7 @@
 	/*pointer-events: none;*/
 }
 
-/*!
- * innerline
- */
-
+/* innerlint */
 .canvaaas-innerline{
 	position: absolute;
 	pointer-events: none;
@@ -236,10 +218,7 @@
 	border-right-style: dashed;
 }
 
-/*!
- * outline
- */
-
+/* outline */
 .canvaaas-outline{
 	position: absolute;
 	pointer-events: none;
@@ -277,10 +256,7 @@
 	border-right-style: solid;
 }
 
-/*!
- * overlay
- */
-
+/* overlay */
 .canvaaas-overlay{
 	position: absolute;
 	top: 0;
@@ -300,10 +276,7 @@
 	opacity: 0.7;
 }
 
-/*!
- * handles
- */
-
+/* handle */
 .canvaaas-handle{
 	position: absolute;
 	top: 50%;
@@ -392,10 +365,7 @@
  	display: none !important;
 }
 
-/*!
- * mobile
- */ 
-
+/* mobile */
 @media only screen and (max-width: 768px) {
 
 	.canvaaas-resize-handle,
@@ -406,10 +376,7 @@
 
 }
 
-/*!
- * cursor
- */
-
+/* cursor */
 .canvaaas-cursor-auto{cursor:auto !important;}
 .canvaaas-cursor-default{cursor: default !important;}
 .canvaaas-cursor-none{cursor: none !important;}
@@ -424,10 +391,8 @@
 .canvaaas-cursor-zoomIn{cursor: zoom-in !important;}
 .canvaaas-cursor-zoomOut{cursor: zoom-out !important;}
 
-/*!
- * loading
- */
-
+/* loading */
+/* https://loading.io/css/ */
 body.canvaaas-fixed{
 	overflow: hidden;
 	/*position: fixed;*/

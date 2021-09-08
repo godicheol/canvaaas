@@ -1,12 +1,8 @@
-/*!
- * 
- * canvaaas.js
- * 
- * 0.2.2
- * 
- * eeecheol@gmail.com
- * 
- */
+/*
+	canvaaas.js
+	
+	eeecheol@gmail.com
+*/
 
 (function(window){
 	'use strict';
@@ -64,8 +60,6 @@
 			remove: undefined, // callback function
 		};
 
-		Object.freeze(defaultConfig);
-		
 		var defaultCanvas = {
 			filename: "untitled",
 			quality: 0.92,
@@ -74,8 +68,6 @@
 			editabled: true,
 		};
 		
-		Object.freeze(defaultCanvas);
-
 		var classNames = {
 			checker: "canvaaas-checker",
 			unfocusabled: "unfocusabled",
@@ -96,6 +88,8 @@
 			cursorZoomOut: "canvaaas-cursor-zoomOut",
 		}
 		
+		Object.freeze(defaultConfig);
+		Object.freeze(defaultCanvas);
 		Object.freeze(classNames);
 
 		var conatinerTemplate = "";
@@ -171,26 +165,66 @@
 		copyObject(config, defaultConfig);
 		copyObject(canvasState, defaultCanvas);
 
-		// 
-		// handlers
-		// 
-
+		/* event handlers */
 		var handlers = {
 
 			stopEvents: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			},
+			
+			drop: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				var dt = e.dataTransfer;
+				var files = dt.files;
+
+				var index = files.length;
+				var count = 0;
+
+				if (eventState.onUpload === true) {
+					if (config.upload) {
+						config.upload("Already in progress");
+					}
+					return false;
+				}
+
+				eventState.onUpload = true;
+				var loading = startLoading(document.body);
+
+				recursiveFunc();
+
+				function recursiveFunc() {
+					if (count < index) {
+						renderImage(files[count], null, function(err, res) {
+							if (err) {
+								if (config.upload) {
+									config.upload(err);
+								}
+							} else {
+								if (config.upload) {
+									config.upload(null, exportState(res));
+								}
+							}
+							count++;
+							recursiveFunc();
+						});
+					} else {
+						eventState.onUpload = false;
+						endLoading(loading);
+					}
+				}
+			},
 
 			hover: function(e) {
-				var mouseX;
-				var mouseY;
-				var target;
-
 				if (!whereContainer()) {
 					return false;
 				}
 
+				var mouseX;
+				var mouseY;
+				var target;
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - (containerState.left + canvasState.left);
 					mouseY = e.clientY - (containerState.top + canvasState.top);
@@ -199,6 +233,8 @@
 					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
 					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
 					target = getTarget(e.touches[0]);
+				} else {
+					return false;
 				}
 
 				var scaleRatio = canvasState.width / canvasState.originalWidth;
@@ -1003,14 +1039,9 @@
 					});
 				});
 			},
-
-
 		};
 
-		// 
-		// methods
-		// 
-
+		/* methods */
 		function getId(obj) {
 			if (!obj) {
 				return false;
@@ -1774,7 +1805,7 @@
 				options.width,
 				options.height,
 				options.maxWidth,
-				options.maxHeight,
+				options.maxHeight
 			)
 			var fooMin = getCoveredSizes(
 				options.width,
@@ -2390,7 +2421,7 @@
 			return canvas;
 		}
 
-		// asynchronous
+		/* asynchronous */
 		function drawImage(mainCanvas, canvState, imgState, cb) {
 			/*!
 			 * canvState = {
@@ -2514,7 +2545,7 @@
 			}
 		}
 
-		// asynchronous
+		/* asynchronous */
 		function renderImage(file, newState, cb) {
 			var newImage = new Image();
 			var id = getShortId();
@@ -2728,7 +2759,7 @@
 
 			var viewportSizes = getViewportSizes();
 
-			// clear container style
+			/* reset container style */
 			containerObject.style.width = "";
 			containerObject.style.height = "";
 
@@ -2796,10 +2827,7 @@
 			return true;
 		}
 
-		// 
-		// exports
-		// 
-
+		/* export methods */
 		myObject.init = function(target, cb) {
 			if (!isObject(target)) {
 				if (cb) {
@@ -2808,30 +2836,35 @@
 				return false;
 			}
 
-			// set template
+			/* set template */
 			target.innerHTML = conatinerTemplate;
 
-			// set elements
+			/* set elements */
 			containerObject = target.querySelector("div.canvaaas");
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 
 			canvasObject.classList.add(classNames.checker);
 
-			// set events(fix removeEventListener)
+			/* set events(fix removeEventListener) */
 			windowResizeEvent = handlers.resizeWindow;
 			// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
 
 			window.addEventListener("resize", windowResizeEvent, false);
 
-			canvasObject.addEventListener("mousemove", handlers.hover, true);
-			canvasObject.addEventListener("touchmove", handlers.hover, true);
+			canvasObject.addEventListener("mousemove", handlers.hover, false);
+			canvasObject.addEventListener("touchmove", handlers.hover, false);
+			
+			containerObject.addEventListener('dragenter', handlers.stopEvents, false);
+			containerObject.addEventListener('dragleave', handlers.stopEvents, false);
+			containerObject.addEventListener('dragover', handlers.stopEvents, false);
+			containerObject.addEventListener('drop', handlers.drop, false);
 
+			/* check canvas */
 			if (
 				canvasState.originalWidth &&
 				canvasState.originalHeight
 			) {
-				// set canvas
 				initCanvas();
 			}
 
@@ -2841,7 +2874,7 @@
 			return getConfig();
 		}
 
-		// asynchronous
+		/* asynchronous */
 		myObject.uploadFile = function(files, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -2909,7 +2942,7 @@
 			});
 		}
 
-		// asynchronous
+		/* asynchronous */
 		myObject.uploadUrl = function(imageUrl, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -2968,7 +3001,7 @@
 			});
 		}
 
-		// asynchronous
+		/* asynchronous */
 		myObject.uploadState = function(imageState, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -3029,7 +3062,7 @@
 			});
 		}
 
-		// asynchronous
+		/* asynchronous */
 		myObject.uploadElement = function(target, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -3104,10 +3137,7 @@
 			});
 		}
 
-		// 
-		// image
-		// 
-
+		/* image */
 		myObject.findOne = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
@@ -4332,10 +4362,7 @@
 			return exportState(id);
 		}
 
-		// 
-		// config
-		// 
-
+		/* config */
 		myObject.config = function(newConfig, cb) {
 			if (!canvasState.editabled && canvasObject) {
 				if (cb) {
@@ -4360,10 +4387,7 @@
 			return getConfig();
 		}
 
-		// 
-		// canvas
-		// 
-
+		/* canvas */
 		myObject.canvas = function(options, cb) {
 			if (!canvasState.editabled && canvasObject) {
 				if (cb) {
@@ -4661,10 +4685,7 @@
 			return true;
 		}
 
-		// 
-		// draw
-		// 
-
+		/* draw */
 		myObject.draw = function(options, cb){
 			/*
 				options = {
@@ -4979,6 +5000,7 @@
 			}
 		}
 		
+		/* example */
 		myObject.download = function(data, filename){
 			var link = document.createElement('a');
 			link.setAttribute('href', data);
@@ -4990,6 +5012,7 @@
 			window.URL.revokeObjectURL(data);
 		}
 		
+		/* example */
 		myObject.newTab = function(data){
 			var image = new Image();
 			image.src = data;
@@ -5009,10 +5032,7 @@
 			window.URL.revokeObjectURL(data);
 		}
 
-		// 
-		// data
-		// 
-
+		/* data */
 		myObject.this = function(cb){
 			if (!eventState.target) {
 				if (cb) {
@@ -5053,64 +5073,6 @@
 				cb(null, redoCaches.length);
 			}
 			return redoCaches.length;
-		}
-
-		myObject.undo = function(cb){
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			if (undoCaches.length < 1) {
-				if (cb) {
-					cb("Cache not found");
-				}
-				return false;
-			}
-
-			if (eventState.target) {
-				focusOut(eventState.target);
-			}
-
-			var id = callUndo();
-
-			focusIn(id);
-
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.redo = function(cb){
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
-			if (redoCaches.length < 1) {
-				if (cb) {
-					cb("Cache is empty");
-				}
-				return false;
-			}
-
-			if (eventState.target) {
-				focusOut(eventState.target);
-			}
-
-			var id = callRedo();
-
-			focusIn(id);
-
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
 		}
 
 		myObject.export = function(cb){
@@ -5198,7 +5160,67 @@
 				}
 			}
 		}
+		
+		/* undo & redo */
+		myObject.undo = function(cb){
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
 
+			if (undoCaches.length < 1) {
+				if (cb) {
+					cb("Cache not found");
+				}
+				return false;
+			}
+
+			if (eventState.target) {
+				focusOut(eventState.target);
+			}
+
+			var id = callUndo();
+
+			focusIn(id);
+
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
+		myObject.redo = function(cb){
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Editing has been disabled");
+				}
+				return false;
+			}
+
+			if (redoCaches.length < 1) {
+				if (cb) {
+					cb("Cache is empty");
+				}
+				return false;
+			}
+
+			if (eventState.target) {
+				focusOut(eventState.target);
+			}
+
+			var id = callRedo();
+
+			focusIn(id);
+
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
+		/* destroy */
 		myObject.destroy = function(cb){
 			window.removeEventListener("resize", windowResizeEvent, false);
 
@@ -5229,17 +5251,11 @@
 			}
 		}
 
-		// 
-		// end
-		// 
-
+		/* end */
 		return myObject;
 	}
 
-	// 
-	// global export
-	// 
-
+	/* global export */
 	if (typeof(window.canvaaas) === 'undefined') {
 		window.canvaaas = canvaaas();
 	}
