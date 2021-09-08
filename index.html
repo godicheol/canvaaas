@@ -585,16 +585,6 @@
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.lock(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						writeCanvasData();
-					})
-				">Toggle Editable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.freeze()
 				">Freeze</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -614,7 +604,7 @@
 						}
 						writeCanvasData();
 					})
-				">Dimensions</a></li>
+				">Canvas Size</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
@@ -627,8 +617,20 @@
 				">Background Color</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.lock(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						writeCanvasData();
+					})
+				">Toggle Editable</a></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.checker()
 				">Toggle Checker</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.overlay()
+				">Toggle Overlay</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">

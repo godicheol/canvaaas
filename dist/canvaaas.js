@@ -1,5 +1,4 @@
-/* canvaaas.js */
-/* eeecheol@gmail.com */
+/* canvaaas.js eeecheol@gmail.com */
 
 (function(window){
 	'use strict';
@@ -9,6 +8,10 @@
 		var myObject = {};
 
 		var defaultConfig = {
+			
+			checker: true, // boolean
+			
+			overlay: false, // boolean
 
 			allowedExtensions: [
 				"jpg",
@@ -34,13 +37,13 @@
 
 			cacheLevels: 999, // number
 
-			containerAspectRatio: undefined, // number, 0 ~ 1
+			containerAspectRatio: undefined, // number, width / height
 
 			maxContainerWidth: 1, // number, 0 ~ 1
 
 			maxContainerHeight: 0.7, // number, 0 ~ 1
 
-			renderImageScale: 0.5, // number,
+			renderScale: 0.5, // number,
 
 			hover: undefined, // callback function
 
@@ -49,8 +52,6 @@
 			focus: undefined, // callback function
 
 			edit: undefined, // callback function
-
-			remove: undefined, // callback function
 		};
 
 		var defaultCanvas = {
@@ -62,7 +63,8 @@
 		};
 		
 		var classNames = {
-			checker: "canvaaas-checker",
+			hidden: "hidden",
+			checker: "checker",
 			unfocusabled: "unfocusabled",
 			uneditabled: "uneditabled",
 			undrawabled: "undrawabled",
@@ -70,16 +72,7 @@
 			onEditing: "editing",
 			onFocused: "focused",
 			onFreezed: "freezed",
-			cursorCrosshair: "canvaaas-cursor-crosshair",
-			cursorProgress: "canvaaas-cursor-progress",
-			cursorHelp: "canvaaas-cursor-help",
-			cursorGrab: "canvaaas-cursor-grab",
-			cursorGrabbing: "canvaaas-cursor-grabbing",
-			cursorPointer: "canvaaas-cursor-pointer",
-			cursorMove: "canvaaas-cursor-move",
-			cursorZoomIn: "canvaaas-cursor-zoomIn",
-			cursorZoomOut: "canvaaas-cursor-zoomOut",
-		}
+		};
 		
 		Object.freeze(defaultConfig);
 		Object.freeze(defaultCanvas);
@@ -88,6 +81,7 @@
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
+		conatinerTemplate += "<div class='canvaaas-background'></div>";
 		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "</div>";
 		
@@ -152,6 +146,7 @@
 		var containerObject;
 		var canvasObject;
 		var mirrorObject;
+		var backgroundObject;
 
 		var windowResizeEvent;
 
@@ -1133,10 +1128,12 @@
 			];
 
 			var candidtaeKeys = [
+				"checker",
+				"overlay",
 				"allowedExtensions",
 				"deniedTagNamesToFocusOut",
 				"cacheLevels",
-				"renderImageScale",
+				"renderScale",
 				"containerAspectRatio",
 				"maxContainerWidth",
 				"maxContainerHeight",
@@ -2636,8 +2633,8 @@
 					index: nextIndex,
 					originalWidth: originalWidth,
 					originalHeight: originalHeight,
-					width: fittedSizes[0] * config.renderImageScale,
-					height: fittedSizes[1] * config.renderImageScale,
+					width: fittedSizes[0] * config.renderScale,
+					height: fittedSizes[1] * config.renderScale,
 					x: canvasState.width * 0.5,
 					y: canvasState.height * 0.5,
 					rotate: 0,
@@ -2820,8 +2817,19 @@
 			containerObject = target.querySelector("div.canvaaas");
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
+			backgroundObject = target.querySelector("div.canvaaas-background");
+			
+			backgroundObject.style.backgroundColor = "#FFFFFF";
 
-			canvasObject.classList.add(classNames.checker);
+			if (config.checker) {
+				canvasObject.classList.add(classNames.checker);
+			}
+			
+			if (!config.overlay) {
+				if (!mirrorObject.classList.contains(classNames.hidden)) {
+					mirrorObject.classList.add(classNames.hidden);
+				}
+			}
 
 			/* set events(fix removeEventListener) */
 			windowResizeEvent = handlers.resizeWindow;
@@ -4518,7 +4526,7 @@
 
 			// reset background
 			canvasState.backgroundColor = undefined;
-			canvasObject.style.backgroundColor = "";
+			backgroundObject.style.backgroundColor = "#FFFFFF";
 
 			// clear caches
 			undoCaches = [];
@@ -4541,6 +4549,24 @@
 				cb(null, getCanvas());
 			}
 			return getCanvas();
+		}
+		
+		myObject.overlay = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!mirrorObject.classList.contains(classNames.hidden)) {
+				mirrorObject.classList.add(classNames.hidden);
+			} else {
+				mirrorObject.classList.remove(classNames.hidden);
+			}
+			if (cb) {
+				return cb(null, true);
+			}
 		}
 
 		myObject.checker = function(cb) {
@@ -4590,7 +4616,7 @@
 			}
 
 			canvasState.backgroundColor = colour;
-			canvasObject.style.backgroundColor = colour;
+			backgroundObject.style.backgroundColor = colour;
 
 			if (cb) {
 				cb(null, getCanvas());
