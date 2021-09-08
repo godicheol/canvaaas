@@ -2523,39 +2523,47 @@
 			var src;
 			var typ;
 
-			// check file or url
-			if (isObject(file)) {
-				if (
-					!file.name ||
-					!file.type ||
-					!file.size
-				) {
+			try {
+				// check file or url
+				if (isObject(file)) {
+					if (
+						!file.name ||
+						!file.type ||
+						!file.size
+					) {
+						if (cb) {
+							cb("File not found");
+						}
+						return false;
+					}
+
+					// file
+					typ = "file";
+					ext = file.type.split("/").pop();
+					src = URL.createObjectURL(file);
+				} else if (isString(file)) {
+					// url
+					typ = "url";
+					ext = file.split('.').pop();
+					src = file;
+				} else {
 					if (cb) {
 						cb("File not found");
 					}
 					return false;
 				}
 
-				// file
-				typ = "file";
-				ext = file.type.split("/").pop();
-				src = URL.createObjectURL(file);
-			} else if (isString(file)) {
-				// url
-				typ = "url";
-				ext = file.split('.').pop();
-				src = file;
-			} else {
-				if (cb) {
-					cb("File not found");
+				// check mimeType
+				if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
+					if (cb) {
+						cb("This extention not allowed => " + ext.toLowerCase());
+					}
+					return false;
 				}
-				return false;
-			}
-
-			// check mimeType
-			if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
+			} catch(err) {
 				if (cb) {
-					cb("This extention not allowed => " + ext.toLowerCase());
+					console.log(err);
+					cb("Type error");
 				}
 				return false;
 			}
