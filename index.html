@@ -225,7 +225,7 @@
 						console.log(err, result);
 						canvaaas.download(res, result.filename);
 					});
-				">Save</a></li>
+				">Save<br />(iOS not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
@@ -240,7 +240,6 @@
 						canvaaas.download(res, result.filename);
 					})
 				">Save Thumbnail</a></li>
-				
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
 						filename: 'original',
@@ -252,7 +251,7 @@
 						console.log(err, result);
 						canvaaas.download(res, result.filename);
 					})
-				">Save Without Init</a></li>
+				">Save from JSON<br />(iOS not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					// new tab
 					canvaaas.draw({
@@ -262,14 +261,26 @@
 						canvaaas.newTab(res);
 					})
 				">New Tab</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.drawTo({
+						filename: 'original',
+						dataType: 'url'
+					}, 
+					testCanvasState,
+					testImportState,
+					function(err, res, result){
+						console.log(err, result);
+						canvaaas.newTab(res);
+					})
+				">New Tab from JSON</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.export(function(err, res){
+					canvaaas.export(function(err, res, result){
 						if (err) {
 							console.log(err);
 							return false;
 						}
-						console.log('export callback', res);
+						console.log('export callback', res, result);
 
 						alert(JSON.stringify(res, null, 2));
 					})
@@ -587,16 +598,7 @@
 						}
 						writeCanvasData();
 					})
-				">Lock</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.unlock(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						writeCanvasData();
-					})
-				">Unlock</a></li>
+				">Toggle Editable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.freeze()
@@ -656,7 +658,7 @@
 		<div style="clear: both;"></div>
 	</div>
 
-	<div id="myImage" class="hidden">
+	<div id="myImage" class="">
 		<div id="myImage-id"></div>
 		<div id="myImage-state"></div>
 		<div style="clear: both;"></div>
@@ -715,7 +717,6 @@
 
 		// 
 		// 
-		// 
 		// MAIN START
 		// 
 		// 
@@ -766,19 +767,13 @@
 			},
 		});
 
-		// #1.1 canvas
+		// #1.1 canvas before init
 		canvaaas.canvas({
 			width: 7858.705673285892,
 			height: 5239.137115523928,
-			unit: "px"
+			unit: "px",
+			dpi : 1
 		});
-
-		// #1.1 error
-		// canvaaas.canvas({
-		// 	width: 7858.705673285892,
-		// 	height: 5239.137115523928,
-		// 	unit: "px"
-		// });
 
 		// #2 init
 		canvaaas.init(target, function(err, res){
@@ -794,22 +789,13 @@
 			console.log("canvaaas.init callback", res);
 		});
 
-		// #2.1 canvas
-		// canvaaas.canvas({
-		// 	width: 7858.705673285892,
-		// 	height: 5239.137115523928,
-		// 	unit: "px"
-		// });
-
-		// #2.1 error
-		// canvaaas.initCanvas({
-		// 	width: 7858.705673285892,
-		// 	height: 5239.137115523928,
-		// 	unit: "px"
-		// }, function(err, res){
-		// 	console.log(err, res);
-		// });
-
+		 // #2.1 canvas after init
+		 // canvaaas.canvas({
+		 // 	width: 7858.705673285892,
+		 // 	height: 5239.137115523928,
+		 // 	unit: "px",
+		 //  	dpi : 1
+		 // });
 
 
 
@@ -911,7 +897,7 @@
 			var aCanvas = document.getElementById("myCanvas");
 			var aImage = document.getElementById("myImage");
 
-			var opened;
+			var opened = aImage;
 
 			function evtHandle(e) {
 				if (opened) {
@@ -996,7 +982,7 @@
 
 				writeCursor(res);
 
-				console.log("config.hover callback", res);
+				// console.log("config.hover callback", res);
 			},
 			upload: function(err, res){
 				if (err) {

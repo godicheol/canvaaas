@@ -1385,7 +1385,8 @@
 			for(var key in state) {
 				if (state.hasOwnProperty(key)) {
 					if ([
-						"id"
+						"id",
+						"src"
 					].indexOf(key) > -1) {
 						tmp[key] = toString(state[key]);
 					} else if ([
@@ -2364,18 +2365,24 @@
 		function drawCanvas(options) {
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
-
+			
+			var maxWidth = 999999;
+			var maxHeight = 999999;
+			if (isIos()) {
+				maxWidth = 4096;
+				maxHeight = 4096;
+			}
 			var sizes = getFittedSizes({
 				width: options.width,
 				height: options.height,
-				maxWidth: isIos() ? 4096 : 999999,
-				maxHeight: isIos() ? 4096 : 999999,
+				maxWidth: maxWidth,
+				maxHeight: maxHeight,
 				minWidth: 0,
 				minHeight: 0
 			});
 
-			canvas.width = sizes[0];
-			canvas.height = sizes[1];
+			canvas.width = Math.floor(sizes[0]);
+			canvas.height = Math.floor(sizes[1]);
 
 			ctx.fillStyle = options.backgroundColor || "#FFFFFF";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2434,13 +2441,19 @@
 				var rotatedHeight = Math.floor(rotatedSizes[1]);
 				var rotatedLeft = Math.floor(originalX - (rotatedSizes[0] * 0.5));
 				var rotatedTop = Math.floor(originalY - (rotatedSizes[1] * 0.5));
-
+				
 				// original & rotate & resize
+				var maxWidth = 999999;
+				var maxHeight = 999999;
+				if (isIos()) {
+					maxWidth = 4096;
+					maxHeight = 4096;
+				}
 				var canvasSizes = getFittedSizes({
 					width: rotatedWidth,
 					height: rotatedHeight,
-					maxWidth: isIos() ? 4096 : 999999,
-					maxHeight: isIos() ? 4096 : 999999,
+					maxWidth: maxWidth,
+					maxHeight: maxHeight,
 					minWidth: 0,
 					minHeight: 0
 				});
@@ -2465,8 +2478,8 @@
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 				ctx.save();
 				ctx.translate(canvas.width * 0.5, canvas.height * 0.5);
-				ctx.scale(imgState.scaleX, imgState.scaleY);
 				ctx.rotate(imgState.rotate * (Math.PI / 180));
+				ctx.scale(imgState.scaleX, imgState.scaleY);
 
 				// draw
 				ctx.drawImage(
@@ -4500,16 +4513,11 @@
 		}
 
 		myObject.lock = function(cb) {
-			canvasState.editabled = false;
-
-			if (cb) {
-				cb(null, getCanvas());
+			if (canvasState.editabled) {
+				canvasState.editabled = false;
+			} else {
+				canvasState.editabled = true;
 			}
-			return getCanvas();
-		}
-
-		myObject.unlock = function(cb) {
-			canvasState.editabled = true;
 
 			if (cb) {
 				cb(null, getCanvas());
@@ -4641,17 +4649,17 @@
 		// 
 
 		myObject.draw = function(options, cb){
-			/*!
-			 * options = {
-		 	 * filename(optional),
-		 	 * drawType(optional),
-			 * width(optional), 
-			 * height(optional),
-			 * backgroundColor(optional),
-			 * quality(optional),
-			 * mimeType(optional),
-			 * }
-			 */
+			/*
+				options = {
+					filename(optional),
+					fileType(optional),
+					mimeType(optional),
+					width(optional), 
+					height(optional),
+					backgroundColor(optional),
+					quality(optional),
+				}
+			*/
 
 			if (eventState.onDraw === true) {
 				if (cb) {
@@ -4716,7 +4724,7 @@
 			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawabled === true) {
-					drawables.push(getState(imageStates[i].id));
+					drawables.push(exportState(imageStates[i].id));
 				}
 			}
 
@@ -4748,13 +4756,17 @@
 			function recursiveFunc() {
 				if (count < index) {
 					// recursive
-					var canvState = canvasState;
+					var canvState = getCanvas();
 					var imgState = drawables[count];
 					drawImage(canvas, canvState, imgState, function(err) {
-						imageResults.push({
-							err: err,
-							state: imgState
-						});
+						if (err) {
+							imageResults.push({
+								id: imgState.id,
+								err: err
+							});
+						} else {
+							imageResults.push(imgState);	
+						}
 						count++;
 						recursiveFunc();
 					});
@@ -4764,8 +4776,13 @@
 					var data;
 					if (dataType === "url") {
 						data = dataURL;
-					} else {
+					} else if (dataType === "file") {
 						data = dataURLtoFile(dataURL, filename);
+					} else {
+						if (cb) {
+							cb("DataType not found");
+						}
+						return false;
 					}
 
 					result.images = imageResults;
@@ -4785,12 +4802,12 @@
 			/*
 				options = {
 					filename(optional),
-					filetype(optional),
+					fileType(optional),
+					mimeType(optional),
 					width(optional), 
 					height(optional),
 					backgroundColor(optional),
 					quality(optional),
-					mimetype(optional),
 				}
 
 				canvState => canvaaas.getCanvasData()
@@ -4906,10 +4923,14 @@
 					// recursive
 					var imgState = drawables[count];
 					drawImage(canvas, canvState, imgState, function(err) {
-						imageResults.push({
-							err: err,
-							state: imgState
-						});
+						if (err) {
+							imageResults.push({
+								id: imgState.id,
+								err: err
+							});
+						} else {
+							imageResults.push(imgState);	
+						}
 						count++;
 						recursiveFunc();
 					});
@@ -4919,8 +4940,13 @@
 					var data;
 					if (dataType === "url") {
 						data = dataURL;
-					} else {
+					} else if (dataType === "file") {
 						data = dataURLtoFile(dataURL, filename);
+					} else {
+						if (cb) {
+							cb("DataType not found");
+						}
+						return false;
 					}
 
 					result.images = imageResults;
