@@ -70,12 +70,12 @@
 }
 
 /* svg test*/
-.canvaaas-rotate-handle svg{
+/*.canvaaas-rotate-handle svg{
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-}
+}*/
 
 /* undrawabled */
 .canvaaas.freezed .undrawabled{
