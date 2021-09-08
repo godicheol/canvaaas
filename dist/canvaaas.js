@@ -1,8 +1,5 @@
-/*
-	canvaaas.js
-	
-	eeecheol@gmail.com
-*/
+/* canvaaas.js */
+/* eeecheol@gmail.com */
 
 (function(window){
 	'use strict';
@@ -38,10 +35,6 @@
 			cacheLevels: 999, // number
 
 			containerAspectRatio: undefined, // number, 0 ~ 1
-
-			minContainerWidth: 0, // number, 0 ~ 1
-
-			minContainerHeight: 0, // number, 0 ~ 1
 
 			maxContainerWidth: 1, // number, 0 ~ 1
 
@@ -465,7 +458,6 @@
 				} else {
 					return false;
 				}
-
 
 				// calculate degree
 				var radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
@@ -1146,8 +1138,6 @@
 				"cacheLevels",
 				"renderImageScale",
 				"containerAspectRatio",
-				"minContainerWidth",
-				"minContainerHeight",
 				"maxContainerWidth",
 				"maxContainerHeight",
 			]
@@ -2749,43 +2739,28 @@
 		}
 
 		function initCanvas() {
-			/*!
-			 * require
-			 * 
-			 * canvasState.originalWidth
-			 * canvasState.originalHeight
-			 * 
-			 */
-
-			var viewportSizes = getViewportSizes();
-
+			/* required, canvaaas.canvas() */
+			
 			/* reset container style */
 			containerObject.style.width = "";
 			containerObject.style.height = "";
 
+			var viewportSizes = getViewportSizes();
 			var containerAspectRatio = config.containerAspectRatio || canvasState.originalWidth / canvasState.originalHeight;
 			var containerWidth = containerObject.offsetWidth;
 			var containerHeight = containerObject.offsetWidth / containerAspectRatio;
+			
+			var containerSizes = getFittedSizes({
+				width: containerWidth,
+				height: containerHeight,
+				maxWidth: viewportSizes[0] * config.maxContainerWidth,
+				maxHeight: viewportSizes[1] * config.maxContainerHeight,
+				minWidth: 0,
+				minHeight: 0
+			});
 
-			var maxSizes = getContainedSizes(
-				containerWidth,
-				containerHeight,
-				viewportSizes[0] * config.maxContainerWidth,
-				viewportSizes[1] * config.maxContainerHeight
-			);
-
-			var minSizes = getCoveredSizes(
-				containerWidth,
-				containerHeight,
-				config.minContainerWidth || 0,
-				config.minContainerHeight || 0
-			);
-
-			var containerWidth = Math.min(maxSizes[0], Math.max(minSizes[0], containerWidth));
-			var containerHeight = Math.min(maxSizes[1], Math.max(minSizes[1], containerHeight));
-
-			containerState.width = containerWidth;
-			containerState.height = containerHeight;
+			containerState.width = containerSizes[0];
+			containerState.height = containerSizes[1];
 			containerState.left = containerObject.getBoundingClientRect().left;
 			containerState.top = containerObject.getBoundingClientRect().top;
 
@@ -2802,17 +2777,19 @@
 				containerObject.style.height = containerState.height + "px";
 			}
 
-			var fittedSizes = getContainedSizes(
-				canvasState.originalWidth,
-				canvasState.originalHeight,
-				containerState.width,
-				containerState.height
-			);
+			var canvasSizes = getFittedSizes({
+				width: canvasState.originalWidth,
+				height: canvasState.originalHeight,
+				maxWidth: containerState.width,
+				maxHeight: containerState.height,
+				minWidth: 0,
+				minHeight: 0
+			});
 
-			canvasState.width = fittedSizes[0];
-			canvasState.height = fittedSizes[1];
-			canvasState.left = 0.5 * (containerState.width - fittedSizes[0]);
-			canvasState.top = 0.5 * (containerState.height - fittedSizes[1]);
+			canvasState.width = canvasSizes[0];
+			canvasState.height = canvasSizes[1];
+			canvasState.left = 0.5 * (containerState.width - canvasSizes[0]);
+			canvasState.top = 0.5 * (containerState.height - canvasSizes[1]);
 
 			canvasObject.style.width = canvasState.width + "px";
 			canvasObject.style.height = canvasState.height + "px";
@@ -4706,11 +4683,11 @@
 				return false;
 			}
 			
-			var filename = canvasState.filename;
-			var mimeType = canvasState.mimeType;
-			var dataType = canvasState.dataType;
-			var quality = canvasState.quality;
-			var backgroundColor = canvasState.backgroundColor;
+			var filename = canvasState.filename || "untitled";
+			var mimeType = canvasState.mimeType || "image/png";
+			var dataType = canvasState.dataType || "file";
+			var quality = canvasState.quality || 0.92;
+			var backgroundColor = canvasState.backgroundColor || "#FFFFFF";
 			var width = canvasState.originalWidth;
 			var height = canvasState.originalHeight;
 			
@@ -4848,7 +4825,15 @@
 					quality(optional),
 				}
 
-				canvState => canvaaas.getCanvasData()
+				canvState = {
+					filename(optional),
+					width(required, canvasState.originalWidth),
+					height(required, canvasState.originalHeight),
+					backgroundColor(optional),
+					mimeType(optional),
+					dataType(optional),
+					quality(optional),
+				}
 
 				imgStates => canvaaas.export()
 			*/
@@ -4859,12 +4844,24 @@
 				}
 				return false;
 			}
+			if (!isObject(canvState)) {
+				if (cb) {
+					cb("Argument not object");
+				}
+				return false;
+			}
+			if (!isArray(imgStates)) {
+				if (cb) {
+					cb("Argument not array");
+				}
+				return false;
+			}
 			
-			var filename = canvState.filename;
-			var mimeType = canvState.mimeType;
-			var dataType = canvState.dataType;
-			var quality = canvState.quality;
-			var backgroundColor = canvState.backgroundColor;
+			var filename = canvState.filename || "untitled";
+			var mimeType = canvState.mimeType || "image/png";
+			var dataType = canvState.dataType || "file";
+			var quality = canvState.quality || 0.92;
+			var backgroundColor = canvState.backgroundColor || "#FFFFFF";
 			var width = canvState.width;
 			var height = canvState.height;
 			
@@ -5032,7 +5029,7 @@
 			window.URL.revokeObjectURL(data);
 		}
 
-		/* data */
+		/* get data */
 		myObject.this = function(cb){
 			if (!eventState.target) {
 				if (cb) {
