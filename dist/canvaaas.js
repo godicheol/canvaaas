@@ -1153,14 +1153,13 @@
 					if ([
 						"id"
 					].indexOf(key) > -1) {
-						if (state[key] !== newState[key]) {
-							idChanged = true;
-							oldId = state[key];
-						}
 						if (
 							isString(newState[key]) &&
-							!isExist(newState[key])
+							!isExist(newState[key]) &&
+							state[key] !== newState[key]
 						) {
+							idChanged = true;
+							oldId = state[key];
 							state[key] = toString(newState[key]);
 						}
 					} else if ([
@@ -1386,7 +1385,8 @@
 				if (state.hasOwnProperty(key)) {
 					if ([
 						"id",
-						"src"
+						"src",
+						"type"
 					].indexOf(key) > -1) {
 						tmp[key] = toString(state[key]);
 					} else if ([
@@ -1525,7 +1525,6 @@
 			} else {
 				result = parseState(thisAttrs);
 			}
-			console.log(result);
 			return result;
 		}
 
@@ -2556,7 +2555,7 @@
 				// check mimeType
 				if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
 					if (cb) {
-						cb("Extention not allowed => " + ext.toLowerCase());
+						cb("Extention not allowed => " + ext);
 					}
 					return false;
 				}
@@ -2902,10 +2901,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, exportState(res));
 				}
 				if (cb) {
-					cb(null, res);
+					cb(null, exportState(res));
 				}
 			});
 		}
@@ -2961,10 +2960,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, exportState(res));
 				}
 				if (cb) {
-					cb(null, res);
+					cb(null, exportState(res));
 				}
 			});
 		}
@@ -3022,10 +3021,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, exportState(res));
 				}
 				if (cb) {
-					cb(null, res);
+					cb(null, exportState(res));
 				}
 			});
 		}
@@ -3097,10 +3096,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, res);
+					config.upload(null, exportState(res));
 				}
 				if (cb) {
-					cb(null, res);
+					cb(null, exportState(res));
 				}
 			});
 		}
@@ -5107,9 +5106,7 @@
 		myObject.export = function(cb){
 			var states = [];
 			imageStates.forEach(function(elem){
-                var tmp = exportState(elem.id);
-                tmp.src = elem.src;
-				states.push(tmp);
+				states.push(exportState(elem.id));
 			});
 
 			var results = states.sort(function(a, b){
