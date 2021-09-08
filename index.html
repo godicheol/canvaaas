@@ -49,8 +49,12 @@
 		float: right;
 	}
 
+	#myCanvas-filename{
+		float: left;	
+	}
 	#myCanvas-editabled{
-		float: left;
+		float: right;
+		margin-right: 6px;
 	}
 	#myCanvas-backgroundColor{
 		width: 1rem;
@@ -197,7 +201,7 @@
 					)
 				">Upload URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadState(testImport[0], function(err, res){
+					canvaaas.uploadState(testImportState[0], function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -216,62 +220,46 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'original',
-						datatype: 'url'
+						dataType: 'url'
 					}, function(err, res, result){
 						console.log(err, result);
-						var link = document.createElement('a');
-						link.setAttribute('href', res);
-						link.setAttribute('download', result.filename);
-						link.style.display = 'none';
-						document.body.appendChild(link);
-						link.click();
-						document.body.removeChild(link);
-						window.URL.revokeObjectURL(res);
+						canvaaas.download(res, result.filename);
 					});
 				">Save</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
-						datatype: 'url',
+						mimeType: 'image/png',
+						dataType: 'url',
 						width: 256, 
 						height: 256, 
 						quality: 0.5,
-						mimeType: 'png',
 						backgroundColor: '#000000',
 					}, function(err, res, result){
 						console.log(err, result);
-						var link = document.createElement('a');
-						link.setAttribute('href', res);
-						link.setAttribute('download', result.filename);
-						link.style.display = 'none';
-						document.body.appendChild(link);
-						link.click();
-						document.body.removeChild(link);
-						window.URL.revokeObjectURL(res);
+						canvaaas.download(res, result.filename);
 					})
 				">Save Thumbnail</a></li>
+				
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.drawTo({
+						filename: 'original',
+						dataType: 'url'
+					}, 
+					testCanvasState,
+					testImportState,
+					function(err, res, result){
+						console.log(err, result);
+						canvaaas.download(res, result.filename);
+					})
+				">Save Without Init</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					// new tab
 					canvaaas.draw({
 						filename: 'original',
-						datatype: 'url'
+						dataType: 'url'
 					}, function(err, res){
-						var image = new Image();
-						image.src = res;
-						image.style.position = 'absolute';
-						image.style.top = '50%';
-						image.style.left = '50%';
-						image.style.transform = 'translate(-50%, -50%)';
-						image.style.width = '100%';
-						image.style.height = 'auto';
-
-				        var newTab = window.open('');
-				        newTab.document.write(image.outerHTML);
-				        newTab.document.body.style.backgroundColor = '#000000';
-				        newTab.document.body.style.padding = '24px';
-				        newTab.document.body.style.position = 'relative';
-
-						window.URL.revokeObjectURL(res);
+						canvaaas.newTab(res);
 					})
 				">New Tab</a></li>
 				<li class="rule"></li>
@@ -287,7 +275,7 @@
 					})
 				">Export</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(JSON.stringify(testImport), function(err, res){
+					canvaaas.import(JSON.stringify(testImportState), function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -350,6 +338,52 @@
 				">Get Redo Data</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.config(testConfig, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						canvaaas.init(document.getElementById('myContainer'), function(err, res){
+							if (err) {
+								console.log(err);
+								return false;
+							}
+						})
+					})
+				">Init</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.destroy(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+					})
+				">Destroy</a></li>
+			</ul>
+		</div>
+		<div class="header-tab">
+			<a href="javascript:void(0)" class="header-subject">Edit</a>
+			<ul class="header-list hidden">
+				<li><a id="undo" href="javascript:void(0)" onclick="
+					canvaaas.undo(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						checkCaches();
+					})
+				">Undo</a></li>
+				<li><a id="redo" href="javascript:void(0)" onclick="
+					canvaaas.redo(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						checkCaches();
+					})
+				">Redo</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.findOne({
 						index: 2
 					}, function(err, res){
@@ -404,52 +438,6 @@
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Update Many {index: 2}</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.config(testConfig, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						canvaaas.init(document.getElementById('myContainer'), function(err, res){
-							if (err) {
-								console.log(err);
-								return false;
-							}
-						})
-					})
-				">Init</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.destroy(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-					})
-				">Destroy</a></li>
-			</ul>
-		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">Edit</a>
-			<ul class="header-list hidden">
-				<li><a id="undo" href="javascript:void(0)" onclick="
-					canvaaas.undo(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						checkCaches();
-					})
-				">Undo</a></li>
-				<li><a id="redo" href="javascript:void(0)" onclick="
-					canvaaas.redo(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						checkCaches();
-					})
-				">Redo</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.id(canvaaas.this(), window.prompt('Type new ID'))
@@ -592,8 +580,23 @@
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.lock()
+					canvaaas.lock(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						writeCanvasData();
+					})
 				">Lock</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unlock(function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						writeCanvasData();
+					})
+				">Unlock</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.freeze()
@@ -608,11 +611,23 @@
 						height: window.prompt('Type height', '4'),
 						unit: window.prompt('Type unit', 'in'),
 						dpi: window.prompt('Type dpi', '300'),
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						writeCanvasData();
 					})
-				">Canvas Size</a></li>
+				">Dimensions</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'))
+					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						writeCanvasData();
+					})
 				">Background Color</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -625,7 +640,7 @@
 			<ul class="header-list hidden">
 				<li><a id="showCursor" href="javascript:void(0)">Show Cursor Data</a></li>
 				<li><a id="showCanvas" href="javascript:void(0)">Show Canvas Data</a></li>
-				<li><a id="showImage" href="javascript:void(0)">Show Focus Data</a></li>
+				<li><a id="showImage" href="javascript:void(0)">Show Image Data</a></li>
 			</ul>
 		</div>
 	</div>
@@ -633,10 +648,11 @@
 	<div id="myContainer"></div>
 
 	<div id="myCanvas" class="hidden">
-		<div id="myCanvas-editabled"></div>
+		<div id="myCanvas-filename"></div>
 		<div id="myCanvas-state"></div>
 		<div id="myCanvas-backgroundColor"></div>
 		<span style="float: right; font-size: 0.8rem; margin-right: 0.1rem;">bg:</span>
+		<div id="myCanvas-editabled"></div>
 		<div style="clear: both;"></div>
 	</div>
 
@@ -712,7 +728,7 @@
 					return false;
 				}
 
-				writeStatus(res);
+				writeCursor(res);
 
 				// console.log("config.hover callback", res);
 			},
@@ -725,27 +741,6 @@
 				checkCaches();
 
 				console.log("config.upload callback", res);
-			},
-			canvas: function(err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.canvas callback", res);
-			},
-			remove: function(err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				checkCaches();
-
-				console.log("config.remove callback", res);
 			},
 			focus: function(err, res){
 				if (err) {
@@ -769,18 +764,10 @@
 
 				console.log("config.edit callback", res);
 			},
-			export: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				console.log("config.export callback", res);
-			},
 		});
 
-		// #1.1 init canvas
-		canvaaas.initCanvas({
+		// #1.1 canvas
+		canvaaas.canvas({
 			width: 7858.705673285892,
 			height: 5239.137115523928,
 			unit: "px"
@@ -807,7 +794,7 @@
 			console.log("canvaaas.init callback", res);
 		});
 
-		// #2.1 canvas size
+		// #2.1 canvas
 		// canvaaas.canvas({
 		// 	width: 7858.705673285892,
 		// 	height: 5239.137115523928,
@@ -838,16 +825,19 @@
 		function writeCanvasData(){
 			var state = canvaaas.getCanvasData();
 
+			var sFilename = document.getElementById("myCanvas-filename");
 			var sEditabled = document.getElementById("myCanvas-editabled");
 			var sBackground = document.getElementById("myCanvas-backgroundColor");
 			var sState = document.getElementById("myCanvas-state");
 
+			sFilename.innerHTML = state.filename + "." + state.mimeType.split("/").pop();
+			
 			sState.innerHTML = "";
 			sState.innerHTML += "w:" + Math.floor(state.width);
 			sState.innerHTML += " h:" + Math.floor(state.height);
 
 			sEditabled.innerHTML = state.editabled ? 
-				"<span style='color: black;'>Editabled</span>" : 
+				"" : 
 				"<span style='color: red;'>Uneditabled</span>";
 
 			sBackground.style.backgroundColor = state.backgroundColor;
@@ -866,13 +856,18 @@
 			sId.innerHTML = state.id;
 
 			sState.innerHTML = "";
-			sState.innerHTML += "x:" + Math.floor(state.x);
+			sState.innerHTML += " index:" + state.index;
+			sState.innerHTML += " x:" + Math.floor(state.x);
 			sState.innerHTML += " y:" + Math.floor(state.y);
 			sState.innerHTML += " w:" + Math.floor(state.width);
 			sState.innerHTML += " h:" + Math.floor(state.height);
+			sState.innerHTML += " deg:" + Math.floor(state.rotate);
+			sState.innerHTML += " flipX:" + state.scaleY;
+			sState.innerHTML += " flipY:" + state.scaleX;
+			sState.innerHTML += " opacity " + state.opacity;
 		}
 
-		function writeStatus(res) {
+		function writeCursor(res) {
 			var sId = document.getElementById("myCursor-id");
 			var sState = document.getElementById("myCursor-state");
 			if (res.target) {
@@ -904,24 +899,6 @@
 				buttons.redo.style.pointerEvents = "";
 				buttons.redo.style.cursor = "";
 				buttons.redo.style.color = "";
-			}
-		}
-
-		function viewImageData() {
-			var elem = document.querySelector("div.image-data");
-			if (elem.classList.contains("hidden") === true) {
-				elem.classList.remove("hidden");
-			} else {
-				elem.classList.add("hidden");
-			}
-		}
-
-		function viewCanvasData() {
-			var elem = document.querySelector("div.canvas-data");
-			if (elem.classList.contains("hidden") === true) {
-				elem.classList.remove("hidden");
-			} else {
-				elem.classList.add("hidden");
 			}
 		}
 
@@ -1017,7 +994,7 @@
 					return false;
 				}
 
-				writeStatus(res);
+				writeCursor(res);
 
 				console.log("config.hover callback", res);
 			},
@@ -1030,27 +1007,6 @@
 				checkCaches();
 
 				console.log("config.upload callback", res);
-			},
-			canvas: function(err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.canvas callback", res);
-			},
-			remove: function(err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				checkCaches();
-
-				console.log("config.remove callback", res);
 			},
 			focus: function(err, res){
 				if (err) {
@@ -1075,8 +1031,19 @@
 				console.log("config.edit callback", res);
 			},
 		}
+		
+		var testCanvasState = {
+			"width": 7858.705673285892,
+			"height": 5239.137115523928,
+			"editabled": true,
+			"filename": "untitled",
+			"mimeType": "image/png",
+			"dataType": "file",
+			"quality": 0.92,
+			"aspectRatio": "3:2"
+		}
 
-		var testImport = [{
+		var testImportState = [{
 	        "id": "db3783",
 	        "index": 1,
 	        "originalWidth": 3024,
