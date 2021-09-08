@@ -20,6 +20,9 @@
 .canvaaas.freezed .undrawabled{
 	visibility: hidden;
 }
+.canvaaas.freezed .canvaaas-mirror{
+	display: none;
+}
 
 /* on editing (mouse down) */
 .canvaaas-image.editing,

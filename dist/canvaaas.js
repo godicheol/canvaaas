@@ -4912,18 +4912,16 @@
 
 			var drawables = [];
 			for (var i = 0; i < imgStates.length; i++) {
-				var copied = {};
-				copyObject(copied, imgStates[i]);
-
-				if (!copied.src) {
-					if (copied.url) {
-						copied.src = copied.url;
-					} else if (copied.path) {
-						copied.src = copied.path;
+				if (imgStates[i].drawabled === true) {
+					var copied = {};
+					copyObject(copied, imgStates[i]);
+					if (!copied.src) {
+						if (copied.url) {
+							copied.src = copied.url;
+						} else if (copied.path) {
+							copied.src = copied.path;
+						}
 					}
-				}
-
-				if (copied.drawabled === true) {
 					drawables.push(copied);
 				}
 			}
