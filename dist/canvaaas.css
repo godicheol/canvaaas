@@ -1,10 +1,4 @@
-/*!
- * 
- * canvaaas.js
- * 
- * eeecheol@gmail.com
- * 
- */
+/* canvaaas.js eeecheol@gmail.com */
 
 /* on freezed */
 .canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
@@ -38,6 +32,7 @@
 /* on focus */
 .canvaaas-image.focused,
 .canvaaas-clone.focused{
+	/* any styles */
 
 }
 
@@ -71,6 +66,12 @@
 	display: block;
 }
 
+/* restricted */
+.canvaaas-image.restricted,
+.canvaaas-clone.restricted{
+
+}
+
 /* uneditabled */
 .canvaaas-image.uneditabled .canvaaas-innerline,
 .canvaaas-clone.uneditabled .canvaaas-innerline,
@@ -86,6 +87,12 @@
 .canvaaas-clone.unfocusabled{
 	pointer-events: none;
 	cursor: default;
+}
+
+/* undrawabled */
+.canvaaas-image.undrawabled,
+.canvaaas-clone.undrawabled{
+
 }
 
 /* container */
@@ -164,8 +171,6 @@
 	display: none;
 }
 
-
-
 /* background */
 .canvaaas-background{
 	display: block;
@@ -175,6 +180,13 @@
 	left: 0;
 	right: 0;
 	z-index: 2;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+/*	pointer-events: none;*/
 }
 
 /* image & clone */

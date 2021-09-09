@@ -65,6 +65,7 @@
 		var classNames = {
 			hidden: "hidden",
 			checker: "checker",
+			restricted: "restricted",
 			unfocusabled: "unfocusabled",
 			uneditabled: "uneditabled",
 			undrawabled: "undrawabled",
@@ -1212,6 +1213,22 @@
 			cloneObj.style.height = height;
 			cloneObj.style.transform = transform;
 			cloneObj.querySelector("img").style.opacity = opacity;
+			
+			if (state.restricted === false) {
+				if (!originObj.classList.contains(classNames.restricted)) {
+					originObj.classList.add(classNames.restricted);
+				}
+				if (!cloneObj.classList.contains(classNames.restricted)) {
+					cloneObj.classList.add(classNames.restricted);
+				}
+			} else {
+				if (originObj.classList.contains(classNames.restricted)) {
+					originObj.classList.remove(classNames.restricted);
+				}
+				if (cloneObj.classList.contains(classNames.restricted)) {
+					cloneObj.classList.remove(classNames.restricted);
+				}
+			}
 
 			if (state.focusabled === false) {
 				if (!originObj.classList.contains(classNames.unfocusabled)) {
