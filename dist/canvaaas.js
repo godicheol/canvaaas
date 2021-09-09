@@ -210,6 +210,8 @@
 					return false;
 				}
 
+				var scaleRatio = canvasState.width / canvasState.originalWidth;
+				var result;
 				var mouseX;
 				var mouseY;
 				var target;
@@ -225,9 +227,7 @@
 					return false;
 				}
 
-				var scaleRatio = canvasState.width / canvasState.originalWidth;
-
-				var result = {
+				result = {
 					x: mouseX / scaleRatio,
 					y: mouseY / scaleRatio,
 					target: target
@@ -250,7 +250,6 @@
 				if (!state.focusabled) {
 					return false;
 				}
-
 				if (eventState.target !== id) {
 					focusOut(eventState.target);
 				}
@@ -273,15 +272,12 @@
 						return handlers.startMove(e);
 					}
 				}
-
 				if (config.deniedTagNamesToFocusOut.indexOf(e.target.tagName) > -1) {
 					return false;
 				}
-
 				if (eventState.target) {
 					focusOut(eventState.target);
 				}
-
 				if (config.focus) {
 					config.focus(null, null);
 				}
@@ -294,15 +290,12 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-
 				if (!isAvailable(eventState.target)) {
 					return false;
 				}
-
 				if (!whereContainer()) {
 					return false;
 				}
-
 				// fix osx wheel
 				if (eventState.onZoom) {
 					return false;
@@ -353,10 +346,9 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey;
+				var onShiftKey = e.shiftKey || state.restricted;
 				var mouseX;
 				var mouseY;
-
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - eventState.mouseX;
 					mouseY = e.clientY - eventState.mouseY;
@@ -365,6 +357,14 @@
 					mouseY = e.touches[0].clientY - eventState.mouseY;
 				} else {
 					return false;
+				}
+				
+				if (onShiftKey) {
+					if (Math.abs(mouseX) > Math.abs(mouseY)) {
+						mouseY = 0;
+					} else {
+						mouseX = 0;
+					}
 				}
 
 				// save state
@@ -404,11 +404,9 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-
 				if (!isAvailable(eventState.target)) {
 					return false;
 				}
-
 				if (!whereContainer()) {
 					return false;
 				}
@@ -439,10 +437,11 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey;
+				var onShiftKey = e.shiftKey || state.restricted;
+				var radians;
+				var deg;
 				var mouseX;
 				var mouseY;
-
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX - (containerState.left + canvasState.left);
 					mouseY = e.clientY - (containerState.top + canvasState.top);
@@ -454,14 +453,17 @@
 				}
 
 				// calculate degree
-				var radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
-				var deg = -radians + 90;
-
+				radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
+				deg = 360 - ((radians + 270) % 360);
 				if (state.scaleX < 0) {
-					deg = deg - 360;
+					deg = deg;
 				}
 				if (state.scaleY < 0) {
-					deg = deg - 180;
+					deg = deg + 180;
+				}
+		
+				if (onShiftKey) {
+					deg = Math.round(deg / 45) * 45
 				}
 
 				// save state
@@ -500,17 +502,16 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-
 				if (!isAvailable(eventState.target)) {
 					return false;
 				}
-
 				if (!whereContainer()) {
 					return false;
 				}
 
 				var state = getState(eventState.target);
 				var handle = e.target;
+				var direction;
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -523,7 +524,6 @@
 					return false;
 				}
 
-				var direction;
 				if (handle.classList.contains("canvaaas-resize-n")) {
 					direction = getFlippedDirection("n", state.scaleX, state.scaleY);
 				} else if (handle.classList.contains("canvaaas-resize-ne")) {
@@ -579,7 +579,7 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || state.lockAspectRatio;
+				var onShiftKey = e.shiftKey || state.restricted;
 				var direction = eventState.direction;
 				var aspectRatio = state.originalWidth / state.originalHeight;
 				var width = eventState.initialW;
@@ -591,7 +591,6 @@
 				var radians;
 				var cosFraction;
 				var sinFraction;
-
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -615,133 +614,115 @@
 				sinFraction = Math.sin(radians);
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-				
-				console.log(diffX, diffY)
 
 				if (direction === "n") {
-					if (!onShiftKey) {
-						height -= diffY;
-
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
-						height -= diffY;
+					height -= diffY;
+					
+					if (onShiftKey) {
 						width = height * aspectRatio;
-
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
 					}
+					
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "ne") {
-					if (!onShiftKey) {
-						width += diffX;
-						height -= diffY;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
+					width += diffX;
+					height -= diffY;
+					
+					if (onShiftKey) {
 						if (2 * diffX < 2 * -diffY * aspectRatio) {
-							height -= diffY * 2;
+							diffX -= width - (height * aspectRatio);
 							width = height * aspectRatio;
 						} else {
-							width += diffX * 2;
+							diffY += height - (width / aspectRatio);
 							height = width / aspectRatio;
 						}
 					}
+					
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "e") {
-					if (!onShiftKey) {
-						width += diffX;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-					} else {
-						width += diffX;
+					width += diffX;
+					
+					if (onShiftKey) {
 						height = width / aspectRatio;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
 					}
+					
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
 				} else if (direction === "se") {
-					if (!onShiftKey) {
-						width += diffX;
-						height += diffY;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
+					width += diffX;
+					height += diffY;
+					
+					if (onShiftKey) {
 						if (2 * diffX < 2 * diffY * aspectRatio) {
-							height += 2 * diffY;
+							diffX -= width - (height * aspectRatio);
 							width = height * aspectRatio;
 						} else {
-							width += 2 * diffX;
+							diffY -= height - (width / aspectRatio);
 							height = width / aspectRatio;
 						}
 					}
+
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "s") {
-					if (!onShiftKey) {
-						height += diffY;
+					height += diffY;
 
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
-						height += diffY;
+					if (onShiftKey) {
 						width = height * aspectRatio;
-
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
 					}
+					
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "sw") {
-					if (!onShiftKey) {
-						width -= diffX;
-						height += diffY;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
+					width -= diffX;
+					height += diffY;
+					
+					if (onShiftKey) {
 						if (2 * -diffX < 2 * diffY * aspectRatio) {
-							height += 2 * diffY;
+							diffX += width - (height * aspectRatio);
 							width = height * aspectRatio;
 						} else {
-							width -= 2 * diffX;
+							diffY -= height - (width / aspectRatio);
 							height = width / aspectRatio;
 						}
 					}
+					
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "w") {
-					if (!onShiftKey) {
-						width -= diffX;
+					width -= diffX;
 
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-					} else {
-						width -= diffX;
+					if (onShiftKey) {
 						height = width / aspectRatio;
-
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
 					}
+						
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
 				} else if (direction === "nw") {
-					if (!onShiftKey) {
-						width -= diffX;
-						height -= diffY;
+					width -= diffX;
+					height -= diffY;
 
-						axisX += 0.5 * diffX * cosFraction;
-						axisY += 0.5 * diffX * sinFraction;
-						axisX -= 0.5 * diffY * sinFraction;
-						axisY += 0.5 * diffY * cosFraction;
-					} else {
+					if (onShiftKey) {
 						if (2 * -diffX < 2 * -diffY * aspectRatio) {
-							height -= 2 * diffY;
+							diffX += width - (height * aspectRatio);
 							width = height * aspectRatio;
 						} else {
-							width -= 2 * diffX;
+							diffY += height - (width / aspectRatio);
 							height = width / aspectRatio;
 						}
 					}
+					
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else {
 					return false;
 				}
@@ -801,11 +782,9 @@
 					if (!chkTarget(e)) {
 						return false;
 					}
-
 					if (!isAvailable(eventState.target)) {
 						return false;
 					}
-
 					if (!whereContainer()) {
 						return false;
 					}
@@ -817,7 +796,7 @@
 					saveUndo(eventState.target);
 
 					// class
-					// addClass(eventState.target, classNames.onEditing);
+					 addClass(eventState.target, classNames.onEditing);
 				}
 
 				var state = getState(eventState.target);
@@ -851,7 +830,7 @@
 					eventState.onZoom = false;
 
 					// class
-					// removeClass(eventState.target, classNames.onEditing);
+					 removeClass(eventState.target, classNames.onEditing);
 
 					// callback
 					if (config.edit) {
@@ -867,15 +846,12 @@
 				if (eventState.onMove) {
 					handlers.endMove(e);
 				}
-
 				if (!chkTarget(e)) {
 					return false;
 				}
-
 				if (!isAvailable(eventState.target)) {
 					return false;
 				}
-
 				if (!whereContainer()) {
 					return false;
 				}
@@ -963,7 +939,6 @@
 					if (timer) {
 						clearTimeout(timer);
 					};
-
 					timer = setTimeout(func, time, e);
 				};
 			},
@@ -1063,7 +1038,7 @@
 			tmp.scaleX = state.scaleX;
 			tmp.scaleY = state.scaleY;
 			tmp.opacity = state.opacity;
-			tmp.lockAspectRatio = state.lockAspectRatio;
+			tmp.restricted = state.restricted;
 			tmp.focusabled = state.focusabled;
 			tmp.editabled = state.editabled;
 			tmp.drawabled = state.drawabled;
@@ -1144,7 +1119,7 @@
 						if (
 							isString(newState[key]) &&
 							!isExist(newState[key]) &&
-							state[key] !== newState[key]
+							!isEmpty(newState[key])
 						) {
 							idChanged = true;
 							oldId = state[key];
@@ -1165,7 +1140,7 @@
 							state[key] = toNumber(newState[key]);
 						}
 					} else if ([
-						"lockAspectRatio",
+						"restricted",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1351,7 +1326,7 @@
 					].indexOf(key) > -1) {
 						tmp[key] = toNumber(state[key]);
 					} else if ([
-						"lockAspectRatio",
+						"restricted",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1398,7 +1373,7 @@
 					].indexOf(key) > -1) {
 						tmp[key] = toNumber(state[key]);
 					} else if ([
-						"lockAspectRatio",
+						"restricted",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1488,7 +1463,7 @@
 				"scaleX",
 				"scaleY",
 				"opacity",
-				"lockAspectRatio",
+				"restricted",
 				"focusabled",
 				"editabled",
 				"drawabled",
@@ -2089,13 +2064,27 @@
 			return firstPart + secondPart;
 		}
 
-		function isEmpty(str) {
-			if (typeof(str) === "string" || typeof(str) === "number" || str === null) {
-				return str === undefined || str === null || str === "";
-			} else if (Array.isArray(str)) {
-				return str.length < 1;
-			} else if (typeof(str) === "object") {
-				return Object.keys(str).length < 1;
+		function isEmpty(obj) {
+			if (typeof(obj) === "undefined") {
+				return true;	
+			} else if (typeof(obj) === "string") {
+				return obj.trim() === "";
+			} else if (typeof(obj) === "number") {
+				return obj === NaN;
+			} else if (Array.isArray(obj)) {
+				return obj.length < 1;
+			} else if (typeof(obj) === "object") {
+				if (obj === null) {
+					return true;
+				}
+				for (var key in obj) {
+					if (obj.hasOwnProperty(key)) {
+						return false;
+					}
+				}
+				return JSON.stringify(obj) === JSON.stringify({});
+			} else {
+				return false;
 			}
 		}
 
@@ -2611,7 +2600,7 @@
 					scaleX: 1,
 					scaleY: 1,
 					opacity: 1,
-					lockAspectRatio: true,
+					restricted: true,
 					focusabled: true,
 					editabled: true,
 					drawabled: true,
@@ -3483,69 +3472,6 @@
 			return exportState(id);
 		}
 
-		myObject.resize = function(id, w, h, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				} 
-				return false;
-			}
-
-			if (!isAvailable(id)) {
-				if (config.edit) {
-					config.edit("Could not edit image");
-				}
-				if (cb) {
-					cb("Could not edit image");
-				} 
-				return false;
-			}
-
-			if (
-				!isNumeric(w) ||
-				!isNumeric(h)
-			) {
-				if (config.edit) {
-					config.edit("Argument not numeric or string");
-				}
-				if (cb) {
-					cb("Argument not numeric or string");
-				} 
-				return false;
-			}
-
-			var state = getState(id);
-			var ar = state.originalWidth / state.originalHeight;
-			w = toNumber(w);
-			h = toNumber(h);
-
-			var lockAspectRatio;
-			if (w !== h * ar) {
-				lockAspectRatio = false;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				width: w,
-				height: h,
-				lockAspectRatio: lockAspectRatio
-			});
-
-			if (config.edit) {
-				config.edit(null, exportState(id));
-			}
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
 		myObject.zoom = function(id, ratio, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -4076,7 +4002,7 @@
 			return true;
 		}
 
-		myObject.aspectRatio = function(id, cb){
+		myObject.restrict = function(id, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4098,16 +4024,25 @@
 			}
 
 			var state = getState(id);
+			var aspectRatio = state.originalWidth / state.originalHeight;
 			var width = state.width;
 			var height = state.height;
+			var deg = state.rotate;
 
-			if (state.lockAspectRatio === false) {
-				var aspectRatio = state.originalWidth / state.originalHeight;
+			if (state.restricted === false) {
 				if (state.width > state.height * aspectRatio) {
 					height = state.width / aspectRatio;
 				} else {
 					width = state.height * aspectRatio;
 				}
+				
+				deg = Math.round(deg / 45) * 45;
+				
+				setState(id, {
+					width: width,
+					height: height,
+					rotate: deg
+				});
 			}
 
 			// save cache
@@ -4115,9 +4050,7 @@
 
 			// save state
 			setState(id, {
-				width: width,
-				height: height,
-				lockAspectRatio: state.lockAspectRatio === false
+				restricted: state.restricted === false
 			});
 
 			if (config.edit) {
@@ -4305,7 +4238,7 @@
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,
-				lockAspectRatio: true,
+				restricted: true,
 				focusabled: true,
 				editabled: true,
 				drawabled: true
@@ -4343,7 +4276,7 @@
 		}
 
 		/* canvas */
-		myObject.canvas = function(options, cb) {
+		myObject.resize = function(options, cb) {
 			if (!canvasState.editabled && canvasObject) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4508,7 +4441,7 @@
 			return getCanvas();
 		}
 
-		myObject.lock = function(cb) {
+		myObject.active = function(cb) {
 			if (canvasState.editabled) {
 				canvasState.editabled = false;
 			} else {

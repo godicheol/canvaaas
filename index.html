@@ -490,14 +490,6 @@
 				">Move Bottom-Right</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.resize(
-						canvaaas.this(),
-						window.prompt('Type new width(px).', '256'),
-						window.prompt('Type new height(px).', '256')
-					)
-				">Resize</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoom(canvaaas.this(), 0.1)
 				">Zoom In</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -560,8 +552,8 @@
 				">Focus Out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.aspectRatio(canvaaas.this())
-				">Toggle Aspect Ratio</a></li>
+					canvaaas.restrict(canvaaas.this())
+				">Toggle Restrict</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this())
 				">Toggle Focusable</a></li>
@@ -592,7 +584,7 @@
 				">Thaw</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
+					canvaaas.resize({
 						width: window.prompt('Type width', '6'),
 						height: window.prompt('Type height', '4'),
 						unit: window.prompt('Type unit', 'in'),
@@ -604,7 +596,7 @@
 						}
 						writeCanvasData();
 					})
-				">Canvas Size</a></li>
+				">Resize</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
@@ -617,7 +609,7 @@
 				">Background Color</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.lock(function(err, res){
+					canvaaas.active(function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -681,14 +673,14 @@
 	        data-scaleX = "1"
 	        data-scaleY = "-1"
 	        data-opacity = "1"
-	        data-lockAspectRatio = "true"
+	        data-restricted = "false"
 	        data-focusabled = "true"
 	        data-editabled = "true"
 	        data-drawabled = "true">
 		<img 
 			id="image-2" 
 			src="./img/1.jpeg" 
-			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"lockAspectRatio":true,"focusabled":true,"editabled":true,"drawabled":true}'>
+			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"restricted":true,"focusabled":true,"editabled":true,"drawabled":true}'>
 		<img
 			id="image-3"
 			src="./img/1.JPG"
@@ -764,7 +756,7 @@
 		});
 
 		// #1.1 canvas before init
-		canvaaas.canvas({
+		canvaaas.resize({
 			width: 7858.705673285892,
 			height: 5239.137115523928,
 			unit: "px",
@@ -785,14 +777,23 @@
 			console.log("canvaaas.init callback", res);
 		});
 
-		 // #2.1 canvas after init
-		 // canvaaas.canvas({
-		 // 	width: 7858.705673285892,
-		 // 	height: 5239.137115523928,
-		 // 	unit: "px",
-		 //  	dpi : 1
-		 // });
+		// #2.1 canvas after init
+		// canvaaas.resize({
+		// 	width: 7858.705673285892,
+		// 	height: 5239.137115523928,
+		// 	unit: "px",
+		//  	dpi : 1
+		// });
 
+		
+		// #3 upload test
+		canvaaas.uploadUrl("./img/1.JPG", function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+			console.log(res);
+		});
 
 
 
@@ -1038,7 +1039,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 0.5,
-	        "lockAspectRatio": true,
+	        "restricted": true,
 	        "focusabled": true,
 	        "editabled": true,
 	        "drawabled": true,
@@ -1060,7 +1061,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "lockAspectRatio": true,
+	        "restricted": true,
 	        "focusabled": true,
 	        "editabled": true,
 	        "drawabled": true,
@@ -1082,7 +1083,7 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "lockAspectRatio": true,
+	        "restricted": true,
 	        "focusabled": true,
 	        "editabled": true,
 	        "drawabled": true,
