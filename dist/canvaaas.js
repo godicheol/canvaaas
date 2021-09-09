@@ -43,7 +43,7 @@
 
 			maxContainerHeight: 0.7, // number, 0 ~ 1
 
-			renderScale: 0.5, // number,
+			renderScale: 0.5, // number, 0 ~ 1
 
 			hover: undefined, // callback function
 
@@ -463,7 +463,7 @@
 				}
 		
 				if (onShiftKey) {
-					deg = Math.round(deg / 45) * 45
+					deg = Math.round(deg / 15) * 15;
 				}
 
 				// save state
@@ -3652,6 +3652,10 @@
 			if (state.scaleY === -1) {
 				deg *= -1;
 			}
+			
+			if (state.restricted) {
+				deg = Math.round(deg / 15) * 15;
+			}
 
 			// save cache
 			saveUndo(id);
@@ -3710,6 +3714,10 @@
 
 			if (state.scaleY === -1) {
 				deg *= -1;
+			}
+			
+			if (state.restricted) {
+				deg = Math.round(deg / 15) * 15;
 			}
 
 			// save cache
@@ -4035,8 +4043,8 @@
 				} else {
 					width = state.height * aspectRatio;
 				}
-				
-				deg = Math.round(deg / 45) * 45;
+
+				deg = Math.round(deg / 15) * 15;
 				
 				setState(id, {
 					width: width,
