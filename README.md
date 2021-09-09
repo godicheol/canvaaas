@@ -1,1 +1,1 @@
-[TEST](https://eeecheol.github.io/canvaaas/)
+[Test page](https://eeecheol.github.io/canvaaas/)

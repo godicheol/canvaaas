@@ -311,7 +311,6 @@
 				var state = getState(eventState.target);
 				var mouseX;
 				var mouseY;
-
 				if (typeof(e.touches) === "undefined") {
 					mouseX = e.clientX;
 					mouseY = e.clientY;
@@ -512,11 +511,6 @@
 
 				var state = getState(eventState.target);
 				var handle = e.target;
-
-				var flipX;
-				var flipY;
-				var direction;
-
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -529,6 +523,7 @@
 					return false;
 				}
 
+				var direction;
 				if (handle.classList.contains("canvaaas-resize-n")) {
 					direction = getFlippedDirection("n", state.scaleX, state.scaleY);
 				} else if (handle.classList.contains("canvaaas-resize-ne")) {
@@ -584,14 +579,13 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey;
+				var onShiftKey = e.shiftKey || state.lockAspectRatio;
 				var direction = eventState.direction;
-
-				var aspectRatio;
-				var width;
-				var height;
-				var axisX;
-				var axisY;
+				var aspectRatio = state.originalWidth / state.originalHeight;
+				var width = eventState.initialW;
+				var height = eventState.initialH;
+				var axisX = eventState.initialX;
+				var axisY = eventState.initialY;
 				var diffX;
 				var diffY;
 				var radians;
@@ -610,12 +604,6 @@
 					return false;
 				}
 
-				if (state.lockAspectRatio) {
-					onShiftKey = true;
-				}
-
-				aspectRatio = state.originalWidth / state.originalHeight;
-
 				radians = state.rotate * Math.PI / 180;
 				if (state.scaleX !== 1) {
 					radians *= -1;
@@ -627,11 +615,8 @@
 				sinFraction = Math.sin(radians);
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-
-				width = eventState.initialW;
-				height = eventState.initialH;
-				axisX = eventState.initialX;
-				axisY = eventState.initialY;
+				
+				console.log(diffX, diffY)
 
 				if (direction === "n") {
 					if (!onShiftKey) {
@@ -832,22 +817,15 @@
 					saveUndo(eventState.target);
 
 					// class
-					addClass(eventState.target, classNames.onEditing);
+					// addClass(eventState.target, classNames.onEditing);
 				}
 
 				var state = getState(eventState.target);
-				var ratio;
-				var diffX;
-				var diffY;
-				var width;
-				var height;
-				var aspectRatio;
-
-				ratio = -e.deltaY * 0.001;
-				diffX = state.width * ratio;
-				diffY = state.height * ratio;
-				width = state.width + diffX;
-				height = state.height + diffY;
+				var ratio = -e.deltaY * 0.001;
+				var diffX = state.width * ratio;
+				var diffY = state.height * ratio;
+				var width = state.width + diffX;
+				var height = state.height + diffY;
 
 				// add timer
 				clearTimeout(eventState.wheeling);
@@ -873,13 +851,13 @@
 					eventState.onZoom = false;
 
 					// class
-					removeClass(eventState.target, classNames.onEditing);
+					// removeClass(eventState.target, classNames.onEditing);
 
 					// callback
 					if (config.edit) {
 						config.edit(null, exportState(eventState.target));
 					}
-				}, 100);
+				}, 64);
 			},
 
 			startPinchZoom: function(e){
@@ -935,20 +913,12 @@
 				}
 
 				var state = getState(eventState.target);
-				var diagonal;
-				var mouseX;
-				var mouseY;
-				var width;
-				var height;
-				var ratio;
-
-				mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-				mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-				diagonal = getDiagonal(mouseX, mouseY);
-				ratio = 1 + ((diagonal - eventState.diagonal) * 0.01);
-
-				width = eventState.initialW * ratio;
-				height = eventState.initialH * ratio;
+				var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+				var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+				var diagonal = getDiagonal(mouseX, mouseY);
+				var ratio = 1 + ((diagonal - eventState.diagonal) * 0.01);
+				var width = eventState.initialW * ratio;
+				var height = eventState.initialH * ratio;
 
 				if (width < 10) {
 					return false;
