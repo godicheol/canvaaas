@@ -1938,73 +1938,87 @@
 			}
 		}
 
-		function dimensionsToPx(width, height, unit, dpi) {
-			try {
+		function dimensionsToPx(obj) {
+				try {
+					if (
+					typeof(obj) !== "object" ||
+					obj === null
+				) {
+					return false;
+				}
+				if (
+					!obj.width ||
+					!obj.height ||
+					!obj.unit ||
+					!obj.dpi
+				) {
+					return false;
+				}
 				var w, h;
-				switch(unit.toLowerCase()) {
+				switch(obj.unit.toLowerCase()) {
 					case "nm":
 					case "nanometer":
 					case "nanometers":
-						w = parseFloat(width) * 3.937e-8;
-						h = parseFloat(height) * 3.937e-8;
+						w = parseFloat(obj.width) * 3.937e-8;
+						h = parseFloat(obj.height) * 3.937e-8;
 						break;
 					case "mm":
 					case "millimeter":
 					case "millimeters":
-						w = parseFloat(width) * 0.0393701;
-						h = parseFloat(height) * 0.0393701;
+						w = parseFloat(obj.width) * 0.0393701;
+						h = parseFloat(obj.height) * 0.0393701;
 						break;
 					case "cm":
 					case "centimeter":
 					case "centimeters":
-						w = parseFloat(width) * 0.393701;
-						h = parseFloat(height) * 0.393701;
+						w = parseFloat(obj.width) * 0.393701;
+						h = parseFloat(obj.height) * 0.393701;
 						break;
 					case "m":
 					case "meter":
 					case "meters":
-						w = parseFloat(width) * 39.3701;
-						h = parseFloat(height) * 39.3701;
+						w = parseFloat(obj.width) * 39.3701;
+						h = parseFloat(obj.height) * 39.3701;
 						break;
 					case "km":
 					case "kilometer":
 					case "kilometers":
-						w = parseFloat(width) * 39370.1;
-						h = parseFloat(height) * 39370.1;
+						w = parseFloat(obj.width) * 39370.1;
+						h = parseFloat(obj.height) * 39370.1;
 						break;
 					case "in":
 					case "inch":
 					case "inches":
-						w = parseFloat(width);
-						h = parseFloat(height);
+						w = parseFloat(obj.width);
+						h = parseFloat(obj.height);
 						break;
 					case "mile":
 					case "miles":
-						w = parseFloat(width) * 63360;
-						h = parseFloat(height) * 63360;
+						w = parseFloat(obj.width) * 63360;
+						h = parseFloat(obj.height) * 63360;
 						break;
 					case "yard":
 					case "yards":
-						w = parseFloat(width) * 36;
-						h = parseFloat(height) * 36;
+						w = parseFloat(obj.width) * 36;
+						h = parseFloat(obj.height) * 36;
 						break;
 					case "nautical mile":
 					case "nauticalmile":
 					case "nmi":
-						w = parseFloat(width) * 72913.4;
-						h = parseFloat(height) * 72913.4;
+						w = parseFloat(obj.width) * 72913.4;
+						h = parseFloat(obj.height) * 72913.4;
 						break;
 					case "px":
 					case "pixel":
 					case "pixels":
-						w = parseFloat(width);
-						h = parseFloat(height);
-						dpi = 1;
+						w = parseFloat(obj.width);
+						h = parseFloat(obj.height);
+						obj.dpi = 1;
 						break;
 				}
 
-				w *= parseFloat(dpi);
-				h *= parseFloat(dpi);
+				w *= parseFloat(obj.dpi);
+				h *= parseFloat(obj.dpi);
 
 				return [w, h];
 			} catch(err) {
@@ -2368,27 +2382,24 @@
 		}
 
 		/* asynchronous */
-		function drawImage(mainCanvas, canvState, imgState, cb) {
-			/*!
-			 * canvState = {
-			 * 		width
-			 * }
-			 */
-
-			/*!
-			 * imgState = {
-			 * 		src
-			 * 		width,
-			 *  	height,
-			 * 		x,
-			 * 		y,
-			 * 		rotate,
-			 * 		opacity,
-			 * 		scaleX,
-			 * 		scaleY,
-			 * 		smoothing(optional)	
-			 * }
-			 */
+		function drawImage(mainCanvas, canvasWidth, imgState, cb) {
+			/*
+				canvasWidth => canvasState.originalWidth
+			*/
+			/*
+				imageState = {
+					src,
+					width(imageState.width / (canvasState.width / canvasState.height)),
+					height(imageState.height / (canvasState.width / canvasState.height)),
+					x(imageState.x / (canvasState.width / canvasState.height)),
+					y(imageState.y / (canvasState.width / canvasState.height)),
+					rotate,
+					opacity,
+					scaleX,
+					scaleY,
+					smoothing(optional)
+				}
+			*/
 
 			var thisImg = new Image();
 			thisImg.src = imgState.src;
@@ -2401,7 +2412,7 @@
 				var ctx = canvas.getContext("2d");
 
 				// original
-				var scaleRatio = mainCanvas.width / canvState.width;
+				var scaleRatio = mainCanvas.width / canvasWidth;
 				var originalWidth = imgState.width * scaleRatio;
 				var originalHeight = imgState.height * scaleRatio;
 				var originalX = imgState.x * scaleRatio;
@@ -4310,13 +4321,19 @@
 				}
 				return false;
 			}
-
-			var inputW = toNumber(options.width);
-			var inputH = toNumber(options.height);
-			var inputU = options.unit || "px";
-			var inputD = isNumeric(options.dpi) ? toNumber(options.dpi) : 300;
-
-			var sizes = dimensionsToPx(inputW, inputH, inputU, inputD);
+			
+			if (options.unit === undefined) {
+				options.unit = "px";
+			}
+			if (options.dpi === undefined) {
+				options.dpi = 300;
+			}
+			var sizes = dimensionsToPx({
+				width: toNumber(options.width),
+				height: toNumber(options.height),
+				unit: toString(options.unit),
+				dpi: toNumber(options.dpi)
+			});
 			if (!sizes) {
 				if (cb) {
 					cb("Argument not allowed");
@@ -4333,10 +4350,10 @@
 
 				// set images
 				imageStates.forEach(function(elem){
-					var minX = 0;
-					var minY = 0;
 					var maxX = canvasState.width;
 					var maxY = canvasState.height;
+					var minX = 0;
+					var minY = 0;
 
 					var axisX = elem.x;
 					var axisY = elem.y;
@@ -4405,13 +4422,18 @@
 				}
 				return false;
 			}
-
-			var inputW = toNumber(options.width);
-			var inputH = toNumber(options.height);
-			var inputU = options.unit || "px";
-			var inputD = isNumeric(options.dpi) ? toNumber(options.dpi) : 300;
-
-			var sizes = dimensionsToPx(inputW, inputH, inputU, inputD);
+			if (options.unit === undefined) {
+				options.unit = "px";
+			}
+			if (options.dpi === undefined) {
+				options.dpi = 300;
+			}
+			var sizes = dimensionsToPx({
+				width: toNumber(options.width),
+				height: toNumber(options.height),
+				unit: toString(options.unit),
+				dpi: toNumber(options.dpi)
+			});
 			if (!sizes) {
 				if (cb) {
 					cb("Argument not allowed");
@@ -4708,9 +4730,8 @@
 			function recursiveFunc() {
 				if (count < index) {
 					// recursive
-					var canvState = getCanvas();
 					var imgState = drawables[count];
-					drawImage(canvas, canvState, imgState, function(err) {
+					drawImage(canvas, canvasState.originalWidth, imgState, function(err) {
 						if (err) {
 							imageResults.push({
 								id: imgState.id,
@@ -4737,20 +4758,18 @@
 						return false;
 					}
 
-					result.images = imageResults;
-
 					eventState.onDraw = false;
 					endLoading(loading);
 
 					if (cb) {
-						cb(null, data, result);
+						cb(null, data, result, imageResults);
 					}
 					return data;
 				}
 			}
 		}
 
-		myObject.drawTo = function(options, canvState, imgStates, cb){
+		myObject.drawTo = function(options, canvasSizes, imgStates, cb){
 			/*
 				options = {
 					filename(optional),
@@ -4781,7 +4800,7 @@
 				}
 				return false;
 			}
-			if (!isObject(canvState)) {
+			if (!isObject(canvasSizes)) {
 				if (cb) {
 					cb("Argument not object");
 				}
@@ -4793,14 +4812,43 @@
 				}
 				return false;
 			}
+			if (
+				!isNumeric(canvasSizes.width) ||
+				!isNumeric(canvasSizes.height) ||
+				(!isString(canvasSizes.unit) && canvasSizes.unit !== undefined) ||
+				(!isNumeric(canvasSizes.dpi) && canvasSizes.dpi !== undefined)
+			) {
+				if (cb) {
+					cb("Argument not allowed");
+				}
+				return false;
+			}
+			if (canvasSizes.unit === undefined) {
+				canvasSizes.unit = "px";
+			}
+			if (canvasSizes.dpi === undefined) {
+				canvasSizes.dpi = 300;
+			}
+			var convertedSizes = dimensionsToPx({
+				width: toNumber(canvasSizes.width),
+				height: toNumber(canvasSizes.height),
+				unit: toString(canvasSizes.unit),
+				dpi: toNumber(canvasSizes.dpi)
+			});
+			if (!convertedSizes) {
+				if (cb) {
+					cb("Argument not allowed");
+				}
+				return false;
+			}
 			
-			var filename = canvState.filename || "untitled";
-			var mimeType = canvState.mimeType || "image/png";
-			var dataType = canvState.dataType || "file";
-			var quality = canvState.quality || 0.92;
-			var backgroundColor = canvState.backgroundColor || "#FFFFFF";
-			var width = canvState.width;
-			var height = canvState.height;
+			var filename = "untitled";
+			var mimeType = "image/png";
+			var dataType = "file";
+			var quality = 0.92;
+			var backgroundColor = "#FFFFFF";
+			var width = convertedSizes[0];
+			var height = convertedSizes[1];
 			
 			if (isObject(options)) {
 				if (isString(options.filename)) {
@@ -4828,16 +4876,16 @@
 				}
 			}
 
-			var canvasSizes = getContainedSizes(
-				canvState.width,
-				canvState.height,
+			var canvSizes = getContainedSizes(
+				convertedSizes[0],
+				convertedSizes[1],
 				width,
 				height,
 			);
 
 			var canvas = drawCanvas({
-				width: canvasSizes[0],
-				height: canvasSizes[1],
+				width: canvSizes[0],
+				height: canvSizes[1],
 				backgroundColor: backgroundColor
 			});
 			if (!canvas) {
@@ -4892,7 +4940,7 @@
 				if (count < index) {
 					// recursive
 					var imgState = drawables[count];
-					drawImage(canvas, canvState, imgState, function(err) {
+					drawImage(canvas, canvSizes[0], imgState, function(err) {
 						if (err) {
 							imageResults.push({
 								id: imgState.id,
@@ -4919,13 +4967,12 @@
 						return false;
 					}
 
-					result.images = imageResults;
 					eventState.onDraw = false;
 
 					endLoading(loading);
 
 					if (cb) {
-						cb(null, data, result);
+						cb(null, data, result, imageResults);
 					}
 					return data;
 				}

@@ -194,22 +194,22 @@
 					})
 				">New</a></li>
 				<li class="rule"></li>
-				<li><label for="uploadSingle">Upload File</label></li>
+				<li><label for="uploadSingle">Upload from File</label></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadUrl(
 						window.prompt('Type image URL(URLs are case sensitive in github.io)', './img/1.JPG')
 					)
-				">Upload URL</a></li>
+				">Upload from URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadState(testImportState[0])
-				">Upload State</a></li>
+				">Upload from State</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
 							window.prompt('Type element ID', 'image-1')
 						)
 					)
-				">Upload Element</a></li>
+				">Upload from Element</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
@@ -217,7 +217,7 @@
 						dataType: 'url'
 					}, function(err, res, result){
 						console.log(err, result);
-						canvaaas.download(res, result.filename);
+						canvaaas.download(res, result.filename); // iOS not supported
 					});
 				">Save<br />(iOS not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -238,12 +238,16 @@
 					canvaaas.drawTo({
 						filename: 'original',
 						dataType: 'url'
-					}, 
-					testCanvasState,
+					}, {
+						width: 7858.705673285892,
+						height: 5239.137115523928,
+						unit: 'px',
+						dpi: 1
+					},
 					testImportState,
 					function(err, res, result){
 						console.log(err, result);
-						canvaaas.download(res, result.filename);
+						canvaaas.download(res, result.filename); // iOS not supported
 					})
 				">Save from JSON<br />(iOS not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -259,8 +263,12 @@
 					canvaaas.drawTo({
 						filename: 'original',
 						dataType: 'url'
-					}, 
-					testCanvasState,
+					}, {
+						width: 7858.705673285892,
+						height: 5239.137115523928,
+						unit: 'px',
+						dpi: 1
+					},
 					testImportState,
 					function(err, res, result){
 						console.log(err, result);
