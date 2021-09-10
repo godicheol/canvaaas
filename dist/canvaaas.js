@@ -42,6 +42,10 @@
 			maxContainerWidth: 1, // number, 0 ~ 1
 
 			maxContainerHeight: 0.7, // number, 0 ~ 1
+			
+			maxDrawWidth: 4096 * 4, // number, iOS has been adjusted 4096
+			
+			maxDrawHeight: 4096 * 4, // number, iOS has been adjusted 4096
 
 			renderScale: 0.5, // number, 0 ~ 1
 			
@@ -1082,6 +1086,8 @@
 				"deniedTagNamesToFocusOut",
 				"cacheLevels",
 				"renderScale",
+				// "maxDrawWidth",
+				// "maxDrawHeight",
 				"restrictAfterRender",
 				"containerAspectRatio",
 				"maxContainerWidth",
@@ -2376,8 +2382,8 @@
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
 			
-			var maxWidth = 4096 * 4;
-			var maxHeight = 4096 * 4;
+			var maxWidth = config.maxDrawWidth;
+			var maxHeight = config.maxDrawHeight;
 			if (isIos()) {
 				maxWidth = 4096;
 				maxHeight = 4096;
@@ -2450,8 +2456,8 @@
 				var rotatedTop = Math.floor(originalY - (rotatedSizes[1] * 0.5));
 				
 				// original & rotate & resize
-				var maxWidth = 4096 * 4;
-				var maxHeight = 4096 * 4;
+				var maxWidth = config.maxDrawWidth;
+				var maxHeight = config.maxDrawHeight;
 				if (isIos()) {
 					maxWidth = 4096;
 					maxHeight = 4096;
