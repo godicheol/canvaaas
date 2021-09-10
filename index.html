@@ -181,10 +181,10 @@
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.newCanvas({
-						width: window.prompt('Type width', '6'),
-						height: window.prompt('Type height', '4'),
-						unit: window.prompt('Type unit', 'in'),
-						dpi: window.prompt('Type dpi', '300'),
+						width: window.prompt('Type Width', '6'),
+						height: window.prompt('Type Height', '4'),
+						unit: window.prompt('Type Unit', 'in'),
+						dpi: window.prompt('Type DPI', '300'),
 					}, function(err, res){
 						if (err) {
 							console.log(err);
@@ -206,7 +206,7 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
-							window.prompt('Type element ID', 'image-1')
+							window.prompt('Type Element ID (e.g. image-2)', 'image-1')
 						)
 					)
 				">Upload from Element</a></li>
@@ -667,6 +667,7 @@
 	</div>
 
 	<div style="display: none;">
+		<!-- IMG with dataset -->
 		<img
 			id="image-1"
 			src="./img/1.JPG"
@@ -685,10 +686,13 @@
 	        data-focusabled = "true"
 	        data-editabled = "true"
 	        data-drawabled = "true">
+		
+		<!-- IMG with data-state JSON.stringify(state) -->
 		<img 
 			id="image-2" 
 			src="./img/1.jpeg" 
 			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"restricted":true,"focusabled":true,"editabled":true,"drawabled":true}'>
+		
 		<img
 			id="image-3"
 			src="./img/1.JPG"
@@ -719,6 +723,16 @@
 
 		// #1 config
 		canvaaas.config({
+			// checker: true, // boolean
+			 overlay: true, // boolean
+			// allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
+			// deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
+			// cacheLevels: 999, // number
+			 containerAspectRatio: 1, // number, width / height
+			// maxContainerWidth: 1, // number, 0 ~ 1
+			// maxContainerHeight: 0.7, // number, 0 ~ 1
+			// renderScale: 0.5, // number, 0 ~ 1
+			// restrictAfterRender: false, // boolean
 			hover: function(err, res){
 				if (err) {
 					console.log(err);
@@ -763,11 +777,11 @@
 			},
 		});
 
-		// #1.1 canvas before init
+		// #1.1 set canvas size before init
 		canvaaas.resize({
 			width: 7858.705673285892,
 			height: 5239.137115523928,
-			unit: "px",
+			unit: "px", // mm, cm, in...
 			dpi : 1
 		});
 
@@ -785,12 +799,12 @@
 			console.log("canvaaas.init callback", res);
 		});
 
-		// #2.1 canvas after init
+		// #2.1 set canvas after init
 		// canvaaas.resize({
 		// 	width: 7858.705673285892,
 		// 	height: 5239.137115523928,
-		// 	unit: "px",
-		//  	dpi : 1
+		// 	unit: "px", // mm, cm, in...
+		//  dpi : 1
 		// });
 
 		
@@ -977,6 +991,23 @@
 				});
 			});
 		})();
+
+		var defaultConfig = {
+			checker: true, // boolean
+			overlay: false, // boolean
+			allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
+			deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
+			cacheLevels: 999, // number
+			containerAspectRatio: undefined, // number, width / height
+			maxContainerWidth: 1, // number, 0 ~ 1
+			maxContainerHeight: 0.7, // number, 0 ~ 1
+			renderScale: 0.5, // number, 0 ~ 1
+			restrictAfterRender: false, // boolean
+			hover: undefined, // callback function
+			upload: undefined, // callback function
+			focus: undefined, // callback function
+			edit: undefined, // callback function
+		}
 
 		var testConfig = {
 			hover: function(err, res){

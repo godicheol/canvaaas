@@ -44,6 +44,8 @@
 			maxContainerHeight: 0.7, // number, 0 ~ 1
 
 			renderScale: 0.5, // number, 0 ~ 1
+			
+			restrictAfterRender: false, // boolean
 
 			hover: undefined, // callback function
 
@@ -54,14 +56,14 @@
 			edit: undefined, // callback function
 		};
 
-		var defaultCanvas = {
+		var defaultCanvasState = {
 			filename: "untitled",
 			quality: 0.92,
 			mimeType: "image/png",
 			dataType: "file",
 			editabled: true,
 		};
-		
+
 		var classNames = {
 			hidden: "hidden",
 			checker: "checker",
@@ -76,7 +78,7 @@
 		};
 		
 		Object.freeze(defaultConfig);
-		Object.freeze(defaultCanvas);
+		Object.freeze(defaultCanvasState);
 		Object.freeze(classNames);
 
 		var conatinerTemplate = "";
@@ -152,7 +154,7 @@
 		var windowResizeEvent;
 
 		copyObject(config, defaultConfig);
-		copyObject(canvasState, defaultCanvas);
+		copyObject(canvasState, defaultCanvasState);
 
 		/* event handlers */
 		var handlers = {
@@ -1080,6 +1082,7 @@
 				"deniedTagNamesToFocusOut",
 				"cacheLevels",
 				"renderScale",
+				"restrictAfterRender",
 				"containerAspectRatio",
 				"maxContainerWidth",
 				"maxContainerHeight",
@@ -1095,7 +1098,7 @@
 				} else {
 					tmp[elem] = false;
 				}
-			})
+			});
 
 			return tmp;
 		}
@@ -2520,7 +2523,7 @@
 		}
 
 		/* asynchronous */
-		function renderImage(file, newState, cb) {
+		function renderImage(file, exportedState, cb) {
 			var newImage = new Image();
 			var id = getShortId();
 			var ext;
@@ -2603,14 +2606,11 @@
 				nextIndex += 1;
 
 				// create states
-				var originalWidth = newImage.width;
-				var originalHeight = newImage.height;
-
 				var fittedSizes = getContainedSizes(
 					newImage.width,
 					newImage.height,
-					canvasState.width,
-					canvasState.height
+					canvasState.width * config.renderScale,
+					canvasState.height * config.renderScale
 				);
 
 				var state = {
@@ -2618,17 +2618,17 @@
 					type: typ,
 					src: newImage.src,
 					index: nextIndex,
-					originalWidth: originalWidth,
-					originalHeight: originalHeight,
-					width: fittedSizes[0] * config.renderScale,
-					height: fittedSizes[1] * config.renderScale,
+					originalWidth: newImage.width,
+					originalHeight: newImage.height,
+					width: fittedSizes[0],
+					height: fittedSizes[1],
 					x: canvasState.width * 0.5,
 					y: canvasState.height * 0.5,
 					rotate: 0,
 					scaleX: 1,
 					scaleY: 1,
 					opacity: 1,
-					restricted: true,
+					restricted: config.restrictAfterRender,
 					focusabled: true,
 					editabled: true,
 					drawabled: true,
@@ -2660,14 +2660,14 @@
 
 				imageStates.push(state);
 
-				var addition;
-				if (isObject(newState)) {
-					addition = importState(newState);
+				var adjustedState;
+				if (isObject(exportedState)) {
+					adjustedState = importState(exportedState);
 				} else {
-					addition = {};
+					adjustedState = {};
 				}
-
-				setState(id, addition);
+				
+				setState(id, adjustedState);
 
 				if (cb) {
 					cb(null, state.id);
@@ -2784,6 +2784,11 @@
 			mirrorObject.style.height = canvasState.height + "px";
 			mirrorObject.style.left = canvasState.left + "px";
 			mirrorObject.style.top = canvasState.top + "px";
+			
+			backgroundObject.style.width = canvasState.width + "px";
+			backgroundObject.style.height = canvasState.height + "px";
+			backgroundObject.style.left = canvasState.left + "px";
+			backgroundObject.style.top = canvasState.top + "px";
 
 			return true;
 		}
@@ -5228,7 +5233,7 @@
 			eventState = {};
 			containerState = {};
 			canvasState = {};
-			copyObject(canvasState, defaultCanvas);
+			copyObject(canvasState, defaultCanvasState);
 			imageStates = [];
 			undoCaches = [];
 			redoCaches = [];
