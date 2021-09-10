@@ -2376,8 +2376,8 @@
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
 			
-			var maxWidth = 999999;
-			var maxHeight = 999999;
+			var maxWidth = 4096 * 4;
+			var maxHeight = 4096 * 4;
 			if (isIos()) {
 				maxWidth = 4096;
 				maxHeight = 4096;
@@ -2450,8 +2450,8 @@
 				var rotatedTop = Math.floor(originalY - (rotatedSizes[1] * 0.5));
 				
 				// original & rotate & resize
-				var maxWidth = 999999;
-				var maxHeight = 999999;
+				var maxWidth = 4096 * 4;
+				var maxHeight = 4096 * 4;
 				if (isIos()) {
 					maxWidth = 4096;
 					maxHeight = 4096;
