@@ -1163,8 +1163,8 @@
 			}
 
 			var index = state.index;
-			var top = ( state.y - (state.height * 0.5) ) + "px";
-			var left = ( state.x - (state.width * 0.5) ) + "px";
+			var top = (state.y - (state.height * 0.5)) + "px";
+			var left = (state.x - (state.width * 0.5)) + "px";
 			var width = state.width + "px";
 			var height = state.height + "px";
 			var opacity = state.opacity;

@@ -219,7 +219,7 @@
 						console.log(err, result);
 						canvaaas.download(res, result.filename); // iOS not supported
 					});
-				">Save<br />(iOS not supported)</a></li>
+				">Save<br />(Safari not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
@@ -249,7 +249,7 @@
 						console.log(err, result);
 						canvaaas.download(res, result.filename); // iOS not supported
 					})
-				">Save from JSON<br />(iOS not supported)</a></li>
+				">Save from JSON<br />(iOS chrome not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					// new tab
 					canvaaas.draw({
@@ -258,7 +258,7 @@
 					}, function(err, res){
 						canvaaas.newTab(res);
 					})
-				">New Tab</a></li>
+				">New Tab<br />(Safari not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
 						filename: 'original',
@@ -274,7 +274,7 @@
 						console.log(err, result);
 						canvaaas.newTab(res);
 					})
-				">New Tab from JSON</a></li>
+				">New Tab from JSON<br />(Safari not supported)</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res, result){
