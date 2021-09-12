@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 <!-- ! -->
-<meta name="viewport" content="width=device-width, initial-scale=1"> 
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel='stylesheet' href='./dist/canvaaas.css' />
 <script src="./dist/canvaaas.js"></script>
 <!-- ! -->
@@ -50,7 +50,7 @@
 	}
 
 	#myCanvas-filename{
-		float: left;	
+		float: left;
 	}
 	#myCanvas-editabled{
 		float: right;
@@ -197,7 +197,7 @@
 				<li><label for="uploadSingle">Upload from File</label></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadUrl(
-						window.prompt('Type image URL(URLs are case sensitive in github.io)', './img/1.JPG')
+						window.prompt('Type image URL(URLs are case sensitive in github.io)', './img/1.jpg')
 					)
 				">Upload from URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -225,8 +225,8 @@
 						filename: 'thumbnail',
 						mimeType: 'image/png',
 						dataType: 'url',
-						width: 256, 
-						height: 256, 
+						width: 256,
+						height: 256,
 						quality: 0.5,
 						backgroundColor: '#000000',
 					}, function(err, res, result){
@@ -670,9 +670,9 @@
 		<!-- IMG with dataset -->
 		<img
 			id="image-1"
-			src="./img/1.JPG"
+			src="./img/1.jpg"
 			data-id = "test-1"
-	        data-src = "./img/1.JPG"
+	        data-src = "./img/1.jpg"
 	        data-index = "1"
 	        data-width = "7858.705673285891"
 	        data-height = "5239.137115523928"
@@ -686,23 +686,23 @@
 	        data-focusabled = "true"
 	        data-editabled = "true"
 	        data-drawabled = "true">
-		
+
 		<!-- IMG with data-state JSON.stringify(state) -->
-		<img 
-			id="image-2" 
-			src="./img/1.jpeg" 
+		<img
+			id="image-2"
+			src="./img/1.jpeg"
 			data-state='{"id":"test-2","index":1,"width":7858.705673285891,"height":5239.137115523928,"x":2037.033467202142,"y":1529.8313253012047,"rotate":-338.99078178925924,"scaleX":1,"scaleY":-1,"opacity":1,"restricted":true,"focusabled":true,"editabled":true,"drawabled":true}'>
-		
+
 		<img
 			id="image-3"
-			src="./img/1.JPG"
+			src="./img/1.jpg"
 	        data-width = "7858.705673285891">
 		<img
 			id="image-4"
-			src="./img/1.JPG">
-		<img 
-			id="image-5" 
-			src="./img/1.jpeg" 
+			src="./img/1.jpg">
+		<img
+			id="image-5"
+			src="./img/1.jpeg"
 			data-state='{"width":7858.705673285891}'>
 	</div>
 
@@ -715,11 +715,11 @@
 
 		var target = document.getElementById("myContainer");
 
-		// 
-		// 
+		//
+		//
 		// MAIN START
-		// 
-		// 
+		//
+		//
 
 		// #1 config
 		canvaaas.config({
@@ -807,9 +807,9 @@
 		//  dpi : 1
 		// });
 
-		
+
 		// #3 upload test
-		/*canvaaas.uploadUrl("./img/1.JPG", function(err, res){
+		/*canvaaas.uploadUrl("./img/1.jpg", function(err, res){
 			if (err) {
 				console.log(err);
 				return false;
@@ -821,11 +821,11 @@
 
 
 
-		// 
-		// 
+		//
+		//
 		// MAIN END
-		// 
-		// 
+		//
+		//
 
 		function writeCanvasData(){
 			var state = canvaaas.getCanvasData();
@@ -836,13 +836,13 @@
 			var sState = document.getElementById("myCanvas-state");
 
 			sFilename.innerHTML = state.filename + "." + state.mimeType.split("/").pop();
-			
+
 			sState.innerHTML = "";
 			sState.innerHTML += "w:" + Math.floor(state.width);
 			sState.innerHTML += " h:" + Math.floor(state.height);
 
-			sEditabled.innerHTML = state.editabled ? 
-				"" : 
+			sEditabled.innerHTML = state.editabled ?
+				"" :
 				"<span style='color: red;'>Uneditabled</span>";
 
 			sBackground.style.backgroundColor = state.backgroundColor;
@@ -1053,7 +1053,7 @@
 				console.log("config.edit callback", res);
 			},
 		}
-		
+
 		var testCanvasState = {
 			"filename": "untitled",
 			"width": 7858.705673285892,
@@ -1066,7 +1066,7 @@
 		}
 
 		var testImportState = [{
-	        "id": "1.JPG",
+	        "id": "1.jpg",
 	        "index": 1,
 	        "originalWidth": 3024,
 	        "originalHeight": 4032,
@@ -1086,7 +1086,7 @@
 	        "aspectRatio": "3:4",
 	        "left": 2766.116234940645,
 	        "top": -2368.6792368110086,
-	        "src": "img/1.JPG"
+	        "src": "img/1.jpg"
 	    }, {
 	        "id": "1.jpeg",
 	        "index": 2,
