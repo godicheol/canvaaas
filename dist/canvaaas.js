@@ -8,9 +8,9 @@
 		var myObject = {};
 
 		var defaultConfig = {
-			
+
 			checker: true, // boolean
-			
+
 			overlay: false, // boolean
 
 			allowedExtensions: [
@@ -42,13 +42,13 @@
 			maxContainerWidth: 1, // number, 0 ~ 1
 
 			maxContainerHeight: 0.7, // number, 0 ~ 1
-			
-			maxDrawWidth: 4096 * 4, // number, iOS has been adjusted 4096
-			
-			maxDrawHeight: 4096 * 4, // number, iOS has been adjusted 4096
+
+			maxDrawWidth: 4096 * 4, // number, iOS always has been adjusted 4096px
+
+			maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
 
 			renderScale: 0.5, // number, 0 ~ 1
-			
+
 			restrictAfterRender: false, // boolean
 
 			hover: undefined, // callback function
@@ -80,7 +80,7 @@
 			onFocused: "focused",
 			onFreezed: "freezed",
 		};
-		
+
 		Object.freeze(defaultConfig);
 		Object.freeze(defaultCanvasState);
 		Object.freeze(classNames);
@@ -91,7 +91,7 @@
 		conatinerTemplate += "<div class='canvaaas-background'></div>";
 		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "</div>";
-		
+
 		var imageTemplate = "";
 		imageTemplate += "<img>";
 		imageTemplate += "<div class='canvaaas-overlay'></div>";
@@ -167,7 +167,7 @@
 				e.preventDefault();
 				e.stopPropagation();
 			},
-			
+
 			drop: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -365,7 +365,7 @@
 				} else {
 					return false;
 				}
-				
+
 				if (onShiftKey) {
 					if (Math.abs(mouseX) > Math.abs(mouseY)) {
 						mouseY = 0;
@@ -468,7 +468,7 @@
 				if (state.scaleY < 0) {
 					deg = deg + 180;
 				}
-		
+
 				if (onShiftKey) {
 					deg = Math.round(deg / 15) * 15;
 				}
@@ -624,17 +624,17 @@
 
 				if (direction === "n") {
 					height -= diffY;
-					
+
 					if (onShiftKey) {
 						width = height * aspectRatio;
 					}
-					
+
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "ne") {
 					width += diffX;
 					height -= diffY;
-					
+
 					if (onShiftKey) {
 						if (2 * diffX < 2 * -diffY * aspectRatio) {
 							diffX -= width - (height * aspectRatio);
@@ -644,24 +644,24 @@
 							height = width / aspectRatio;
 						}
 					}
-					
+
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "e") {
 					width += diffX;
-					
+
 					if (onShiftKey) {
 						height = width / aspectRatio;
 					}
-					
+
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 				} else if (direction === "se") {
 					width += diffX;
 					height += diffY;
-					
+
 					if (onShiftKey) {
 						if (2 * diffX < 2 * diffY * aspectRatio) {
 							diffX -= width - (height * aspectRatio);
@@ -682,13 +682,13 @@
 					if (onShiftKey) {
 						width = height * aspectRatio;
 					}
-					
+
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "sw") {
 					width -= diffX;
 					height += diffY;
-					
+
 					if (onShiftKey) {
 						if (2 * -diffX < 2 * diffY * aspectRatio) {
 							diffX += width - (height * aspectRatio);
@@ -698,7 +698,7 @@
 							height = width / aspectRatio;
 						}
 					}
-					
+
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 					axisX -= 0.5 * diffY * sinFraction;
@@ -709,7 +709,7 @@
 					if (onShiftKey) {
 						height = width / aspectRatio;
 					}
-						
+
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 				} else if (direction === "nw") {
@@ -725,7 +725,7 @@
 							height = width / aspectRatio;
 						}
 					}
-					
+
 					axisX += 0.5 * diffX * cosFraction;
 					axisY += 0.5 * diffX * sinFraction;
 					axisX -= 0.5 * diffY * sinFraction;
@@ -778,9 +778,9 @@
 				e.stopPropagation();
 
 				if (
-					eventState.onMove === true || 
-					eventState.onResize === true || 
-					eventState.onRotate === true 
+					eventState.onMove === true ||
+					eventState.onResize === true ||
+					eventState.onRotate === true
 				) {
 					return false;
 				}
@@ -1058,7 +1058,7 @@
 			tmp.height = canvasState.originalHeight;
 			tmp.backgroundColor = canvasState.backgroundColor;
 			tmp.editabled = canvasState.editabled;
-			
+
 			tmp.filename = canvasState.filename;
 			tmp.mimeType = canvasState.mimeType;
 			tmp.dataType = canvasState.dataType;
@@ -1086,13 +1086,13 @@
 				"deniedTagNamesToFocusOut",
 				"cacheLevels",
 				"renderScale",
-				// "maxDrawWidth",
-				// "maxDrawHeight",
 				"restrictAfterRender",
 				"containerAspectRatio",
 				"maxContainerWidth",
 				"maxContainerHeight",
-			]
+				// "maxDrawWidth",
+				// "maxDrawHeight",
+			];
 
 			candidtaeKeys.forEach(function(elem){
 				tmp[elem] = config[elem];
@@ -1222,7 +1222,7 @@
 			cloneObj.style.height = height;
 			cloneObj.style.transform = transform;
 			cloneObj.querySelector("img").style.opacity = opacity;
-			
+
 			if (state.restricted === false) {
 				if (!originObj.classList.contains(classNames.restricted)) {
 					originObj.classList.add(classNames.restricted);
@@ -1435,7 +1435,7 @@
 							result[j] = toString(obj[j]);
 						}
 					}
-					
+
 				}
 			} else if (isString(obj)) {
 				try {
@@ -1665,7 +1665,7 @@
 				console.log(err);
 				return false;
 			}
-			
+
 			eventState.target = id;
 
 			return true;
@@ -1732,7 +1732,7 @@
 				console.log(err);
 				return false;
 			}
-			
+
 			eventState.target = undefined;
 
 			return true;
@@ -1784,8 +1784,8 @@
 				var sinFraction = Math.sin(radians);
 				var cosFraction = Math.cos(radians);
 
-				if (sinFraction < 0) { 
-					sinFraction = -sinFraction; 
+				if (sinFraction < 0) {
+					sinFraction = -sinFraction;
 				}
 
 				if (cosFraction < 0) {
@@ -2083,8 +2083,8 @@
 		function dataURLtoFile(dataurl, filename) {
 			var arr = dataurl.split(','),
 				mime = arr[0].match(/:(.*?);/)[1],
-				bstr = atob(arr[1]), 
-				n = bstr.length, 
+				bstr = atob(arr[1]),
+				n = bstr.length,
 				u8arr = new Uint8Array(n);
 
 			while(n--){
@@ -2095,7 +2095,7 @@
 		}
 
 		function getShortId() {
-		    // I generate the UID from two parts here 
+		    // I generate the UID from two parts here
 		    // to ensure the random number provide enough bits.
 			var firstPart = (Math.random() * 46656) | 0;
 			var secondPart = (Math.random() * 46656) | 0;
@@ -2106,7 +2106,7 @@
 
 		function isEmpty(obj) {
 			if (typeof(obj) === "undefined") {
-				return true;	
+				return true;
 			} else if (typeof(obj) === "string") {
 				return obj.trim() === "";
 			} else if (typeof(obj) === "number") {
@@ -2164,7 +2164,7 @@
 
 		function isNode(obj){
 			return (
-				typeof Node === "object" ? obj instanceof Node : 
+				typeof Node === "object" ? obj instanceof Node :
 				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName==="string"
 			);
 		}
@@ -2329,7 +2329,7 @@
 			if (!keepRedo) {
 				redoCaches = [];
 			}
-			
+
 			return true;
 		}
 
@@ -2381,7 +2381,7 @@
 		function drawCanvas(options) {
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
-			
+
 			var maxWidth = config.maxDrawWidth;
 			var maxHeight = config.maxDrawHeight;
 			if (isIos()) {
@@ -2454,7 +2454,7 @@
 				var rotatedHeight = Math.floor(rotatedSizes[1]);
 				var rotatedLeft = Math.floor(originalX - (rotatedSizes[0] * 0.5));
 				var rotatedTop = Math.floor(originalY - (rotatedSizes[1] * 0.5));
-				
+
 				// original & rotate & resize
 				var maxWidth = config.maxDrawWidth;
 				var maxHeight = config.maxDrawHeight;
@@ -2539,11 +2539,7 @@
 			try {
 				// check file or url
 				if (isObject(file)) {
-					if (
-						!file.name ||
-						!file.type ||
-						!file.size
-					) {
+					if (!file.name || !file.type || !file.size) {
 						if (cb) {
 							cb("File not found");
 						}
@@ -2672,7 +2668,7 @@
 				} else {
 					adjustedState = {};
 				}
-				
+
 				setState(id, adjustedState);
 
 				if (cb) {
@@ -2729,8 +2725,6 @@
 		}
 
 		function initCanvas() {
-			/* required, canvaaas.canvas() */
-			
 			/* reset container style */
 			containerObject.style.width = "";
 			containerObject.style.height = "";
@@ -2739,7 +2733,7 @@
 			var containerAspectRatio = config.containerAspectRatio || canvasState.originalWidth / canvasState.originalHeight;
 			var containerWidth = containerObject.offsetWidth;
 			var containerHeight = containerObject.offsetWidth / containerAspectRatio;
-			
+
 			var containerSizes = getFittedSizes({
 				width: containerWidth,
 				height: containerHeight,
@@ -2790,7 +2784,7 @@
 			mirrorObject.style.height = canvasState.height + "px";
 			mirrorObject.style.left = canvasState.left + "px";
 			mirrorObject.style.top = canvasState.top + "px";
-			
+
 			backgroundObject.style.width = canvasState.width + "px";
 			backgroundObject.style.height = canvasState.height + "px";
 			backgroundObject.style.left = canvasState.left + "px";
@@ -2816,13 +2810,13 @@
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 			backgroundObject = target.querySelector("div.canvaaas-background");
-			
+
 			backgroundObject.style.backgroundColor = "#FFFFFF";
 
 			if (config.checker) {
 				canvasObject.classList.add(classNames.checker);
 			}
-			
+
 			if (!config.overlay) {
 				if (!mirrorObject.classList.contains(classNames.hidden)) {
 					mirrorObject.classList.add(classNames.hidden);
@@ -2837,7 +2831,7 @@
 
 			canvasObject.addEventListener("mousemove", handlers.hover, false);
 			canvasObject.addEventListener("touchmove", handlers.hover, false);
-			
+
 			containerObject.addEventListener('dragenter', handlers.stopEvents, false);
 			containerObject.addEventListener('dragleave', handlers.stopEvents, false);
 			containerObject.addEventListener('dragover', handlers.stopEvents, false);
@@ -2865,7 +2859,7 @@
 				}
 				if (cb) {
 					cb("Already in progress");
-				} 
+				}
 				return false;
 			}
 
@@ -2875,7 +2869,7 @@
 				}
 				if (cb) {
 					cb("File not found");
-				} 
+				}
 				return false;
 			}
 
@@ -2886,7 +2880,7 @@
 				}
 				if (cb) {
 					cb("File not found");
-				} 
+				}
 				return false;
 			} else if (thisFiles.length > 1) {
 				if (config.upload) {
@@ -2894,7 +2888,7 @@
 				}
 				if (cb) {
 					cb("Multiple upload not allowed");
-				} 
+				}
 				return false;
 			}
 
@@ -2933,7 +2927,7 @@
 				}
 				if (cb) {
 					cb("Already in progress");
-				} 
+				}
 				return false;
 			}
 
@@ -2943,7 +2937,7 @@
 				}
 				if (cb) {
 					cb("URL not found");
-				} 
+				}
 				return false;
 			}
 
@@ -2953,7 +2947,7 @@
 				}
 				if (cb) {
 					cb("Argument not string");
-				} 
+				}
 				return false;
 			}
 
@@ -2992,7 +2986,7 @@
 				}
 				if (cb) {
 					cb("Already in progress");
-				} 
+				}
 				return false;
 			}
 
@@ -3003,7 +2997,7 @@
 				}
 				if (cb) {
 					cb("State not found");
-				} 
+				}
 				return false;
 			}
 			if (!thisState.src) {
@@ -3012,7 +3006,7 @@
 				}
 				if (cb) {
 					cb("URL not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3053,7 +3047,7 @@
 				}
 				if (cb) {
 					cb("Already in progress");
-				} 
+				}
 				return false;
 			}
 			if (!target) {
@@ -3062,7 +3056,7 @@
 				}
 				if (cb) {
 					cb("Target not found");
-				} 
+				}
 				return false;
 			}
 			if (!isElement(target)) {
@@ -3071,7 +3065,7 @@
 				}
 				if (cb) {
 					cb("Target is not DOM Object");
-				} 
+				}
 				return false;
 			}
 
@@ -3084,7 +3078,7 @@
 					}
 					if (cb) {
 						cb("File not found");
-					} 
+					}
 					return false;
 				} else {
 					thisSrc = thisState.src;
@@ -3301,7 +3295,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3311,19 +3305,19 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
 			var state = getState(id);
-			
+
 			if (isEmpty(newId)) {
 				if (config.edit) {
 					config.edit("Argument is null");
 				}
 				if (cb) {
 					cb("Argument is null");
-				} 
+				}
 				return false;
 			}
 
@@ -3333,7 +3327,7 @@
 				}
 				if (cb) {
 					cb("ID duplicated");
-				} 
+				}
 				return false;
 			}
 
@@ -3365,7 +3359,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3375,7 +3369,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3388,7 +3382,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3421,7 +3415,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3431,7 +3425,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3444,7 +3438,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric or string");
-				} 
+				}
 				return false;
 			}
 
@@ -3454,17 +3448,17 @@
 				x = toNumber(x);
 			} else {
 				if (
-					x.toLowerCase() === "l" || 
+					x.toLowerCase() === "l" ||
 					x.toLowerCase() === "left"
 				) {
 					x = (canvasState.width * 0) + (state.width * 0.5);
 				} else if (
-					x.toLowerCase() === "c" || 
+					x.toLowerCase() === "c" ||
 					x.toLowerCase() === "center"
 				) {
 					x = (canvasState.width * 0.5);
 				} else if (
-					x.toLowerCase() === "r" || 
+					x.toLowerCase() === "r" ||
 					x.toLowerCase() === "right"
 				) {
 					x = (canvasState.width * 1) - (state.width * 0.5);
@@ -3475,18 +3469,18 @@
 				y = toNumber(y);
 			} else {
 				if (
-					y.toLowerCase() === "t" || 
+					y.toLowerCase() === "t" ||
 					y.toLowerCase() === "top"
 				) {
 					y = (canvasState.height * 0) + (state.height * 0.5);
 				} else if (
-					y.toLowerCase() === "c" || 
-					y.toLowerCase() === "center" || 
+					y.toLowerCase() === "c" ||
+					y.toLowerCase() === "center" ||
 					y.toLowerCase() === "middle"
 				) {
 					y = (canvasState.height * 0.5);
 				} else if (
-					y.toLowerCase() === "b" || 
+					y.toLowerCase() === "b" ||
 					y.toLowerCase() === "bottom"
 				) {
 					y = (canvasState.height * 1) - (state.height * 0.5);
@@ -3518,7 +3512,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3528,7 +3522,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3538,7 +3532,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3570,7 +3564,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3580,7 +3574,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3593,7 +3587,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric or string");
-				} 
+				}
 				return false;
 			}
 
@@ -3623,7 +3617,7 @@
 				} else {
 					if (cb) {
 						cb("Argument error");
-					} 
+					}
 					return false;
 				}
 			} else {
@@ -3657,7 +3651,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3667,7 +3661,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3677,7 +3671,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3691,7 +3685,7 @@
 			if (state.scaleY === -1) {
 				deg *= -1;
 			}
-			
+
 			if (state.restricted) {
 				deg = Math.round(deg / 15) * 15;
 			}
@@ -3720,7 +3714,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3730,7 +3724,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3740,7 +3734,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3754,7 +3748,7 @@
 			if (state.scaleY === -1) {
 				deg *= -1;
 			}
-			
+
 			if (state.restricted) {
 				deg = Math.round(deg / 15) * 15;
 			}
@@ -3783,7 +3777,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3793,7 +3787,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3813,7 +3807,7 @@
 			}
 			if (cb) {
 				cb(null, exportState(id));
-			} 
+			}
 			return exportState(id);
 		}
 
@@ -3824,7 +3818,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3834,7 +3828,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3854,7 +3848,7 @@
 			}
 			if (cb) {
 				cb(null, exportState(id));
-			} 
+			}
 			return exportState(id);
 		}
 
@@ -3865,7 +3859,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3875,7 +3869,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3885,7 +3879,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3915,7 +3909,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3925,7 +3919,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3935,7 +3929,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -3962,7 +3956,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -3972,7 +3966,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -3982,7 +3976,7 @@
 				}
 				if (cb) {
 					cb("Argument not numeric");
-				} 
+				}
 				return false;
 			}
 
@@ -4008,7 +4002,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4034,7 +4028,7 @@
 				}
 				if (cb) {
 					cb("Did not found focused image");
-				} 
+				}
 				return false;
 			}
 
@@ -4056,7 +4050,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4066,7 +4060,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -4084,7 +4078,7 @@
 				}
 
 				deg = Math.round(deg / 15) * 15;
-				
+
 				setState(id, {
 					width: width,
 					height: height,
@@ -4116,7 +4110,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4152,7 +4146,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4182,7 +4176,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4209,7 +4203,7 @@
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4229,7 +4223,7 @@
 
 			var tmp = exportState(id);
 			var res = removeImage(id);
-			if (!res) { 
+			if (!res) {
 				if (cb) {
 					cb("Could not remove image");
 				}
@@ -4249,7 +4243,7 @@
 				}
 				if (cb) {
 					cb("Image not found");
-				} 
+				}
 				return false;
 			}
 
@@ -4259,7 +4253,7 @@
 				}
 				if (cb) {
 					cb("Could not edit image");
-				} 
+				}
 				return false;
 			}
 
@@ -4349,7 +4343,7 @@
 				}
 				return false;
 			}
-			
+
 			if (options.unit === undefined) {
 				options.unit = "px";
 			}
@@ -4511,7 +4505,7 @@
 			}
 			return getCanvas();
 		}
-		
+
 		myObject.overlay = function(cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
@@ -4571,7 +4565,7 @@
 			} else if (colour !== "") {
 				if (colour.charAt(0) !== "#") {
 					colour = "#" + colour;
-				}	
+				}
 			} else {
 				colour = "";
 			}
@@ -4656,7 +4650,7 @@
 					filename(optional),
 					fileType(optional),
 					mimeType(optional),
-					width(optional), 
+					width(optional),
 					height(optional),
 					backgroundColor(optional),
 					quality(optional),
@@ -4669,7 +4663,7 @@
 				}
 				return false;
 			}
-			
+
 			var filename = canvasState.filename || "untitled";
 			var mimeType = canvasState.mimeType || "image/png";
 			var dataType = canvasState.dataType || "file";
@@ -4677,7 +4671,7 @@
 			var backgroundColor = canvasState.backgroundColor || "#FFFFFF";
 			var width = canvasState.originalWidth;
 			var height = canvasState.originalHeight;
-			
+
 			if (isObject(options)) {
 				if (isString(options.filename)) {
 					filename = options.filename;
@@ -4766,7 +4760,7 @@
 								err: err
 							});
 						} else {
-							imageResults.push(imgState);	
+							imageResults.push(imgState);
 						}
 						count++;
 						recursiveFunc();
@@ -4803,7 +4797,7 @@
 					filename(optional),
 					fileType(optional),
 					mimeType(optional),
-					width(optional), 
+					width(optional),
 					height(optional),
 					backgroundColor(optional),
 					quality(optional),
@@ -4869,7 +4863,7 @@
 				}
 				return false;
 			}
-			
+
 			var filename = "untitled";
 			var mimeType = "image/png";
 			var dataType = "file";
@@ -4877,7 +4871,7 @@
 			var backgroundColor = "#FFFFFF";
 			var width = convertedSizes[0];
 			var height = convertedSizes[1];
-			
+
 			if (isObject(options)) {
 				if (isString(options.filename)) {
 					filename = options.filename;
@@ -4975,7 +4969,7 @@
 								err: err
 							});
 						} else {
-							imageResults.push(imgState);	
+							imageResults.push(imgState);
 						}
 						count++;
 						recursiveFunc();
@@ -5006,7 +5000,7 @@
 				}
 			}
 		}
-		
+
 		/* example */
 		myObject.download = function(data, filename){
 			var link = document.createElement('a');
@@ -5018,7 +5012,7 @@
 			document.body.removeChild(link);
 			window.URL.revokeObjectURL(data);
 		}
-		
+
 		/* example */
 		myObject.newTab = function(data){
 			var image = new Image();
@@ -5110,7 +5104,7 @@
 				if (!isString(states)) {
 					if (cb) {
 						cb("Argument not array");
-					} 
+					}
 					return false;
 				} else {
 					var tmp;
@@ -5123,7 +5117,7 @@
 					if (!isArray(tmp)) {
 						if (cb) {
 							cb("Argument not array");
-						} 
+						}
 						return false;
 					} else {
 						states = tmp;
@@ -5167,7 +5161,7 @@
 				}
 			}
 		}
-		
+
 		/* undo & redo */
 		myObject.undo = function(cb){
 			if (!canvasState.editabled) {
