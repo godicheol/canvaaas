@@ -1,4 +1,4 @@
-/* canvaaas.js eeecheol@gmail.com */
+// canvaaas.js eeecheol@gmail.com
 
 (function(window){
 	'use strict';
@@ -55,9 +55,9 @@
 
 			restrictRotate: true, // boolean
 
-			restrictRotateAngleUnit: 45, // number, 1 ~ 360
-
 			restrictResize: true, // boolean
+
+			restrictRotateAngleUnit: 45, // number, 1 ~ 360
 
 			hover: undefined, // callback function
 
@@ -2779,7 +2779,10 @@
 			return true;
 		}
 
-		/* export methods */
+		//
+		// export methods
+		//
+
 		myObject.init = function(target, cb) {
 			if (!isObject(target)) {
 				if (cb) {
@@ -2788,10 +2791,10 @@
 				return false;
 			}
 
-			/* set template */
+			// set template
 			target.innerHTML = conatinerTemplate;
 
-			/* set elements */
+			// set element
 			containerObject = target.querySelector("div.canvaaas");
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
@@ -2837,7 +2840,7 @@
 			return getConfig();
 		}
 
-		/* asynchronous */
+		// asynchronous
 		myObject.uploadFile = function(files, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -2904,7 +2907,7 @@
 			});
 		}
 
-		/* asynchronous */
+		// asynchronous
 		myObject.uploadUrl = function(imageUrl, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -2962,7 +2965,7 @@
 			});
 		}
 
-		/* asynchronous */
+		// asynchronous
 		myObject.uploadState = function(imageState, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -3022,7 +3025,7 @@
 			});
 		}
 
-		/* asynchronous */
+		// asynchronous
 		myObject.uploadElement = function(target, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -3096,7 +3099,10 @@
 			});
 		}
 
-		/* image */
+		//
+		// image
+		//
+
 		myObject.findOne = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
@@ -4261,7 +4267,7 @@
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,
-				restricted: true,
+				restricted: config.restrictAfterRender,
 				focusabled: true,
 				editabled: true,
 				drawabled: true
@@ -4273,7 +4279,10 @@
 			return exportState(id);
 		}
 
-		/* config */
+		//
+		// config
+		//
+
 		myObject.config = function(newConfig, cb) {
 			if (!canvasState.editabled && canvasObject) {
 				if (cb) {
@@ -4298,7 +4307,10 @@
 			return getConfig();
 		}
 
-		/* canvas */
+		//
+		// canvas
+		//
+
 		myObject.resize = function(options, cb) {
 			if (!canvasState.editabled && canvasObject) {
 				if (cb) {
@@ -4625,7 +4637,10 @@
 			return true;
 		}
 
-		/* draw */
+		//
+		// draw
+		//
+
 		myObject.draw = function(options, cb){
 			/*
 				options = {
@@ -4762,11 +4777,13 @@
 						return false;
 					}
 
+					result.states = imageResults;
+
 					eventState.onDraw = false;
 					endLoading(loading);
 
 					if (cb) {
-						cb(null, data, result, imageResults);
+						cb(null, data, result);
 					}
 					return data;
 				}
@@ -4971,19 +4988,20 @@
 						return false;
 					}
 
-					eventState.onDraw = false;
+					result.states = imageResults;
 
+					eventState.onDraw = false;
 					endLoading(loading);
 
 					if (cb) {
-						cb(null, data, result, imageResults);
+						cb(null, data, result);
 					}
 					return data;
 				}
 			}
 		}
 
-		/* example */
+		// example
 		myObject.download = function(data, filename){
 			var link = document.createElement('a');
 			link.setAttribute('href', data);
@@ -4995,7 +5013,7 @@
 			window.URL.revokeObjectURL(data);
 		}
 
-		/* example */
+		// example
 		myObject.newTab = function(data){
 			var image = new Image();
 			image.src = data;
@@ -5015,7 +5033,10 @@
 			window.URL.revokeObjectURL(data);
 		}
 
-		/* get data */
+		//
+		// get data
+		//
+
 		myObject.this = function(cb){
 			if (!eventState.target) {
 				if (cb) {
@@ -5144,7 +5165,10 @@
 			}
 		}
 
-		/* undo & redo */
+		//
+		// undo & redo
+		//
+
 		myObject.undo = function(cb){
 			if (!canvasState.editabled) {
 				if (cb) {
@@ -5203,7 +5227,10 @@
 			return exportState(id);
 		}
 
-		/* destroy */
+		//
+		// destroy
+		//
+
 		myObject.destroy = function(cb){
 			window.removeEventListener("resize", windowResizeEvent, false);
 
@@ -5234,11 +5261,11 @@
 			}
 		}
 
-		/* end */
+		// end
 		return myObject;
 	}
 
-	/* global export */
+	// global export
 	if (typeof(window.canvaaas) === 'undefined') {
 		window.canvaaas = canvaaas();
 	}
