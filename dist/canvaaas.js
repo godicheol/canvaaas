@@ -51,6 +51,14 @@
 
 			restrictAfterRender: false, // boolean
 
+			restrictMove: false, // boolean
+
+			restrictRotate: true, // boolean
+
+			restrictRotateAngleUnit: 45, // number, 1 ~ 360
+
+			restrictResize: true, // boolean
+
 			hover: undefined, // callback function
 
 			upload: undefined, // callback function
@@ -353,7 +361,7 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || state.restricted;
+				var onShiftKey = e.shiftKey || (config.restrictMove && state.restricted);
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -397,104 +405,6 @@
 
 				document.removeEventListener("touchmove", handlers.onMove, false);
 				document.removeEventListener("touchend", handlers.endMove, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
-				}
-			},
-
-			startRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!chkTarget(e)) {
-					return false;
-				}
-				if (!isAvailable(eventState.target)) {
-					return false;
-				}
-				if (!whereContainer()) {
-					return false;
-				}
-
-				// toggle
-				eventState.onRotate = true;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClass(eventState.target, classNames.onEditing);
-
-				// event
-				document.addEventListener("mousemove", handlers.onRotate, false);
-				document.addEventListener("mouseup", handlers.endRotate, false);
-
-				document.addEventListener("touchmove", handlers.onRotate, false);
-				document.addEventListener("touchend", handlers.endRotate, false);
-			},
-
-			onRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!eventState.onRotate) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || state.restricted;
-				var radians;
-				var deg;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.left);
-					mouseY = e.clientY - (containerState.top + canvasState.top);
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
-				} else {
-					return false;
-				}
-
-				// calculate degree
-				radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
-				deg = 360 - ((radians + 270) % 360);
-				if (state.scaleX < 0) {
-					deg = deg;
-				}
-				if (state.scaleY < 0) {
-					deg = deg + 180;
-				}
-
-				if (onShiftKey) {
-					deg = Math.round(deg / 15) * 15;
-				}
-
-				// save state
-				setState(eventState.target, {
-					rotate: deg
-				});
-			},
-
-			endRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				// toggle
-				eventState.onRotate = false;
-
-				// class
-				removeClass(eventState.target, classNames.onEditing);
-
-				// event
-				document.removeEventListener("mousemove", handlers.onRotate, false);
-				document.removeEventListener("mouseup", handlers.endRotate, false);
-
-				document.removeEventListener("touchmove", handlers.onRotate, false);
-				document.removeEventListener("touchend", handlers.endRotate, false);
 
 				// callback
 				if (config.edit) {
@@ -586,7 +496,7 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || state.restricted;
+				var onShiftKey = e.shiftKey || (config.restrictResize && state.restricted);
 				var direction = eventState.direction;
 				var aspectRatio = state.originalWidth / state.originalHeight;
 				var width = eventState.initialW;
@@ -940,6 +850,104 @@
 				handlers.startMove(e);
 			},
 
+			startRotate: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (!chkTarget(e)) {
+					return false;
+				}
+				if (!isAvailable(eventState.target)) {
+					return false;
+				}
+				if (!whereContainer()) {
+					return false;
+				}
+
+				// toggle
+				eventState.onRotate = true;
+
+				// cache
+				saveUndo(eventState.target);
+
+				// class
+				addClass(eventState.target, classNames.onEditing);
+
+				// event
+				document.addEventListener("mousemove", handlers.onRotate, false);
+				document.addEventListener("mouseup", handlers.endRotate, false);
+
+				document.addEventListener("touchmove", handlers.onRotate, false);
+				document.addEventListener("touchend", handlers.endRotate, false);
+			},
+
+			onRotate: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (!eventState.onRotate) {
+					return false;
+				}
+
+				var state = getState(eventState.target);
+				var onShiftKey = e.shiftKey || (config.restrictRotate && state.restricted);
+				var radians;
+				var deg;
+				var mouseX;
+				var mouseY;
+				if (typeof(e.touches) === "undefined") {
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
+				} else if(e.touches.length === 1) {
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+				} else {
+					return false;
+				}
+
+				// calculate degree
+				radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
+				deg = 360 - ((radians + 270) % 360);
+				if (state.scaleX < 0) {
+					deg = deg;
+				}
+				if (state.scaleY < 0) {
+					deg = deg + 180;
+				}
+
+				if (onShiftKey) {
+					deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
+				}
+
+				// save state
+				setState(eventState.target, {
+					rotate: deg
+				});
+			},
+
+			endRotate: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				// toggle
+				eventState.onRotate = false;
+
+				// class
+				removeClass(eventState.target, classNames.onEditing);
+
+				// event
+				document.removeEventListener("mousemove", handlers.onRotate, false);
+				document.removeEventListener("mouseup", handlers.endRotate, false);
+
+				document.removeEventListener("touchmove", handlers.onRotate, false);
+				document.removeEventListener("touchend", handlers.endRotate, false);
+
+				// callback
+				if (config.edit) {
+					config.edit(null, exportState(eventState.target));
+				}
+			},
+
 			debounce: function(func, time){
 				var timer;
 				return function(e){
@@ -1072,39 +1080,22 @@
 
 		function getConfig() {
 			var tmp = {};
-			var candidtaeFuncs = [
+			var candidateFuncs = [
 				"hover",
 				"upload",
 				"focus",
 				"edit",
 			];
 
-			var candidtaeKeys = [
-				"checker",
-				"overlay",
-				"allowedExtensions",
-				"deniedTagNamesToFocusOut",
-				"cacheLevels",
-				"renderScale",
-				"restrictAfterRender",
-				"containerAspectRatio",
-				"maxContainerWidth",
-				"maxContainerHeight",
-				// "maxDrawWidth",
-				// "maxDrawHeight",
-			];
-
-			candidtaeKeys.forEach(function(elem){
-				tmp[elem] = config[elem];
-			});
-
-			candidtaeFuncs.forEach(function(elem){
-				if (config[elem] !== undefined) {
-					tmp[elem] = true;
-				} else {
-					tmp[elem] = false;
+			for(var key in config) {
+				if (config.hasOwnProperty(key)) {
+					if (candidateFuncs.indexOf(key) > -1) {
+						tmp[key] = (config[key] !== undefined);
+					} else {
+						tmp[key] = config[key];
+					}
 				}
-			});
+			}
 
 			return tmp;
 		}
@@ -2896,7 +2887,6 @@
 			var loading = startLoading(document.body);
 
 			renderImage(thisFiles[0], null, function(err, res) {
-
 				eventState.onUpload = false;
 				endLoading(loading);
 
@@ -2955,7 +2945,6 @@
 			var loading = startLoading(document.body);
 
 			renderImage(imageUrl, null, function(err, res) {
-
 				eventState.onUpload = false;
 				endLoading(loading);
 
@@ -3016,7 +3005,6 @@
 			var loading = startLoading(document.body);
 
 			renderImage(thisSrc, thisState, function(err, res) {
-
 				eventState.onUpload = false;
 				endLoading(loading);
 
@@ -3091,7 +3079,6 @@
 			var loading = startLoading(document.body);
 
 			renderImage(thisSrc, thisState, function(err, res) {
-
 				eventState.onUpload = false;
 				endLoading(loading);
 
@@ -4077,7 +4064,7 @@
 					width = state.height * aspectRatio;
 				}
 
-				deg = Math.round(deg / 15) * 15;
+				deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
 
 				setState(id, {
 					width: width,
@@ -4262,8 +4249,8 @@
 			var fittedSizes = getContainedSizes(
 				state.originalWidth,
 				state.originalHeight,
-				canvasState.width * config.renderImageWidth,
-				canvasState.height * config.renderImageHeight,
+				canvasState.width * config.renderScale,
+				canvasState.height * config.renderScale,
 			);
 
 			// save cache

@@ -724,15 +724,19 @@
 		// #1 config
 		canvaaas.config({
 			// checker: true, // boolean
-			 // overlay: true, // boolean
+			// overlay: true, // boolean
 			// allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
 			// deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
 			// cacheLevels: 999, // number
-			 // containerAspectRatio: 1, // number, width / height
+			// containerAspectRatio: 1, // number, width / height
 			// maxContainerWidth: 1, // number, 0 ~ 1
 			// maxContainerHeight: 0.7, // number, 0 ~ 1
 			// renderScale: 0.5, // number, 0 ~ 1
 			// restrictAfterRender: false, // boolean
+			// restrictMove: false, // boolean
+			// restrictRotate: true, // boolean
+			// restrictRotateRadians: 15, // number
+			// restrictResize: true, // boolean
 			hover: function(err, res){
 				if (err) {
 					console.log(err);
