@@ -441,6 +441,7 @@
 					return false;
 				}
 
+				// deprecated
 				if (handle.classList.contains("canvaaas-resize-n")) {
 					direction = getFlippedDirection("n", state.scaleX, state.scaleY);
 				} else if (handle.classList.contains("canvaaas-resize-ne")) {
@@ -521,12 +522,6 @@
 				}
 
 				radians = state.rotate * Math.PI / 180;
-				if (state.scaleX !== 1) {
-					radians *= -1;
-				}
-				if (state.scaleY !== 1) {
-					radians *= -1;
-				}
 				cosFraction = Math.cos(radians);
 				sinFraction = Math.sin(radians);
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
