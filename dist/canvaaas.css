@@ -1,6 +1,10 @@
 /* canvaaas.js eeecheol@gmail.com */
 
 /* on freezed */
+.canvaaas.freezed .canvaaas-image,
+.canvaaas.freezed .canvaaas-clone{
+	cursor: default;
+}
 .canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
 .canvaaas.freezed .canvaaas-image .canvaaas-resize-handle,
 .canvaaas.freezed .canvaaas-image .canvaaas-innerline,
@@ -184,7 +188,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-/*	pointer-events: none;*/
+	/* pointer-events: none; */
 }
 
 /* image & clone */
@@ -216,7 +220,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/*pointer-events: none;*/
+	/* pointer-events: none; */
 }
 
 /* innerlint */
@@ -329,7 +333,7 @@
 	/* box */
 	width: 6px;
 	height: 6px;
-	border: 1px solid; 
+	border: 1px solid;
 	background-color: #fff;
 	border-color: inherit;
 }
@@ -438,11 +442,11 @@
 /* https://loading.io/css/ */
 body.canvaaas-fixed{
 	overflow: hidden;
-	/*position: fixed;*/
+	/* position: fixed; */
 }
 .canvaaas-loading-wrapper{
 	display: block;
-	/*position: absolute;*/
+	/* position: absolute; */
 	position: fixed;
 	top: 0;
 	bottom: 0;
