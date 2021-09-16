@@ -532,10 +532,10 @@
 				">Rotate Reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipX(canvaaas.this())
+					canvaaas.flipY(canvaaas.this())
 				">Flip Horizontally</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipY(canvaaas.this())
+					canvaaas.flipX(canvaaas.this())
 				">Flip Vertically</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -707,12 +707,6 @@
 	</div>
 
 	<script>
-
-		var buttons = {
-			undo: document.getElementById("undo"),
-			redo: document.getElementById("redo"),
-		}
-
 		var target = document.getElementById("myContainer");
 
 		//
@@ -742,9 +736,7 @@
 					console.log(err);
 					return false;
 				}
-
 				writeCursor(res);
-
 				// console.log("config.hover callback", res);
 			},
 			upload: function(err, res){
@@ -752,9 +744,7 @@
 					console.log(err);
 					return false;
 				}
-
 				checkCaches();
-
 				console.log("config.upload callback", res);
 			},
 			focus: function(err, res){
@@ -762,10 +752,8 @@
 					console.log(err);
 					return false;
 				}
-
 				writeImageData(res);
 				checkCaches();
-
 				console.log("config.focus callback", res);
 			},
 			edit: function(err, res){
@@ -773,10 +761,8 @@
 					console.log(err);
 					return false;
 				}
-
 				writeImageData(res);
 				checkCaches();
-
 				console.log("config.edit callback", res);
 			},
 		});
@@ -810,6 +796,8 @@
 		// 	unit: "px", // mm, cm, in...
 		//  dpi : 1
 		// });
+
+
 
 
 		// #3 upload test
@@ -891,23 +879,25 @@
 		}
 
 		function checkCaches(){
+			var undo = document.getElementById("undo");
+			var redo = document.getElementById("redo");
 			if (canvaaas.getUndoData() < 1) {
-				buttons.undo.style.pointerEvents = "none";
-				buttons.undo.style.cursor = "default";
-				buttons.undo.style.color = "#777";
+				undo.style.pointerEvents = "none";
+				undo.style.cursor = "default";
+				undo.style.color = "#777";
 			} else {
-				buttons.undo.style.pointerEvents = "";
-				buttons.undo.style.cursor = "";
-				buttons.undo.style.color = "";
+				undo.style.pointerEvents = "";
+				undo.style.cursor = "";
+				undo.style.color = "";
 			}
 			if (canvaaas.getRedoData() < 1) {
-				buttons.redo.style.pointerEvents = "none";
-				buttons.redo.style.cursor = "default";
-				buttons.redo.style.color = "#777";
+				redo.style.pointerEvents = "none";
+				redo.style.cursor = "default";
+				redo.style.color = "#777";
 			} else {
-				buttons.redo.style.pointerEvents = "";
-				buttons.redo.style.cursor = "";
-				buttons.redo.style.color = "";
+				redo.style.pointerEvents = "";
+				redo.style.cursor = "";
+				redo.style.color = "";
 			}
 		}
 

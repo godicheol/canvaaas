@@ -1173,22 +1173,14 @@
 				undoCaches.forEach(function(elem){
 					if (elem.id === oldId) {
 						elem.id = state.id;
-					}
-					if (elem.state) {
-						if (elem.state.id === oldId) {
-							elem.state.id = state.id;
-						}
+						elem.state.id = state.id;
 					}
 				});
 
 				redoCaches.forEach(function(elem){
 					if (elem.id === oldId) {
 						elem.id = state.id;
-					}
-					if (elem.state) {
-						if (elem.state.id === oldId) {
-							elem.state.id = state.id;
-						}
+						elem.state.id = state.id;
 					}
 				});
 			}
@@ -1209,69 +1201,87 @@
 			cloneObj.style.transform = transform;
 			cloneObj.querySelector("img").style.opacity = opacity;
 
-			if (state.restricted === false) {
-				if (!originObj.classList.contains(classNames.restricted)) {
-					originObj.classList.add(classNames.restricted);
+			try {
+				if (state.restricted === false) {
+					if (!originObj.classList.contains(classNames.restricted)) {
+						originObj.classList.add(classNames.restricted);
+					}
+					if (!cloneObj.classList.contains(classNames.restricted)) {
+						cloneObj.classList.add(classNames.restricted);
+					}
+				} else {
+					if (originObj.classList.contains(classNames.restricted)) {
+						originObj.classList.remove(classNames.restricted);
+					}
+					if (cloneObj.classList.contains(classNames.restricted)) {
+						cloneObj.classList.remove(classNames.restricted);
+					}
 				}
-				if (!cloneObj.classList.contains(classNames.restricted)) {
-					cloneObj.classList.add(classNames.restricted);
-				}
-			} else {
-				if (originObj.classList.contains(classNames.restricted)) {
-					originObj.classList.remove(classNames.restricted);
-				}
-				if (cloneObj.classList.contains(classNames.restricted)) {
-					cloneObj.classList.remove(classNames.restricted);
-				}
+			} catch(err) {
+				console.log(err);
 			}
 
-			if (state.focusabled === false) {
-				if (!originObj.classList.contains(classNames.unfocusabled)) {
-					originObj.classList.add(classNames.unfocusabled);
+			try {
+				if (state.focusabled === false) {
+					if (!originObj.classList.contains(classNames.unfocusabled)) {
+						originObj.classList.add(classNames.unfocusabled);
+					}
+					if (!cloneObj.classList.contains(classNames.unfocusabled)) {
+						cloneObj.classList.add(classNames.unfocusabled);
+					}
+				} else {
+					if (originObj.classList.contains(classNames.unfocusabled)) {
+						originObj.classList.remove(classNames.unfocusabled);
+					}
+					if (cloneObj.classList.contains(classNames.unfocusabled)) {
+						cloneObj.classList.remove(classNames.unfocusabled);
+					}
 				}
-				if (!cloneObj.classList.contains(classNames.unfocusabled)) {
-					cloneObj.classList.add(classNames.unfocusabled);
-				}
-			} else {
-				if (originObj.classList.contains(classNames.unfocusabled)) {
-					originObj.classList.remove(classNames.unfocusabled);
-				}
-				if (cloneObj.classList.contains(classNames.unfocusabled)) {
-					cloneObj.classList.remove(classNames.unfocusabled);
-				}
+			} catch(err) {
+				console.log(err);
 			}
 
-			if (state.editabled === false) {
-				if (!originObj.classList.contains(classNames.uneditabled)) {
-					originObj.classList.add(classNames.uneditabled);
+			try {
+				if (state.editabled === false) {
+					if (!originObj.classList.contains(classNames.uneditabled)) {
+						originObj.classList.add(classNames.uneditabled);
+					}
+					if (!cloneObj.classList.contains(classNames.uneditabled)) {
+						cloneObj.classList.add(classNames.uneditabled);
+					}
+				} else {
+					if (originObj.classList.contains(classNames.uneditabled)) {
+						originObj.classList.remove(classNames.uneditabled);
+					}
+					if (cloneObj.classList.contains(classNames.uneditabled)) {
+						cloneObj.classList.remove(classNames.uneditabled);
+					}
 				}
-				if (!cloneObj.classList.contains(classNames.uneditabled)) {
-					cloneObj.classList.add(classNames.uneditabled);
-				}
-			} else {
-				if (originObj.classList.contains(classNames.uneditabled)) {
-					originObj.classList.remove(classNames.uneditabled);
-				}
-				if (cloneObj.classList.contains(classNames.uneditabled)) {
-					cloneObj.classList.remove(classNames.uneditabled);
-				}
+			} catch(err) {
+				console.log(err);
 			}
 
-			if (state.drawabled === false) {
-				if (!originObj.classList.contains(classNames.undrawabled)) {
-					originObj.classList.add(classNames.undrawabled);
+
+			try {
+				if (state.drawabled === false) {
+					if (!originObj.classList.contains(classNames.undrawabled)) {
+						originObj.classList.add(classNames.undrawabled);
+					}
+					if (!cloneObj.classList.contains(classNames.undrawabled)) {
+						cloneObj.classList.add(classNames.undrawabled);
+					}
+				} else {
+					if (originObj.classList.contains(classNames.undrawabled)) {
+						originObj.classList.remove(classNames.undrawabled);
+					}
+					if (cloneObj.classList.contains(classNames.undrawabled)) {
+						cloneObj.classList.remove(classNames.undrawabled);
+					}
 				}
-				if (!cloneObj.classList.contains(classNames.undrawabled)) {
-					cloneObj.classList.add(classNames.undrawabled);
-				}
-			} else {
-				if (originObj.classList.contains(classNames.undrawabled)) {
-					originObj.classList.remove(classNames.undrawabled);
-				}
-				if (cloneObj.classList.contains(classNames.undrawabled)) {
-					cloneObj.classList.remove(classNames.undrawabled);
-				}
+			} catch(err) {
+				console.log(err);
 			}
+
 
 			return true;
 		}
@@ -3786,8 +3796,7 @@
 
 			// save state
 			setState(id, {
-				scaleY: state.scaleY * -1,
-				rotate: state.rotate * -1
+				scaleY: state.scaleY * -1
 			});
 
 			if (config.edit) {
@@ -3827,8 +3836,7 @@
 
 			// save state
 			setState(id, {
-				scaleX: state.scaleX * -1,
-				rotate: state.rotate * -1
+				scaleX: state.scaleX * -1
 			});
 
 			if (config.edit) {
