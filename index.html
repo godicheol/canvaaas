@@ -825,6 +825,11 @@
 				checkCaches();
 				console.log("config.edit callback", res);
 			},
+		}, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
 		});
 
 		// #3 create canvas

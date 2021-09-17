@@ -1061,17 +1061,10 @@
 
 		function getConfig() {
 			var tmp = {};
-			var candidateFuncs = [
-				"hover",
-				"upload",
-				"focus",
-				"edit",
-			];
-
 			for(var key in config) {
 				if (config.hasOwnProperty(key)) {
-					if (candidateFuncs.indexOf(key) > -1) {
-						tmp[key] = (config[key] !== undefined);
+					if (typeof(config[key]) === "function") {
+						tmp[key] = true;
 					} else {
 						tmp[key] = config[key];
 					}
@@ -2866,14 +2859,14 @@
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 			backgroundObject = target.querySelector("div.canvaaas-background");
 
-			// set events
-			// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
-
-			windowResizeEvent = handlers.resizeWindow;
-			window.addEventListener("resize", windowResizeEvent, false);
-
 			// set container
 			initContainer();
+
+			// set events
+			windowResizeEvent = handlers.resizeWindow;
+			// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
+			
+			window.addEventListener("resize", windowResizeEvent, false);
 
 			canvasObject.addEventListener("mousemove", handlers.hover, false);
 			canvasObject.addEventListener("touchmove", handlers.hover, false);
