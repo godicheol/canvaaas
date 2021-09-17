@@ -9,10 +9,6 @@
 
 		var defaultConfig = {
 
-			checker: true, // boolean
-
-			overlay: false, // boolean
-
 			allowedExtensions: [
 				"jpg",
 				"jpeg",
@@ -37,7 +33,7 @@
 
 			cacheLevels: 999, // number
 
-			containerAspectRatio: undefined, // number, width / height
+			containerAspectRatio: 1 / 1, // number, width / height
 
 			maxContainerWidth: 1, // number, 0 ~ 1
 
@@ -74,6 +70,9 @@
 			mimeType: "image/png",
 			dataType: "file",
 			editabled: true,
+			backgroundColor: "#FFFFFF",
+			overlay: false,
+			checker: true
 		};
 
 		var classNames = {
@@ -168,7 +167,7 @@
 		copyObject(config, defaultConfig);
 		copyObject(canvasState, defaultCanvasState);
 
-		/* event handlers */
+		// event handlers
 		var handlers = {
 
 			stopEvents: function(e) {
@@ -957,33 +956,36 @@
 				e.preventDefault();
 				e.stopPropagation();
 
-				if (
-					!canvasState.width ||
-					!canvasState.height
-				) {
-					return false;
-				}
-
 				var oldWidth = containerState.width;
 
-				initCanvas();
+				initContainer();
 
-				var newWidth = containerState.width;
-				var scaleRatio = newWidth / oldWidth;
+				if (
+					canvasState.originalWidth &&
+					canvasState.originalHeight
+				) {
 
-				imageStates.forEach(function(state){
-					// save state
-					setState(state.id, {
-						x: state.x * scaleRatio,
-						y: state.y * scaleRatio,
-						width: state.width * scaleRatio,
-						height: state.height * scaleRatio
+					initCanvas();
+
+					var newWidth = containerState.width;
+					var scaleRatio = newWidth / oldWidth;
+
+					imageStates.forEach(function(state){
+						// save state
+						setState(state.id, {
+							x: state.x * scaleRatio,
+							y: state.y * scaleRatio,
+							width: state.width * scaleRatio,
+							height: state.height * scaleRatio
+						});
 					});
-				});
-			},
-		};
 
-		/* methods */
+				}
+
+			},
+		} // event handlers end
+
+		// methods
 		function getId(obj) {
 			if (!obj) {
 				return false;
@@ -1034,41 +1036,25 @@
 			}
 
 			var tmp = {};
-			tmp.id = state.id;
-			tmp.type = state.type;
-			tmp.src = state.src;
-			tmp.index = state.index;
-			tmp.originalWidth = state.originalWidth;
-			tmp.originalHeight = state.originalHeight;
-			tmp.width = state.width;
-			tmp.height = state.height;
-			tmp.x = state.x;
-			tmp.y = state.y;
-			tmp.rotate = state.rotate;
-			tmp.scaleX = state.scaleX;
-			tmp.scaleY = state.scaleY;
-			tmp.opacity = state.opacity;
-			tmp.restricted = state.restricted;
-			tmp.focusabled = state.focusabled;
-			tmp.editabled = state.editabled;
-			tmp.drawabled = state.drawabled;
+			for (var key in state) {
+				if (state.hasOwnProperty(key)) {
+					tmp[key] = state[key];
+				}
+			}
+
 			return tmp;
 		}
 
 		function getCanvas() {
 			var tmp = {};
-			tmp.width = canvasState.originalWidth;
-			tmp.height = canvasState.originalHeight;
-			tmp.backgroundColor = canvasState.backgroundColor;
-			tmp.editabled = canvasState.editabled;
+			for (var key in canvasState) {
+				if (canvasState.hasOwnProperty(key)) {
+					tmp[key] = canvasState[key];
+				}
+			}
 
-			tmp.filename = canvasState.filename;
-			tmp.mimeType = canvasState.mimeType;
-			tmp.dataType = canvasState.dataType;
-			tmp.quality = canvasState.quality;
-
-			var as = getAspectRatio(tmp.width, tmp.height);
-			tmp.aspectRatio = "" + as[0] + ":" + as[1];
+			var ar = getAspectRatio(tmp.width, tmp.height);
+			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
 
 			return tmp;
 		}
@@ -2731,27 +2717,27 @@
 			}
 		}
 
-		function initCanvas() {
-			/* reset container style */
+		function initContainer() {
+			// reset canvas size
 			containerObject.style.width = "";
 			containerObject.style.height = "";
 
 			var viewportSizes = getViewportSizes();
-			var containerAspectRatio = config.containerAspectRatio || canvasState.originalWidth / canvasState.originalHeight;
-			var containerWidth = containerObject.offsetWidth;
-			var containerHeight = containerObject.offsetWidth / containerAspectRatio;
+			var aspectRatio = config.containerAspectRatio;
+			var width = containerObject.offsetWidth;
+			var height = containerObject.offsetWidth / aspectRatio;
 
-			var containerSizes = getFittedSizes({
-				width: containerWidth,
-				height: containerHeight,
+			var sizes = getFittedSizes({
+				width: width,
+				height: height,
 				maxWidth: viewportSizes[0] * config.maxContainerWidth,
 				maxHeight: viewportSizes[1] * config.maxContainerHeight,
 				minWidth: 0,
 				minHeight: 0
 			});
 
-			containerState.width = containerSizes[0];
-			containerState.height = containerSizes[1];
+			containerState.width = sizes[0];
+			containerState.height = sizes[1];
 			containerState.left = containerObject.getBoundingClientRect().left;
 			containerState.top = containerObject.getBoundingClientRect().top;
 
@@ -2762,13 +2748,17 @@
 				var sbw = getScrollbarWidth();
 
 				containerState.width -= sbw;
-				containerState.height = containerState.width / containerAspectRatio;
+				containerState.height = containerState.width / aspectRatio;
 
 				containerObject.style.width = containerState.width + "px";
 				containerObject.style.height = containerState.height + "px";
 			}
 
-			var canvasSizes = getFittedSizes({
+			return true;
+		}
+
+		function initCanvas() {
+			var sizes = getFittedSizes({
 				width: canvasState.originalWidth,
 				height: canvasState.originalHeight,
 				maxWidth: containerState.width,
@@ -2777,31 +2767,86 @@
 				minHeight: 0
 			});
 
-			canvasState.width = canvasSizes[0];
-			canvasState.height = canvasSizes[1];
-			canvasState.left = 0.5 * (containerState.width - canvasSizes[0]);
-			canvasState.top = 0.5 * (containerState.height - canvasSizes[1]);
+			canvasState.width = sizes[0];
+			canvasState.height = sizes[1];
+			canvasState.left = 0.5 * (containerState.width - sizes[0]);
+			canvasState.top = 0.5 * (containerState.height - sizes[1]);
 
 			canvasObject.style.width = canvasState.width + "px";
 			canvasObject.style.height = canvasState.height + "px";
 			canvasObject.style.left = canvasState.left + "px";
 			canvasObject.style.top = canvasState.top + "px";
+			if (!canvasState.checker) {
+				if (canvasObject.classList.contains(classNames.checker)) {
+					canvasObject.classList.remove(classNames.checker);
+				}
+			} else {
+				if (!canvasObject.classList.contains(classNames.checker)) {
+					canvasObject.classList.add(classNames.checker);
+				}
+			}
 
 			mirrorObject.style.width = canvasState.width + "px";
 			mirrorObject.style.height = canvasState.height + "px";
 			mirrorObject.style.left = canvasState.left + "px";
 			mirrorObject.style.top = canvasState.top + "px";
+			if (!canvasState.overlay) {
+				if (!mirrorObject.classList.contains(classNames.hidden)) {
+					mirrorObject.classList.add(classNames.hidden);
+				}
+			} else {
+				if (mirrorObject.classList.contains(classNames.hidden)) {
+					mirrorObject.classList.remove(classNames.hidden);
+				}
+			}
 
 			backgroundObject.style.width = canvasState.width + "px";
 			backgroundObject.style.height = canvasState.height + "px";
 			backgroundObject.style.left = canvasState.left + "px";
 			backgroundObject.style.top = canvasState.top + "px";
+			backgroundObject.style.backgroundColor = canvasState.backgroundColor;
+
+			return true;
+		}
+
+		function clearCanvas() {
+			// clear canvas state
+			canvasState = {};
+			copyObject(canvasState, defaultCanvasState);
+
+			canvasObject.style.width = "";
+			canvasObject.style.height = "";
+			canvasObject.style.left = "";
+			canvasObject.style.top = "";
+
+			if (canvasObject.classList.contains(classNames.checker)) {
+				canvasObject.classList.remove(classNames.checker);
+			}
+
+			mirrorObject.style.width = "";
+			mirrorObject.style.height = "";
+			mirrorObject.style.left = "";
+			mirrorObject.style.top = "";
+
+			if (mirrorObject.classList.contains(classNames.hidden)) {
+				mirrorObject.classList.remove(classNames.hidden);
+			}
+
+			backgroundObject.style.width = "";
+			backgroundObject.style.height = "";
+			backgroundObject.style.left = "";
+			backgroundObject.style.top = "";
+			backgroundObject.style.backgroundColor = "";
 
 			return true;
 		}
 
 		//
 		// export methods
+		//
+
+		//
+		// initialize
 		//
 
 		myObject.init = function(target, cb) {
@@ -2821,23 +2866,14 @@
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 			backgroundObject = target.querySelector("div.canvaaas-background");
 
-			backgroundObject.style.backgroundColor = "#FFFFFF";
-
-			if (config.checker) {
-				canvasObject.classList.add(classNames.checker);
-			}
-
-			if (!config.overlay) {
-				if (!mirrorObject.classList.contains(classNames.hidden)) {
-					mirrorObject.classList.add(classNames.hidden);
-				}
-			}
-
-			/* set events(fix removeEventListener) */
-			windowResizeEvent = handlers.resizeWindow;
+			// set events
 			// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
 
+			windowResizeEvent = handlers.resizeWindow;
 			window.addEventListener("resize", windowResizeEvent, false);
+
+			// set container
+			initContainer();
 
 			canvasObject.addEventListener("mousemove", handlers.hover, false);
 			canvasObject.addEventListener("touchmove", handlers.hover, false);
@@ -2847,18 +2883,41 @@
 			containerObject.addEventListener('dragover', handlers.stopEvents, false);
 			containerObject.addEventListener('drop', handlers.drop, false);
 
-			/* check canvas */
-			if (
-				canvasState.originalWidth &&
-				canvasState.originalHeight
-			) {
-				initCanvas();
-			}
-
 			if (cb) {
 				cb(null, getConfig());
 			}
 			return getConfig();
+		}
+
+		myObject.destroy = function(cb){
+			window.removeEventListener("resize", windowResizeEvent, false);
+
+			containerObject.parentNode.removeChild(containerObject);
+
+			config = {};
+			copyObject(config, defaultConfig);
+
+			eventState = {};
+			containerState = {};
+			canvasState = {};
+			copyObject(canvasState, defaultCanvasState);
+			imageStates = [];
+			undoCaches = [];
+			redoCaches = [];
+
+			containerObject = undefined;
+			canvasObject = undefined;
+			mirrorObject = undefined;
+
+			windowResizeEvent = undefined;
+
+			originId = "canvaaas-o";
+			cloneId = "canvaaas-c";
+
+			if (cb) {
+				cb(null, true);
+			}
+			return true;
 		}
 
 		//
@@ -4334,10 +4393,32 @@
 		// canvas
 		//
 
-		myObject.resize = function(options, cb) {
-			if (!canvasState.editabled && canvasObject) {
+		myObject.new = function(options, cb) {
+			// options = {
+			// 	width: number,
+			// 	height: number,
+			// 	unit: string,
+			// 	dpi: number,
+			// 	filename: string,
+			// 	overlay: boolean,
+			// 	checker: boolean
+			// }
+			if (
+				!containerState.width ||
+				!containerState.height
+			) {
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Container has been not initialized");
+				}
+				return false;
+			}
+
+			if (
+				canvasState.originalWidth ||
+				canvasState.originalHeight
+			) {
+				if (cb) {
+					cb("Canvas already initialized");
 				}
 				return false;
 			}
@@ -4360,7 +4441,6 @@
 				}
 				return false;
 			}
-
 			if (options.unit === undefined) {
 				options.unit = "px";
 			}
@@ -4383,44 +4463,17 @@
 			canvasState.originalWidth = sizes[0];
 			canvasState.originalHeight = sizes[1];
 
-			if (canvasObject) {
-				// set canvas
-				initCanvas();
-
-				// set images
-				imageStates.forEach(function(elem){
-					var maxX = canvasState.width;
-					var maxY = canvasState.height;
-					var minX = 0;
-					var minY = 0;
-
-					var axisX = elem.x;
-					var axisY = elem.y;
-
-					if (axisX > maxX) {
-						axisX = maxX;
-					}
-					if (axisX < minX) {
-						axisX = minX;
-					}
-					if (axisY > maxY) {
-						axisY = maxY;
-					}
-					if (axisY < minY) {
-						axisY = minY;
-					}
-
-					// save state
-					setState(elem.id, {
-						x: axisX,
-						y: axisY
-					});
-				});
-
-				// clear caches
-				undoCaches = [];
-				redoCaches = [];
+			if (isString(options.filename)) {
+				canvasState.filename = toString(options.filename);
 			}
+			if (isBoolean(options.checker)) {
+				canvasState.checker = toBoolean(options.checker);
+			}
+			if (isBoolean(options.overlay)) {
+				canvasState.overlay = toBoolean(options.overlay);
+			}
+
+			initCanvas();
 
 			if (cb) {
 				cb(null, getCanvas());
@@ -4428,17 +4481,50 @@
 			return getCanvas();
 		}
 
-		myObject.newCanvas = function(options, cb) {
-			if (!canvasObject) {
+		myObject.close = function(cb) {
+			if (
+				!canvasState.originalWidth ||
+				!canvasState.originalHeight
+			) {
 				if (cb) {
-					cb("Canvas not initialized");
+					cb("Canvas has been not initialized");
 				}
 				return false;
 			}
 
-			if (!canvasState.editabled) {
+			eventState = {};
+			undoCaches = [];
+			redoCaches = [];
+
+			imageStates.forEach(function(elem){
+				removeImage(elem.id);
+			});
+
+			clearCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.resize = function(options, cb) {
+			if (
+				!containerState.width ||
+				!containerState.height
+			) {
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Container has been not initialized");
+				}
+				return false;
+			}
+
+			if (
+				!canvasState.originalWidth ||
+				!canvasState.originalHeight
+			) {
+				if (cb) {
+					cb("Canvas has been not initialized");
 				}
 				return false;
 			}
@@ -4461,6 +4547,7 @@
 				}
 				return false;
 			}
+
 			if (options.unit === undefined) {
 				options.unit = "px";
 			}
@@ -4480,25 +4567,41 @@
 				return false;
 			}
 
-			// remove image
-			var tmp = [];
-			imageStates.forEach(function(elem){
-				tmp.push(elem.id);
-			});
-
-			tmp.forEach(function(elem){
-				removeImage(elem);
-			});
-
 			canvasState.originalWidth = sizes[0];
 			canvasState.originalHeight = sizes[1];
 
 			// set canvas
 			initCanvas();
 
-			// reset background
-			canvasState.backgroundColor = undefined;
-			backgroundObject.style.backgroundColor = "#FFFFFF";
+			// set images
+			imageStates.forEach(function(elem){
+				var maxX = canvasState.width;
+				var maxY = canvasState.height;
+				var minX = 0;
+				var minY = 0;
+
+				var axisX = elem.x;
+				var axisY = elem.y;
+
+				if (axisX > maxX) {
+					axisX = maxX;
+				}
+				if (axisX < minX) {
+					axisX = minX;
+				}
+				if (axisY > maxY) {
+					axisY = maxY;
+				}
+				if (axisY < minY) {
+					axisY = minY;
+				}
+
+				// save state
+				setState(elem.id, {
+					x: axisX,
+					y: axisY
+				});
+			});
 
 			// clear caches
 			undoCaches = [];
@@ -4511,11 +4614,7 @@
 		}
 
 		myObject.active = function(cb) {
-			if (canvasState.editabled) {
-				canvasState.editabled = false;
-			} else {
-				canvasState.editabled = true;
-			}
+			canvasState.editabled = true;
 
 			if (cb) {
 				cb(null, getCanvas());
@@ -4523,40 +4622,13 @@
 			return getCanvas();
 		}
 
-		myObject.overlay = function(cb) {
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
+		myObject.inactive = function(cb) {
+			canvasState.editabled = false;
 
-			if (!mirrorObject.classList.contains(classNames.hidden)) {
-				mirrorObject.classList.add(classNames.hidden);
-			} else {
-				mirrorObject.classList.remove(classNames.hidden);
-			}
 			if (cb) {
-				return cb(null, true);
+				cb(null, getCanvas());
 			}
-		}
-
-		myObject.checker = function(cb) {
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			if (!canvasObject.classList.contains(classNames.checker)) {
-				canvasObject.classList.add(classNames.checker);
-			} else {
-				canvasObject.classList.remove(classNames.checker);
-			}
-			if (cb) {
-				return cb(null, true);
-			}
+			return getCanvas();
 		}
 
 		myObject.background = function(colour, cb) {
@@ -4592,6 +4664,100 @@
 
 			if (cb) {
 				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.overlay = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!canvasState.overlay) {
+				canvasState.overlay = true;
+			} else {
+				canvasState.overlay = false;
+			}
+
+			initCanvas();
+
+			if (cb) {
+				return cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.overlayTo = function(b, cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			canvasState.overlay = toBoolean(b);
+
+			initCanvas();
+
+			if (cb) {
+				return cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.checker = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!canvasState.checker) {
+				canvasState.checker = true;
+			} else {
+				canvasState.checker = false;
+			}
+
+			initCanvas();
+
+			if (cb) {
+				return cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.checkerTo = function(b, cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			canvasState.checker = toBoolean(b);
+
+			initCanvas();
+
+			if (cb) {
+				return cb(null, getCanvas());
 			}
 			return getCanvas();
 		}
@@ -5250,46 +5416,14 @@
 			return exportState(id);
 		}
 
-		//
-		// destroy
-		//
-
-		myObject.destroy = function(cb){
-			window.removeEventListener("resize", windowResizeEvent, false);
-
-			containerObject.parentNode.removeChild(containerObject);
-
-			config = {};
-			copyObject(config, defaultConfig);
-
-			eventState = {};
-			containerState = {};
-			canvasState = {};
-			copyObject(canvasState, defaultCanvasState);
-			imageStates = [];
-			undoCaches = [];
-			redoCaches = [];
-
-			containerObject = undefined;
-			canvasObject = undefined;
-			mirrorObject = undefined;
-
-			windowResizeEvent = undefined;
-
-			originId = "canvaaas-o";
-			cloneId = "canvaaas-c";
-
-			if (cb) {
-				cb(null, true);
-			}
-		}
-
 		// end
 		return myObject;
+
 	}
 
 	// global export
 	if (typeof(window.canvaaas) === 'undefined') {
 		window.canvaaas = canvaaas();
 	}
+
 })(window);
