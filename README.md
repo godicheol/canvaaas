@@ -1,4 +1,4 @@
-[Test page](https://eeecheol.github.io/canvaaas/)
+[DEMO](https://eeecheol.github.io/canvaaas/)
 
 1. init
 

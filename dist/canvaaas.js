@@ -2583,7 +2583,7 @@
 			newImage.onload = function(e) {
 				// check canvas
 				if (
-					!canvasState.originalWidth &&
+					!canvasState.originalWidth ||
 					!canvasState.originalHeight
 				) {
 					canvasState.originalWidth = newImage.width;
@@ -4076,6 +4076,18 @@
 				return false;
 			}
 
+			var state = getState(id);
+
+			if (!state.focusabled) {
+				if (config.edit) {
+					config.edit("This image unfocusabled");
+				}
+				if (cb) {
+					cb("This image unfocusabled");
+				}
+				return false;
+			}
+
 			if (eventState.target) {
 				focusOut(eventState.target);
 			}
@@ -4140,6 +4152,9 @@
 			var height = state.height;
 			var deg = state.rotate;
 
+			// save cache
+			saveUndo(id);
+
 			if (state.restricted === false) {
 				if (state.width > state.height * aspectRatio) {
 					height = state.width / aspectRatio;
@@ -4156,12 +4171,79 @@
 				});
 			}
 
-			// save cache
-			saveUndo(id);
-
 			// save state
 			setState(id, {
 				restricted: state.restricted === false
+			});
+
+			if (config.edit) {
+				config.edit(null, exportState(id));
+			}
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
+		myObject.restrictTo = function(id, b, cb){
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
+				if (cb) {
+					cb("Could not edit image");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (config.edit) {
+					config.edit("Argument not boolean");
+				}
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			var width = state.width;
+			var height = state.height;
+			var deg = state.rotate;
+
+			// save cache
+			saveUndo(id);
+
+			if (toBoolean(b) === false) {
+				if (state.width > state.height * aspectRatio) {
+					height = state.width / aspectRatio;
+				} else {
+					width = state.height * aspectRatio;
+				}
+
+				deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
+
+				setState(id, {
+					width: width,
+					height: height,
+					rotate: deg
+				});
+			}
+
+			// save state
+			setState(id, {
+				restricted: toBoolean(b)
 			});
 
 			if (config.edit) {
@@ -4184,6 +4266,16 @@
 				return false;
 			}
 
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
+				if (cb) {
+					cb("Could not edit image");
+				}
+				return false;
+			}
+
 			var state = getState(id);
 
 			if (state.focusabled === true) {
@@ -4198,6 +4290,65 @@
 			// save state
 			setState(id, {
 				focusabled: state.focusabled === false
+			});
+
+			if (config.edit) {
+				config.edit(null, exportState(id));
+			}
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
+		myObject.focusableTo = function(id, b, cb){
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
+				if (cb) {
+					cb("Could not edit image");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (config.edit) {
+					config.edit("Argument not boolean");
+				}
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+
+			if (
+				state.focusabled === true &&
+				toBoolean(b) === false
+			) {
+				if (eventState.target === id) {
+					focusOut(id);
+				}
+			}
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				focusabled: toBoolean(b)
 			});
 
 			if (config.edit) {
@@ -4239,6 +4390,46 @@
 			return exportState(id);
 		}
 
+		myObject.editableTo = function(id, b, cb){
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (config.edit) {
+					config.edit("Argument not boolean");
+				}
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				editabled: toBoolean(b)
+			});
+
+			if (config.edit) {
+				config.edit(null, exportState(id));
+			}
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
 		myObject.drawable = function(id, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -4246,6 +4437,16 @@
 				}
 				if (cb) {
 					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
+				if (cb) {
+					cb("Could not edit image");
 				}
 				return false;
 			}
@@ -4269,6 +4470,56 @@
 			return exportState(id);
 		}
 
+		myObject.drawableTo = function(id, b, cb){
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
+				if (cb) {
+					cb("Could not edit image");
+				}
+				return false;
+			}
+
+			if (!isBoolean(b)) {
+				if (config.edit) {
+					config.edit("Argument not boolean");
+				}
+				if (cb) {
+					cb("Argument not boolean");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				drawabled: toBoolean(b)
+			});
+
+			if (config.edit) {
+				config.edit(null, exportState(id));
+			}
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
 		myObject.remove = function(id, cb) {
 			if (!isExist(id)) {
 				if (cb) {
@@ -4277,9 +4528,12 @@
 				return false;
 			}
 
-			if (!canvasState.editabled) {
+			if (!isAvailable(id)) {
+				if (config.edit) {
+					config.edit("Could not edit image");
+				}
 				if (cb) {
-					cb("Canvas editing not enabled");
+					cb("Could not edit image");
 				}
 				return false;
 			}

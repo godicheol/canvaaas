@@ -211,7 +211,7 @@
 				">Upload from URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadState(testImportStates[0])
-				">Upload from State (TEST)</a></li>
+				">Upload from State</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
@@ -572,14 +572,41 @@
 					canvaaas.restrict(canvaaas.this())
 				">Toggle Restrict</a></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.restrictTo(canvaaas.this(), true)
+				">Restrict</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.restrictTo(canvaaas.this(), false)
+				">Unrestrict</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this())
 				">Toggle Focusable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.focusableTo(canvaaas.this(), true)
+				">Focusable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.focusableTo(canvaaas.this(), false)
+				">Unfocusable</a></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.editable(canvaaas.this())
 				">Toggle Editable</a></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.editableTo(canvaaas.this(), true)
+				">Editable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.editableTo(canvaaas.this(), false)
+				">Uneditable</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawable(canvaaas.this())
 				">Toggle Drawable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.drawableTo(canvaaas.this(), true)
+				">Drawable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.drawableTo(canvaaas.this(), false)
+				">Undrawable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.remove(canvaaas.this())
@@ -761,18 +788,6 @@
 
 		// #2 config
 		canvaaas.config({
-			// allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
-			// deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
-			// cacheLevels: 999, // number
-			// containerAspectRatio: 1, // number, width / height
-			// maxContainerWidth: 1, // number, 0 ~ 1
-			// maxContainerHeight: 0.7, // number, 0 ~ 1
-			// renderScale: 0.5, // number, 0 ~ 1
-			// restrictAfterRender: false, // boolean
-			// restrictMove: false, // boolean
-			// restrictRotate: true, // boolean
-			// restrictRotateRadians: 15, // number
-			// restrictResize: true, // boolean
 			hover: function(err, res){
 				if (err) {
 					console.log(err);
@@ -891,8 +906,7 @@
 			sState.innerHTML += " h:" + Math.floor(state.height);
 
 			sEditabled.innerHTML = state.editabled ?
-				"" :
-				"<span style='color: red;'>Uneditabled</span>";
+				"" : "<span style='color: red;'>Uneditabled</span>";
 
 			sBackground.style.backgroundColor = state.backgroundColor;
 		}
