@@ -1331,14 +1331,18 @@
 					if ([
 						"id"
 					].indexOf(key) > -1) {
-						tmp[key] = toString(state[key]);
+						if (isString(state[key])) {
+							tmp[key] = toString(state[key]);
+						}
 					} else if ([
 						"width",
 						"height",
 						"x",
 						"y",
 					].indexOf(key) > -1) {
-						tmp[key] = toNumber(state[key]) * scaleRatio;
+						if (isNumeric(state[key])) {
+							tmp[key] = toNumber(state[key]) * scaleRatio;
+						}
 					} else if ([
 						"index",
 						"rotate",
@@ -1346,14 +1350,18 @@
 						"scaleY",
 						"opacity",
 					].indexOf(key) > -1) {
-						tmp[key] = toNumber(state[key]);
+						if (isNumeric(state[key])) {
+							tmp[key] = toNumber(state[key]);
+						}
 					} else if ([
 						"restricted",
 						"focusabled",
 						"editabled",
 						"drawabled",
 					].indexOf(key) > -1) {
-						tmp[key] = toBoolean(state[key]);
+						if (isBoolean(state[key])) {
+							tmp[key] = toBoolean(state[key]);
+						}
 					}
 				}
 			}
@@ -1373,19 +1381,25 @@
 						"src",
 						"type"
 					].indexOf(key) > -1) {
-						tmp[key] = toString(state[key]);
+						if (isString(state[key])) {
+							tmp[key] = toString(state[key]);
+						}
 					} else if ([
 						"originalWidth",
 						"originalHeight",
 					].indexOf(key) > -1) {
-						tmp[key] = toNumber(state[key]);
+						if (isNumeric(state[key])) {
+							tmp[key] = toNumber(state[key]);
+						}
 					}else if ([
 						"width",
 						"height",
 						"x",
 						"y",
 					].indexOf(key) > -1) {
-						tmp[key] = toNumber(state[key]) / scaleRatio;
+						if (isNumeric(state[key])) {
+							tmp[key] = toNumber(state[key]) / scaleRatio;
+						}
 					} else if ([
 						"index",
 						"rotate",
@@ -1393,14 +1407,18 @@
 						"scaleY",
 						"opacity",
 					].indexOf(key) > -1) {
-						tmp[key] = toNumber(state[key]);
+						if (isNumeric(state[key])) {
+							tmp[key] = toNumber(state[key]);
+						}
 					} else if ([
 						"restricted",
 						"focusabled",
 						"editabled",
 						"drawabled",
 					].indexOf(key) > -1) {
-						tmp[key] = toBoolean(state[key]);
+						if (isBoolean(state[key])) {
+							tmp[key] = toBoolean(state[key]);
+						}
 					}
 				}
 			}
@@ -1416,7 +1434,7 @@
 		}
 
 		function parseState(obj) {
-			var result = {};
+			var res = {};
 
 			if (isObject(obj)) {
 				var stateKeys = Object.keys(obj);
@@ -1424,14 +1442,13 @@
 					var j = stateKeys[i];
 					if (obj.hasOwnProperty(j)) {
 						if (isNumeric(obj[j])) {
-							result[j] = toNumber(obj[j]);
+							res[j] = toNumber(obj[j]);
 						} else if (isBoolean(obj[j])) {
-							result[j] = toBoolean(obj[j]);
+							res[j] = toBoolean(obj[j]);
 						} else if (isString(obj[j])) {
-							result[j] = toString(obj[j]);
+							res[j] = toString(obj[j]);
 						}
 					}
-
 				}
 			} else if (isString(obj)) {
 				try {
@@ -1441,31 +1458,31 @@
 						var j = parsedKeys[i];
 						if (parsed.hasOwnProperty(j)) {
 							if (isNumeric(parsed[j])) {
-								result[j] = toNumber(parsed[j]);
+								res[j] = toNumber(parsed[j]);
 							} else if (isBoolean(parsed[j])) {
-								result[j] = toBoolean(parsed[j]);
+								res[j] = toBoolean(parsed[j]);
 							} else if (isString(parsed[j])) {
-								result[j] = parsed[j];
+								res[j] = parsed[j];
 							}
 						}
 					}
 				} catch(err) {
 					console.log(err);
-					result = {};
+					return false;
 				}
 			} else {
 				return false;
 			}
 
-			if (!result.src) {
-				if (result.url) {
-					result.src = result.url;
-				} else if (result.path) {
-					result.src = result.path;
+			if (!res.src) {
+				if (res.url) {
+					res.src = res.url;
+				} else if (res.path) {
+					res.src = res.path;
 				}
 			}
 
-			return result;
+			return res;
 		}
 
 		function getDataset(elem) {
@@ -1504,13 +1521,13 @@
 				}
 			}
 
-			var result;
+			var res;
 			if (thisAttrs.state) {
-				result = parseState(thisAttrs.state);
+				res = parseState(thisAttrs.state);
 			} else {
-				result = parseState(thisAttrs);
+				res = parseState(thisAttrs);
 			}
-			return result;
+			return res;
 		}
 
 		function isAvailable(id) {
@@ -2091,8 +2108,6 @@
 		}
 
 		function getShortId() {
-		    // I generate the UID from two parts here
-		    // to ensure the random number provide enough bits.
 			var firstPart = (Math.random() * 46656) | 0;
 			var secondPart = (Math.random() * 46656) | 0;
 			firstPart = ("000" + firstPart.toString(36)).slice(-3);
@@ -2211,11 +2226,7 @@
 		}
 
 		function toNumber(n) {
-			if (!isNaN(parseFloat(n)) && isFinite(n)) {
-				return parseFloat(n);
-			} else {
-				return undefined;
-			}
+			return parseFloat(n);
 		}
 
 		function toString(n) {
@@ -2291,6 +2302,8 @@
 				return false;
 			}
 			return str.replace(/^.*[\\\/]/, '');
+
+			// deprecated
 			// return str.substring(url.lastIndexOf('/')+1);
 		}
 
@@ -2403,25 +2416,23 @@
 			return canvas;
 		}
 
-		/* asynchronous */
+		// asynchronous
 		function drawImage(mainCanvas, canvasWidth, imgState, cb) {
-			/*
-				canvasWidth => canvasState.originalWidth
-			*/
-			/*
-				imageState = {
-					src,
-					width(imageState.width / (canvasState.width / canvasState.height)),
-					height(imageState.height / (canvasState.width / canvasState.height)),
-					x(imageState.x / (canvasState.width / canvasState.height)),
-					y(imageState.y / (canvasState.width / canvasState.height)),
-					rotate,
-					opacity,
-					scaleX,
-					scaleY,
-					smoothing(optional)
-				}
-			*/
+
+			// canvasWidth => canvasState.originalWidth
+			//
+			// imageState = {
+			// 	src,
+			// 	width(imageState.width / (canvasState.width / canvasState.height)),
+			// 	height(imageState.height / (canvasState.width / canvasState.height)),
+			// 	x(imageState.x / (canvasState.width / canvasState.height)),
+			// 	y(imageState.y / (canvasState.width / canvasState.height)),
+			// 	rotate,
+			// 	opacity,
+			// 	scaleX,
+			// 	scaleY,
+			// 	smoothing(optional)
+			// }
 
 			var thisImg = new Image();
 			thisImg.src = imgState.src;
@@ -2524,7 +2535,7 @@
 			}
 		}
 
-		/* asynchronous */
+		// asynchronous
 		function renderImage(file, exportedState, cb) {
 			var newImage = new Image();
 			var id = getShortId();
@@ -2849,6 +2860,10 @@
 			}
 			return getConfig();
 		}
+
+		//
+		// upload
+		//
 
 		// asynchronous
 		myObject.uploadFile = function(files, cb) {
