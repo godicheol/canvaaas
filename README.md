@@ -2,14 +2,11 @@
 
 1. init
 
-        canvaaas.init(target, function(err, res){
+        canvaaas.init( <div> , function(err, res){
           if (err) {
             console.log(err);
             return false;
           }
-
-          checkCaches();
-
           console.log("canvaaas.init() callback", res);
         });
 
@@ -26,25 +23,20 @@
           restrictAfterRender: false, // boolean
           restrictMove: false, // boolean
           restrictRotate: true, // boolean
-          restrictRotateRadians: 15, // number
+          restrictRotateRadians: 45, // number
           restrictResize: true, // boolean
           hover: function(err, res){
             if (err) {
               console.log(err);
               return false;
             }
-            writeCursor(res);
-            // console.log("config.hover callback", res);
+            console.log("config.hover callback", res);
           },
           upload: function(err, res){
             if (err) {
               console.log(err);
               return false;
             }
-            // fix canvas not initialized
-            writeCanvasData();
-
-            checkCaches();
             console.log("config.upload callback", res);
           },
           focus: function(err, res){
@@ -52,8 +44,6 @@
               console.log(err);
               return false;
             }
-            writeImageData(res);
-            checkCaches();
             console.log("config.focus callback", res);
           },
           edit: function(err, res){
@@ -61,8 +51,6 @@
               console.log(err);
               return false;
             }
-            writeImageData(res);
-            checkCaches();
             console.log("config.edit callback", res);
           },
         });
@@ -83,7 +71,6 @@
             return false;
           }
           console.log("canvaaas.new() callback",res);
-          writeCanvasData();
         });
 
 4. upload
