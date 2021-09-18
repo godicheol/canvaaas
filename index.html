@@ -219,7 +219,7 @@
 						console.log(err, result);
 						canvaaas.download(res, result.filename); // iOS not supported
 					});
-				">Save<br />(Safari not supported)</a></li>
+				">Save</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
@@ -258,7 +258,7 @@
 					}, function(err, res){
 						canvaaas.newTab(res);
 					})
-				">New Tab<br />(Safari not supported)</a></li>
+				">New Tab<br />(iOS safari not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
 						filename: 'original',
@@ -274,7 +274,7 @@
 						console.log(err, result);
 						canvaaas.newTab(res);
 					})
-				">New Tab from JSON<br />(Safari not supported)</a></li>
+				">New Tab from JSON<br />(iOS safari not supported)</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res, result){
@@ -588,12 +588,12 @@
 				">Undrawable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.remove(canvaaas.this())
-				">Remove</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.reset(canvaaas.this())
 				">Reset</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.remove(canvaaas.this())
+				">Remove</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
