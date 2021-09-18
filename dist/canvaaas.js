@@ -57,9 +57,13 @@
 
 			upload: undefined, // callback function
 
+			canvas: undefined, // callback function
+
 			focus: undefined, // callback function
 
 			edit: undefined, // callback function
+
+			remove: undefined, // callback function
 
 		};
 
@@ -2744,6 +2748,14 @@
 				if (!isExist(id)) {
 					return false;
 				}
+
+				// check focus
+				if (eventState.target) {
+					if (eventState.target === id) {
+						focusOut(id);
+					}
+				}
+
 				var originObj = getOrigin(id);
 				var cloneObj = getClone(id);
 				var state = getState(id);
@@ -4458,21 +4470,20 @@
 				return false;
 			}
 
-			// check focus
-			if (eventState.target) {
-				if (eventState.target === id) {
-					focusOut(id);
-				}
-			}
-
 			var tmp = exportState(id);
 			var res = removeImage(id);
 			if (!res) {
+				if (config.remove) {
+					config.remove("Could not remove image");
+				}
 				if (cb) {
 					cb("Could not remove image");
 				}
 				return false;
 			} else {
+				if (config.remove) {
+					config.remove(null, tmp);
+				}
 				if (cb) {
 					cb(null, tmp);
 				}
@@ -5132,7 +5143,9 @@
 			var index = drawables.length;
 			var count = 0;
 
-			recursiveFunc();
+			setTimeout(function(elem){
+				recursiveFunc();
+			}, 100)
 
 			function recursiveFunc() {
 				if (count < index) {
@@ -5343,7 +5356,9 @@
 			var index = drawables.length;
 			var count = 0;
 
-			recursiveFunc();
+			setTimeout(function(elem){
+				recursiveFunc();
+			}, 100)
 
 			function recursiveFunc() {
 				if (count < index) {
@@ -5390,6 +5405,7 @@
 		}
 
 		// example
+		// iOS chrome not supported (only large file?)
 		myObject.download = function(data, filename){
 			var link = document.createElement('a');
 			link.setAttribute('href', data);
@@ -5402,6 +5418,7 @@
 		}
 
 		// example
+		// iOS safari not supported
 		myObject.newTab = function(data){
 			var image = new Image();
 			image.src = data;

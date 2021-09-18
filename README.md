@@ -40,13 +40,6 @@
             restrictRotate: true, // boolean
             restrictRotateRadians: 45, // number
             restrictResize: true, // boolean
-            hover: function(err, res){
-              if (err) {
-                console.log(err);
-                return false;
-              }
-              console.log("config.hover callback", res);
-            },
             upload: function(err, res){
               if (err) {
                 console.log(err);
