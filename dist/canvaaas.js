@@ -35,15 +35,15 @@
 
 			containerAspectRatio: 1 / 1, // number, width / height
 
-			maxContainerWidth: 1, // number, 0 ~ 1
+			maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport(device screen)
 
-			maxContainerHeight: 0.7, // number, 0 ~ 1
+			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport(device screen)
 
 			maxDrawWidth: 4096 * 4, // number, iOS always has been adjusted 4096px
 
 			maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
 
-			renderScale: 0.5, // number, 0 ~ 1
+			renderScale: 0.5, // number, 0 ~ 1 scale in canvas
 
 			restrictAfterRender: false, // boolean
 
@@ -55,13 +55,12 @@
 
 			restrictRotateAngleUnit: 45, // number, 1 ~ 360
 
-			hover: undefined, // callback function
-
 			upload: undefined, // callback function
 
 			focus: undefined, // callback function
 
 			edit: undefined, // callback function
+
 		};
 
 		var defaultCanvasState = {
@@ -70,6 +69,8 @@
 			mimeType: "image/png",
 			dataType: "file",
 			editabled: true,
+			focusabled: true,
+			drawabled: true,
 			backgroundColor: "#FFFFFF",
 			overlay: false,
 			checker: true
@@ -82,7 +83,7 @@
 			unfocusabled: "unfocusabled",
 			uneditabled: "uneditabled",
 			undrawabled: "undrawabled",
-			onActivated: "activated",
+			unshown: "unshown",
 			onEditing: "editing",
 			onFocused: "focused",
 			onFreezed: "freezed",
@@ -219,6 +220,7 @@
 				}
 			},
 
+			// deprecated
 			hover: function(e) {
 				if (!whereContainer()) {
 					return false;
@@ -257,11 +259,7 @@
 				e.stopPropagation();
 
 				var id = getTarget(e);
-				var state = getState(id);
-				if (!state) {
-					return false;
-				}
-				if (!state.focusabled) {
+				if (!isFocusable(id)) {
 					return false;
 				}
 				if (eventState.target !== id) {
@@ -273,7 +271,6 @@
 				if (config.focus) {
 					config.focus(null, exportState(id));
 				}
-
 				return handlers.startMove(e);
 			},
 
@@ -304,7 +301,7 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-				if (!isAvailable(eventState.target)) {
+				if (!isEditable(eventState.target)) {
 					return false;
 				}
 				if (!whereContainer()) {
@@ -418,7 +415,7 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-				if (!isAvailable(eventState.target)) {
+				if (!isEditable(eventState.target)) {
 					return false;
 				}
 				if (!whereContainer()) {
@@ -693,7 +690,7 @@
 					if (!chkTarget(e)) {
 						return false;
 					}
-					if (!isAvailable(eventState.target)) {
+					if (!isEditable(eventState.target)) {
 						return false;
 					}
 					if (!whereContainer()) {
@@ -707,7 +704,7 @@
 					saveUndo(eventState.target);
 
 					// class
-					 addClass(eventState.target, classNames.onEditing);
+					addClass(eventState.target, classNames.onEditing);
 				}
 
 				var state = getState(eventState.target);
@@ -741,7 +738,7 @@
 					eventState.onZoom = false;
 
 					// class
-					 removeClass(eventState.target, classNames.onEditing);
+					removeClass(eventState.target, classNames.onEditing);
 
 					// callback
 					if (config.edit) {
@@ -760,7 +757,7 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-				if (!isAvailable(eventState.target)) {
+				if (!isEditable(eventState.target)) {
 					return false;
 				}
 				if (!whereContainer()) {
@@ -851,7 +848,7 @@
 				if (!chkTarget(e)) {
 					return false;
 				}
-				if (!isAvailable(eventState.target)) {
+				if (!isEditable(eventState.target)) {
 					return false;
 				}
 				if (!whereContainer()) {
@@ -1006,6 +1003,9 @@
 		}
 
 		function getSrc(id) {
+			if (!id) {
+				return false;
+			}
 			var tmp = document.getElementById(originId + id);
 			if (!tmp) {
 				return false;
@@ -1025,6 +1025,9 @@
 		}
 
 		function getState(id) {
+			if (!id) {
+				return false;
+			}
 			var state = imageStates.find(function(elem){
 				if (elem.id === id) {
 					return elem;
@@ -1032,7 +1035,7 @@
 			});
 
 			if (!state) {
-				return undefined;
+				return false;
 			}
 
 			var tmp = {};
@@ -1075,6 +1078,9 @@
 		}
 
 		function setState(id, newState) {
+			if (!id) {
+				return false;
+			}
 			var state = imageStates.find(function(elem){
 				if (elem.id === id) {
 					return elem;
@@ -1085,6 +1091,8 @@
 			var cloneObj = document.getElementById(cloneId + id);
 
 			var idChanged = false;
+			var restrictChanged = false;
+			var focusChanged = false;
 			var oldId;
 			for(var key in newState) {
 				if (newState.hasOwnProperty(key)) {
@@ -1116,13 +1124,79 @@
 						}
 					} else if ([
 						"restricted",
+					].indexOf(key) > -1) {
+						if (isBoolean(newState[key])) {
+							if (
+								state[key] === false &&
+								toBoolean(newState[key]) === true
+							) {
+								restrictChanged = true;
+							}
+							state[key] = toBoolean(newState[key]);
+						}
+					} else if ([
 						"focusabled",
+					].indexOf(key) > -1) {
+						if (isBoolean(newState[key])) {
+							if (
+								state[key] === true &&
+								toBoolean(newState[key]) === false
+							) {
+								focusChanged = true;
+							}
+							state[key] = toBoolean(newState[key]);
+						}
+					} else if ([
 						"editabled",
 						"drawabled",
 					].indexOf(key) > -1) {
 						if (isBoolean(newState[key])) {
 							state[key] = toBoolean(newState[key]);
 						}
+					}
+				}
+			}
+
+			if (idChanged === true) {
+				// check focus
+				if (eventState.target) {
+					if (eventState.target === oldId) {
+						focusOut(oldId);
+					}
+				}
+				originObj.id = originId + state.id;
+				cloneObj.id = cloneId + state.id;
+
+				undoCaches.forEach(function(elem){
+					if (elem.id === oldId) {
+						elem.id = state.id;
+						elem.state.id = state.id;
+					}
+				});
+
+				redoCaches.forEach(function(elem){
+					if (elem.id === oldId) {
+						elem.id = state.id;
+						elem.state.id = state.id;
+					}
+				});
+			}
+
+			if (restrictChanged === true) {
+				var ar = state.originalWidth / state.originalHeight;
+				if (state.width > state.height * ar) {
+					state.height = state.width / ar;
+				} else {
+					state.width = state.height * ar;
+				}
+				state.rotate = Math.round(state.rotate / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
+			}
+
+			if (focusChanged === true) {
+				// check focus
+				if (eventState.target) {
+					if (eventState.target === state.id) {
+						focusOut(state.id);
 					}
 				}
 			}
@@ -1143,25 +1217,6 @@
 			}
 			if (state.scaleY === -1) {
 				transform += "scaleY(" + state.scaleY + ")";
-			}
-
-			if (idChanged === true) {
-				originObj.id = originId + state.id;
-				cloneObj.id = cloneId + state.id;
-
-				undoCaches.forEach(function(elem){
-					if (elem.id === oldId) {
-						elem.id = state.id;
-						elem.state.id = state.id;
-					}
-				});
-
-				redoCaches.forEach(function(elem){
-					if (elem.id === oldId) {
-						elem.id = state.id;
-						elem.state.id = state.id;
-					}
-				});
 			}
 
 			originObj.style.zIndex = index;
@@ -1240,7 +1295,6 @@
 				console.log(err);
 			}
 
-
 			try {
 				if (state.drawabled === false) {
 					if (!originObj.classList.contains(classNames.undrawabled)) {
@@ -1261,11 +1315,13 @@
 				console.log(err);
 			}
 
-
 			return true;
 		}
 
-		function addClass(id, cls){
+		function addClass(id, cls) {
+			if (!id) {
+				return false;
+			}
 			try {
 				var originObj = document.getElementById(originId + id);
 				var cloneObj = document.getElementById(cloneId + id);
@@ -1283,7 +1339,10 @@
 			}
 		}
 
-		function removeClass(id, cls){
+		function removeClass(id, cls) {
+			if (!id) {
+				return false;
+			}
 			try {
 				var originObj = document.getElementById(originId + id);
 				var cloneObj = document.getElementById(cloneId + id);
@@ -1509,11 +1568,11 @@
 			return res;
 		}
 
-		function isAvailable(id) {
-			if (!canvasState.editabled) {
+		function isEditable(id) {
+			if (!id) {
 				return false;
 			}
-			if (!id) {
+			if (!canvasState.editabled) {
 				return false;
 			}
 			var state = getState(id);
@@ -1521,6 +1580,23 @@
 				return false;
 			}
 			if (!state.editabled) {
+				return false;
+			}
+			return true;
+		}
+
+		function isFocusable(id) {
+			if (!id) {
+				return false;
+			}
+			if (!canvasState.focusabled) {
+				return false;
+			}
+			var state = getState(id);
+			if (!state) {
+				return false;
+			}
+			if (!state.focusabled) {
 				return false;
 			}
 			return true;
@@ -1605,11 +1681,11 @@
 				var originObj = getOrigin(id);
 				var cloneObj = getClone(id);
 
-				if (!canvasObject.classList.contains(classNames.onActivated)) {
-					canvasObject.classList.add(classNames.onActivated);
+				if (!canvasObject.classList.contains(classNames.onFocused)) {
+					canvasObject.classList.add(classNames.onFocused);
 				}
-				if (!mirrorObject.classList.contains(classNames.onActivated)) {
-					mirrorObject.classList.add(classNames.onActivated);
+				if (!mirrorObject.classList.contains(classNames.onFocused)) {
+					mirrorObject.classList.add(classNames.onFocused);
 				}
 
 				if (!originObj.classList.contains(classNames.onFocused)) {
@@ -1672,11 +1748,11 @@
 				var originObj = getOrigin(id);
 				var cloneObj = getClone(id);
 
-				if (canvasObject.classList.contains(classNames.onActivated)) {
-					canvasObject.classList.remove(classNames.onActivated);
+				if (canvasObject.classList.contains(classNames.onFocused)) {
+					canvasObject.classList.remove(classNames.onFocused);
 				}
-				if (mirrorObject.classList.contains(classNames.onActivated)) {
-					mirrorObject.classList.remove(classNames.onActivated);
+				if (mirrorObject.classList.contains(classNames.onFocused)) {
+					mirrorObject.classList.remove(classNames.onFocused);
 				}
 
 				if (originObj.classList.contains(classNames.onFocused)) {
@@ -2760,6 +2836,10 @@
 				minHeight: 0
 			});
 
+			//
+			// set styles
+			//
+
 			canvasState.width = sizes[0];
 			canvasState.height = sizes[1];
 			canvasState.left = 0.5 * (containerState.width - sizes[0]);
@@ -2769,6 +2849,22 @@
 			canvasObject.style.height = canvasState.height + "px";
 			canvasObject.style.left = canvasState.left + "px";
 			canvasObject.style.top = canvasState.top + "px";
+
+			mirrorObject.style.width = canvasState.width + "px";
+			mirrorObject.style.height = canvasState.height + "px";
+			mirrorObject.style.left = canvasState.left + "px";
+			mirrorObject.style.top = canvasState.top + "px";
+
+			backgroundObject.style.width = canvasState.width + "px";
+			backgroundObject.style.height = canvasState.height + "px";
+			backgroundObject.style.left = canvasState.left + "px";
+			backgroundObject.style.top = canvasState.top + "px";
+			backgroundObject.style.backgroundColor = canvasState.backgroundColor;
+
+			//
+			// set class names
+			//
+
 			if (!canvasState.checker) {
 				if (canvasObject.classList.contains(classNames.checker)) {
 					canvasObject.classList.remove(classNames.checker);
@@ -2779,10 +2875,6 @@
 				}
 			}
 
-			mirrorObject.style.width = canvasState.width + "px";
-			mirrorObject.style.height = canvasState.height + "px";
-			mirrorObject.style.left = canvasState.left + "px";
-			mirrorObject.style.top = canvasState.top + "px";
 			if (!canvasState.overlay) {
 				if (!mirrorObject.classList.contains(classNames.hidden)) {
 					mirrorObject.classList.add(classNames.hidden);
@@ -2793,11 +2885,56 @@
 				}
 			}
 
-			backgroundObject.style.width = canvasState.width + "px";
-			backgroundObject.style.height = canvasState.height + "px";
-			backgroundObject.style.left = canvasState.left + "px";
-			backgroundObject.style.top = canvasState.top + "px";
-			backgroundObject.style.backgroundColor = canvasState.backgroundColor;
+			if (!canvasState.editabled) {
+				if (!canvasObject.classList.contains(classNames.uneditabled)) {
+					canvasObject.classList.add(classNames.uneditabled);
+				}
+				if (!mirrorObject.classList.contains(classNames.uneditabled)) {
+					mirrorObject.classList.add(classNames.uneditabled);
+				}
+			} else {
+				if (canvasObject.classList.contains(classNames.uneditabled)) {
+					canvasObject.classList.remove(classNames.uneditabled);
+				}
+				if (mirrorObject.classList.contains(classNames.uneditabled)) {
+					mirrorObject.classList.remove(classNames.uneditabled);
+				}
+			}
+
+			if (!canvasState.focusabled) {
+				if (!canvasObject.classList.contains(classNames.unfocusabled)) {
+					canvasObject.classList.add(classNames.unfocusabled);
+				}
+				if (!mirrorObject.classList.contains(classNames.unfocusabled)) {
+					mirrorObject.classList.add(classNames.unfocusabled);
+				}
+				if (eventState.target) {
+					focusOut(eventState.target);
+				}
+			} else {
+				if (canvasObject.classList.contains(classNames.unfocusabled)) {
+					canvasObject.classList.remove(classNames.unfocusabled);
+				}
+				if (mirrorObject.classList.contains(classNames.unfocusabled)) {
+					mirrorObject.classList.remove(classNames.unfocusabled);
+				}
+			}
+
+			if (!canvasState.drawabled) {
+				if (!canvasObject.classList.contains(classNames.unshown)) {
+					canvasObject.classList.add(classNames.unshown);
+				}
+				if (!mirrorObject.classList.contains(classNames.unshown)) {
+					mirrorObject.classList.add(classNames.unshown);
+				}
+			} else {
+				if (canvasObject.classList.contains(classNames.unshown)) {
+					canvasObject.classList.remove(classNames.unshown);
+				}
+				if (mirrorObject.classList.contains(classNames.unshown)) {
+					mirrorObject.classList.remove(classNames.unshown);
+				}
+			}
 
 			return true;
 		}
@@ -2865,11 +3002,8 @@
 			// set events
 			windowResizeEvent = handlers.resizeWindow;
 			// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
-			
-			window.addEventListener("resize", windowResizeEvent, false);
 
-			canvasObject.addEventListener("mousemove", handlers.hover, false);
-			canvasObject.addEventListener("touchmove", handlers.hover, false);
+			window.addEventListener("resize", windowResizeEvent, false);
 
 			containerObject.addEventListener('dragenter', handlers.stopEvents, false);
 			containerObject.addEventListener('dragleave', handlers.stopEvents, false);
@@ -3008,10 +3142,10 @@
 
 			if (!isString(imageUrl)) {
 				if (config.upload) {
-					config.upload("Argument not string");
+					config.upload("Argument is not string");
 				}
 				if (cb) {
-					cb("Argument not string");
+					cb("Argument is not string");
 				}
 				return false;
 			}
@@ -3183,7 +3317,7 @@
 		myObject.findOne = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
-					cb("Argument not obejct");
+					cb("Argument is not obejct");
 				}
 				return false;
 			}
@@ -3226,7 +3360,7 @@
 		myObject.findMany = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
-					cb("Argument not obejct");
+					cb("Argument is not obejct");
 				}
 				return false;
 			}
@@ -3265,7 +3399,7 @@
 				!isObject(updates)
 			) {
 				if (cb) {
-					cb("Argument not obejct");
+					cb("Argument is not obejct");
 				}
 				return false;
 			}
@@ -3313,7 +3447,7 @@
 				!isObject(updates)
 			) {
 				if (cb) {
-					cb("Argument not obejct");
+					cb("Argument is not obejct");
 				}
 				return false;
 			}
@@ -3364,12 +3498,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3428,12 +3562,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3443,10 +3577,10 @@
 				!isNumeric(y)
 			) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -3484,12 +3618,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3499,10 +3633,10 @@
 				(typeof(y) !== "string" && typeof(y) !== "number")
 			) {
 				if (config.edit) {
-					config.edit("Argument not numeric or string");
+					config.edit("Argument is not numeric or string");
 				}
 				if (cb) {
-					cb("Argument not numeric or string");
+					cb("Argument is not numeric or string");
 				}
 				return false;
 			}
@@ -3581,22 +3715,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(ratio)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -3633,12 +3767,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3648,10 +3782,10 @@
 				typeof(ratio) !== "string"
 			) {
 				if (config.edit) {
-					config.edit("Argument not numeric or string");
+					config.edit("Argument is not numeric or string");
 				}
 				if (cb) {
-					cb("Argument not numeric or string");
+					cb("Argument is not numeric or string");
 				}
 				return false;
 			}
@@ -3720,22 +3854,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(deg)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -3783,22 +3917,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(deg)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -3846,12 +3980,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3886,12 +4020,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -3926,22 +4060,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(num)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -3976,22 +4110,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(idx)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -4023,22 +4157,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isNumeric(idx)) {
 				if (config.edit) {
-					config.edit("Argument not numeric");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument not numeric");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
@@ -4069,17 +4203,17 @@
 				return false;
 			}
 
-			var state = getState(id);
-
-			if (!state.focusabled) {
+			if (!isFocusable(id)) {
 				if (config.edit) {
-					config.edit("This image unfocusabled");
+					config.edit("Image is not focusable");
 				}
 				if (cb) {
-					cb("This image unfocusabled");
+					cb("Image is not focusable");
 				}
 				return false;
 			}
+
+			var state = getState(id);
 
 			if (eventState.target) {
 				focusOut(eventState.target);
@@ -4118,7 +4252,7 @@
 			return true;
 		}
 
-		myObject.restrict = function(id, cb){
+		myObject.restrict = function(id, b, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4129,110 +4263,28 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var aspectRatio = state.originalWidth / state.originalHeight;
-			var width = state.width;
-			var height = state.height;
-			var deg = state.rotate;
-
-			// save cache
-			saveUndo(id);
-
-			if (state.restricted === false) {
-				if (state.width > state.height * aspectRatio) {
-					height = state.width / aspectRatio;
-				} else {
-					width = state.height * aspectRatio;
-				}
-
-				deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
-
-				setState(id, {
-					width: width,
-					height: height,
-					rotate: deg
-				});
-			}
-
-			// save state
-			setState(id, {
-				restricted: state.restricted === false
-			});
-
-			if (config.edit) {
-				config.edit(null, exportState(id));
-			}
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.restrictTo = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isAvailable(id)) {
-				if (config.edit) {
-					config.edit("Could not edit image");
-				}
-				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isBoolean(b)) {
 				if (config.edit) {
-					config.edit("Argument not boolean");
+					config.edit("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Argument not boolean");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			var state = getState(id);
-			var aspectRatio = state.originalWidth / state.originalHeight;
-			var width = state.width;
-			var height = state.height;
-			var deg = state.rotate;
-
 			// save cache
 			saveUndo(id);
-
-			if (toBoolean(b) === false) {
-				if (state.width > state.height * aspectRatio) {
-					height = state.width / aspectRatio;
-				} else {
-					width = state.height * aspectRatio;
-				}
-
-				deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
-
-				setState(id, {
-					width: width,
-					height: height,
-					rotate: deg
-				});
-			}
 
 			// save state
 			setState(id, {
@@ -4248,7 +4300,7 @@
 			return exportState(id);
 		}
 
-		myObject.focusable = function(id, cb){
+		myObject.focusable = function(id, b, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4259,82 +4311,27 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			if (state.focusabled === true) {
-				if (eventState.target === id) {
-					focusOut(id);
-				}
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				focusabled: state.focusabled === false
-			});
-
-			if (config.edit) {
-				config.edit(null, exportState(id));
-			}
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.focusableTo = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isAvailable(id)) {
-				if (config.edit) {
-					config.edit("Could not edit image");
-				}
-				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isBoolean(b)) {
 				if (config.edit) {
-					config.edit("Argument not boolean");
+					config.edit("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Argument not boolean");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
 			var state = getState(id);
-
-			if (
-				state.focusabled === true &&
-				toBoolean(b) === false
-			) {
-				if (eventState.target === id) {
-					focusOut(id);
-				}
-			}
 
 			// save cache
 			saveUndo(id);
@@ -4353,37 +4350,7 @@
 			return exportState(id);
 		}
 
-		myObject.editable = function(id, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				editabled: state.editabled === false
-			});
-
-			if (config.edit) {
-				config.edit(null, exportState(id));
-			}
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.editableTo = function(id, b, cb){
+		myObject.editable = function(id, b, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4396,10 +4363,10 @@
 
 			if (!isBoolean(b)) {
 				if (config.edit) {
-					config.edit("Argument not boolean");
+					config.edit("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Argument not boolean");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
@@ -4423,7 +4390,7 @@
 			return exportState(id);
 		}
 
-		myObject.drawable = function(id, cb){
+		myObject.drawable = function(id, b, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4434,62 +4401,22 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				drawabled: state.drawabled === false
-			});
-
-			if (config.edit) {
-				config.edit(null, exportState(id));
-			}
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.drawableTo = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isAvailable(id)) {
-				if (config.edit) {
-					config.edit("Could not edit image");
-				}
-				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
 
 			if (!isBoolean(b)) {
 				if (config.edit) {
-					config.edit("Argument not boolean");
+					config.edit("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Argument not boolean");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
@@ -4521,12 +4448,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -4564,12 +4491,12 @@
 				return false;
 			}
 
-			if (!isAvailable(id)) {
+			if (!isEditable(id)) {
 				if (config.edit) {
-					config.edit("Could not edit image");
+					config.edit("Image is not editabled");
 				}
 				if (cb) {
-					cb("Could not edit image");
+					cb("Image is not editabled");
 				}
 				return false;
 			}
@@ -4613,7 +4540,7 @@
 		//
 
 		myObject.config = function(newConfig, cb) {
-			if (!canvasState.editabled && canvasObject) {
+			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4622,7 +4549,7 @@
 
 			if (!isObject(newConfig)) {
 				if (cb) {
-					cb("Argument not object");
+					cb("Argument is not object");
 				}
 				return false;
 			}
@@ -4672,7 +4599,7 @@
 
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument not object");
+					cb("Argument is not object");
 				}
 				return false;
 			}
@@ -4684,7 +4611,7 @@
 				(!isNumeric(options.dpi) && options.dpi !== undefined)
 			) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -4702,7 +4629,7 @@
 			});
 			if (!sizes) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -4756,6 +4683,13 @@
 		}
 
 		myObject.resize = function(options, cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
 			if (
 				!containerState.width ||
 				!containerState.height
@@ -4778,7 +4712,7 @@
 
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument not object");
+					cb("Argument is not object");
 				}
 				return false;
 			}
@@ -4790,7 +4724,7 @@
 				(!isNumeric(options.dpi) && options.dpi !== undefined)
 			) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -4809,7 +4743,7 @@
 			});
 			if (!sizes) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -4860,25 +4794,101 @@
 			return getCanvas();
 		}
 
-		myObject.active = function(cb) {
+		myObject.setEditable = function(cb) {
 			canvasState.editabled = true;
 
+			initCanvas();
+
 			if (cb) {
 				cb(null, getCanvas());
 			}
 			return getCanvas();
 		}
 
-		myObject.inactive = function(cb) {
+		myObject.unsetEditable = function(cb) {
 			canvasState.editabled = false;
 
+			initCanvas();
+
 			if (cb) {
 				cb(null, getCanvas());
 			}
 			return getCanvas();
 		}
 
-		myObject.background = function(colour, cb) {
+		myObject.showDrawables = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			canvasState.drawabled = true;
+
+			initCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.hideDrawables = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			canvasState.drawabled = false;
+
+			initCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.setFocusable = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			canvasState.focusabled = true;
+
+			initCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.unsetFocusable = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			canvasState.focusabled = false;
+
+			initCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
+			}
+			return getCanvas();
+		}
+
+		myObject.setBackground = function(colour, cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4888,10 +4898,12 @@
 
 			if (!isString(colour)) {
 				if (cb) {
-					cb("Argument not string");
+					cb("Argument is not string");
 				}
 				return false;
 			}
+
+			colour = toString(colour);
 
 			if (
 				colour.toLowerCase() === "alpha" ||
@@ -4899,15 +4911,23 @@
 			) {
 				colour = "transparent";
 			} else if (colour !== "") {
-				if (colour.charAt(0) !== "#") {
-					colour = "#" + colour;
+				if (
+					colour.length === 3 ||
+					colour.length === 6
+				) {
+					if (colour.charAt(0) !== "#") {
+						colour = "#" + colour;
+					}
+				} else {
+					colour = undefined;
 				}
 			} else {
-				colour = "";
+				colour = undefined;
 			}
 
 			canvasState.backgroundColor = colour;
-			backgroundObject.style.backgroundColor = colour;
+
+			initCanvas();
 
 			if (cb) {
 				cb(null, getCanvas());
@@ -4915,7 +4935,7 @@
 			return getCanvas();
 		}
 
-		myObject.overlay = function(cb) {
+		myObject.unsetBackground = function(cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4923,11 +4943,25 @@
 				return false;
 			}
 
-			if (!canvasState.overlay) {
-				canvasState.overlay = true;
-			} else {
-				canvasState.overlay = false;
+			canvasState.backgroundColor = undefined;
+
+			initCanvas();
+
+			if (cb) {
+				cb(null, getCanvas());
 			}
+			return getCanvas();
+		}
+
+		myObject.showOverlay = function(cb) {
+			if (!canvasState.editabled) {
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			canvasState.overlay = true;
 
 			initCanvas();
 
@@ -4937,7 +4971,7 @@
 			return getCanvas();
 		}
 
-		myObject.overlayTo = function(b, cb) {
+		myObject.hideOverlay = function(cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4945,14 +4979,7 @@
 				return false;
 			}
 
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument not boolean");
-				}
-				return false;
-			}
-
-			canvasState.overlay = toBoolean(b);
+			canvasState.overlay = false;
 
 			initCanvas();
 
@@ -4962,7 +4989,7 @@
 			return getCanvas();
 		}
 
-		myObject.checker = function(cb) {
+		myObject.showChecker = function(cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4970,11 +4997,7 @@
 				return false;
 			}
 
-			if (!canvasState.checker) {
-				canvasState.checker = true;
-			} else {
-				canvasState.checker = false;
-			}
+			canvasState.checker = true;
 
 			initCanvas();
 
@@ -4984,7 +5007,7 @@
 			return getCanvas();
 		}
 
-		myObject.checkerTo = function(b, cb) {
+		myObject.hideChecker = function(cb) {
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -4992,14 +5015,7 @@
 				return false;
 			}
 
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument not boolean");
-				}
-				return false;
-			}
-
-			canvasState.checker = toBoolean(b);
+			canvasState.checker = false;
 
 			initCanvas();
 
@@ -5007,70 +5023,6 @@
 				return cb(null, getCanvas());
 			}
 			return getCanvas();
-		}
-
-		myObject.freeze = function(cb){
-			if (eventState.onFreezed === true) {
-				if (cb) {
-					cb("Already in progress");
-				}
-				return false;
-			}
-
-			if (eventState.target) {
-				focusOut(eventState.target);
-			}
-
-			if (!containerObject.classList.contains(classNames.onFreezed)) {
-				containerObject.classList.add(classNames.onFreezed);
-			}
-
-			if (canvasObject.classList.contains(classNames.checker)) {
-				eventState.checker = true;
-				canvasObject.classList.remove(classNames.checker);
-			}
-
-			if (canvasState.editabled) {
-				eventState.editabled = canvasState.editabled;
-			}
-
-			canvasState.editabled = false;
-			eventState.onFreezed = true;
-
-			if (cb) {
-				cb(null, true);
-			}
-			return true;
-		}
-
-		myObject.thaw = function(cb){
-			if (eventState.onFreezed === false) {
-				if (cb) {
-					cb("No progress in");
-				}
-				return false;
-			}
-
-			canvasState.editabled = eventState.editabled;
-			eventState.onFreezed = false;
-
-			if (containerObject.classList.contains(classNames.onFreezed)) {
-				containerObject.classList.remove(classNames.onFreezed);
-			}
-
-			if (eventState.checker) {
-				if (!canvasObject.classList.contains(classNames.checker)) {
-					canvasObject.classList.add(classNames.checker);
-				}
-				eventState.checker = undefined;
-			}
-
-			eventState.editabled = undefined;
-
-			if (cb) {
-				cb(null, true);
-			}
-			return true;
 		}
 
 		//
@@ -5259,13 +5211,13 @@
 			}
 			if (!isObject(canvasSizes)) {
 				if (cb) {
-					cb("Argument not object");
+					cb("Argument is not object");
 				}
 				return false;
 			}
 			if (!isArray(imgStates)) {
 				if (cb) {
-					cb("Argument not array");
+					cb("Argument is not array");
 				}
 				return false;
 			}
@@ -5276,7 +5228,7 @@
 				(!isNumeric(canvasSizes.dpi) && canvasSizes.dpi !== undefined)
 			) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -5294,7 +5246,7 @@
 			});
 			if (!convertedSizes) {
 				if (cb) {
-					cb("Argument not allowed");
+					cb("Argument is not allowed");
 				}
 				return false;
 			}
@@ -5487,28 +5439,28 @@
 			return eventState.target;
 		}
 
-		myObject.getConfigData = function(cb){
+		myObject.getConfig = function(cb){
 			if (cb) {
 				cb(null, getConfig());
 			}
 			return getConfig();
 		}
 
-		myObject.getCanvasData = function(cb){
+		myObject.getCanvas = function(cb){
 			if (cb) {
 				cb(null, getCanvas());
 			}
 			return getCanvas();
 		}
 
-		myObject.getUndoData = function(cb){
+		myObject.getUndo = function(cb){
 			if (cb) {
 				cb(null, undoCaches.length);
 			}
 			return undoCaches.length;
 		}
 
-		myObject.getRedoData = function(cb){
+		myObject.getRedo = function(cb){
 			if (cb) {
 				cb(null, redoCaches.length);
 			}
@@ -5542,7 +5494,7 @@
 			if (!isArray(states)) {
 				if (!isString(states)) {
 					if (cb) {
-						cb("Argument not array");
+						cb("Argument is not array");
 					}
 					return false;
 				} else {
@@ -5555,7 +5507,7 @@
 					}
 					if (!isArray(tmp)) {
 						if (cb) {
-							cb("Argument not array");
+							cb("Argument is not array");
 						}
 						return false;
 					} else {

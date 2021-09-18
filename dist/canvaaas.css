@@ -1,30 +1,21 @@
 /* canvaaas.js eeecheol@gmail.com */
 
 /* on freezed */
-.canvaaas.freezed .canvaaas-image,
-.canvaaas.freezed .canvaaas-clone{
+.canvaaas.uneditabled .canvaaas-image,
+.canvaaas.uneditabled .canvaaas-clone{
 	cursor: default;
 }
-.canvaaas.freezed .canvaaas-image .canvaaas-rotate-handle,
-.canvaaas.freezed .canvaaas-image .canvaaas-resize-handle,
-.canvaaas.freezed .canvaaas-image .canvaaas-innerline,
-.canvaaas.freezed .canvaaas-image .canvaaas-outline,
-.canvaaas.freezed .canvaaas-clone .canvaaas-rotate-handle,
-.canvaaas.freezed .canvaaas-clone .canvaaas-resize-handle,
-.canvaaas.freezed .canvaaas-clone .canvaaas-innerline,
-.canvaaas.freezed .canvaaas-clone .canvaaas-outline{
-	display: none;
-}
-.canvaaas.freezed .undrawabled{
-	visibility: hidden;
-}
-.canvaaas.freezed .canvaaas-mirror{
-	display: none;
+
+/* canvas on undrawabled */
+.canvaaas-canvas.unshown .undrawabled,
+.canvaaas-mirror.unshown .undrawabled{
+	visibility: hidden !important;
 }
 
 /* on editing (mouse down) */
 .canvaaas-image.editing,
 .canvaaas-clone.editing{
+	/* your styles */
 
 }
 .canvaaas-image.editing .canvaaas-overlay,
@@ -34,9 +25,15 @@
 
 
 /* on focus */
+.canvaaas-canvas.focused,
+.canvaaas-mirror.focused{
+	/* your styles */
+
+}
 .canvaaas-image.focused,
 .canvaaas-clone.focused{
-	/* any styles */
+	/* your styles */
+	cursor: move;
 
 }
 
@@ -77,6 +74,14 @@
 }
 
 /* uneditabled */
+.canvaaas-canvas.uneditabled .canvaaas-innerline,
+.canvaaas-mirror.uneditabled .canvaaas-innerline,
+.canvaaas-canvas.uneditabled .canvaaas-outline,
+.canvaaas-mirror.uneditabled .canvaaas-outline,
+.canvaaas-canvas.uneditabled .canvaaas-handle,
+.canvaaas-mirror.uneditabled .canvaaas-handle{
+	border-color: orange;
+}
 .canvaaas-image.uneditabled .canvaaas-innerline,
 .canvaaas-clone.uneditabled .canvaaas-innerline,
 .canvaaas-image.uneditabled .canvaaas-outline,
@@ -87,6 +92,13 @@
 }
 
 /* unfocusabled */
+.canvaaas-canvas.unfocusabled .canvaaas-image,
+.canvaaas-mirror.unfocusabled .canvaaas-image,
+.canvaaas-canvas.unfocusabled .canvaaas-clone,
+.canvaaas-mirror.unfocusabled .canvaaas-clone{
+	pointer-events: none;
+	cursor: default;
+}
 .canvaaas-image.unfocusabled,
 .canvaaas-clone.unfocusabled{
 	pointer-events: none;
@@ -202,7 +214,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	cursor: move;
+	/* cursor: crosshair; */
 }
 .canvaaas-clone img,
 .canvaaas-image img{

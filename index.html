@@ -26,7 +26,6 @@
 		/*background-color: #000;*/
 	}
 
-	#myCursor,
 	#myImage,
 	#myCanvas{
 		/*color: #FFF;*/
@@ -36,17 +35,9 @@
 		padding: 3px 24px;
 	}
 
-	#myCursor.hidden,
 	#myCanvas.hidden,
 	#myImage.hidden{
 		display: none;
-	}
-
-	#myCursor-id{
-		float: left;
-	}
-	#myCursor-state{
-		float: right;
 	}
 
 	#myCanvas-filename{
@@ -307,7 +298,7 @@
 				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getConfigData(function(err, res){
+					canvaaas.getConfig(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
@@ -317,7 +308,7 @@
 					})
 				">Get Config Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getCanvasData(function(err, res){
+					canvaaas.getCanvas(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
@@ -339,7 +330,7 @@
 					})
 				">Get Image Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getUndoData(function(err, res){
+					canvaaas.getUndo(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
@@ -349,7 +340,7 @@
 					})
 				">Get Undo Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getRedoData(function(err, res){
+					canvaaas.getRedo(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
@@ -569,43 +560,31 @@
 				">Focus Out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.restrict(canvaaas.this())
-				">Toggle Restrict</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.restrictTo(canvaaas.this(), true)
+					canvaaas.restrict(canvaaas.this(), true)
 				">Restrict</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.restrictTo(canvaaas.this(), false)
+					canvaaas.restrict(canvaaas.this(), false)
 				">Unrestrict</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusable(canvaaas.this())
-				">Toggle Focusable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusableTo(canvaaas.this(), true)
+					canvaaas.focusable(canvaaas.this(), true)
 				">Focusable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusableTo(canvaaas.this(), false)
+					canvaaas.focusable(canvaaas.this(), false)
 				">Unfocusable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editable(canvaaas.this())
-				">Toggle Editable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editableTo(canvaaas.this(), true)
+					canvaaas.editable(canvaaas.this(), true)
 				">Editable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editableTo(canvaaas.this(), false)
+					canvaaas.editable(canvaaas.this(), false)
 				">Uneditable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawable(canvaaas.this())
-				">Toggle Drawable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawableTo(canvaaas.this(), true)
+					canvaaas.drawable(canvaaas.this(), true)
 				">Drawable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawableTo(canvaaas.this(), false)
+					canvaaas.drawable(canvaaas.this(), false)
 				">Undrawable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -620,32 +599,6 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.freeze()
-				">Freeze</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.thaw()
-				">Thaw</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.active(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						writeCanvasData();
-					})
-				">Editable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.inactive(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						writeCanvasData();
-					})
-				">Uneditable</a></li>
-				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize({
 						width: window.prompt('Type width', '6'),
@@ -662,40 +615,57 @@
 				">Resize</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.background(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
+					canvaaas.setEditable()
+				">Editabled</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unsetEditable()
+				">Uneditabled</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.setFocusable()
+				">Set Focusable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unsetFocusable()
+				">Unset Focusabled</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.showDrawables()
+				">Show Drawables</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.hideDrawables()
+				">Hide Drawables</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.setBackground(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
 						}
 						writeCanvasData();
 					})
-				">Background Color</a></li>
+				">Set Background</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.unsetBackground()
+				">Unset Background</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker()
-				">Toggle Checker</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checkerTo(true)
+					canvaaas.showChecker()
 				">Checker Show</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checkerTo(false)
+					canvaaas.hideChecker()
 				">Checker Hide</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.overlay()
-				">Toggle Overlay</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.overlayTo(true)
+					canvaaas.showOverlay()
 				">Overlay Show</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.overlayTo(false)
+					canvaaas.hideOverlay()
 				">Overlay Hide</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
-				<li><a id="showCursor" href="javascript:void(0)">Show Cursor Data</a></li>
 				<li><a id="showCanvas" href="javascript:void(0)">Show Canvas Data</a></li>
 				<li><a id="showImage" href="javascript:void(0)">Show Image Data</a></li>
 			</ul>
@@ -716,12 +686,6 @@
 	<div id="myImage" class="">
 		<div id="myImage-id"></div>
 		<div id="myImage-state"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div id="myCursor" class="hidden">
-		<div id="myCursor-id"></div>
-		<div id="myCursor-state"></div>
 		<div style="clear: both;"></div>
 	</div>
 
@@ -788,14 +752,6 @@
 
 		// #2 config
 		canvaaas.config({
-			hover: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-				writeCursor(res);
-				// console.log("config.hover callback", res);
-			},
 			upload: function(err, res){
 				if (err) {
 					console.log(err);
@@ -897,7 +853,7 @@
 		//
 
 		function writeCanvasData(){
-			var state = canvaaas.getCanvasData();
+			var state = canvaaas.getCanvas();
 
 			var sFilename = document.getElementById("myCanvas-filename");
 			var sEditabled = document.getElementById("myCanvas-editabled");
@@ -940,24 +896,10 @@
 			sState.innerHTML += " opacity " + state.opacity;
 		}
 
-		function writeCursor(res) {
-			var sId = document.getElementById("myCursor-id");
-			var sState = document.getElementById("myCursor-state");
-			if (res.target) {
-				sId.innerHTML = res.target;
-			} else {
-				sId.innerHTML = "";
-			}
-
-			sState.innerHTML = "";
-			sState.innerHTML += "x:" + Math.floor(res.x);
-			sState.innerHTML += " y:" + Math.floor(res.y);
-		}
-
 		function checkCaches(){
 			var undo = document.getElementById("undo");
 			var redo = document.getElementById("redo");
-			if (canvaaas.getUndoData() < 1) {
+			if (canvaaas.getUndo() < 1) {
 				undo.style.pointerEvents = "none";
 				undo.style.cursor = "default";
 				undo.style.color = "#777";
@@ -966,7 +908,7 @@
 				undo.style.cursor = "";
 				undo.style.color = "";
 			}
-			if (canvaaas.getRedoData() < 1) {
+			if (canvaaas.getRedo() < 1) {
 				redo.style.pointerEvents = "none";
 				redo.style.cursor = "default";
 				redo.style.color = "#777";
@@ -978,11 +920,9 @@
 		}
 
 		(function(){
-			var sCursor = document.getElementById("showCursor");
 			var sCanvas = document.getElementById("showCanvas");
 			var sImage = document.getElementById("showImage");
 
-			var aCursor = document.getElementById("myCursor");
 			var aCanvas = document.getElementById("myCanvas");
 			var aImage = document.getElementById("myImage");
 
@@ -990,9 +930,7 @@
 
 			function evtHandle(e) {
 				if (opened) {
-					if (opened.isSameNode(aCursor)) {
-						aCursor.classList.add("hidden");
-					} else if (opened.isSameNode(aCanvas)) {
+					if (opened.isSameNode(aCanvas)) {
 						aCanvas.classList.add("hidden");
 					} else if (opened.isSameNode(aImage)) {
 						aImage.classList.add("hidden");
@@ -1000,10 +938,7 @@
 					opened = undefined;
 				}
 
-				if (e.target.isSameNode(sCursor)) {
-					aCursor.classList.remove("hidden");
-					opened = aCursor;
-				} else if (e.target.isSameNode(sCanvas)) {
+				if (e.target.isSameNode(sCanvas)) {
 					aCanvas.classList.remove("hidden");
 					opened = aCanvas;
 				} else if (e.target.isSameNode(sImage)) {
@@ -1012,7 +947,6 @@
 				}
 			}
 
-			sCursor.addEventListener("click", evtHandle, false);
 			sCanvas.addEventListener("click", evtHandle, false);
 			sImage.addEventListener("click", evtHandle, false);
 		})();
@@ -1063,31 +997,44 @@
 		})();
 
 		var defaultConfig = {
-			allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
-			deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
-			cacheLevels: 999, // number
-			containerAspectRatio: undefined, // number, width / height
-			maxContainerWidth: 1, // number, 0 ~ 1
-			maxContainerHeight: 0.7, // number, 0 ~ 1
-			renderScale: 0.5, // number, 0 ~ 1
-			restrictAfterRender: false, // boolean
-			hover: undefined, // callback function
-			upload: undefined, // callback function
-			focus: undefined, // callback function
-			edit: undefined, // callback function
+				allowedExtensions: [
+					"jpg",
+					"jpeg",
+					"png",
+					"gif",
+					"svg",
+					"svg+xml",
+					"tiff",
+					"tif",
+					"webp",
+				], // array
+				deniedTagNamesToFocusOut: [
+					"A",
+					"BUTTON",
+					"INPUT",
+					"LABEL",
+					"TEXTAREA",
+					"SELECT",
+					"OPTION",
+				], // array
+				cacheLevels: 999, // number
+				containerAspectRatio: 1 / 1, // number, width / height
+				maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport(device screen)
+				maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport(device screen)
+				maxDrawWidth: 4096 * 4, // number, iOS always has been adjusted 4096px
+				maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
+				renderScale: 0.5, // number, 0 ~ 1 scale in canvas
+				restrictAfterRender: false, // boolean
+				restrictMove: false, // boolean
+				restrictRotate: true, // boolean
+				restrictResize: true, // boolean
+				restrictRotateAngleUnit: 45, // number, 1 ~ 360
+				upload: undefined, // callback function
+				focus: undefined, // callback function
+				edit: undefined, // callback function
 		}
 
 		var testConfig = {
-			hover: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCursor(res);
-
-				// console.log("config.hover callback", res);
-			},
 			upload: function(err, res){
 				if (err) {
 					console.log(err);
