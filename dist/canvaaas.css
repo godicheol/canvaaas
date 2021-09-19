@@ -1,79 +1,51 @@
 /* canvaaas.js eeecheol@gmail.com */
 
-/* on freezed */
-.canvaaas.uneditabled .canvaaas-image,
-.canvaaas.uneditabled .canvaaas-clone{
-	cursor: default;
-}
-
-/* canvas on undrawabled */
-.canvaaas-canvas.unshown .undrawabled,
-.canvaaas-mirror.unshown .undrawabled{
-	visibility: hidden !important;
-}
-
-/* on editing (mouse down) */
-.canvaaas-image.editing,
-.canvaaas-clone.editing{
-	/* your styles */
+/* on edit (mouse down) */
+.canvaaas-image.onEdit,
+.canvaaas-clone.onEdit{
 
 }
-.canvaaas-image.editing .canvaaas-overlay,
-.canvaaas-clone.editing .canvaaas-overlay{
+.canvaaas-image.onEdit .canvaaas-overlay,
+.canvaaas-clone.onEdit .canvaaas-overlay{
 	display: block;
 }
 
+/* on drag (handle only) */
+.onDrag .canvaaas-handle{
+	width: 12px;
+	height: 12px;
+}
 
-/* on focus */
-.canvaaas-canvas.focused,
-.canvaaas-mirror.focused{
-	/* your styles */
+/* canvas on focus */
+.canvaaas-canvas.onFocus,
+.canvaaas-mirror.onFocus{
 
 }
-.canvaaas-image.focused,
-.canvaaas-clone.focused{
-	/* your styles */
+
+/* image on focus */
+.canvaaas-image.onFocus,
+.canvaaas-clone.onFocus{
 	cursor: move;
-
 }
 
-.canvaaas-image.focused .canvaaas-innerline{
-	border-color: #777;
-}
-.canvaaas-clone.focused .canvaaas-innerline{
-	border-color: red;
-}
-.canvaaas-image.focused .canvaaas-outline{
-	border-color: #000;
-}
-.canvaaas-clone.focused .canvaaas-outline{
-	border-color: red;
-}
-.canvaaas-image.focused .canvaaas-handle{
-	border-color: #000;
-}
-.canvaaas-clone.focused .canvaaas-handle{
-	border-color: red;
-}
-
-.canvaaas-image.focused .canvaaas-rotate-handle,
-.canvaaas-image.focused .canvaaas-resize-handle,
-/*.canvaaas-image.focused .canvaaas-innerline,*/
-.canvaaas-image.focused .canvaaas-outline,
-.canvaaas-clone.focused .canvaaas-rotate-handle,
-.canvaaas-clone.focused .canvaaas-resize-handle,
-/*.canvaaas-clone.focused .canvaaas-innerline,*/
-.canvaaas-clone.focused .canvaaas-outline{
+.canvaaas-image.onFocus .canvaaas-rotate-handle,
+.canvaaas-image.onFocus .canvaaas-resize-handle,
+/*.canvaaas-image.onFocus .canvaaas-innerline,*/
+.canvaaas-image.onFocus .canvaaas-outline,
+.canvaaas-clone.onFocus .canvaaas-rotate-handle,
+.canvaaas-clone.onFocus .canvaaas-resize-handle,
+/*.canvaaas-clone.onFocus .canvaaas-innerline,*/
+.canvaaas-clone.onFocus .canvaaas-outline{
 	display: block;
 }
 
-/* restricted */
+/* image restricted */
 .canvaaas-image.restricted,
 .canvaaas-clone.restricted{
 
 }
 
-/* uneditabled */
+/* canvas uneditabled */
 .canvaaas-canvas.uneditabled .canvaaas-innerline,
 .canvaaas-mirror.uneditabled .canvaaas-innerline,
 .canvaaas-canvas.uneditabled .canvaaas-outline,
@@ -82,6 +54,8 @@
 .canvaaas-mirror.uneditabled .canvaaas-handle{
 	border-color: orange;
 }
+
+/* image uneditabled */
 .canvaaas-image.uneditabled .canvaaas-innerline,
 .canvaaas-clone.uneditabled .canvaaas-innerline,
 .canvaaas-image.uneditabled .canvaaas-outline,
@@ -91,7 +65,7 @@
 	border-color: orange;
 }
 
-/* unfocusabled */
+/* canvas unfocusabled */
 .canvaaas-canvas.unfocusabled .canvaaas-image,
 .canvaaas-mirror.unfocusabled .canvaaas-image,
 .canvaaas-canvas.unfocusabled .canvaaas-clone,
@@ -99,13 +73,23 @@
 	pointer-events: none;
 	cursor: default;
 }
+
+/* image unfocusabled */
 .canvaaas-image.unfocusabled,
 .canvaaas-clone.unfocusabled{
 	pointer-events: none;
 	cursor: default;
 }
 
-/* undrawabled */
+/* canvas undrawabled */
+.canvaaas-canvas.undrawabled .canvaaas-image.undrawabled,
+.canvaaas-canvas.undrawabled .canvaaas-clone.undrawabled,
+.canvaaas-mirror.undrawabled .canvaaas-image.undrawabled,
+.canvaaas-mirror.undrawabled .canvaaas-clone.undrawabled{
+	visibility: hidden !important;
+}
+
+/* image undrawabled */
 .canvaaas-image.undrawabled,
 .canvaaas-clone.undrawabled{
 
@@ -235,11 +219,11 @@
 	/* pointer-events: none; */
 }
 
-/* innerlint */
+/* innerline */
 .canvaaas-innerline{
 	position: absolute;
 	pointer-events: none;
-	border-color: inherit;
+	border-color: #777;
 
 	/* hide */
 	display: none;
@@ -281,7 +265,7 @@
 .canvaaas-outline{
 	position: absolute;
 	pointer-events: none;
-	border-color: inherit;
+	border-color: #000;
 
 	/* hide */
 	display: none;
@@ -347,7 +331,7 @@
 	height: 6px;
 	border: 1px solid;
 	background-color: #fff;
-	border-color: inherit;
+	border-color: #000;
 }
 .canvaaas-resize-handle,
 .canvaaas-rotate-handle{

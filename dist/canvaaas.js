@@ -87,10 +87,9 @@
 			unfocusabled: "unfocusabled",
 			uneditabled: "uneditabled",
 			undrawabled: "undrawabled",
-			unshown: "unshown",
-			onEditing: "editing",
-			onFocused: "focused",
-			onFreezed: "freezed",
+			onEdit: "onEdit",
+			onFocus: "onFocus",
+			onDrag: "onDrag"
 		};
 
 		Object.freeze(defaultConfig);
@@ -342,7 +341,7 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClass(eventState.target, classNames.onEditing);
+				addClass(eventState.target, classNames.onEdit);
 
 				// event
 				document.addEventListener("mousemove", handlers.onMove, false);
@@ -393,11 +392,11 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				// class
+				removeClass(eventState.target, classNames.onEdit);
+				
 				// toggle
 				eventState.onMove = false;
-
-				// class
-				removeClass(eventState.target, classNames.onEditing);
 
 				// event
 				document.removeEventListener("mousemove", handlers.onMove, false);
@@ -463,6 +462,7 @@
 				}
 
 				// initialize
+				eventState.handle = handle;
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
@@ -478,7 +478,8 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClass(eventState.target, classNames.onEditing);
+				addClass(eventState.target, classNames.onEdit);
+				eventState.handle.classList.add(classNames.onDrag);
 
 				// event
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -659,11 +660,13 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				// class
+				removeClass(eventState.target, classNames.onEdit);
+				eventState.handle.classList.remove(classNames.onDrag);
+
 				// toggle
 				eventState.onResize = false;
-
-				// class
-				removeClass(eventState.target, classNames.onEditing);
+				eventState.handle = undefined;
 
 				// event
 				document.removeEventListener("mousemove", handlers.onResize, false);
@@ -708,7 +711,7 @@
 					saveUndo(eventState.target);
 
 					// class
-					addClass(eventState.target, classNames.onEditing);
+					addClass(eventState.target, classNames.onEdit);
 				}
 
 				var state = getState(eventState.target);
@@ -742,7 +745,7 @@
 					eventState.onZoom = false;
 
 					// class
-					removeClass(eventState.target, classNames.onEditing);
+					removeClass(eventState.target, classNames.onEdit);
 
 					// callback
 					if (config.edit) {
@@ -785,7 +788,7 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClass(eventState.target, classNames.onEditing);
+				addClass(eventState.target, classNames.onEdit);
 
 				// event
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
@@ -826,11 +829,11 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				// class
+				removeClass(eventState.target, classNames.onEdit);
+
 				// toggle
 				eventState.onZoom = false;
-
-				// class
-				removeClass(eventState.target, classNames.onEditing);
 
 				// event
 				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
@@ -861,12 +864,14 @@
 
 				// toggle
 				eventState.onRotate = true;
+				eventState.handle = e.target;
 
 				// cache
 				saveUndo(eventState.target);
 
 				// class
-				addClass(eventState.target, classNames.onEditing);
+				addClass(eventState.target, classNames.onEdit);
+				eventState.handle.classList.add(classNames.onDrag);
 
 				// event
 				document.addEventListener("mousemove", handlers.onRotate, false);
@@ -924,11 +929,13 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				// class
+				removeClass(eventState.target, classNames.onEdit);
+				eventState.handle.classList.remove(classNames.onDrag);
+
 				// toggle
 				eventState.onRotate = false;
-
-				// class
-				removeClass(eventState.target, classNames.onEditing);
+				eventState.handle = undefined;
 
 				// event
 				document.removeEventListener("mousemove", handlers.onRotate, false);
@@ -1713,18 +1720,18 @@
 				var originObj = getOrigin(id);
 				var cloneObj = getClone(id);
 
-				if (!canvasObject.classList.contains(classNames.onFocused)) {
-					canvasObject.classList.add(classNames.onFocused);
+				if (!canvasObject.classList.contains(classNames.onFocus)) {
+					canvasObject.classList.add(classNames.onFocus);
 				}
-				if (!mirrorObject.classList.contains(classNames.onFocused)) {
-					mirrorObject.classList.add(classNames.onFocused);
+				if (!mirrorObject.classList.contains(classNames.onFocus)) {
+					mirrorObject.classList.add(classNames.onFocus);
 				}
 
-				if (!originObj.classList.contains(classNames.onFocused)) {
-					originObj.classList.add(classNames.onFocused);
+				if (!originObj.classList.contains(classNames.onFocus)) {
+					originObj.classList.add(classNames.onFocus);
 				}
-				if (!cloneObj.classList.contains(classNames.onFocused)) {
-					cloneObj.classList.add(classNames.onFocused);
+				if (!cloneObj.classList.contains(classNames.onFocus)) {
+					cloneObj.classList.add(classNames.onFocus);
 				}
 
 				originObj.removeEventListener("mousedown", handlers.focusIn, false);
@@ -1780,18 +1787,18 @@
 				var originObj = getOrigin(id);
 				var cloneObj = getClone(id);
 
-				if (canvasObject.classList.contains(classNames.onFocused)) {
-					canvasObject.classList.remove(classNames.onFocused);
+				if (canvasObject.classList.contains(classNames.onFocus)) {
+					canvasObject.classList.remove(classNames.onFocus);
 				}
-				if (mirrorObject.classList.contains(classNames.onFocused)) {
-					mirrorObject.classList.remove(classNames.onFocused);
+				if (mirrorObject.classList.contains(classNames.onFocus)) {
+					mirrorObject.classList.remove(classNames.onFocus);
 				}
 
-				if (originObj.classList.contains(classNames.onFocused)) {
-					originObj.classList.remove(classNames.onFocused);
+				if (originObj.classList.contains(classNames.onFocus)) {
+					originObj.classList.remove(classNames.onFocus);
 				}
-				if (cloneObj.classList.contains(classNames.onFocused)) {
-					cloneObj.classList.remove(classNames.onFocused);
+				if (cloneObj.classList.contains(classNames.onFocus)) {
+					cloneObj.classList.remove(classNames.onFocus);
 				}
 
 				originObj.addEventListener("mousedown", handlers.focusIn, false);
@@ -2961,18 +2968,18 @@
 			}
 
 			if (!canvasState.drawabled) {
-				if (!canvasObject.classList.contains(classNames.unshown)) {
-					canvasObject.classList.add(classNames.unshown);
+				if (!canvasObject.classList.contains(classNames.undrawabled)) {
+					canvasObject.classList.add(classNames.undrawabled);
 				}
-				if (!mirrorObject.classList.contains(classNames.unshown)) {
-					mirrorObject.classList.add(classNames.unshown);
+				if (!mirrorObject.classList.contains(classNames.undrawabled)) {
+					mirrorObject.classList.add(classNames.undrawabled);
 				}
 			} else {
-				if (canvasObject.classList.contains(classNames.unshown)) {
-					canvasObject.classList.remove(classNames.unshown);
+				if (canvasObject.classList.contains(classNames.undrawabled)) {
+					canvasObject.classList.remove(classNames.undrawabled);
 				}
-				if (mirrorObject.classList.contains(classNames.unshown)) {
-					mirrorObject.classList.remove(classNames.unshown);
+				if (mirrorObject.classList.contains(classNames.undrawabled)) {
+					mirrorObject.classList.remove(classNames.undrawabled);
 				}
 			}
 
