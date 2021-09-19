@@ -10,6 +10,7 @@
   }
 </style>
 ```
+
 ```html
 <!-- MAIN ELEMENT -->
 <div id="target"></div>
@@ -32,8 +33,17 @@
 ```html
 <script>
   canvaaas.config({
-    allowedExtensions: ["jpg","jpeg","png","gif","svg","svg+xml","tiff","tif","webp",], // array
-    deniedTagNamesToFocusOut: ["A","BUTTON","INPUT","LABEL","TEXTAREA","SELECT","OPTION",], // array
+    allowedExtensions: [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "svg",
+      "svg+xml",
+      "tiff",
+      "tif",
+      "webp"
+    ], // array
     cacheLevels: 999, // number
     containerAspectRatio: 1, // number, width / height
     maxContainerWidth: 1, // number, 0 ~ 1
@@ -104,41 +114,45 @@
   });
 </script>
 ```
+
 5. Add Image (optional)
 
 ```html
 <input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
 ```
+
 ```html
 <script>
   canvaaas.uploadUrl( Your url, function(err, res){
-  	if (err) {
-  		console.log(err);
-  		return false;
-  	}
-  	console.log(res);
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log(res);
   });
 </script>
 ```
+
 ```html
 <script>
   canvaaas.uploadState( Your JSON or JSON.stringify(Your JSON), function(err, res){
-  	if (err) {
-  		console.log(err);
-  		return false;
-  	}
-  	console.log(res);
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log(res);
   });
 </script>
 ```
+
 ```html
 <script>
   canvaaas.uploadElement( <img> , function(err, res){
-  	if (err) {
-  		console.log(err);
-  		return false;
-  	}
-  	console.log(res);
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log(res);
   });
 </script>
 ```

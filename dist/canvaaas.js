@@ -5356,7 +5356,7 @@
 				}
 				return false;
 			}
-			if (!isObject(options)) {
+			if (!isObject(canvState)) {
 				if (cb) {
 					cb("Argument is not object");
 				}
