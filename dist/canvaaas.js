@@ -5373,10 +5373,10 @@
 			copyObject(cs, defaultCanvasState);
 
 			if (isString(canvState.filename)) {
-				cs.filename = toString(options.filename);
+				cs.filename = toString(canvState.filename);
 			}
 			if (isString(canvState.mimeType)) {
-				cs.mimeType = toString(options.mimeType);
+				cs.mimeType = toString(canvState.mimeType);
 			}
 			if (isString(canvState.dataType)) {
 				if (canvState.dataType.toLowerCase() === "url") {
