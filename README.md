@@ -45,40 +45,40 @@
     restrictRotateRadians: 45, // number
     restrictResize: true, // boolean
     canvas: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("config.canvas callback", res);
-		},
-		upload: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("config.upload callback", res);
-		},
-		focus: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("config.focus callback", res);
-		},
-		edit: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("config.edit callback", res);
-		},
-		remove: function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("config.remove callback", res);
-		},
+      if (err) {
+        console.log(err);
+        return false;
+      }
+      console.log("config.canvas callback", res);
+    },
+    upload: function(err, res){
+      if (err) {
+        console.log(err);
+        return false;
+      }
+      console.log("config.upload callback", res);
+    },
+    focus: function(err, res){
+      if (err) {
+        console.log(err);
+        return false;
+      }
+        console.log("config.focus callback", res);
+    },
+    edit: function(err, res){
+      if (err) {
+        console.log(err);
+        return false;
+      }
+      console.log("config.edit callback", res);
+    },
+    remove: function(err, res){
+      if (err) {
+        console.log(err);
+        return false;
+      }
+      console.log("config.remove callback", res);
+    },
   });
 </script>
 ```
