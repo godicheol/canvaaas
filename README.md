@@ -40,27 +40,41 @@
             restrictRotate: true, // boolean
             restrictRotateRadians: 45, // number
             restrictResize: true, // boolean
-            upload: function(err, res){
-              if (err) {
-                console.log(err);
-                return false;
-              }
-              console.log("config.upload callback", res);
-            },
-            focus: function(err, res){
-              if (err) {
-                console.log(err);
-                return false;
-              }
-              console.log("config.focus callback", res);
-            },
-            edit: function(err, res){
-              if (err) {
-                console.log(err);
-                return false;
-              }
-              console.log("config.edit callback", res);
-            },
+            canvas: function(err, res){
+      				if (err) {
+      					console.log(err);
+      					return false;
+      				}
+      				console.log("config.canvas callback", res);
+      			},
+      			upload: function(err, res){
+      				if (err) {
+      					console.log(err);
+      					return false;
+      				}
+      				console.log("config.upload callback", res);
+      			},
+      			focus: function(err, res){
+      				if (err) {
+      					console.log(err);
+      					return false;
+      				}
+      				console.log("config.focus callback", res);
+      			},
+      			edit: function(err, res){
+      				if (err) {
+      					console.log(err);
+      					return false;
+      				}
+      				console.log("config.edit callback", res);
+      			},
+      			remove: function(err, res){
+      				if (err) {
+      					console.log(err);
+      					return false;
+      				}
+      				console.log("config.remove callback", res);
+      			},
           });
         </script>
 
@@ -86,8 +100,9 @@
 
 5. Add Image (optional)
 
-        <input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
-
+```html
+<input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
+```
         <script>
           canvaaas.uploadUrl( Your url, function(err, res){
           	if (err) {
