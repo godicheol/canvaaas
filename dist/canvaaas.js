@@ -68,10 +68,10 @@
 		};
 
 		var defaultCanvasState = {
-			filename: "untitled",
+			filename: "untitled", // without extension
 			quality: 0.92,
 			mimeType: "image/png",
-			dataType: "file",
+			dataType: "url", // url, file
 			editabled: true,
 			focusabled: true,
 			drawabled: true,
@@ -1052,6 +1052,7 @@
 			return tmp;
 		}
 
+		// deprecated
 		function getCanvas() {
 			var tmp = {};
 			for (var key in canvasState) {
@@ -1364,6 +1365,27 @@
 			}
 		}
 
+		function exportCanvasState() {
+			var tmp = {};
+			tmp.filename = canvasState.filename;
+			tmp.dataType = canvasState.dataType;
+			tmp.mimeType = canvasState.mimeType;
+			tmp.quality = canvasState.quality;
+			tmp.width = canvasState.originalWidth;
+			tmp.height = canvasState.originalHeight;
+			tmp.editabled = canvasState.editabled;
+			tmp.focusabled = canvasState.focusabled;
+			tmp.drawabled = canvasState.drawabled;
+			tmp.backgroundColor = canvasState.backgroundColor;
+			tmp.checker = canvasState.checker;
+			tmp.overlay = canvasState.overlay;
+
+			var ar = getAspectRatio(tmp.width, tmp.height);
+			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
+
+			return tmp;
+		}
+
 		function importState(state) {
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
@@ -1466,11 +1488,17 @@
 			}
 
 			var oar = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
-			var ar = getAspectRatio(tmp.width, tmp.height);
+			var iar = getAspectRatio(tmp.width, tmp.height);
+			var car = getAspectRatio(canvasState.originalWidth, canvasState.originalHeight);
+
 			tmp.originalAspectRatio = "" + oar[0] + ":" + oar[1];
-			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
+			tmp.aspectRatio = "" + iar[0] + ":" + iar[1];
 			tmp.left = tmp.x - (0.5 * tmp.width);
 			tmp.top = tmp.y - (0.5 * tmp.height);
+
+			tmp.canvasWidth = canvasState.originalWidth;
+			tmp.canvasHeight = canvasState.originalHeight;
+			tmp.canvasAspectRatio = "" + car[0] + ":" + car[1];
 
 			return tmp;
 		}
@@ -2478,7 +2506,7 @@
 		// asynchronous
 		function drawImage(mainCanvas, canvasWidth, imgState, cb) {
 
-			// canvasWidth => canvasState.originalWidth
+			// canvasWidth => canvasState.originalWidth of imgState
 			//
 			// imageState = {
 			// 	src,
@@ -4592,6 +4620,9 @@
 				!containerState.width ||
 				!containerState.height
 			) {
+				if (config.canvas) {
+					config.canvas("Container has been not initialized");
+				}
 				if (cb) {
 					cb("Container has been not initialized");
 				}
@@ -4602,6 +4633,9 @@
 				canvasState.originalWidth ||
 				canvasState.originalHeight
 			) {
+				if (config.canvas) {
+					config.canvas("Canvas already initialized");
+				}
 				if (cb) {
 					cb("Canvas already initialized");
 				}
@@ -4609,6 +4643,9 @@
 			}
 
 			if (!isObject(options)) {
+				if (config.canvas) {
+					config.canvas("Argument is not object");
+				}
 				if (cb) {
 					cb("Argument is not object");
 				}
@@ -4621,6 +4658,9 @@
 				(!isString(options.unit) && options.unit !== undefined) ||
 				(!isNumeric(options.dpi) && options.dpi !== undefined)
 			) {
+				if (config.canvas) {
+					config.canvas("Argument is not allowed");
+				}
 				if (cb) {
 					cb("Argument is not allowed");
 				}
@@ -4639,6 +4679,9 @@
 				dpi: toNumber(options.dpi)
 			});
 			if (!sizes) {
+				if (config.canvas) {
+					config.canvas("Argument is not allowed");
+				}
 				if (cb) {
 					cb("Argument is not allowed");
 				}
@@ -4660,10 +4703,13 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.close = function(cb) {
@@ -4688,13 +4734,16 @@
 			clearCanvas();
 
 			if (cb) {
-				cb(null, getCanvas());
+				cb(null, exportCanvasState());
 			}
-			return getCanvas();
+			return exportCanvasState();
 		}
 
 		myObject.resize = function(options, cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4705,6 +4754,9 @@
 				!containerState.width ||
 				!containerState.height
 			) {
+				if (config.canvas) {
+					config.canvas("Container has been not initialized");
+				}
 				if (cb) {
 					cb("Container has been not initialized");
 				}
@@ -4715,6 +4767,9 @@
 				!canvasState.originalWidth ||
 				!canvasState.originalHeight
 			) {
+				if (config.canvas) {
+					config.canvas("Canvas has been not initialized");
+				}
 				if (cb) {
 					cb("Canvas has been not initialized");
 				}
@@ -4722,6 +4777,9 @@
 			}
 
 			if (!isObject(options)) {
+				if (config.canvas) {
+					config.canvas("Argument is not object");
+				}
 				if (cb) {
 					cb("Argument is not object");
 				}
@@ -4734,6 +4792,9 @@
 				(!isString(options.unit) && options.unit !== undefined) ||
 				(!isNumeric(options.dpi) && options.dpi !== undefined)
 			) {
+				if (config.canvas) {
+					config.canvas("Argument is not allowed");
+				}
 				if (cb) {
 					cb("Argument is not allowed");
 				}
@@ -4753,6 +4814,9 @@
 				dpi: toNumber(options.dpi)
 			});
 			if (!sizes) {
+				if (config.canvas) {
+					config.canvas("Argument is not allowed");
+				}
 				if (cb) {
 					cb("Argument is not allowed");
 				}
@@ -4799,10 +4863,13 @@
 			undoCaches = [];
 			redoCaches = [];
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.setEditable = function(cb) {
@@ -4810,10 +4877,13 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.unsetEditable = function(cb) {
@@ -4821,14 +4891,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.showDrawables = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4839,14 +4915,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.hideDrawables = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4857,14 +4939,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.setFocusable = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4875,14 +4963,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.unsetFocusable = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4893,14 +4987,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.setBackground = function(colour, cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4908,6 +5008,9 @@
 			}
 
 			if (!isString(colour)) {
+				if (config.canvas) {
+					config.canvas("Argument is not string");
+				}
 				if (cb) {
 					cb("Argument is not string");
 				}
@@ -4940,14 +5043,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.unsetBackground = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4958,14 +5067,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.showOverlay = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4976,14 +5091,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				return cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.hideOverlay = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -4994,14 +5115,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				return cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.showChecker = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -5012,14 +5139,20 @@
 
 			initCanvas();
 
-			if (cb) {
-				return cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		myObject.hideChecker = function(cb) {
 			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
 				if (cb) {
 					cb("Canvas has been uneditabled");
 				}
@@ -5030,10 +5163,13 @@
 
 			initCanvas();
 
-			if (cb) {
-				return cb(null, getCanvas());
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
 			}
-			return getCanvas();
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
 		}
 
 		//
@@ -5041,17 +5177,15 @@
 		//
 
 		myObject.draw = function(options, cb){
-			/*
-				options = {
-					filename(optional),
-					fileType(optional),
-					mimeType(optional),
-					width(optional),
-					height(optional),
-					backgroundColor(optional),
-					quality(optional),
-				}
-			*/
+			// options = {
+			// 	filename(optional),
+			// 	dataType(optional),
+			// 	mimeType(optional),
+			// 	width(optional),
+			// 	height(optional),
+			// 	backgroundColor(optional),
+			// 	quality(optional),
+			// }
 
 			if (eventState.onDraw === true) {
 				if (cb) {
@@ -5060,51 +5194,51 @@
 				return false;
 			}
 
-			var filename = canvasState.filename || "untitled";
-			var mimeType = canvasState.mimeType || "image/png";
-			var dataType = canvasState.dataType || "file";
-			var quality = canvasState.quality || 0.92;
-			var backgroundColor = canvasState.backgroundColor || "#FFFFFF";
-			var width = canvasState.originalWidth;
-			var height = canvasState.originalHeight;
+			var cs = {};
+			copyObject(cs, canvasState);
+
+			cs.width = canvasState.originalWidth;
+			cs.height = canvasState.originalHeight;
 
 			if (isObject(options)) {
 				if (isString(options.filename)) {
-					filename = options.filename;
+					cs.filename = toString(options.filename);
 				}
 				if (isString(options.mimeType)) {
-					mimeType = options.mimeType;
+					cs.mimeType = toString(options.mimeType);
 				}
 				if (isString(options.dataType)) {
 					if (options.dataType.toLowerCase() === "url") {
-						dataType = "url";
+						cs.dataType = "url";
+					} else if (options.dataType.toLowerCase() === "file") {
+						cs.dataType = "file";
 					}
 				}
 				if (isNumeric(options.quality)) {
-					quality = toNumber(options.quality);
+					cs.quality = toNumber(options.quality);
 				}
 				if (isString(options.backgroundColor)) {
-					backgroundColor = options.backgroundColor;
+					cs.backgroundColor = toString(options.backgroundColor);
 				}
 				if (isNumeric(options.width)) {
-					width = toNumber(options.width);
+					cs.width = toNumber(options.width);
 				}
 				if (isNumeric(options.height)) {
-					height = toNumber(options.height);
+					cs.height = toNumber(options.height);
 				}
 			}
 
-			var canvasSizes = getContainedSizes(
-				canvasState.originalWidth,
-				canvasState.originalHeight,
-				width,
-				height,
+			var sizes = getContainedSizes(
+				cs.originalWidth,
+				cs.originalHeight,
+				cs.width,
+				cs.height,
 			);
 
 			var canvas = drawCanvas({
-				width: canvasSizes[0],
-				height: canvasSizes[1],
-				backgroundColor: backgroundColor
+				width: sizes[0],
+				height: sizes[1],
+				backgroundColor: cs.backgroundColor
 			});
 			if (!canvas) {
 				if (cb) {
@@ -5125,11 +5259,11 @@
 			});
 
 			var result = {
-				filename: filename,
-				mimeType: mimeType,
-				dataType: dataType,
-				quality: quality,
-				backgroundColor: backgroundColor,
+				filename: cs.filename,
+				mimeType: cs.mimeType,
+				dataType: cs.dataType,
+				quality: cs.quality,
+				backgroundColor: cs.backgroundColor,
 				width: canvas.width,
 				height: canvas.height,
 				numberOfImages: drawables.length,
@@ -5143,34 +5277,34 @@
 			var index = drawables.length;
 			var count = 0;
 
-			setTimeout(function(elem){
+			setTimeout(function(e){
 				recursiveFunc();
-			}, 100)
+			}, 100);
 
 			function recursiveFunc() {
 				if (count < index) {
 					// recursive
-					var imgState = drawables[count];
-					drawImage(canvas, canvasState.originalWidth, imgState, function(err) {
+					var state = drawables[count];
+					drawImage(canvas, state.canvasWidth, state, function(err) {
 						if (err) {
 							imageResults.push({
-								id: imgState.id,
+								id: state.id,
 								err: err
 							});
 						} else {
-							imageResults.push(imgState);
+							imageResults.push(state);
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					// end
-					var dataURL = canvas.toDataURL(mimeType, quality);
+					var dataURL = canvas.toDataURL(cs.mimeType, cs.quality);
 					var data;
-					if (dataType === "url") {
+					if (cs.dataType === "url") {
 						data = dataURL;
-					} else if (dataType === "file") {
-						data = dataURLtoFile(dataURL, filename);
+					} else if (cs.dataType === "file") {
+						data = dataURLtoFile(dataURL, cs.filename);
 					} else {
 						if (cb) {
 							cb("DataType not found");
@@ -5191,30 +5325,30 @@
 			}
 		}
 
-		myObject.drawTo = function(options, canvasSizes, imgStates, cb){
-			/*
-				options = {
-					filename(optional),
-					fileType(optional),
-					mimeType(optional),
-					width(optional),
-					height(optional),
-					backgroundColor(optional),
-					quality(optional),
-				}
+		myObject.drawTo = function(canvState, imgStates, cb){
+			// canvState = {
+			// 	filename(optional),
+			// 	dataType(optional),
+			// 	mimeType(optional),
+			// 	width(required),
+			// 	height(required),
+			// 	backgroundColor(optional),
+			// 	quality(optional),
+			// 	drawWidth(optional),
+			// 	drawHeight(optional),
+			// }
 
-				canvState = {
-					filename(optional),
-					width(required, canvasState.originalWidth),
-					height(required, canvasState.originalHeight),
-					backgroundColor(optional),
-					mimeType(optional),
-					dataType(optional),
-					quality(optional),
-				}
-
-				imgStates => canvaaas.export()
-			*/
+			// imgStates = [{
+			// 	canvasWidth(required),
+			// 	src(required),
+			// 	index(required),
+			// 	width(required),
+			// 	height(required),
+			// 	rotate(required),
+			// 	scaleX(required),
+			// 	scaleY(required),
+			// 	opacity(required),
+			// }]
 
 			if (eventState.onDraw === true) {
 				if (cb) {
@@ -5222,7 +5356,7 @@
 				}
 				return false;
 			}
-			if (!isObject(canvasSizes)) {
+			if (!isObject(options)) {
 				if (cb) {
 					cb("Argument is not object");
 				}
@@ -5234,81 +5368,67 @@
 				}
 				return false;
 			}
+
+			var cs = {};
+			copyObject(cs, defaultCanvasState);
+
+			if (isString(canvState.filename)) {
+				cs.filename = toString(options.filename);
+			}
+			if (isString(canvState.mimeType)) {
+				cs.mimeType = toString(options.mimeType);
+			}
+			if (isString(canvState.dataType)) {
+				if (canvState.dataType.toLowerCase() === "url") {
+					cs.dataType = "url";
+				} else if (canvState.dataType.toLowerCase() === "file") {
+					cs.dataType = "file";
+				}
+			}
+			if (isNumeric(canvState.quality)) {
+				cs.quality = toNumber(canvState.quality);
+			}
+			if (isString(canvState.backgroundColor)) {
+				cs.backgroundColor = toString(canvState.backgroundColor);
+			}
+			if (isNumeric(canvState.width)) {
+				cs.width = toNumber(canvState.width);
+			}
+			if (isNumeric(canvState.height)) {
+				cs.height = toNumber(canvState.height);
+			}
+			if (isNumeric(canvState.drawWidth)) {
+				cs.drawWidth = toNumber(canvState.drawWidth);
+			} else {
+				cs.drawWidth = toNumber(canvState.width);
+			}
+			if (isNumeric(canvState.drawHeight)) {
+				cs.drawHeight = toNumber(canvState.drawHeight);
+			} else {
+				cs.drawHeight = toNumber(canvState.height);
+			}
+
 			if (
-				!isNumeric(canvasSizes.width) ||
-				!isNumeric(canvasSizes.height) ||
-				(!isString(canvasSizes.unit) && canvasSizes.unit !== undefined) ||
-				(!isNumeric(canvasSizes.dpi) && canvasSizes.dpi !== undefined)
+				!cs.width ||
+				!cs.height
 			) {
 				if (cb) {
-					cb("Argument is not allowed");
+					cb("Argument not found");
 				}
 				return false;
-			}
-			if (canvasSizes.unit === undefined) {
-				canvasSizes.unit = "px";
-			}
-			if (canvasSizes.dpi === undefined) {
-				canvasSizes.dpi = 300;
-			}
-			var convertedSizes = dimensionsToPx({
-				width: toNumber(canvasSizes.width),
-				height: toNumber(canvasSizes.height),
-				unit: toString(canvasSizes.unit),
-				dpi: toNumber(canvasSizes.dpi)
-			});
-			if (!convertedSizes) {
-				if (cb) {
-					cb("Argument is not allowed");
-				}
-				return false;
-			}
+			};
 
-			var filename = "untitled";
-			var mimeType = "image/png";
-			var dataType = "file";
-			var quality = 0.92;
-			var backgroundColor = "#FFFFFF";
-			var width = convertedSizes[0];
-			var height = convertedSizes[1];
-
-			if (isObject(options)) {
-				if (isString(options.filename)) {
-					filename = options.filename;
-				}
-				if (isString(options.mimeType)) {
-					mimeType = options.mimeType;
-				}
-				if (isString(options.dataType)) {
-					if (options.dataType.toLowerCase() === "url") {
-						dataType = "url";
-					}
-				}
-				if (isNumeric(options.quality)) {
-					quality = toNumber(options.quality);
-				}
-				if (isString(options.backgroundColor)) {
-					backgroundColor = options.backgroundColor;
-				}
-				if (isNumeric(options.width)) {
-					width = toNumber(options.width);
-				}
-				if (isNumeric(options.height)) {
-					height = toNumber(options.height);
-				}
-			}
-
-			var canvSizes = getContainedSizes(
-				convertedSizes[0],
-				convertedSizes[1],
-				width,
-				height,
+			var sizes = getContainedSizes(
+				cs.width,
+				cs.height,
+				cs.drawWidth,
+				cs.drawHeight,
 			);
 
 			var canvas = drawCanvas({
-				width: canvSizes[0],
-				height: canvSizes[1],
-				backgroundColor: backgroundColor
+				width: sizes[0],
+				height: sizes[1],
+				backgroundColor: cs.backgroundColor
 			});
 			if (!canvas) {
 				if (cb) {
@@ -5329,7 +5449,9 @@
 							copied.src = copied.path;
 						}
 					}
-					drawables.push(copied);
+					if (copied.src) {
+						drawables.push(copied);
+					}
 				}
 			}
 
@@ -5338,11 +5460,11 @@
 			});
 
 			var result = {
-				filename: filename,
-				mimeType: mimeType,
-				dataType: dataType,
-				quality: quality,
-				backgroundColor: backgroundColor,
+				filename: cs.filename,
+				mimeType: cs.mimeType,
+				dataType: cs.dataType,
+				quality: cs.quality,
+				backgroundColor: cs.backgroundColor,
 				width: canvas.width,
 				height: canvas.height,
 				numberOfImages: drawables.length,
@@ -5356,34 +5478,34 @@
 			var index = drawables.length;
 			var count = 0;
 
-			setTimeout(function(elem){
+			setTimeout(function(e){
 				recursiveFunc();
-			}, 100)
+			}, 100);
 
 			function recursiveFunc() {
 				if (count < index) {
 					// recursive
-					var imgState = drawables[count];
-					drawImage(canvas, canvSizes[0], imgState, function(err) {
+					var state = drawables[count];
+					drawImage(canvas, state.canvasWidth, state, function(err) {
 						if (err) {
 							imageResults.push({
-								id: imgState.id,
+								id: state.id,
 								err: err
 							});
 						} else {
-							imageResults.push(imgState);
+							imageResults.push(state);
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					// end
-					var dataURL = canvas.toDataURL(mimeType, quality);
+					var dataURL = canvas.toDataURL(cs.mimeType, cs.quality);
 					var data;
-					if (dataType === "url") {
+					if (cs.dataType === "url") {
 						data = dataURL;
-					} else if (dataType === "file") {
-						data = dataURLtoFile(dataURL, filename);
+					} else if (cs.dataType === "file") {
+						data = dataURLtoFile(dataURL, cs.filename);
 					} else {
 						if (cb) {
 							cb("DataType not found");
@@ -5465,9 +5587,25 @@
 
 		myObject.getCanvas = function(cb){
 			if (cb) {
-				cb(null, getCanvas());
+				cb(null, exportCanvasState());
 			}
-			return getCanvas();
+			return exportCanvasState();
+		}
+
+		myObject.getImages = function(cb){
+			var states = [];
+			imageStates.forEach(function(elem){
+				states.push(exportState(elem.id));
+			});
+
+			var results = states.sort(function(a, b){
+				return a.index - b.index;
+			});
+
+			if (cb) {
+				cb(null, results);
+			}
+			return results;
 		}
 
 		myObject.getUndo = function(cb){
@@ -5484,21 +5622,7 @@
 			return redoCaches.length;
 		}
 
-		myObject.export = function(cb){
-			var states = [];
-			imageStates.forEach(function(elem){
-				states.push(exportState(elem.id));
-			});
-
-			var results = states.sort(function(a, b){
-				return a.index - b.index;
-			});
-
-			if (cb) {
-				cb(null, results, getCanvas());
-			}
-			return results;
-		}
+		myObject.export = myObject.getImages;
 
 		myObject.import = function(states, cb){
 			if (!canvasState.editabled) {
@@ -5566,6 +5690,7 @@
 					if (cb) {
 						cb(null, results);
 					}
+					return false;
 				}
 			}
 		}
@@ -5632,12 +5757,66 @@
 			return exportState(id);
 		}
 
+		myObject.convert = function(src, desti, cb){
+			// src = canvasState or imageState
+
+			// desti = {
+			// 	width(required),
+			// 	height(required)
+			// }
+
+			if (
+				!isObject(src) ||
+				!isObject(desti)
+			) {
+				if (cb) {
+					cb("Argument not object");
+				}
+				return false;
+			}
+
+			if (
+				!isNumeric(src.width) ||
+				!isNumeric(src.height) ||
+				!isNumeric(desti.width) ||
+				!isNumeric(desti.height)
+			) {
+				if (cb) {
+					cb("Argument not found");
+				}
+				return false;
+			}
+
+			var tmp = {};
+			copyObject(tmp, src);
+
+			var containedSizes = getContainedSizes(
+				tmp.width,
+				tmp.height,
+				desti.width,
+				desti.height,
+			);
+
+
+
+			if (cb) {
+				cb(null, exportState(id));
+			}
+			return exportState(id);
+		}
+
+		//
 		// end
+		//
+
 		return myObject;
 
 	}
 
+	//
 	// global export
+	//
+
 	if (typeof(window.canvaaas) === 'undefined') {
 		window.canvaaas = canvaaas();
 	}
