@@ -5024,19 +5024,31 @@
 				colour.toLowerCase() === "transparent"
 			) {
 				colour = "transparent";
-			} else if (colour !== "") {
-				if (
-					colour.length === 3 ||
-					colour.length === 6
-				) {
-					if (colour.charAt(0) !== "#") {
-						colour = "#" + colour;
-					}
-				} else {
-					colour = undefined;
+			} else if (
+				colour.length < 6 ||
+				colour.length > 7
+			) {
+				if (config.canvas) {
+					config.canvas("Argument is not rgb format");
 				}
+				if (cb) {
+					cb("Argument is not rgb format");
+				}
+				return false;
 			} else {
-				colour = undefined;
+				if (colour.charAt(0) !== "#") {
+					colour = "#" + colour;
+				}
+
+				if (colour.length !== 7) {
+					if (config.canvas) {
+						config.canvas("Argument is not rgb format");
+					}
+					if (cb) {
+						cb("Argument is not rgb format");
+					}
+					return false;
+				}
 			}
 
 			canvasState.backgroundColor = colour;
