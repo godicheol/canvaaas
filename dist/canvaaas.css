@@ -12,8 +12,8 @@
 
 /* on drag (handle only) */
 .onDrag .canvaaas-handle-box{
-	width: 12px;
-	height: 12px;
+	width: 24px;
+	height: 24px;
 }
 
 /* canvas on focus */
@@ -318,6 +318,17 @@
 }
 
 /* handle */
+.canvaaas-handle{
+	position: absolute;
+	display: block;
+	width: 24px; /* click space */
+	height: 24px; /* click space */
+	cursor: grab;
+	border-color: inherit;
+
+	/* hide */
+	display: none;
+}
 .canvaaas-handle-box{
 	position: absolute;
 	top: 50%;
@@ -331,63 +342,42 @@
 	background-color: #fff;
 	border-color: #000;
 }
-
-.canvaaas-handle{
-	position: absolute;
-	display: block;
-	width: 24px; /* click space */
-	height: 24px; /* click space */
-	cursor: grab;
-	border-color: inherit;
-
-	/* hide */
-	display: none;
-}
-
-.canvaaas-handle-resize.canvaaas-handle-n,
-.canvaaas-handle-rotate.canvaaas-handle-n{
+.canvaaas-handle-n{
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-ne,
-.canvaaas-handle-rotate.canvaaas-handle-ne{
+.canvaaas-handle-ne{
 	top: 0;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-e,
-.canvaaas-handle-rotate.canvaaas-handle-e{
+.canvaaas-handle-e{
 	top: 50%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-se,
-.canvaaas-handle-rotate.canvaaas-handle-se{
+.canvaaas-handle-se{
 	top: 100%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-s,
-.canvaaas-handle-rotate.canvaaas-handle-s{
+.canvaaas-handle-s{
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-sw,
-.canvaaas-handle-rotate.canvaaas-handle-sw{
+.canvaaas-handle-sw{
 	top: 100%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-w,
-.canvaaas-handle-rotate.canvaaas-handle-w{
+.canvaaas-handle-w{
 	top: 50%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-resize.canvaaas-handle-nw,
-.canvaaas-handle-rotate.canvaaas-handle-nw{
+.canvaaas-handle-nw{
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
@@ -404,34 +394,22 @@
 .canvaaas-handle-rotate.canvaaas-handle-sw,
 .canvaaas-handle-rotate.canvaaas-handle-w,
 .canvaaas-handle-rotate.canvaaas-handle-nw{
-	display: none !important;
+	display: none;
 }
 
 /* mobile */
 @media only screen and (max-width: 768px) {
 
-	.canvaaas-handle-resize,
-	.canvaaas-handle-rotate{
+	.canvaaas-handle-rotate.canvaaas-handle-n{
+		top: -36px;
+	}
+
+	.canvaaas-handle{
 		width: 36px; /* touch space */
 		height: 36px; /* touch space */
 	}
 
 }
-
-/* cursor */
-.canvaaas-cursor-auto{cursor:auto !important;}
-.canvaaas-cursor-default{cursor: default !important;}
-.canvaaas-cursor-none{cursor: none !important;}
-.canvaaas-cursor-help{cursor: help !important;}
-.canvaaas-cursor-pointer{cursor: pointer !important;}
-.canvaaas-cursor-progress{cursor: progress !important;}
-.canvaaas-cursor-wait{cursor: wait !important;}
-.canvaaas-cursor-crosshair{cursor: crosshair !important;}
-.canvaaas-cursor-move{cursor: move !important;}
-.canvaaas-cursor-grab{cursor: grab !important;}
-.canvaaas-cursor-grabbing{cursor: grabbing !important;}
-.canvaaas-cursor-zoomIn{cursor: zoom-in !important;}
-.canvaaas-cursor-zoomOut{cursor: zoom-out !important;}
 
 /* loading */
 /* https://loading.io/css/ */
