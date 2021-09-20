@@ -115,7 +115,7 @@
 </script>
 ```
 
-5. Add Image (optional)
+5. Open Image
 
 ```html
 <input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
@@ -146,6 +146,46 @@
 ```
 
 ```html
+<img
+  id="blahblah"
+  src="./img/1.png"
+  data-id = "1"
+  data-src = "./img/1.png"
+  data-index = "1"
+  data-width = "600"
+  data-height = "600"
+  data-x = "399.07235621521335"
+  data-y = "808.7198515769946"
+  data-rotate = "17.46323891797897"
+  data-scaleX = "1"
+  data-scaleY = "1"
+  data-opacity = "1"
+  data-restricted = "false"
+  data-focusabled = "true"
+  data-editabled = "true"
+  data-drawabled = "true">
+
+<img
+  id="blahblah"
+  src="./img/2.jpg"
+  data-state='{
+    "id": "2",
+    "type": "url",
+    "index": 2,
+    "width": 594.2754728305664,
+    "height": 792.367297107422,
+    "x": 1629.1280148423007,
+    "y": 366.2337662337663,
+    "rotate": 383.231324008005,
+    "scaleX": 1,
+    "scaleY": -1,
+    "opacity": 1,
+    "restricted": false,
+    "focusabled": true,
+    "editabled": true,
+    "drawabled": true
+  }'>
+
 <script>
   canvaaas.uploadElement( <img> , function(err, res){
     if (err) {
@@ -155,4 +195,47 @@
     console.log(res);
   });
 </script>
+```
+
+6. Save File
+
+```html
+canvaaas.draw({
+  filename: 'thumbnail', // optional, default "untitled"
+  mimeType: 'image/png', // optional, default "image/png"
+  dataType: 'url',  // optional, "url" or "file", default "url"
+  width: 256, // optional, default canvasWidth
+  height: 256, // optional, default canvasHeight
+  quality: 0.5, // optional, default 0.92
+  backgroundColor: '#000000', // optional, rgb format, default "#FFFFFF"
+}, function(err, res, result){
+  if (err) {
+    console.log(err);
+    return false;
+  }
+  console.log(res, result);
+});
+```
+
+7. Save File from JSON Data
+```html
+canvaaas.drawTo({
+  filename: 'TEST', // optional, default "untitled"
+  quality: 0.92, // optional, default 0.92
+  mimeType: 'image/png', // optional, default "image/png"
+  dataType: 'url', // optional, default "url"
+  backgroundColor: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
+  width: 1800, // required, px
+  height: 1200, // required, px
+  drawWidth: 3600, // optional, default width
+  drawHeight: 3600 // optional, default height
+},
+exportedStates, // array, imageState with src
+function(err, res, result){
+  if (err) {
+    console.log(err);
+    return false;
+  }
+  canvaaas.download(res, result.filename); // iOS not supported
+})
 ```
