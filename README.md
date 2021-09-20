@@ -239,7 +239,7 @@
       console.log(err);
       return false;
     }
-    canvaaas.download(res, result.filename); // iOS not supported
-  })
+    console.log(res, result);
+  });
 </script>
 ```
