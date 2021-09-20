@@ -114,22 +114,22 @@
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-n'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-e'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-s'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-w'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-ne'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-nw'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-se'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-rotate-handle canvaaas-rotate-sw'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-n'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-e'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-s'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-w'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-ne'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-nw'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-se'><div class='canvaaas-handle'></div></div>";
-		imageTemplate += "<div class='canvaaas-resize-handle canvaaas-resize-sw'><div class='canvaaas-handle'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
 
 		var loadingTemplate = "";
 		loadingTemplate += "<div class='canvaaas-loading'>";
@@ -427,7 +427,7 @@
 
 				var state = getState(eventState.target);
 				var handle = e.target;
-				var direction;
+				var direction = getDirectionFromHandle(handle);
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -440,24 +440,7 @@
 					return false;
 				}
 
-				// deprecated
-				if (handle.classList.contains("canvaaas-resize-n")) {
-					direction = getFlippedDirection("n", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-ne")) {
-					direction = getFlippedDirection("ne", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-e")) {
-					direction = getFlippedDirection("e", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-se")) {
-					direction = getFlippedDirection("se", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-s")) {
-					direction = getFlippedDirection("s", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-sw")) {
-					direction = getFlippedDirection("sw", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-w")) {
-					direction = getFlippedDirection("w", state.scaleX, state.scaleY);
-				} else if (handle.classList.contains("canvaaas-resize-nw")) {
-					direction = getFlippedDirection("nw", state.scaleX, state.scaleY);
-				} else {
+				if (!direction) {
 					return false;
 				}
 
@@ -479,7 +462,7 @@
 
 				// class
 				addClass(eventState.target, classNames.onEdit);
-				eventState.handle.classList.add(classNames.onDrag);
+				addClassToHandle(eventState.handle, classNames.onDrag);
 
 				// event
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -662,7 +645,7 @@
 
 				// class
 				removeClass(eventState.target, classNames.onEdit);
-				eventState.handle.classList.remove(classNames.onDrag);
+				removeClassToHandle(eventState.handle, classNames.onDrag);
 
 				// toggle
 				eventState.onResize = false;
@@ -871,7 +854,7 @@
 
 				// class
 				addClass(eventState.target, classNames.onEdit);
-				eventState.handle.classList.add(classNames.onDrag);
+				addClassToHandle(eventState.handle, classNames.onDrag);
 
 				// event
 				document.addEventListener("mousemove", handlers.onRotate, false);
@@ -931,7 +914,7 @@
 
 				// class
 				removeClass(eventState.target, classNames.onEdit);
-				eventState.handle.classList.remove(classNames.onDrag);
+				removeClassToHandle(eventState.handle, classNames.onDrag);
 
 				// toggle
 				eventState.onRotate = false;
@@ -1372,6 +1355,128 @@
 			}
 		}
 
+		function addClassToHandle(handle, cls) {
+			var id = getId(handle.parentNode);
+			if (!id) {
+				return false;
+			}
+			var typ;
+			var direction;
+			if (handle.classList.contains("canvaaas-handle-rotate")) {
+				typ = ".canvaaas-handle-rotate";
+			} else if (handle.classList.contains("canvaaas-handle-resize")) {
+				typ = ".canvaaas-handle-resize";
+			} else {
+				return false;
+			}
+			if (handle.classList.contains("canvaaas-handle-n")) {
+				direction = ".canvaaas-handle-n";
+			} else if (handle.classList.contains("canvaaas-handle-ne")) {
+				direction = ".canvaaas-handle-ne";
+			} else if (handle.classList.contains("canvaaas-handle-e")) {
+				direction = ".canvaaas-handle-e";
+			} else if (handle.classList.contains("canvaaas-handle-se")) {
+				direction = ".canvaaas-handle-se";
+			} else if (handle.classList.contains("canvaaas-handle-s")) {
+				direction = ".canvaaas-handle-s";
+			} else if (handle.classList.contains("canvaaas-handle-sw")) {
+				direction = ".canvaaas-handle-sw";
+			} else if (handle.classList.contains("canvaaas-handle-w")) {
+				direction = ".canvaaas-handle-w";
+			} else if (handle.classList.contains("canvaaas-handle-nw")) {
+				direction = ".canvaaas-handle-nw";
+			} else {
+				return false;
+			}
+
+			var originObj = document.getElementById(originId + id);
+			var cloneObj = document.getElementById(cloneId + id);
+			if (
+				!originObj ||
+				!cloneObj
+			) {
+				return false;
+			}
+
+			var originHandle = originObj.querySelector("div" + typ + direction);
+			var cloneHandle = cloneObj.querySelector("div" + typ + direction);
+			if (
+				!originHandle ||
+				!cloneHandle
+			) {
+				return false;
+			}
+
+			if (!originHandle.classList.contains(cls)) {
+				originHandle.classList.add(cls);
+			}
+			if (!cloneHandle.classList.contains(cls)) {
+				cloneHandle.classList.add(cls);
+			}
+			return true;
+		}
+
+		function removeClassToHandle(handle, cls) {
+			var id = getId(handle.parentNode);
+			if (!id) {
+				return false;
+			}
+			var typ;
+			var direction;
+			if (handle.classList.contains("canvaaas-handle-rotate")) {
+				typ = ".canvaaas-handle-rotate";
+			} else if (handle.classList.contains("canvaaas-handle-resize")) {
+				typ = ".canvaaas-handle-resize";
+			} else {
+				return false;
+			}
+			if (handle.classList.contains("canvaaas-handle-n")) {
+				direction = ".canvaaas-handle-n";
+			} else if (handle.classList.contains("canvaaas-handle-ne")) {
+				direction = ".canvaaas-handle-ne";
+			} else if (handle.classList.contains("canvaaas-handle-e")) {
+				direction = ".canvaaas-handle-e";
+			} else if (handle.classList.contains("canvaaas-handle-se")) {
+				direction = ".canvaaas-handle-se";
+			} else if (handle.classList.contains("canvaaas-handle-s")) {
+				direction = ".canvaaas-handle-s";
+			} else if (handle.classList.contains("canvaaas-handle-sw")) {
+				direction = ".canvaaas-handle-sw";
+			} else if (handle.classList.contains("canvaaas-handle-w")) {
+				direction = ".canvaaas-handle-w";
+			} else if (handle.classList.contains("canvaaas-handle-nw")) {
+				direction = ".canvaaas-handle-nw";
+			} else {
+				return false;
+			}
+
+			var originObj = document.getElementById(originId + id);
+			var cloneObj = document.getElementById(cloneId + id);
+			if (
+				!originObj ||
+				!cloneObj
+			) {
+				return false;
+			}
+
+			var originHandle = originObj.querySelector("div" + typ + direction);
+			var cloneHandle = cloneObj.querySelector("div" + typ + direction);
+			if (
+				!originHandle ||
+				!cloneHandle
+			) {
+				return false;
+			}
+
+			if (originHandle.classList.contains(cls)) {
+				originHandle.classList.remove(cls);
+			}
+			if (cloneHandle.classList.contains(cls)) {
+				cloneHandle.classList.remove(cls);
+			}
+			return true;
+		}
+
 		function exportCanvasState() {
 			var tmp = {};
 			tmp.filename = canvasState.filename;
@@ -1740,12 +1845,12 @@
 				originObj.addEventListener("touchstart", handlers.startMove, false);
 				originObj.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				originObj.querySelectorAll("div.canvaaas-rotate-handle").forEach(function(elem){
+				originObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startRotate, false);
 					elem.addEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-resize-handle").forEach(function(elem){
+				originObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startResize, false);
 					elem.addEventListener("touchstart", handlers.startResize, false);
 				});
@@ -1756,12 +1861,12 @@
 				cloneObj.addEventListener("touchstart", handlers.startMove, false);
 				cloneObj.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneObj.querySelectorAll("div.canvaaas-rotate-handle").forEach(function(elem){
+				cloneObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startRotate, false);
 					elem.addEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-resize-handle").forEach(function(elem){
+				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startResize, false);
 					elem.addEventListener("touchstart", handlers.startResize, false);
 				});
@@ -1807,12 +1912,12 @@
 				originObj.removeEventListener("touchstart", handlers.startMove, false);
 				originObj.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				originObj.querySelectorAll("div.canvaaas-rotate-handle").forEach(function(elem){
+				originObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startRotate, false);
 					elem.removeEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-resize-handle").forEach(function(elem){
+				originObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startResize, false);
 					elem.removeEventListener("touchstart", handlers.startResize, false);
 				});
@@ -1823,12 +1928,12 @@
 				cloneObj.removeEventListener("touchstart", handlers.startMove, false);
 				cloneObj.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneObj.querySelectorAll("div.canvaaas-rotate-handle").forEach(function(elem){
+				cloneObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startRotate, false);
 					elem.removeEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-resize-handle").forEach(function(elem){
+				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startResize, false);
 					elem.removeEventListener("touchstart", handlers.startResize, false);
 				});
@@ -1942,6 +2047,28 @@
 					}
 					upper = mediant;
 				}
+			}
+		}
+
+		function getDirectionFromHandle(handle) {
+			if (handle.classList.contains("canvaaas-handle-n")) {
+				return "n";
+			} else if (handle.classList.contains("canvaaas-handle-ne")) {
+				return "ne";
+			} else if (handle.classList.contains("canvaaas-handle-e")) {
+				return "e";
+			} else if (handle.classList.contains("canvaaas-handle-se")) {
+				return "se";
+			} else if (handle.classList.contains("canvaaas-handle-s")) {
+				return "s";
+			} else if (handle.classList.contains("canvaaas-handle-sw")) {
+				return "sw";
+			} else if (handle.classList.contains("canvaaas-handle-w")) {
+				return "w";
+			} else if (handle.classList.contains("canvaaas-handle-nw")) {
+				return "nw";
+			} else {
+				return false;
 			}
 		}
 
@@ -2071,87 +2198,82 @@
 			}
 		}
 
-		function dimensionsToPx(obj) {
-				try {
-					if (
-					typeof(obj) !== "object" ||
-					obj === null
-				) {
+		function toPx(width, height, unit, dpi) {
+			try {
+				if (!width || !height) {
 					return false;
 				}
-				if (
-					!obj.width ||
-					!obj.height ||
-					!obj.unit ||
-					!obj.dpi
-				) {
+				if (!unit) {
+					unit = "px";
+				}
+				if (!dpi && unit !== "px") {
 					return false;
 				}
 				var w, h;
-				switch(obj.unit.toLowerCase()) {
+				switch(unit.toLowerCase()) {
 					case "nm":
 					case "nanometer":
 					case "nanometers":
-						w = parseFloat(obj.width) * 3.937e-8;
-						h = parseFloat(obj.height) * 3.937e-8;
+						w = parseFloat(width) * 3.937e-8;
+						h = parseFloat(height) * 3.937e-8;
 						break;
 					case "mm":
 					case "millimeter":
 					case "millimeters":
-						w = parseFloat(obj.width) * 0.0393701;
-						h = parseFloat(obj.height) * 0.0393701;
+						w = parseFloat(width) * 0.0393701;
+						h = parseFloat(height) * 0.0393701;
 						break;
 					case "cm":
 					case "centimeter":
 					case "centimeters":
-						w = parseFloat(obj.width) * 0.393701;
-						h = parseFloat(obj.height) * 0.393701;
+						w = parseFloat(width) * 0.393701;
+						h = parseFloat(height) * 0.393701;
 						break;
 					case "m":
 					case "meter":
 					case "meters":
-						w = parseFloat(obj.width) * 39.3701;
-						h = parseFloat(obj.height) * 39.3701;
+						w = parseFloat(width) * 39.3701;
+						h = parseFloat(height) * 39.3701;
 						break;
 					case "km":
 					case "kilometer":
 					case "kilometers":
-						w = parseFloat(obj.width) * 39370.1;
-						h = parseFloat(obj.height) * 39370.1;
+						w = parseFloat(width) * 39370.1;
+						h = parseFloat(height) * 39370.1;
 						break;
 					case "in":
 					case "inch":
 					case "inches":
-						w = parseFloat(obj.width);
-						h = parseFloat(obj.height);
+						w = parseFloat(width);
+						h = parseFloat(height);
 						break;
 					case "mile":
 					case "miles":
-						w = parseFloat(obj.width) * 63360;
-						h = parseFloat(obj.height) * 63360;
+						w = parseFloat(width) * 63360;
+						h = parseFloat(height) * 63360;
 						break;
 					case "yard":
 					case "yards":
-						w = parseFloat(obj.width) * 36;
-						h = parseFloat(obj.height) * 36;
+						w = parseFloat(width) * 36;
+						h = parseFloat(height) * 36;
 						break;
 					case "nautical mile":
 					case "nauticalmile":
 					case "nmi":
-						w = parseFloat(obj.width) * 72913.4;
-						h = parseFloat(obj.height) * 72913.4;
+						w = parseFloat(width) * 72913.4;
+						h = parseFloat(height) * 72913.4;
 						break;
 					case "px":
 					case "pixel":
 					case "pixels":
-						w = parseFloat(obj.width);
-						h = parseFloat(obj.height);
-						obj.dpi = 1;
+						w = parseFloat(width);
+						h = parseFloat(height);
+						dpi = 1;
 						break;
 				}
 
-				w *= parseFloat(obj.dpi);
-				h *= parseFloat(obj.dpi);
+				w *= parseFloat(dpi);
+				h *= parseFloat(dpi);
 
 				return [w, h];
 			} catch(err) {
@@ -4678,12 +4800,12 @@
 			if (options.dpi === undefined) {
 				options.dpi = 300;
 			}
-			var sizes = dimensionsToPx({
-				width: toNumber(options.width),
-				height: toNumber(options.height),
-				unit: toString(options.unit),
-				dpi: toNumber(options.dpi)
-			});
+			var sizes = toPx(
+				toNumber(options.width),
+				toNumber(options.height),
+				toString(options.unit),
+				toNumber(options.dpi)
+			);
 			if (!sizes) {
 				if (config.canvas) {
 					config.canvas("Argument is not allowed");
@@ -4831,19 +4953,18 @@
 				}
 				return false;
 			}
-
 			if (options.unit === undefined) {
 				options.unit = "px";
 			}
 			if (options.dpi === undefined) {
 				options.dpi = 300;
 			}
-			var sizes = dimensionsToPx({
-				width: toNumber(options.width),
-				height: toNumber(options.height),
-				unit: toString(options.unit),
-				dpi: toNumber(options.dpi)
-			});
+			var sizes = toPx(
+				toNumber(options.width),
+				toNumber(options.height),
+				toString(options.unit),
+				toNumber(options.dpi)
+			);
 			if (!sizes) {
 				if (config.canvas) {
 					config.canvas("Argument is not allowed");

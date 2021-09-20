@@ -11,7 +11,7 @@
 }
 
 /* on drag (handle only) */
-.onDrag .canvaaas-handle{
+.onDrag .canvaaas-handle-box{
 	width: 12px;
 	height: 12px;
 }
@@ -28,12 +28,10 @@
 	cursor: move;
 }
 
-.canvaaas-image.onFocus .canvaaas-rotate-handle,
-.canvaaas-image.onFocus .canvaaas-resize-handle,
+.canvaaas-image.onFocus .canvaaas-handle,
 /*.canvaaas-image.onFocus .canvaaas-innerline,*/
 .canvaaas-image.onFocus .canvaaas-outline,
-.canvaaas-clone.onFocus .canvaaas-rotate-handle,
-.canvaaas-clone.onFocus .canvaaas-resize-handle,
+.canvaaas-clone.onFocus .canvaaas-handle,
 /*.canvaaas-clone.onFocus .canvaaas-innerline,*/
 .canvaaas-clone.onFocus .canvaaas-outline{
 	display: block;
@@ -50,8 +48,8 @@
 .canvaaas-mirror.uneditabled .canvaaas-innerline,
 .canvaaas-canvas.uneditabled .canvaaas-outline,
 .canvaaas-mirror.uneditabled .canvaaas-outline,
-.canvaaas-canvas.uneditabled .canvaaas-handle,
-.canvaaas-mirror.uneditabled .canvaaas-handle{
+.canvaaas-canvas.uneditabled .canvaaas-handle-box,
+.canvaaas-mirror.uneditabled .canvaaas-handle-box{
 	border-color: orange;
 }
 
@@ -60,8 +58,8 @@
 .canvaaas-clone.uneditabled .canvaaas-innerline,
 .canvaaas-image.uneditabled .canvaaas-outline,
 .canvaaas-clone.uneditabled .canvaaas-outline,
-.canvaaas-image.uneditabled .canvaaas-handle,
-.canvaaas-clone.uneditabled .canvaaas-handle{
+.canvaaas-image.uneditabled .canvaaas-handle-box,
+.canvaaas-clone.uneditabled .canvaaas-handle-box{
 	border-color: orange;
 }
 
@@ -320,7 +318,7 @@
 }
 
 /* handle */
-.canvaaas-handle{
+.canvaaas-handle-box{
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -333,8 +331,8 @@
 	background-color: #fff;
 	border-color: #000;
 }
-.canvaaas-resize-handle,
-.canvaaas-rotate-handle{
+
+.canvaaas-handle{
 	position: absolute;
 	display: block;
 	width: 24px; /* click space */
@@ -346,73 +344,74 @@
 	display: none;
 }
 
-.canvaaas-resize-n,
-.canvaaas-rotate-n{
+.canvaaas-handle-resize.canvaaas-handle-n,
+.canvaaas-handle-rotate.canvaaas-handle-n{
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-ne,
-.canvaaas-rotate-ne{
+.canvaaas-handle-resize.canvaaas-handle-ne,
+.canvaaas-handle-rotate.canvaaas-handle-ne{
 	top: 0;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-e,
-.canvaaas-rotate-e{
+.canvaaas-handle-resize.canvaaas-handle-e,
+.canvaaas-handle-rotate.canvaaas-handle-e{
 	top: 50%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-se,
-.canvaaas-rotate-se{
+.canvaaas-handle-resize.canvaaas-handle-se,
+.canvaaas-handle-rotate.canvaaas-handle-se{
 	top: 100%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-s,
-.canvaaas-rotate-s{
+.canvaaas-handle-resize.canvaaas-handle-s,
+.canvaaas-handle-rotate.canvaaas-handle-s{
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-sw,
-.canvaaas-rotate-sw{
+.canvaaas-handle-resize.canvaaas-handle-sw,
+.canvaaas-handle-rotate.canvaaas-handle-sw{
 	top: 100%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-w,
-.canvaaas-rotate-w{
+.canvaaas-handle-resize.canvaaas-handle-w,
+.canvaaas-handle-rotate.canvaaas-handle-w{
 	top: 50%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-resize-nw,
-.canvaaas-rotate-nw{
+.canvaaas-handle-resize.canvaaas-handle-nw,
+.canvaaas-handle-rotate.canvaaas-handle-nw{
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
 
-.canvaaas-rotate-n{
-	top: -24px !important;
+.canvaaas-handle-rotate.canvaaas-handle-n{
+	top: -24px;
 }
-.canvaaas-rotate-ne,
-.canvaaas-rotate-e,
-.canvaaas-rotate-se,
-.canvaaas-rotate-s,
-.canvaaas-rotate-sw,
-.canvaaas-rotate-w,
-.canvaaas-rotate-nw{
- 	display: none !important;
+
+.canvaaas-handle-rotate.canvaaas-handle-ne,
+.canvaaas-handle-rotate.canvaaas-handle-e,
+.canvaaas-handle-rotate.canvaaas-handle-se,
+.canvaaas-handle-rotate.canvaaas-handle-s,
+.canvaaas-handle-rotate.canvaaas-handle-sw,
+.canvaaas-handle-rotate.canvaaas-handle-w,
+.canvaaas-handle-rotate.canvaaas-handle-nw{
+	display: none !important;
 }
 
 /* mobile */
 @media only screen and (max-width: 768px) {
 
-	.canvaaas-resize-handle,
-	.canvaaas-rotate-handle{
+	.canvaaas-handle-resize,
+	.canvaaas-handle-rotate{
 		width: 36px; /* touch space */
 		height: 36px; /* touch space */
 	}
