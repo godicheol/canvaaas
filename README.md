@@ -104,7 +104,11 @@
     dpi : 300,
     filename: "TEST",
     overlay: true,
-    checker: true
+    checker: true,
+    editabled: true,
+    focusabled: true,
+    drawabled: true,
+    backgroundColor: "#000000" // rgb format or "alpha"
   }, function(err, res){
     if (err) {
       console.log(err);
@@ -220,6 +224,7 @@
 ```
 
 7. Save File from JSON Data
+
 ```html
 <script>
   canvaaas.drawTo({

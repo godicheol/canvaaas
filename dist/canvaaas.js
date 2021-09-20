@@ -394,7 +394,7 @@
 
 				// class
 				removeClass(eventState.target, classNames.onEdit);
-				
+
 				// toggle
 				eventState.onMove = false;
 
@@ -2883,10 +2883,7 @@
 				minHeight: 0
 			});
 
-			//
 			// set styles
-			//
-
 			canvasState.width = sizes[0];
 			canvasState.height = sizes[1];
 			canvasState.left = 0.5 * (containerState.width - sizes[0]);
@@ -2908,10 +2905,7 @@
 			backgroundObject.style.top = canvasState.top + "px";
 			backgroundObject.style.backgroundColor = canvasState.backgroundColor;
 
-			//
 			// set class names
-			//
-
 			if (!canvasState.checker) {
 				if (canvasObject.classList.contains(classNames.checker)) {
 					canvasObject.classList.remove(classNames.checker);
@@ -4621,8 +4615,13 @@
 			// 	dpi: number,
 			// 	filename: string,
 			// 	overlay: boolean,
-			// 	checker: boolean
+			// 	checker: boolean,
+			// 	editabled: boolean,
+			// 	focusabled: boolean,
+			// 	drawabled: boolean,
+			// 	backgroundColor: string,
 			// }
+
 			if (
 				!containerState.width ||
 				!containerState.height
@@ -4706,6 +4705,31 @@
 			}
 			if (isBoolean(options.overlay)) {
 				canvasState.overlay = toBoolean(options.overlay);
+			}
+			if (isBoolean(options.editabled)) {
+				canvasState.editabled = toBoolean(options.editabled);
+			}
+			if (isBoolean(options.focusabled)) {
+				canvasState.focusabled = toBoolean(options.focusabled);
+			}
+			if (isBoolean(options.drawabled)) {
+				canvasState.drawabled = toBoolean(options.drawabled);
+			}
+			if (isString(options.backgroundColor)) {
+				var colour = toString(options.backgroundColor).trim();
+				if (
+					colour.toLowerCase() === "alpha" ||
+					colour.toLowerCase() === "transparent"
+				) {
+					colour = "transparent";
+				} else {
+					if (colour.charAt(0) !== "#") {
+						colour = "#" + colour;
+					}
+					if (colour.length === 7) {
+						canvasState.backgroundColor = colour;
+					}
+				}
 			}
 
 			initCanvas();
@@ -5769,54 +5793,6 @@
 			var id = callRedo();
 
 			focusIn(id);
-
-			if (cb) {
-				cb(null, exportState(id));
-			}
-			return exportState(id);
-		}
-
-		myObject.convert = function(src, desti, cb){
-			// src = canvasState or imageState
-
-			// desti = {
-			// 	width(required),
-			// 	height(required)
-			// }
-
-			if (
-				!isObject(src) ||
-				!isObject(desti)
-			) {
-				if (cb) {
-					cb("Argument not object");
-				}
-				return false;
-			}
-
-			if (
-				!isNumeric(src.width) ||
-				!isNumeric(src.height) ||
-				!isNumeric(desti.width) ||
-				!isNumeric(desti.height)
-			) {
-				if (cb) {
-					cb("Argument not found");
-				}
-				return false;
-			}
-
-			var tmp = {};
-			copyObject(tmp, src);
-
-			var containedSizes = getContainedSizes(
-				tmp.width,
-				tmp.height,
-				desti.width,
-				desti.height,
-			);
-
-
 
 			if (cb) {
 				cb(null, exportState(id));
