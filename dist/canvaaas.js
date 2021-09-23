@@ -1,4 +1,5 @@
-// canvaaas.js eeecheol@gmail.com
+// canvaaas.js
+// eeecheol@gmail.com
 
 (function(window){
 	'use strict';
@@ -4731,17 +4732,17 @@
 
 		myObject.new = function(options, cb) {
 			// options = {
-			// 	width: number,
-			// 	height: number,
-			// 	unit: string,
-			// 	dpi: number,
-			// 	filename: string,
-			// 	overlay: boolean,
-			// 	checker: boolean,
-			// 	editabled: boolean,
-			// 	focusabled: boolean,
-			// 	drawabled: boolean,
-			// 	backgroundColor: string,
+			// 	width: number, (required)
+			// 	height: number, (required)
+			// 	unit: string, (optional, default 'px')
+			// 	dpi: number, (optional, default '300')
+			// 	filename: string, (optional, default 'untitled')
+			// 	overlay: boolean, (optional, default 'false')
+			// 	checker: boolean, (optional, default 'true')
+			// 	editabled: boolean, (optional, default 'true')
+			// 	focusabled: boolean, (optional, default 'true')
+			// 	drawabled: boolean, (optional, default 'true')
+			// 	backgroundColor: string, (optional, default '#FFFFFF')
 			// }
 
 			if (
@@ -4820,6 +4821,9 @@
 			canvasState.originalHeight = sizes[1];
 
 			if (isString(options.filename)) {
+				if (isEmpty(options.filename)) {
+					options.filename = "untitled";
+				}
 				canvasState.filename = toString(options.filename);
 			}
 			if (isBoolean(options.checker)) {
@@ -5014,6 +5018,48 @@
 			// clear caches
 			undoCaches = [];
 			redoCaches = [];
+
+			if (config.canvas) {
+				config.canvas(null, exportCanvasState());
+			}
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
+		}
+
+		myObject.setFilename = function(str, cb) {
+			if (!canvasState.editabled) {
+				if (config.canvas) {
+					config.canvas("Canvas has been uneditabled");
+				}
+				if (cb) {
+					cb("Canvas has been uneditabled");
+				}
+				return false;
+			}
+
+			if (!isString(str)) {
+				if (config.canvas) {
+					config.canvas("Argument is not string");
+				}
+				if (cb) {
+					cb("Argument is not string");
+				}
+				return false;
+			}
+
+			if (isEmpty(str)) {
+				if (config.canvas) {
+					config.canvas("Filename cannot be empty ");
+				}
+				if (cb) {
+					cb("Filename cannot be empty ");
+				}
+				return false;
+			}
+
+			canvasState.filename = str;
 
 			if (config.canvas) {
 				config.canvas(null, exportCanvasState());
@@ -5342,13 +5388,13 @@
 
 		myObject.draw = function(options, cb){
 			// options = {
-			// 	filename(optional),
-			// 	dataType(optional),
-			// 	mimeType(optional),
-			// 	width(optional),
-			// 	height(optional),
-			// 	backgroundColor(optional),
-			// 	quality(optional),
+			// 	filename: string, (optional, default 'canvasState.filename')
+			// 	dataType: string 'url' or 'file', (optional, default 'canvasState.dataType')
+			// 	mimeType: string, (optional, default 'canvasState.mimeType')
+			// 	width: number, (optional, default 'canvasState.originalWidth)
+			// 	height: number, (optional, default 'canvasState.originalHeight)
+			// 	backgroundColor: string, (optional, default 'canvasState.backgroundColor')
+			// 	quality: number, (optional, default 'canvasState.quality')
 			// }
 
 			if (eventState.onDraw === true) {
