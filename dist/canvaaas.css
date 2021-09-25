@@ -42,14 +42,10 @@
 
 }
 
-/* canvas uneditabled */
-.canvaaas-canvas.uneditabled .canvaaas-innerline,
-.canvaaas-mirror.uneditabled .canvaaas-innerline,
-.canvaaas-canvas.uneditabled .canvaaas-outline,
-.canvaaas-mirror.uneditabled .canvaaas-outline,
-.canvaaas-canvas.uneditabled .canvaaas-handle-box,
-.canvaaas-mirror.uneditabled .canvaaas-handle-box{
-	border-color: orange;
+/* image undrawabled */
+.canvaaas-image.undrawabled,
+.canvaaas-clone.undrawabled{
+
 }
 
 /* image uneditabled */
@@ -62,18 +58,28 @@
 	border-color: orange;
 }
 
+/* image unfocusabled */
+.canvaaas-image.unfocusabled,
+.canvaaas-clone.unfocusabled{
+	pointer-events: none;
+	cursor: default;
+}
+
+/* canvas uneditabled */
+.canvaaas-canvas.uneditabled .canvaaas-innerline,
+.canvaaas-mirror.uneditabled .canvaaas-innerline,
+.canvaaas-canvas.uneditabled .canvaaas-outline,
+.canvaaas-mirror.uneditabled .canvaaas-outline,
+.canvaaas-canvas.uneditabled .canvaaas-handle-box,
+.canvaaas-mirror.uneditabled .canvaaas-handle-box{
+	border-color: orange;
+}
+
 /* canvas unfocusabled */
 .canvaaas-canvas.unfocusabled .canvaaas-image,
 .canvaaas-mirror.unfocusabled .canvaaas-image,
 .canvaaas-canvas.unfocusabled .canvaaas-clone,
 .canvaaas-mirror.unfocusabled .canvaaas-clone{
-	pointer-events: none;
-	cursor: default;
-}
-
-/* image unfocusabled */
-.canvaaas-image.unfocusabled,
-.canvaaas-clone.unfocusabled{
 	pointer-events: none;
 	cursor: default;
 }
@@ -84,12 +90,6 @@
 .canvaaas-mirror.undrawabled .canvaaas-image.undrawabled,
 .canvaaas-mirror.undrawabled .canvaaas-clone.undrawabled{
 	visibility: hidden !important;
-}
-
-/* image undrawabled */
-.canvaaas-image.undrawabled,
-.canvaaas-clone.undrawabled{
-
 }
 
 /* container */
