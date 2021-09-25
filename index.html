@@ -225,6 +225,20 @@
 				">Save</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
+						filename: 'original',
+						dataType: 'url',
+						width: 10000,
+						height: 10000
+					}, function(err, res, result){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						canvaaas.download(res, result.filename);
+					});
+				">Save 10000x10000px</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.draw({
 						filename: 'thumbnail',
 						mimeType: 'image/png',
 						dataType: 'url',

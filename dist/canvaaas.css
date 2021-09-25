@@ -11,9 +11,8 @@
 }
 
 /* on drag (handle only) */
-.onDrag .canvaaas-handle-box{
-	width: 24px;
-	height: 24px;
+.canvaaas-handle.onDrag .canvaaas-handle-box{
+	background-color: #000;
 }
 
 /* canvas on focus */
@@ -386,6 +385,37 @@
 .canvaaas-handle-rotate.canvaaas-handle-n{
 	top: -24px;
 }
+.canvaaas-handle-rotate.canvaaas-handle-ne{
+	top: -24px;
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-e{
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-se{
+	top: auto;
+	bottom: -48px;
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-s{
+	top: auto;
+	bottom: -48px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-sw{
+	top: auto;
+	bottom: -48px;
+	left: -24px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-w{
+	left: -24px;
+}
+.canvaaas-handle-rotate.canvaaas-handle-nw{
+	top: -24px;
+	left: -24px;
+}
 
 .canvaaas-handle-rotate.canvaaas-handle-ne,
 .canvaaas-handle-rotate.canvaaas-handle-e,
@@ -394,7 +424,52 @@
 .canvaaas-handle-rotate.canvaaas-handle-sw,
 .canvaaas-handle-rotate.canvaaas-handle-w,
 .canvaaas-handle-rotate.canvaaas-handle-nw{
-	display: none;
+	display: none !important;
+}
+
+.canvaaas-handle-flip.canvaaas-handle-n{
+	top: -24px;
+}
+.canvaaas-handle-flip.canvaaas-handle-ne{
+	top: -24px;
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-flip.canvaaas-handle-e{
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-flip.canvaaas-handle-se{
+	top: auto;
+	bottom: -48px;
+	left: auto;
+	right: -48px;
+}
+.canvaaas-handle-flip.canvaaas-handle-s{
+	top: auto;
+	bottom: -48px;
+}
+.canvaaas-handle-flip.canvaaas-handle-sw{
+	top: auto;
+	bottom: -48px;
+	left: -24px;
+}
+.canvaaas-handle-flip.canvaaas-handle-w{
+	left: -24px;
+}
+.canvaaas-handle-flip.canvaaas-handle-nw{
+	top: -24px;
+	left: -24px;
+}
+
+.canvaaas-handle-flip.canvaaas-handle-n,
+.canvaaas-handle-flip.canvaaas-handle-ne,
+.canvaaas-handle-flip.canvaaas-handle-se,
+.canvaaas-handle-flip.canvaaas-handle-s,
+.canvaaas-handle-flip.canvaaas-handle-sw,
+.canvaaas-handle-flip.canvaaas-handle-w,
+.canvaaas-handle-flip.canvaaas-handle-nw{
+	display: none !important;
 }
 
 /* mobile */
@@ -402,6 +477,10 @@
 
 	.canvaaas-handle-rotate.canvaaas-handle-n{
 		top: -36px;
+	}
+
+	.canvaaas-handle-flip.canvaaas-handle-e{
+		right: -72px;
 	}
 
 	.canvaaas-handle{

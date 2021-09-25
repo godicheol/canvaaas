@@ -50,11 +50,15 @@
 
 			restrictMove: false, // boolean
 
-			restrictRotate: true, // boolean
-
 			restrictResize: true, // boolean
 
+			restrictRotate: true, // boolean
+
+			restrictFlip: false, // boolean
+
 			restrictRotateAngleUnit: 45, // number, 1 ~ 360
+
+			restrictFlipAngleUnit: 180, // number, 1 ~ 180
 
 			upload: undefined, // callback function
 
@@ -76,9 +80,53 @@
 			editabled: true,
 			focusabled: true,
 			drawabled: true,
-			backgroundColor: "#FFFFFF",
+			backgroundColor: "transparent", // transparent, #FFFFFF ~ #000000
 			overlay: false,
 			checker: true
+		};
+
+		var defaultImageState = function(newImage) {
+			var id = getShortId();
+
+			// get last index
+			var nextIndex = 0;
+			imageStates.forEach(function(elem){
+				if (elem.drawabled) {
+					if (nextIndex < elem.index) {
+						nextIndex = elem.index;
+					}
+				}
+			});
+
+			// create states
+			var fittedSizes = getContainedSizes(
+				newImage.width,
+				newImage.height,
+				canvasState.width * config.renderScale,
+				canvasState.height * config.renderScale
+			);
+
+			return {
+				id: id,
+				src: newImage.src,
+				index: nextIndex + 1,
+				originalWidth: newImage.width,
+				originalHeight: newImage.height,
+				width: fittedSizes[0],
+				height: fittedSizes[1],
+				x: canvasState.width * 0.5,
+				y: canvasState.height * 0.5,
+				rotate: 0,
+				rotateX: 0,
+				rotateY: 0,
+				scaleX: 1,
+				scaleY: 1,
+				opacity: 1,
+				restricted: config.restrictAfterRender,
+				focusabled: true,
+				editabled: true,
+				drawabled: true,
+			}
 		};
 
 		var classNames = {
@@ -131,6 +179,14 @@
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
 
 		var loadingTemplate = "";
 		loadingTemplate += "<div class='canvaaas-loading'>";
@@ -651,6 +707,7 @@
 				// toggle
 				eventState.onResize = false;
 				eventState.handle = undefined;
+				eventState.direction = undefined;
 
 				// event
 				document.removeEventListener("mousemove", handlers.onResize, false);
@@ -761,9 +818,9 @@
 				var diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
 
 				// initialize
-				eventState.diagonal = diagonal;
 				eventState.initialW = state.width;
 				eventState.initialH = state.height;
+				eventState.diagonal = diagonal;
 
 				// toggle
 				eventState.onZoom = true;
@@ -934,6 +991,227 @@
 				}
 			},
 
+			startFlip: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (!chkTarget(e)) {
+					return false;
+				}
+				if (!isEditable(eventState.target)) {
+					return false;
+				}
+				if (!whereContainer()) {
+					return false;
+				}
+
+				var handle = e.target;
+				var direction = getDirectionFromHandle(handle);
+				var mouseX;
+				var mouseY;
+				if (typeof(e.touches) === "undefined") {
+					mouseX = e.clientX;
+					mouseY = e.clientY;
+				} else if(e.touches.length === 1) {
+					mouseX = e.touches[0].clientX;
+					mouseY = e.touches[0].clientY;
+				} else {
+					return false;
+				}
+
+				eventState.mouseX = mouseX;
+				eventState.mouseY = mouseY;
+				eventState.direction = direction;
+
+				// toggle
+				eventState.onFlip = true;
+				eventState.handle = handle;
+
+				// cache
+				saveUndo(eventState.target);
+
+				// class
+				addClass(eventState.target, classNames.onEdit);
+				addClassToHandle(eventState.handle, classNames.onDrag);
+
+				// event
+				document.addEventListener("mousemove", handlers.onFlip, false);
+				document.addEventListener("mouseup", handlers.endFlip, false);
+
+				document.addEventListener("touchmove", handlers.onFlip, false);
+				document.addEventListener("touchend", handlers.endFlip, false);
+			},
+
+			onFlip: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (!eventState.onFlip) {
+					return false;
+				}
+
+				var state = getState(eventState.target);
+				var direction = eventState.direction;
+				var onShiftKey = e.shiftKey || (config.restrictFlip && state.restricted);
+				var degX = 0;
+				var degY = 0;
+				var mouseX;
+				var mouseY;
+				if (typeof(e.touches) === "undefined") {
+					mouseX = e.clientX - eventState.mouseX;
+					mouseY = e.clientY - eventState.mouseY;
+				} else if(e.touches.length === 1) {
+					mouseX = e.touches[0].clientX - eventState.mouseX;
+					mouseY = e.touches[0].clientY - eventState.mouseY;
+				} else {
+					return false;
+				}
+
+				if (state.scaleX !== 1) {
+					mouseX = -1 * mouseX;
+				}
+				if (state.scaleY !== 1) {
+					mouseY = -1 * mouseY;
+				}
+
+				if (direction === "n") {
+					degY = mouseY;
+
+					if (degY < 0) {
+						degY = 0;
+					}
+				} else if (direction === "ne") {
+					degX = mouseX;
+					degY = mouseY;
+
+					if (degX > 0) {
+						degX = 0;
+					}
+					if (degY < 0) {
+						degY = 0;
+					}
+				} else if (direction === "e") {
+					degX = mouseX;
+
+					if (degX > 0) {
+						degX = 0;
+					}
+				} else if (direction === "se") {
+					degX = mouseX;
+					degY = mouseY;
+
+					if (degX > 0) {
+						degX = 0;
+					}
+					if (degY > 0) {
+						degY = 0;
+					}
+				} else if (direction === "s") {
+					degY = mouseY;
+
+					if (degY > 0) {
+						degY = 0;
+					}
+				} else if (direction === "sw") {
+					degX = mouseX;
+					degY = mouseY;
+
+					if (degX < 0) {
+						degX = 0;
+					}
+					if (degY > 0) {
+						degY = 0;
+					}
+				} else if (direction === "w") {
+					degX = mouseX;
+
+					if (degX < 0) {
+						degX = 0;
+					}
+				} else if (direction === "nw") {
+					degX = mouseX;
+					degY = mouseY;
+
+					if (degX < 0) {
+						degX = 0;
+					}
+					if (degY < 0) {
+						degY = 0;
+					}
+				}
+
+				if (degX > 180) {
+					degX = 180;
+				}
+				if (degX < -180) {
+					degX = -180;
+				}
+				if (degY > 180) {
+					degY = 180;
+				}
+				if (degY < -180) {
+					degY = -180;
+				}
+
+				if (onShiftKey) {
+					degX = Math.round(degX / config.restrictFlipAngleUnit) * config.restrictFlipAngleUnit;
+					degY = Math.round(degY / config.restrictFlipAngleUnit) * config.restrictFlipAngleUnit;
+				}
+
+				// save state
+				setState(eventState.target, {
+					rotateX: degY,
+					rotateY: degX
+				});
+			},
+
+			endFlip: function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				var state = getState(eventState.target);
+				var rotateX = state.rotateX;
+				var rotateY = state.rotateY;
+				var scaleX = state.scaleX;
+				var scaleY = state.scaleY;
+
+				if (Math.abs(rotateX) > 75) {
+					scaleY = -1 * scaleY;
+				}
+				if (Math.abs(rotateY) > 75) {
+					scaleX = -1 * scaleX;
+				}
+
+				// save state
+				setState(eventState.target, {
+					rotateX: 0,
+					rotateY: 0,
+					scaleX: scaleX,
+					scaleY: scaleY
+				});
+
+				// class
+				removeClass(eventState.target, classNames.onEdit);
+				removeClassToHandle(eventState.handle, classNames.onDrag);
+
+				// toggle
+				eventState.onFlip = false;
+				eventState.handle = undefined;
+				eventState.direction = undefined;
+
+				// event
+				document.removeEventListener("mousemove", handlers.onFlip, false);
+				document.removeEventListener("mouseup", handlers.endFlip, false);
+
+				document.removeEventListener("touchmove", handlers.onFlip, false);
+				document.removeEventListener("touchend", handlers.endFlip, false);
+
+				// callback
+				if (config.edit) {
+					config.edit(null, exportState(eventState.target));
+				}
+			},
+
 			debounce: function(func, time){
 				var timer;
 				return function(e){
@@ -1089,6 +1367,7 @@
 			var idChanged = false;
 			var restrictChanged = false;
 			var focusChanged = false;
+			var rotateY = 0;
 			var oldId;
 			for(var key in newState) {
 				if (newState.hasOwnProperty(key)) {
@@ -1111,6 +1390,8 @@
 						"x",
 						"y",
 						"rotate",
+						"rotateX",
+						"rotateY",
 						"scaleX",
 						"scaleY",
 						"opacity",
@@ -1207,6 +1488,12 @@
 			var transform = "";
 			if (state.rotate !== 0) {
 				transform += "rotate(" + state.rotate + "deg)";
+			}
+			if (state.rotateX !== 0) {
+				transform += "rotateX(" + state.rotateX +  "deg)";
+			}
+			if (state.rotateY !== 0) {
+				transform += "rotateY(" + state.rotateY +  "deg)";
 			}
 			if (state.scaleX === -1) {
 				transform += "scaleX(" + state.scaleX + ")";
@@ -1367,6 +1654,8 @@
 				typ = ".canvaaas-handle-rotate";
 			} else if (handle.classList.contains("canvaaas-handle-resize")) {
 				typ = ".canvaaas-handle-resize";
+			} else if (handle.classList.contains("canvaaas-handle-flip")) {
+				typ = ".canvaaas-handle-flip";
 			} else {
 				return false;
 			}
@@ -1428,6 +1717,8 @@
 				typ = ".canvaaas-handle-rotate";
 			} else if (handle.classList.contains("canvaaas-handle-resize")) {
 				typ = ".canvaaas-handle-resize";
+			} else if (handle.classList.contains("canvaaas-handle-flip")) {
+				typ = ".canvaaas-handle-flip";
 			} else {
 				return false;
 			}
@@ -1856,6 +2147,11 @@
 					elem.addEventListener("touchstart", handlers.startResize, false);
 				});
 
+				originObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.startFlip, false);
+					elem.addEventListener("touchstart", handlers.startFlip, false);
+				});
+
 				cloneObj.removeEventListener("mousedown", handlers.focusIn, false);
 
 				cloneObj.addEventListener("mousedown", handlers.startMove, false);
@@ -1870,6 +2166,11 @@
 				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startResize, false);
 					elem.addEventListener("touchstart", handlers.startResize, false);
+				});
+
+				cloneObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.startFlip, false);
+					elem.addEventListener("touchstart", handlers.startFlip, false);
 				});
 
 				document.addEventListener("mousedown", handlers.focusOut, false);
@@ -1923,6 +2224,11 @@
 					elem.removeEventListener("touchstart", handlers.startResize, false);
 				});
 
+				originObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+					elem.removeEventListener("mousedown", handlers.startFlip, false);
+					elem.removeEventListener("touchstart", handlers.startFlip, false);
+				});
+
 				cloneObj.addEventListener("mousedown", handlers.focusIn, false);
 
 				cloneObj.removeEventListener("mousedown", handlers.startMove, false);
@@ -1937,6 +2243,11 @@
 				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startResize, false);
 					elem.removeEventListener("touchstart", handlers.startResize, false);
+				});
+
+				cloneObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+					elem.removeEventListener("mousedown", handlers.startFlip, false);
+					elem.removeEventListener("touchstart", handlers.startFlip, false);
 				});
 
 				document.removeEventListener("mousedown", handlers.focusOut, false);
@@ -2626,7 +2937,7 @@
 			canvas.width = Math.floor(sizes[0]);
 			canvas.height = Math.floor(sizes[1]);
 
-			ctx.fillStyle = options.backgroundColor || "#FFFFFF";
+			ctx.fillStyle = options.backgroundColor || "transparent";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
 
@@ -2755,7 +3066,6 @@
 		// asynchronous
 		function renderImage(file, exportedState, cb) {
 			var newImage = new Image();
-			var id = getShortId();
 			var ext;
 			var src;
 			var typ;
@@ -2822,43 +3132,8 @@
 					initCanvas();
 				}
 
-				// get last index
-				var nextIndex = 0;
-				imageStates.forEach(function(elem){
-					if (nextIndex < elem.index) {
-						nextIndex = elem.index;
-					}
-				});
-				nextIndex += 1;
-
-				// create states
-				var fittedSizes = getContainedSizes(
-					newImage.width,
-					newImage.height,
-					canvasState.width * config.renderScale,
-					canvasState.height * config.renderScale
-				);
-
-				var state = {
-					id: id,
-					type: typ,
-					src: newImage.src,
-					index: nextIndex,
-					originalWidth: newImage.width,
-					originalHeight: newImage.height,
-					width: fittedSizes[0],
-					height: fittedSizes[1],
-					x: canvasState.width * 0.5,
-					y: canvasState.height * 0.5,
-					rotate: 0,
-					scaleX: 1,
-					scaleY: 1,
-					opacity: 1,
-					restricted: config.restrictAfterRender,
-					focusabled: true,
-					editabled: true,
-					drawabled: true,
-				}
+				var state = defaultImageState(newImage);
+				state.type = typ;
 
 				// create origin element
 				var newOrigin = document.createElement("div");
@@ -2893,7 +3168,7 @@
 					adjustedState = {};
 				}
 
-				setState(id, adjustedState);
+				setState(state.id, adjustedState);
 
 				if (cb) {
 					cb(null, state.id);
@@ -5273,7 +5548,7 @@
 				return false;
 			}
 
-			canvasState.backgroundColor = undefined;
+			canvasState.backgroundColor = "transparent";
 
 			initCanvas();
 
@@ -5405,10 +5680,15 @@
 			}
 
 			var cs = {};
-			copyObject(cs, canvasState);
-
+			cs.filename = canvasState.filename;
+			cs.originalWidth = canvasState.originalWidth;
+			cs.originalHeight = canvasState.originalHeight;
 			cs.width = canvasState.originalWidth;
 			cs.height = canvasState.originalHeight;
+			cs.dataType = canvasState.dataType;
+			cs.mimeType = canvasState.mimeType;
+			cs.quality = canvasState.quality;
+			cs.backgroundColor = canvasState.backgroundColor;
 
 			if (isObject(options)) {
 				if (isString(options.filename)) {
