@@ -52,8 +52,10 @@
     restrictAfterRender: false, // boolean
     restrictMove: false, // boolean
     restrictRotate: true, // boolean
-    restrictRotateRadians: 45, // number
     restrictResize: true, // boolean
+    restrictFlip: false, // boolean
+    restrictRotateAngleUnit: 45, // number, 1 ~ 360
+    restrictFlipAngleUnit: 180, // number, 1 ~ 180
     canvas: function(err, res){
       if (err) {
         console.log(err);
@@ -242,14 +244,9 @@
     drawHeight: 3600 // optional, default height
   }, {
     // export()
-    "id": "UPLOADED_FROM_STATE",
-    "type": "url",
     "src": "./img/1.png", // required
     "index": 1, // required
     "canvasWidth": 1800, // required
-    "canvasHeight": 1200,
-    "originalWidth": 800,
-    "originalHeight": 800,
     "width": 600.0000000000001, // required
     "height": 600.0000000000001, // required
     "x": 399.07235621521335, // required
@@ -258,14 +255,7 @@
     "scaleX": 1, // required
     "scaleY": 1, // required
     "opacity": 1, // required
-    "restricted": false,
-    "focusabled": true,
-    "editabled": true,
     "drawabled": true, // required
-    "originalAspectRatio": "1:1",
-    "aspectRatio": "1:1",
-    "left": 99.07235621521329,
-    "top": 508.7198515769946
   }, function(err, res, result){
     if (err) {
       console.log(err);
