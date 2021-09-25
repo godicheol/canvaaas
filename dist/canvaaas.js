@@ -385,13 +385,10 @@
 					return handlers.startPinchZoom(e);
 				}
 
-				// initialize
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
-
-				// toggle
 				eventState.onMove = true;
 
 				// cache
@@ -452,7 +449,7 @@
 				// class
 				removeClass(eventState.target, classNames.onEdit);
 
-				// toggle
+				// clear
 				eventState.onMove = false;
 
 				// event
@@ -501,7 +498,6 @@
 					return false;
 				}
 
-				// initialize
 				eventState.handle = handle;
 				eventState.direction = direction;
 				eventState.mouseX = mouseX;
@@ -510,8 +506,6 @@
 				eventState.initialH = state.height;
 				eventState.initialX = state.x;
 				eventState.initialY = state.y;
-
-				// toggle
 				eventState.onResize = true;
 
 				// cache
@@ -704,7 +698,7 @@
 				removeClass(eventState.target, classNames.onEdit);
 				removeClassToHandle(eventState.handle, classNames.onDrag);
 
-				// toggle
+				// clear
 				eventState.onResize = false;
 				eventState.handle = undefined;
 				eventState.direction = undefined;
@@ -745,7 +739,6 @@
 						return false;
 					}
 
-					// toggle
 					eventState.onZoom = true;
 
 					// cache
@@ -782,7 +775,7 @@
 					// remove timer
 					eventState.wheeling = undefined;
 
-					// toggle
+					// clear
 					eventState.onZoom = false;
 
 					// class
@@ -817,12 +810,9 @@
 				var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
 				var diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
 
-				// initialize
 				eventState.initialW = state.width;
 				eventState.initialH = state.height;
 				eventState.diagonal = diagonal;
-
-				// toggle
 				eventState.onZoom = true;
 
 				// cache
@@ -873,7 +863,7 @@
 				// class
 				removeClass(eventState.target, classNames.onEdit);
 
-				// toggle
+				// clear
 				eventState.onZoom = false;
 
 				// event
@@ -903,9 +893,12 @@
 					return false;
 				}
 
-				// toggle
+				var handle = e.target;
+				var direction = getDirectionFromHandle(handle);
+
+				eventState.direction = direction;
+				eventState.handle = handle;
 				eventState.onRotate = true;
-				eventState.handle = e.target;
 
 				// cache
 				saveUndo(eventState.target);
@@ -931,6 +924,7 @@
 				}
 
 				var state = getState(eventState.target);
+				var direction = eventState.direction;
 				var onShiftKey = e.shiftKey || (config.restrictRotate && state.restricted);
 				var radians;
 				var deg;
@@ -948,7 +942,25 @@
 
 				// calculate degree
 				radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
-				deg = 360 - ((radians + 270) % 360);
+
+				if (direction === "n") {
+					deg = 360 - ((radians + 270) % 360);
+				} else if (direction === "ne") {
+					deg = 360 - ((radians + 315) % 360);
+				} else if (direction === "e") {
+					deg = 360 - ((radians + 360) % 360);
+				} else if (direction === "se") {
+					deg = 360 - ((radians + 405) % 360);
+				} else if (direction === "s") {
+					deg = 360 - ((radians + 450) % 360);
+				} else if (direction === "sw") {
+					deg = 360 - ((radians + 495) % 360);
+				} else if (direction === "w") {
+					deg = 360 - ((radians + 540) % 360);
+				} else if (direction === "nw") {
+					deg = 360 - ((radians + 585) % 360);
+				}
+
 				if (state.scaleX < 0) {
 					deg = deg;
 				}
@@ -974,9 +986,10 @@
 				removeClass(eventState.target, classNames.onEdit);
 				removeClassToHandle(eventState.handle, classNames.onDrag);
 
-				// toggle
+				// clear
 				eventState.onRotate = false;
 				eventState.handle = undefined;
+				eventState.direction = undefined;
 
 				// event
 				document.removeEventListener("mousemove", handlers.onRotate, false);
@@ -1022,10 +1035,8 @@
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 				eventState.direction = direction;
-
-				// toggle
-				eventState.onFlip = true;
 				eventState.handle = handle;
+				eventState.onFlip = true;
 
 				// cache
 				saveUndo(eventState.target);
@@ -1175,10 +1186,10 @@
 				var scaleX = state.scaleX;
 				var scaleY = state.scaleY;
 
-				if (Math.abs(rotateX) > 75) {
+				if (Math.abs(rotateX) > 90) {
 					scaleY = -1 * scaleY;
 				}
-				if (Math.abs(rotateY) > 75) {
+				if (Math.abs(rotateY) > 90) {
 					scaleX = -1 * scaleX;
 				}
 
