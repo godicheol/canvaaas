@@ -1078,6 +1078,9 @@
 					return false;
 				}
 
+				mouseX = mouseX * (180 / state.width);
+				mouseY = mouseY * (180 / state.height);
+
 				if (state.scaleX !== 1) {
 					mouseX = -1 * mouseX;
 				}
