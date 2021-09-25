@@ -1078,7 +1078,7 @@
 					return false;
 				}
 
-				mouseX = mouseX * (180 / state.width);
+				mouseX = -mouseX * (180 / state.width);
 				mouseY = mouseY * (180 / state.height);
 
 				if (state.scaleX !== 1) {
@@ -1098,7 +1098,7 @@
 					degX = mouseX;
 					degY = mouseY;
 
-					if (degX > 0) {
+					if (degX < 0) {
 						degX = 0;
 					}
 					if (degY < 0) {
@@ -1107,14 +1107,14 @@
 				} else if (direction === "e") {
 					degX = mouseX;
 
-					if (degX > 0) {
+					if (degX < 0) {
 						degX = 0;
 					}
 				} else if (direction === "se") {
 					degX = mouseX;
 					degY = mouseY;
 
-					if (degX > 0) {
+					if (degX < 0) {
 						degX = 0;
 					}
 					if (degY > 0) {
@@ -1130,7 +1130,7 @@
 					degX = mouseX;
 					degY = mouseY;
 
-					if (degX < 0) {
+					if (degX > 0) {
 						degX = 0;
 					}
 					if (degY > 0) {
@@ -1139,14 +1139,14 @@
 				} else if (direction === "w") {
 					degX = mouseX;
 
-					if (degX < 0) {
+					if (degX > 0) {
 						degX = 0;
 					}
 				} else if (direction === "nw") {
 					degX = mouseX;
 					degY = mouseY;
 
-					if (degX < 0) {
+					if (degX > 0) {
 						degX = 0;
 					}
 					if (degY < 0) {

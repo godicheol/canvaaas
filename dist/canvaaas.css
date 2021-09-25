@@ -462,7 +462,7 @@
 	left: -24px;
 }
 
-.canvaaas-handle-flip.canvaaas-handle-n,
+/* .canvaaas-handle-flip.canvaaas-handle-n,
 .canvaaas-handle-flip.canvaaas-handle-ne,
 .canvaaas-handle-flip.canvaaas-handle-se,
 .canvaaas-handle-flip.canvaaas-handle-s,
@@ -470,7 +470,7 @@
 .canvaaas-handle-flip.canvaaas-handle-w,
 .canvaaas-handle-flip.canvaaas-handle-nw{
 	display: none !important;
-}
+} */
 
 /* mobile */
 @media only screen and (max-width: 768px) {
