@@ -481,7 +481,7 @@
 
 				var state = getState(eventState.target);
 				var handle = e.target;
-				var direction = getDirectionFromHandle(handle);
+				var direction = getDirection(handle, state.scaleX, state.scaleY);
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -2424,7 +2424,8 @@
 			}
 		}
 
-		function getFlippedDirection(direction, scaleX, scaleY) {
+		function getDirection(handle, scaleX, scaleY) {
+			var direction = getDirectionFromHandle(handle);
 			var flipX;
 			var flipY;
 			if (scaleX > 0 || scaleX === false) {
@@ -2432,7 +2433,6 @@
 			} else if (scaleX < 0 || scaleX === true) {
 				flipX = true;
 			}
-
 			if (scaleY > 0 || scaleY === false) {
 				flipY = false;
 			} else if (scaleY < 0 || scaleY === true) {
