@@ -19,7 +19,7 @@
 
 ```html
 <script>
-  canvaaas.init(document.getElementById("target"), function(err, res){
+  canvaaas.init( document.getElementById("target") , function(err, res){
     if (err) {
       console.log(err);
       return false;
@@ -191,7 +191,7 @@
   }'>
 
 <script>
-  canvaaas.uploadElement( <img> , function(err, res){
+  canvaaas.uploadElement( document.getElementById("blahblah") , function(err, res){
     if (err) {
       console.log(err);
       return false;
@@ -227,6 +227,9 @@
 
 ```html
 <script>
+
+  canvaaas.drawTo( canvasState, imageStates, callback(err, res){});
+
   canvaaas.drawTo({
     filename: 'TEST', // optional, default "untitled"
     quality: 0.92, // optional, default 0.92
@@ -237,9 +240,33 @@
     height: 1200, // required, px
     drawWidth: 3600, // optional, default width
     drawHeight: 3600 // optional, default height
-  },
-  exportedStates, // array, imageState with src
-  function(err, res, result){
+  }, {
+    // export()
+    "id": "UPLOADED_FROM_STATE",
+    "type": "url",
+    "src": "./img/1.png", // required
+    "index": 1, // required
+    "canvasWidth": 1800, // required
+    "canvasHeight": 1200,
+    "originalWidth": 800,
+    "originalHeight": 800,
+    "width": 600.0000000000001, // required
+    "height": 600.0000000000001, // required
+    "x": 399.07235621521335, // required
+    "y": 808.7198515769946, // required
+    "rotate": 17.46323891797897, // required
+    "scaleX": 1, // required
+    "scaleY": 1, // required
+    "opacity": 1, // required
+    "restricted": false,
+    "focusabled": true,
+    "editabled": true,
+    "drawabled": true, // required
+    "originalAspectRatio": "1:1",
+    "aspectRatio": "1:1",
+    "left": 99.07235621521329,
+    "top": 508.7198515769946
+  }, function(err, res, result){
     if (err) {
       console.log(err);
       return false;

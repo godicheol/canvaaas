@@ -5852,6 +5852,7 @@
 			// 	scaleX(required),
 			// 	scaleY(required),
 			// 	opacity(required),
+			//  drawabled(required),
 			// }]
 
 			if (eventState.onDraw === true) {
