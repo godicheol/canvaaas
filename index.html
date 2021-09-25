@@ -644,28 +644,28 @@
 				">Resize</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.setEditable()
+					canvaaas.editableAll(true)
 				">Editabled</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.unsetEditable()
+					canvaaas.editableAll(false)
 				">Uneditabled</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.setFocusable()
+					canvaaas.focusableAll(true)
 				">Set Focusable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.unsetFocusable()
+					canvaaas.focusableAll(false)
 				">Unset Focusabled</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.showDrawables()
+					canvaaas.drawableAll(true)
 				">Show Drawables</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.hideDrawables()
+					canvaaas.drawableAll(false)
 				">Hide Drawables</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.setBackground(window.prompt('e.g. #FFFFFF', '#000000'), function(err, res){
+					canvaaas.background(window.prompt('e.g. #FFFFFF, alpha', '#000000'), function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -674,21 +674,21 @@
 					})
 				">Set Background</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.unsetBackground()
+					canvaaas.background('alpha')
 				">Unset Background</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.showChecker()
+					canvaaas.checker(true)
 				">Show Checker</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.hideChecker()
+					canvaaas.checker(false)
 				">Hide Checker</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.showOverlay()
+					canvaaas.overlay(true)
 				">Show Overlay</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.hideOverlay()
+					canvaaas.overlay(false)
 				">Hide Overlay</a></li>
 			</ul>
 		</div>

@@ -2507,90 +2507,6 @@
 			}
 		}
 
-		function toPx(width, height, unit, dpi) {
-			try {
-				if (!width || !height) {
-					return false;
-				}
-				if (!unit) {
-					unit = "px";
-				}
-				if (!dpi && unit !== "px") {
-					return false;
-				}
-				var w, h;
-				switch(unit.toLowerCase()) {
-					case "nm":
-					case "nanometer":
-					case "nanometers":
-						w = parseFloat(width) * 3.937e-8;
-						h = parseFloat(height) * 3.937e-8;
-						break;
-					case "mm":
-					case "millimeter":
-					case "millimeters":
-						w = parseFloat(width) * 0.0393701;
-						h = parseFloat(height) * 0.0393701;
-						break;
-					case "cm":
-					case "centimeter":
-					case "centimeters":
-						w = parseFloat(width) * 0.393701;
-						h = parseFloat(height) * 0.393701;
-						break;
-					case "m":
-					case "meter":
-					case "meters":
-						w = parseFloat(width) * 39.3701;
-						h = parseFloat(height) * 39.3701;
-						break;
-					case "km":
-					case "kilometer":
-					case "kilometers":
-						w = parseFloat(width) * 39370.1;
-						h = parseFloat(height) * 39370.1;
-						break;
-					case "in":
-					case "inch":
-					case "inches":
-						w = parseFloat(width);
-						h = parseFloat(height);
-						break;
-					case "mile":
-					case "miles":
-						w = parseFloat(width) * 63360;
-						h = parseFloat(height) * 63360;
-						break;
-					case "yard":
-					case "yards":
-						w = parseFloat(width) * 36;
-						h = parseFloat(height) * 36;
-						break;
-					case "nautical mile":
-					case "nauticalmile":
-					case "nmi":
-						w = parseFloat(width) * 72913.4;
-						h = parseFloat(height) * 72913.4;
-						break;
-					case "px":
-					case "pixel":
-					case "pixels":
-						w = parseFloat(width);
-						h = parseFloat(height);
-						dpi = 1;
-						break;
-				}
-
-				w *= parseFloat(dpi);
-				h *= parseFloat(dpi);
-
-				return [w, h];
-			} catch(err) {
-				console.log(err);
-				return false;
-			}
-		}
-
 		function startLoading(target) {
 			var wrapper = document.createElement("div");
 			wrapper.classList.add("canvaaas-loading-wrapper");
@@ -5265,7 +5181,7 @@
 			return exportCanvasState();
 		}
 
-		myObject.setFilename = function(str, cb) {
+		myObject.filename = function(str, cb) {
 			if (!canvasState.editabled) {
 				if (config.canvas) {
 					config.canvas("Canvas has been uneditabled");
@@ -5307,46 +5223,18 @@
 			return exportCanvasState();
 		}
 
-		myObject.setEditable = function(cb) {
-			canvasState.editabled = true;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.unsetEditable = function(cb) {
-			canvasState.editabled = false;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.showDrawables = function(cb) {
-			if (!canvasState.editabled) {
+		myObject.editableAll = function(b, cb) {
+			if (!isBoolean(b)) {
 				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
+					config.canvas("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			canvasState.drawabled = true;
+			canvasState.editabled = toBoolean(b);
 
 			initCanvas();
 
@@ -5359,18 +5247,18 @@
 			return exportCanvasState();
 		}
 
-		myObject.hideDrawables = function(cb) {
-			if (!canvasState.editabled) {
+		myObject.drawableAll = function(b, cb) {
+			if (!isBoolean(b)) {
 				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
+					config.canvas("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			canvasState.drawabled = false;
+			canvasState.drawabled = toBoolean(b);
 
 			initCanvas();
 
@@ -5383,18 +5271,18 @@
 			return exportCanvasState();
 		}
 
-		myObject.setFocusable = function(cb) {
-			if (!canvasState.editabled) {
+		myObject.focusableAll = function(b, cb) {
+			if (!isBoolean(b)) {
 				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
+					config.canvas("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			canvasState.focusabled = true;
+			canvasState.focusabled = toBoolean(b);
 
 			initCanvas();
 
@@ -5407,41 +5295,7 @@
 			return exportCanvasState();
 		}
 
-		myObject.unsetFocusable = function(cb) {
-			if (!canvasState.editabled) {
-				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
-				}
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			canvasState.focusabled = false;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.setBackground = function(colour, cb) {
-			if (!canvasState.editabled) {
-				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
-				}
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
+		myObject.background = function(colour, cb) {
 			if (!isString(colour)) {
 				if (config.canvas) {
 					config.canvas("Argument is not string");
@@ -5456,7 +5310,8 @@
 
 			if (
 				colour.toLowerCase() === "alpha" ||
-				colour.toLowerCase() === "transparent"
+				colour.toLowerCase() === "transparent" ||
+				colour.toLowerCase() === "unset"
 			) {
 				colour = "transparent";
 			} else if (
@@ -5499,18 +5354,18 @@
 			return exportCanvasState();
 		}
 
-		myObject.unsetBackground = function(cb) {
-			if (!canvasState.editabled) {
+		myObject.overlay = function(b, cb) {
+			if (!isBoolean(b)) {
 				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
+					config.canvas("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			canvasState.backgroundColor = "transparent";
+			canvasState.overlay = toBoolean(b);
 
 			initCanvas();
 
@@ -5523,90 +5378,18 @@
 			return exportCanvasState();
 		}
 
-		myObject.showOverlay = function(cb) {
-			if (!canvasState.editabled) {
+		myObject.checker = function(b, cb) {
+			if (!isBoolean(b)) {
 				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
+					config.canvas("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Argument is not boolean");
 				}
 				return false;
 			}
 
-			canvasState.overlay = true;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.hideOverlay = function(cb) {
-			if (!canvasState.editabled) {
-				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
-				}
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			canvasState.overlay = false;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.showChecker = function(cb) {
-			if (!canvasState.editabled) {
-				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
-				}
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			canvasState.checker = true;
-
-			initCanvas();
-
-			if (config.canvas) {
-				config.canvas(null, exportCanvasState());
-			}
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.hideChecker = function(cb) {
-			if (!canvasState.editabled) {
-				if (config.canvas) {
-					config.canvas("Canvas has been uneditabled");
-				}
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			canvasState.checker = false;
+			canvasState.checker = toBoolean(b);
 
 			initCanvas();
 
@@ -6174,43 +5957,6 @@
 				cb(null, exportState(id));
 			}
 			return exportState(id);
-		}
-
-		myObject.toPx = function(options, cb){
-			if (
-				!isNumeric(options.width) ||
-				!isNumeric(options.height) ||
-				!isString(options.unit) ||
-				!isNumeric(options.dpi)
-			) {
-				if (cb) {
-					cb("Argument not found");
-				}
-				return false;
-			}
-
-			var sizes = toPx(
-				toNumber(options.width),
-				toNumber(options.height),
-				toString(options.unit),
-				toNumber(options.dpi)
-			);
-			if (!sizes) {
-				if (cb) {
-					cb("Argument is not allowed");
-				}
-				return false;
-			}
-
-			var res = {
-				width: sizes[0],
-				height: sizes[1]
-			}
-
-			if (cb) {
-				cb(null, res);
-			}
-			return res;
 		}
 
 		//

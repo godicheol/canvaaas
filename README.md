@@ -127,7 +127,7 @@
 
 ```html
 <script>
-  canvaaas.uploadUrl( Your url, function(err, res){
+  canvaaas.uploadUrl( Your URL, function(err, res){
     if (err) {
       console.log(err);
       return false;
@@ -227,10 +227,8 @@
 
 ```html
 <script>
-
-  canvaaas.drawTo( canvasState, imageStates, callback(err, res){});
-
   canvaaas.drawTo({
+    // getCanvas()
     filename: 'TEST', // optional, default "untitled"
     quality: 0.92, // optional, default 0.92
     mimeType: 'image/png', // optional, default "image/png"
@@ -241,7 +239,7 @@
     drawWidth: 3600, // optional, default width
     drawHeight: 3600 // optional, default height
   }, {
-    // export()
+    // getImages()
     "src": "./img/1.png", // required
     "index": 1, // required
     "canvasWidth": 1800, // required
