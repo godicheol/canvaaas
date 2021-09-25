@@ -478,9 +478,59 @@
 	.canvaaas-handle-rotate.canvaaas-handle-n{
 		top: -36px;
 	}
+	.canvaaas-handle-rotate.canvaaas-handle-ne{
+		top: -36px;
+		right: -72px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-e{
+		right: -72px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-se{
+		bottom: -72px;
+		right: -72px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-s{
+		bottom: -72px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-sw{
+		bottom: -72px;
+		left: -24px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-w{
+		left: -36px;
+	}
+	.canvaaas-handle-rotate.canvaaas-handle-nw{
+		top: -36px;
+		left: -36px;
+	}
 
+	.canvaaas-handle-flip.canvaaas-handle-n{
+		top: -36px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-ne{
+		top: -36px;
+		right: -72px;
+	}
 	.canvaaas-handle-flip.canvaaas-handle-e{
 		right: -72px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-se{
+		bottom: -72px;
+		right: -72px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-s{
+		bottom: -72px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-sw{
+		bottom: -72px;
+		left: -24px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-w{
+		left: -36px;
+	}
+	.canvaaas-handle-flip.canvaaas-handle-nw{
+		top: -36px;
+		left: -36px;
 	}
 
 	.canvaaas-handle{
