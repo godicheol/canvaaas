@@ -172,10 +172,8 @@
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.new({
-						width: window.prompt('Type Width', '6'),
-						height: window.prompt('Type Height', '4'),
-						unit: window.prompt('Type Unit', 'in'),
-						dpi: window.prompt('Type DPI', '300'),
+						width: window.prompt('Type Width', '1800'),
+						height: window.prompt('Type Height', '1200'),
 					}, function(err, res){
 						if (err) {
 							console.log(err);
@@ -220,23 +218,9 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.download(res, result.filename);
+						myDownload(res, result.filename);
 					});
 				">Save</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'original',
-						dataType: 'url',
-						width: 10000,
-						height: 10000
-					}, function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						canvaaas.download(res, result.filename);
-					});
-				">Save 10000x10000px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
@@ -251,9 +235,26 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.download(res, result.filename);
-					})
-				">Save Thumbnail</a></li>
+						myDownload(res, result.filename);
+					});
+				">Save To<br />256 x 256 px</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.draw({
+						filename: 'large',
+						mimeType: 'image/png',
+						dataType: 'url',
+						width: 5120,
+						height: 5120,
+						quality: 0.5,
+						backgroundColor: '#FFFFFF',
+					}, function(err, res, result){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						myDownload(res, result.filename);
+					});
+				">Save To<br />5120 x 5120 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
 				    filename: 'TEST',
@@ -272,7 +273,7 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.download(res, result.filename); // iOS not supported
+						myDownload(res, result.filename); // iOS not supported
 					})
 				">Save from JSON<br />(iOS chrome not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -284,7 +285,7 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.newTab(res);
+						newTab(res);
 					})
 				">New Tab<br />(iOS safari not supported)</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -305,7 +306,7 @@
 							console.log(err);
 							return false;
 						}
-						canvaaas.newTab(res);
+						newTab(res);
 					})
 				">New Tab from JSON<br />(iOS safari not supported)</a></li>
 				<li class="rule"></li>
@@ -631,10 +632,8 @@
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize({
-						width: window.prompt('Type width', '6'),
-						height: window.prompt('Type height', '4'),
-						unit: window.prompt('Type unit', 'in'),
-						dpi: window.prompt('Type dpi', '300'),
+						width: window.prompt('Type width', '1800'),
+						height: window.prompt('Type height', '1200'),
 					}, function(err, res){
 						if (err) {
 							console.log(err);
@@ -864,10 +863,8 @@
 
 		// #3 create canvas
 		canvaaas.new({
-			width: 6,
-			height: 4,
-			unit: "in", // mm, cm, in...
-			dpi : 300,
+			width: 1800, // number, px
+			height: 1200, // number, px
 			filename: "TEST",
 			overlay: true,
 			checker: true
@@ -925,6 +922,42 @@
 		// MAIN END
 		//
 		//
+
+
+
+		// example
+		// iOS chrome not supported (only large file?)
+		function myDownload(myData, filename){
+			var myLink = document.createElement('a');
+			myLink.setAttribute('href', myData);
+			myLink.setAttribute('download', filename);
+			myLink.style.display = 'none';
+			document.body.appendChild(myLink);
+			myLink.click();
+			document.body.removeChild(myLink);
+			window.URL.revokeObjectURL(myData);
+		}
+
+		// example
+		// iOS safari not supported
+		function newTab(myData){
+			var image = new Image();
+			image.src = myData;
+			image.style.position = 'absolute';
+			image.style.top = '50%';
+			image.style.left = '50%';
+			image.style.transform = 'translate(-50%, -50%)';
+			image.style.width = '100%';
+			image.style.height = 'auto';
+
+			var myNewTab = window.open('');
+			myNewTab.document.write(image.outerHTML);
+			myNewTab.document.body.style.backgroundColor = '#000000';
+			myNewTab.document.body.style.padding = '24px';
+			myNewTab.document.body.style.position = 'relative';
+
+			window.URL.revokeObjectURL(myData);
+		}
 
 		function writeCanvasData(){
 			var state = canvaaas.getCanvas();

@@ -100,10 +100,8 @@
 ```html
 <script>
   canvaaas.new({
-    width: 6,
-    height: 4,
-    unit: "in", // mm, cm, in...
-    dpi : 300,
+    width: 1800, // number, px
+    height: 1200, // number, px
     filename: "TEST",
     overlay: true,
     checker: true,

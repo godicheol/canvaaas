@@ -88,7 +88,6 @@
 		var defaultImageState = function(newImage) {
 			var id = getShortId();
 
-			// get last index
 			var nextIndex = 0;
 			imageStates.forEach(function(elem){
 				if (elem.drawabled) {
@@ -98,7 +97,6 @@
 				}
 			});
 
-			// create states
 			var fittedSizes = getContainedSizes(
 				newImage.width,
 				newImage.height,
@@ -481,7 +479,7 @@
 
 				var state = getState(eventState.target);
 				var handle = e.target;
-				var direction = getDirection(handle, state.scaleX, state.scaleY);
+				var direction = getFlippedDirection(handle, state.scaleX, state.scaleY);
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -894,7 +892,7 @@
 				}
 
 				var handle = e.target;
-				var direction = getDirectionFromHandle(handle);
+				var direction = getDirection(handle);
 
 				eventState.direction = direction;
 				eventState.handle = handle;
@@ -1020,7 +1018,7 @@
 
 				var state = getState(eventState.target);
 				var handle = e.target;
-				var direction = getDirectionFromHandle(handle);
+				var direction = getDirection(handle);
 				var diffX;
 				var diffY;
 				var mouseX;
@@ -1405,9 +1403,6 @@
 			var cloneObj = document.getElementById(cloneId + id);
 
 			var idChanged = false;
-			var restrictChanged = false;
-			var focusChanged = false;
-			var rotateY = 0;
 			var oldId;
 			for(var key in newState) {
 				if (newState.hasOwnProperty(key)) {
@@ -1441,29 +1436,7 @@
 						}
 					} else if ([
 						"restricted",
-					].indexOf(key) > -1) {
-						if (isBoolean(newState[key])) {
-							if (
-								state[key] === false &&
-								toBoolean(newState[key]) === true
-							) {
-								restrictChanged = true;
-							}
-							state[key] = toBoolean(newState[key]);
-						}
-					} else if ([
 						"focusabled",
-					].indexOf(key) > -1) {
-						if (isBoolean(newState[key])) {
-							if (
-								state[key] === true &&
-								toBoolean(newState[key]) === false
-							) {
-								focusChanged = true;
-							}
-							state[key] = toBoolean(newState[key]);
-						}
-					} else if ([
 						"editabled",
 						"drawabled",
 					].indexOf(key) > -1) {
@@ -1475,15 +1448,18 @@
 			}
 
 			if (idChanged === true) {
-				// check focus
+				// change focus
 				if (eventState.target) {
 					if (eventState.target === oldId) {
-						focusOut(oldId);
+						eventState.target = state.id;
 					}
 				}
+
+				// change element
 				originObj.id = originId + state.id;
 				cloneObj.id = cloneId + state.id;
 
+				// change undo redo caches
 				undoCaches.forEach(function(elem){
 					if (elem.id === oldId) {
 						elem.id = state.id;
@@ -1497,25 +1473,6 @@
 						elem.state.id = state.id;
 					}
 				});
-			}
-
-			if (restrictChanged === true) {
-				var ar = state.originalWidth / state.originalHeight;
-				if (state.width > state.height * ar) {
-					state.height = state.width / ar;
-				} else {
-					state.width = state.height * ar;
-				}
-				state.rotate = Math.round(state.rotate / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
-			}
-
-			if (focusChanged === true) {
-				// check focus
-				if (eventState.target) {
-					if (eventState.target === state.id) {
-						focusOut(state.id);
-					}
-				}
 			}
 
 			var index = state.index;
@@ -2135,7 +2092,6 @@
 					}
 				}
 
-
 				var id = getId(found);
 				if (!id) {
 					return false;
@@ -2328,13 +2284,14 @@
 				options.height,
 				options.maxWidth,
 				options.maxHeight
-			)
+			);
+
 			var fooMin = getCoveredSizes(
 				options.width,
 				options.height,
 				options.minWidth,
 				options.minHeight
-			)
+			);
 
 			return [
 				Math.min(fooMax[0], Math.max(fooMin[0], options.width)),
@@ -2402,7 +2359,7 @@
 			}
 		}
 
-		function getDirectionFromHandle(handle) {
+		function getDirection(handle) {
 			if (handle.classList.contains("canvaaas-handle-n")) {
 				return "n";
 			} else if (handle.classList.contains("canvaaas-handle-ne")) {
@@ -2424,8 +2381,8 @@
 			}
 		}
 
-		function getDirection(handle, scaleX, scaleY) {
-			var direction = getDirectionFromHandle(handle);
+		function getFlippedDirection(handle, scaleX, scaleY) {
+			var direction = getDirection(handle);
 			var flipX;
 			var flipY;
 			if (scaleX > 0 || scaleX === false) {
@@ -4009,10 +3966,6 @@
 				return false;
 			}
 
-			if (eventState.target === id) {
-				focusOut(id);
-			}
-
 			// save cache
 			saveUndo(id);
 
@@ -4762,12 +4715,33 @@
 				return false;
 			}
 
+			var state = getState(id);
+			var aspectRatio = state.originalWidth / state.originalHeight;
+			var width = state.width;
+			var height = state.height;
+			var rotate = state.rotate;
+
+			if (
+				state.restricted === false &&
+				toBoolean(b) === true
+			) {
+				if (width > height * aspectRatio) {
+					height = width / aspectRatio;
+				} else {
+					width = height * aspectRatio;
+				}
+				rotate = Math.round(rotate / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
+			}
+
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				restricted: toBoolean(b)
+				restricted: toBoolean(b),
+				width: width,
+				height: height,
+				rotate: rotate
 			});
 
 			if (config.edit) {
@@ -4790,16 +4764,6 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isBoolean(b)) {
 				if (config.edit) {
 					config.edit("Argument is not boolean");
@@ -4811,6 +4775,12 @@
 			}
 
 			var state = getState(id);
+
+			if (eventState.target) {
+				if (eventState.target === state.id) {
+					focusOut(state.id);
+				}
+			}
 
 			// save cache
 			saveUndo(id);
@@ -5049,8 +5019,6 @@
 			// options = {
 			// 	width: number, (required)
 			// 	height: number, (required)
-			// 	unit: string, (optional, default 'px')
-			// 	dpi: number, (optional, default '300')
 			// 	filename: string, (optional, default 'untitled')
 			// 	overlay: boolean, (optional, default 'false')
 			// 	checker: boolean, (optional, default 'true')
@@ -5098,9 +5066,7 @@
 
 			if (
 				!isNumeric(options.width) ||
-				!isNumeric(options.height) ||
-				(!isString(options.unit) && options.unit !== undefined) ||
-				(!isNumeric(options.dpi) && options.dpi !== undefined)
+				!isNumeric(options.height)
 			) {
 				if (config.canvas) {
 					config.canvas("Argument is not allowed");
@@ -5110,30 +5076,9 @@
 				}
 				return false;
 			}
-			if (options.unit === undefined) {
-				options.unit = "px";
-			}
-			if (options.dpi === undefined) {
-				options.dpi = 300;
-			}
-			var sizes = toPx(
-				toNumber(options.width),
-				toNumber(options.height),
-				toString(options.unit),
-				toNumber(options.dpi)
-			);
-			if (!sizes) {
-				if (config.canvas) {
-					config.canvas("Argument is not allowed");
-				}
-				if (cb) {
-					cb("Argument is not allowed");
-				}
-				return false;
-			}
 
-			canvasState.originalWidth = sizes[0];
-			canvasState.originalHeight = sizes[1];
+			canvasState.originalWidth = toNumber(options.width);
+			canvasState.originalHeight = toNumber(options.height);
 
 			if (isString(options.filename)) {
 				if (isEmpty(options.filename)) {
@@ -5260,9 +5205,7 @@
 
 			if (
 				!isNumeric(options.width) ||
-				!isNumeric(options.height) ||
-				(!isString(options.unit) && options.unit !== undefined) ||
-				(!isNumeric(options.dpi) && options.dpi !== undefined)
+				!isNumeric(options.height)
 			) {
 				if (config.canvas) {
 					config.canvas("Argument is not allowed");
@@ -5272,30 +5215,9 @@
 				}
 				return false;
 			}
-			if (options.unit === undefined) {
-				options.unit = "px";
-			}
-			if (options.dpi === undefined) {
-				options.dpi = 300;
-			}
-			var sizes = toPx(
-				toNumber(options.width),
-				toNumber(options.height),
-				toString(options.unit),
-				toNumber(options.dpi)
-			);
-			if (!sizes) {
-				if (config.canvas) {
-					config.canvas("Argument is not allowed");
-				}
-				if (cb) {
-					cb("Argument is not allowed");
-				}
-				return false;
-			}
 
-			canvasState.originalWidth = sizes[0];
-			canvasState.originalHeight = sizes[1];
+			canvasState.originalWidth = toNumber(options.width);
+			canvasState.originalHeight = toNumber(options.height);
 
 			// set canvas
 			initCanvas();
@@ -6057,40 +5979,6 @@
 			}
 		}
 
-		// example
-		// iOS chrome not supported (only large file?)
-		myObject.download = function(data, filename){
-			var link = document.createElement('a');
-			link.setAttribute('href', data);
-			link.setAttribute('download', filename);
-			link.style.display = 'none';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			window.URL.revokeObjectURL(data);
-		}
-
-		// example
-		// iOS safari not supported
-		myObject.newTab = function(data){
-			var image = new Image();
-			image.src = data;
-			image.style.position = 'absolute';
-			image.style.top = '50%';
-			image.style.left = '50%';
-			image.style.transform = 'translate(-50%, -50%)';
-			image.style.width = '100%';
-			image.style.height = 'auto';
-
-			var newTab = window.open('');
-			newTab.document.write(image.outerHTML);
-			newTab.document.body.style.backgroundColor = '#000000';
-			newTab.document.body.style.padding = '24px';
-			newTab.document.body.style.position = 'relative';
-
-			window.URL.revokeObjectURL(data);
-		}
-
 		//
 		// get data
 		//
@@ -6286,6 +6174,43 @@
 				cb(null, exportState(id));
 			}
 			return exportState(id);
+		}
+
+		myObject.toPx = function(options, cb){
+			if (
+				!isNumeric(options.width) ||
+				!isNumeric(options.height) ||
+				!isString(options.unit) ||
+				!isNumeric(options.dpi)
+			) {
+				if (cb) {
+					cb("Argument not found");
+				}
+				return false;
+			}
+
+			var sizes = toPx(
+				toNumber(options.width),
+				toNumber(options.height),
+				toString(options.unit),
+				toNumber(options.dpi)
+			);
+			if (!sizes) {
+				if (cb) {
+					cb("Argument is not allowed");
+				}
+				return false;
+			}
+
+			var res = {
+				width: sizes[0],
+				height: sizes[1]
+			}
+
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
 		}
 
 		//
