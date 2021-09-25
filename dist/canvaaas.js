@@ -1018,20 +1018,34 @@
 					return false;
 				}
 
+				var state = getState(eventState.target);
 				var handle = e.target;
 				var direction = getDirectionFromHandle(handle);
+				var diffX;
+				var diffY;
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX;
-					mouseY = e.clientY;
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX;
-					mouseY = e.touches[0].clientY;
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
 				} else {
 					return false;
 				}
 
+				diffX = Math.abs(state.x) - Math.abs(mouseX);
+				diffY = Math.abs(state.y) - Math.abs(mouseY);
+
+				var diagonal = getDiagonal(
+					state.x + diffX - mouseX,
+					state.y + diffY - mouseY
+				);
+
+				eventState.diagonal = diagonal;
+				eventState.initialX = state.x + diffX;
+				eventState.initialY = state.y + diffY;
 				eventState.mouseX = mouseX;
 				eventState.mouseY = mouseY;
 				eventState.direction = direction;
@@ -1069,87 +1083,99 @@
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - eventState.mouseX;
-					mouseY = e.clientY - eventState.mouseY;
+					mouseX = e.clientX - (containerState.left + canvasState.left);
+					mouseY = e.clientY - (containerState.top + canvasState.top);
 				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - eventState.mouseX;
-					mouseY = e.touches[0].clientY - eventState.mouseY;
+					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
 				} else {
 					return false;
 				}
 
-				mouseX = -mouseX * (180 / state.width);
-				mouseY = mouseY * (180 / state.height);
+				if (eventState.mouseX < eventState.initialX) {
+					if (mouseX > eventState.initialX) {
+						mouseX = eventState.initialX;
+					}
+				} else {
+					if (mouseX < eventState.initialX) {
+						mouseX = eventState.initialX;
+					}
+				}
+				if (eventState.mouseY < eventState.initialY) {
+					if (mouseY > eventState.initialY) {
+						mouseY = eventState.initialY;
+					}
+				} else {
+					if (mouseY < eventState.initialY) {
+						mouseY = eventState.initialY;
+					}
+				}
 
-				if (state.scaleX !== 1) {
-					mouseX = -1 * mouseX;
-				}
-				if (state.scaleY !== 1) {
-					mouseY = -1 * mouseY;
-				}
+				var maxDiagonal = eventState.diagonal;
+
+				var diagonalA = getDiagonal(
+					eventState.mouseX - mouseX,
+					eventState.mouseY - mouseY
+				);
+				var diagonalB = getDiagonal(
+					eventState.initialX - mouseX,
+					eventState.initialY - mouseY
+				);
 
 				if (direction === "n") {
-					degY = mouseY;
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degY < 0) {
+					if (diagonalB > maxDiagonal) {
 						degY = 0;
 					}
 				} else if (direction === "ne") {
-					degX = mouseX;
-					degY = mouseY;
+					degX = diagonalA * (180 / maxDiagonal);
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degX < 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
-					}
-					if (degY < 0) {
 						degY = 0;
 					}
 				} else if (direction === "e") {
-					degX = mouseX;
+					degX = diagonalA * (180 / maxDiagonal);
 
-					if (degX < 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
 					}
 				} else if (direction === "se") {
-					degX = mouseX;
-					degY = mouseY;
+					degX = diagonalA * (180 / maxDiagonal);
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degX < 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
-					}
-					if (degY > 0) {
 						degY = 0;
 					}
 				} else if (direction === "s") {
-					degY = mouseY;
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degY > 0) {
+					if (diagonalB > maxDiagonal) {
 						degY = 0;
 					}
 				} else if (direction === "sw") {
-					degX = mouseX;
-					degY = mouseY;
+					degX = diagonalA * (180 / maxDiagonal);
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degX > 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
-					}
-					if (degY > 0) {
 						degY = 0;
 					}
 				} else if (direction === "w") {
-					degX = mouseX;
+					degX = diagonalA * (180 / maxDiagonal);
 
-					if (degX > 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
 					}
 				} else if (direction === "nw") {
-					degX = mouseX;
-					degY = mouseY;
+					degX = diagonalA * (180 / maxDiagonal);
+					degY = diagonalA * (180 / maxDiagonal);
 
-					if (degX > 0) {
+					if (diagonalB > maxDiagonal) {
 						degX = 0;
-					}
-					if (degY < 0) {
 						degY = 0;
 					}
 				}
