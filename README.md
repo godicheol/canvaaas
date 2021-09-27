@@ -100,9 +100,9 @@
 ```html
 <script>
   canvaaas.new({
+    filename: "TEST",
     width: 1800, // number, px
     height: 1200, // number, px
-    filename: "TEST",
     overlay: true,
     checker: true,
     editabled: true,
@@ -114,7 +114,7 @@
       console.log(err);
       return false;
     }
-    console.log("canvaaas.new() callback",res);
+    console.log("canvaaas.new() callback", res);
   });
 </script>
 ```
@@ -132,7 +132,7 @@
       console.log(err);
       return false;
     }
-    console.log(res);
+    console.log("canvaaas.uploadUrl() callback", res);
   });
 </script>
 ```
@@ -144,7 +144,7 @@
       console.log(err);
       return false;
     }
-    console.log(res);
+    console.log("canvaaas.uploadState() callback", res);
   });
 </script>
 ```
@@ -196,7 +196,7 @@
       console.log(err);
       return false;
     }
-    console.log(res);
+    console.log("canvaaas.uploadElement() callback", res);
   });
 </script>
 ```
@@ -206,9 +206,9 @@
 ```html
 <script>
   canvaaas.draw({
-    filename: 'thumbnail', // optional, default "untitled"
-    mimeType: 'image/png', // optional, default "image/png"
+    filename: 'thumbnail_256x256px', // optional, default "untitled"
     dataType: 'url',  // optional, "url" or "file", default "url"
+    mimeType: 'image/png', // optional, default "image/png"
     width: 256, // optional, default canvasWidth
     height: 256, // optional, default canvasHeight
     quality: 0.5, // optional, default 0.92
@@ -218,7 +218,7 @@
       console.log(err);
       return false;
     }
-    console.log(res, result);
+    console.log("canvaaas.draw() callback", res, result);
   });
 </script>
 ```
@@ -229,15 +229,15 @@
 <script>
   canvaaas.drawTo({
     // getCanvas()
-    filename: 'TEST', // optional, default "untitled"
-    quality: 0.92, // optional, default 0.92
-    mimeType: 'image/png', // optional, default "image/png"
+    filename: 'drawTo_3600x3600px', // optional, default "untitled"
     dataType: 'url', // optional, default "url"
-    backgroundColor: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
+    mimeType: 'image/png', // optional, default "image/png"
     width: 1800, // required, px
     height: 1200, // required, px
     drawWidth: 3600, // optional, default width
-    drawHeight: 3600 // optional, default height
+    drawHeight: 3600, // optional, default height
+    quality: 0.92, // optional, default 0.92
+    backgroundColor: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
   }, {
     // getImages()
     "src": "./img/1.png", // required
@@ -257,7 +257,7 @@
       console.log(err);
       return false;
     }
-    console.log(res, result);
+    console.log("canvaaas.drawTo() callback", res, result);
   });
 </script>
 ```
