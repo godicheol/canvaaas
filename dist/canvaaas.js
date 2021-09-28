@@ -5421,12 +5421,12 @@
 
 			var thisCanvasState = {};
 			thisCanvasState.filename = canvasState.filename;
+			thisCanvasState.mimeType = canvasState.mimeType;
+			thisCanvasState.dataType = canvasState.dataType;
 			thisCanvasState.width = canvasState.originalWidth;
 			thisCanvasState.height = canvasState.originalHeight;
 			thisCanvasState.drawWidth = canvasState.originalWidth;
 			thisCanvasState.drawHeight = canvasState.originalHeight;
-			thisCanvasState.dataType = canvasState.dataType;
-			thisCanvasState.mimeType = canvasState.mimeType;
 			thisCanvasState.quality = canvasState.quality;
 			thisCanvasState.background = canvasState.background;
 
