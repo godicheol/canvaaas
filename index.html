@@ -229,7 +229,7 @@
 						width: 256,
 						height: 256,
 						quality: 0.5,
-						backgroundColor: '#000000',
+						background: '#000000',
 					}, function(err, res, result){
 						if (err) {
 							console.log(err);
@@ -246,7 +246,7 @@
 						width: 5120,
 						height: 5120,
 						quality: 0.5,
-						backgroundColor: '#FFFFFF',
+						background: '#FFFFFF',
 					}, function(err, res, result){
 						if (err) {
 							console.log(err);
@@ -261,7 +261,7 @@
 				    quality: 0.92,
 				    mimeType: 'image/png',
 				    dataType: 'url',
-				    backgroundColor: '#FFFFFF',
+				    background: '#FFFFFF',
 				    width: 1800,
 				    height: 1200,
 						drawWidth: 3600,
@@ -294,7 +294,7 @@
 				    quality: 0.92,
 				    mimeType: 'image/png',
 				    dataType: 'url',
-				    backgroundColor: '#FFFFFF',
+				    background: '#FFFFFF',
 				    width: 1800,
 				    height: 1200,
 						drawWidth: 3600,
@@ -976,7 +976,7 @@
 			sEditabled.innerHTML = state.editabled ?
 				"" : "<span style='color: red;'>Uneditabled</span>";
 
-			sBackground.style.backgroundColor = state.backgroundColor;
+			sBackground.style.backgroundColor = state.background;
 		}
 
 		function writeImageData(state){
@@ -1201,7 +1201,7 @@
 		    "editabled": true,
 		    "focusabled": true,
 		    "drawabled": true,
-		    "backgroundColor": "#FFFFFF",
+		    "background": "#FFFFFF",
 		    "overlay": true,
 		    "checker": true,
 		    "width": 1800,
@@ -1214,8 +1214,6 @@
         "type": "url",
         "src": "./img/1.png",
         "index": 1,
-				"canvasWidth": 1800,
-				"canvasHeight": 1200,
         "originalWidth": 800, // no use
         "originalHeight": 800, // no use
         "width": 600.0000000000001,
@@ -1239,8 +1237,6 @@
         "type": "url",
         "src": "./img/2.jpg",
         "index": 2,
-				"canvasWidth": 1800,
-				"canvasHeight": 1200,
         "originalWidth": 1350, // no use
         "originalHeight": 1800, // no use
         "width": 594.2754728305664,
@@ -1264,8 +1260,6 @@
         "type": "url",
         "src": "./img/3.jpeg",
         "index": 3,
-				"canvasWidth": 1800,
-				"canvasHeight": 1200,
         "originalWidth": 1800, // no use
         "originalHeight": 1200, // no use
         "width": 948.4312600294483,
@@ -1291,8 +1285,6 @@
 	        "type": "url",
 	        "src": "./img/1.png",
 	        "index": 1,
-					"canvasWidth": 1800,
-					"canvasHeight": 1200,
 	        "originalWidth": 800, // no use
 	        "originalHeight": 800, // no use
 	        "width": 600.0000000000001,

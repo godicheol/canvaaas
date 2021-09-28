@@ -45,10 +45,10 @@
       "webp"
     ], // array
     cacheLevels: 999, // number
-    containerAspectRatio: 1, // number, width / height
-    maxContainerWidth: 1, // number, 0 ~ 1
-    maxContainerHeight: 0.7, // number, 0 ~ 1
-    renderScale: 0.5, // number, 0 ~ 1
+    containerAspectRatio: 1 / 1, // number, width / height
+    maxContainerWidth: 1, // number, 0 ~ 1, scale in viewport(device screen)
+    maxContainerHeight: 0.7, // number, 0 ~ 1, scale in viewport(device screen)
+    renderScale: 0.5, // number, 0 ~ 1, scale in canvas
     restrictAfterRender: false, // boolean
     restrictMove: false, // boolean
     restrictRotate: true, // boolean
@@ -108,7 +108,7 @@
     editabled: true,
     focusabled: true,
     drawabled: true,
-    backgroundColor: "#000000" // rgb format or "alpha"
+    background: "#000000" // rgb format or "alpha"
   }, function(err, res){
     if (err) {
       console.log(err);
@@ -209,10 +209,10 @@
     filename: 'thumbnail_256x256px', // optional, default "untitled"
     dataType: 'url',  // optional, "url" or "file", default "url"
     mimeType: 'image/png', // optional, default "image/png"
-    width: 256, // optional, default canvasWidth
-    height: 256, // optional, default canvasHeight
+    drawWidth: 256, // optional, default canvasWidth
+    drawHeight: 256, // optional, default canvasHeight
     quality: 0.5, // optional, default 0.92
-    backgroundColor: '#000000', // optional, rgb format, default "#FFFFFF"
+    background: '#000000', // optional, rgb format, default "#FFFFFF"
   }, function(err, res, result){
     if (err) {
       console.log(err);
@@ -237,12 +237,11 @@
     drawWidth: 3600, // optional, default width
     drawHeight: 3600, // optional, default height
     quality: 0.92, // optional, default 0.92
-    backgroundColor: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
+    background: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
   }, {
     // getImages()
     "src": "./img/1.png", // required
     "index": 1, // required
-    "canvasWidth": 1800, // required
     "width": 600.0000000000001, // required
     "height": 600.0000000000001, // required
     "x": 399.07235621521335, // required

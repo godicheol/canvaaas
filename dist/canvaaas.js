@@ -80,7 +80,7 @@
 			editabled: true,
 			focusabled: true,
 			drawabled: true,
-			backgroundColor: "transparent", // transparent, #FFFFFF ~ #000000
+			background: "transparent", // transparent, #FFFFFF ~ #000000
 			overlay: false,
 			checker: true
 		};
@@ -1777,7 +1777,7 @@
 			tmp.editabled = canvasState.editabled;
 			tmp.focusabled = canvasState.focusabled;
 			tmp.drawabled = canvasState.drawabled;
-			tmp.backgroundColor = canvasState.backgroundColor;
+			tmp.background = canvasState.background;
 			tmp.checker = canvasState.checker;
 			tmp.overlay = canvasState.overlay;
 
@@ -1889,17 +1889,12 @@
 			}
 
 			var oar = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
-			var iar = getAspectRatio(tmp.width, tmp.height);
-			var car = getAspectRatio(canvasState.originalWidth, canvasState.originalHeight);
+			var ar = getAspectRatio(tmp.width, tmp.height);
 
 			tmp.originalAspectRatio = "" + oar[0] + ":" + oar[1];
-			tmp.aspectRatio = "" + iar[0] + ":" + iar[1];
+			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
 			tmp.left = tmp.x - (0.5 * tmp.width);
 			tmp.top = tmp.y - (0.5 * tmp.height);
-
-			tmp.canvasWidth = canvasState.originalWidth;
-			tmp.canvasHeight = canvasState.originalHeight;
-			tmp.canvasAspectRatio = "" + car[0] + ":" + car[1];
 
 			return tmp;
 		}
@@ -2850,7 +2845,7 @@
 			canvas.width = Math.floor(sizes[0]);
 			canvas.height = Math.floor(sizes[1]);
 
-			ctx.fillStyle = options.backgroundColor || "transparent";
+			ctx.fillStyle = options.background || "transparent";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			ctx.save();
 
@@ -2860,7 +2855,7 @@
 		// asynchronous
 		function drawImage(mainCanvas, canvasWidth, imgState, cb) {
 
-			// canvasWidth => canvasState.originalWidth of imgState
+			// canvasWidth => canvasState.originalWidth
 			//
 			// imageState = {
 			// 	src,
@@ -3214,7 +3209,7 @@
 			backgroundObject.style.height = canvasState.height + "px";
 			backgroundObject.style.left = canvasState.left + "px";
 			backgroundObject.style.top = canvasState.top + "px";
-			backgroundObject.style.backgroundColor = canvasState.backgroundColor;
+			backgroundObject.style.background = canvasState.background;
 
 			// set class names
 			if (!canvasState.checker) {
@@ -3318,7 +3313,7 @@
 			backgroundObject.style.height = "";
 			backgroundObject.style.left = "";
 			backgroundObject.style.top = "";
-			backgroundObject.style.backgroundColor = "";
+			backgroundObject.style.background = "";
 
 			return true;
 		}
@@ -4941,7 +4936,7 @@
 			// 	editabled: boolean, (optional, default 'true')
 			// 	focusabled: boolean, (optional, default 'true')
 			// 	drawabled: boolean, (optional, default 'true')
-			// 	backgroundColor: string, (optional, default '#FFFFFF')
+			// 	background: string, (optional, default '#FFFFFF')
 			// }
 
 			if (
@@ -5017,8 +5012,8 @@
 			if (isBoolean(options.drawabled)) {
 				canvasState.drawabled = toBoolean(options.drawabled);
 			}
-			if (isString(options.backgroundColor)) {
-				var colour = toString(options.backgroundColor).trim();
+			if (isString(options.background)) {
+				var colour = toString(options.background).trim();
 				if (
 					colour.toLowerCase() === "alpha" ||
 					colour.toLowerCase() === "transparent"
@@ -5029,7 +5024,7 @@
 						colour = "#" + colour;
 					}
 					if (colour.length === 7) {
-						canvasState.backgroundColor = colour;
+						canvasState.background = colour;
 					}
 				}
 			}
@@ -5341,7 +5336,7 @@
 				}
 			}
 
-			canvasState.backgroundColor = colour;
+			canvasState.background = colour;
 
 			initCanvas();
 
@@ -5411,9 +5406,9 @@
 			// 	filename: string, (optional, default 'canvasState.filename')
 			// 	dataType: string 'url' or 'file', (optional, default 'canvasState.dataType')
 			// 	mimeType: string, (optional, default 'canvasState.mimeType')
-			// 	width: number, (optional, default 'canvasState.originalWidth)
-			// 	height: number, (optional, default 'canvasState.originalHeight)
-			// 	backgroundColor: string, (optional, default 'canvasState.backgroundColor')
+			// 	drawWidth(or width): number, (optional, default 'canvasState.originalWidth)
+			// 	drawHeight(or height): number, (optional, default 'canvasState.originalHeight)
+			// 	background: string, (optional, default 'canvasState.background')
 			// 	quality: number, (optional, default 'canvasState.quality')
 			// }
 
@@ -5424,56 +5419,60 @@
 				return false;
 			}
 
-			var cs = {};
-			cs.filename = canvasState.filename;
-			cs.originalWidth = canvasState.originalWidth;
-			cs.originalHeight = canvasState.originalHeight;
-			cs.width = canvasState.originalWidth;
-			cs.height = canvasState.originalHeight;
-			cs.dataType = canvasState.dataType;
-			cs.mimeType = canvasState.mimeType;
-			cs.quality = canvasState.quality;
-			cs.backgroundColor = canvasState.backgroundColor;
+			var thisCanvasState = {};
+			thisCanvasState.filename = canvasState.filename;
+			thisCanvasState.width = canvasState.originalWidth;
+			thisCanvasState.height = canvasState.originalHeight;
+			thisCanvasState.drawWidth = canvasState.originalWidth;
+			thisCanvasState.drawHeight = canvasState.originalHeight;
+			thisCanvasState.dataType = canvasState.dataType;
+			thisCanvasState.mimeType = canvasState.mimeType;
+			thisCanvasState.quality = canvasState.quality;
+			thisCanvasState.background = canvasState.background;
 
 			if (isObject(options)) {
 				if (isString(options.filename)) {
-					cs.filename = toString(options.filename);
+					thisCanvasState.filename = toString(options.filename);
 				}
 				if (isString(options.mimeType)) {
-					cs.mimeType = toString(options.mimeType);
+					thisCanvasState.mimeType = toString(options.mimeType);
 				}
 				if (isString(options.dataType)) {
 					if (options.dataType.toLowerCase() === "url") {
-						cs.dataType = "url";
+						thisCanvasState.dataType = "url";
 					} else if (options.dataType.toLowerCase() === "file") {
-						cs.dataType = "file";
+						thisCanvasState.dataType = "file";
 					}
 				}
 				if (isNumeric(options.quality)) {
-					cs.quality = toNumber(options.quality);
+					thisCanvasState.quality = toNumber(options.quality);
 				}
-				if (isString(options.backgroundColor)) {
-					cs.backgroundColor = toString(options.backgroundColor);
+				if (isString(options.background)) {
+					thisCanvasState.background = toString(options.background);
 				}
-				if (isNumeric(options.width)) {
-					cs.width = toNumber(options.width);
+				if (isNumeric(options.drawWidth)) {
+					thisCanvasState.drawWidth = toNumber(options.drawWidth);
+				} else if (isNumeric(options.width)) {
+					thisCanvasState.drawWidth = toNumber(options.width);
 				}
-				if (isNumeric(options.height)) {
-					cs.height = toNumber(options.height);
+				if (isNumeric(options.drawHeight)) {
+					thisCanvasState.drawHeight = toNumber(options.drawHeight);
+				} else if (isNumeric(options.height)) {
+					thisCanvasState.drawHeight = toNumber(options.height);
 				}
 			}
 
 			var sizes = getContainedSizes(
-				cs.originalWidth,
-				cs.originalHeight,
-				cs.width,
-				cs.height,
+				thisCanvasState.width,
+				thisCanvasState.height,
+				thisCanvasState.drawWidth,
+				thisCanvasState.drawHeight,
 			);
 
 			var canvas = drawCanvas({
 				width: sizes[0],
 				height: sizes[1],
-				backgroundColor: cs.backgroundColor
+				background: thisCanvasState.background
 			});
 			if (!canvas) {
 				if (cb) {
@@ -5494,11 +5493,11 @@
 			});
 
 			var result = {
-				filename: cs.filename,
-				mimeType: cs.mimeType,
-				dataType: cs.dataType,
-				quality: cs.quality,
-				backgroundColor: cs.backgroundColor,
+				filename: thisCanvasState.filename,
+				mimeType: thisCanvasState.mimeType,
+				dataType: thisCanvasState.dataType,
+				quality: thisCanvasState.quality,
+				background: thisCanvasState.background,
 				width: canvas.width,
 				height: canvas.height,
 				numberOfImages: drawables.length,
@@ -5520,7 +5519,7 @@
 				if (count < index) {
 					// recursive
 					var state = drawables[count];
-					drawImage(canvas, state.canvasWidth, state, function(err) {
+					drawImage(canvas, thisCanvasState.width, state, function(err) {
 						if (err) {
 							imageResults.push({
 								id: state.id,
@@ -5534,12 +5533,12 @@
 					});
 				} else {
 					// end
-					var dataURL = canvas.toDataURL(cs.mimeType, cs.quality);
+					var dataURL = canvas.toDataURL(thisCanvasState.mimeType, thisCanvasState.quality);
 					var data;
-					if (cs.dataType === "url") {
+					if (thisCanvasState.dataType === "url") {
 						data = dataURL;
-					} else if (cs.dataType === "file") {
-						data = dataURLtoFile(dataURL, cs.filename);
+					} else if (thisCanvasState.dataType === "file") {
+						data = dataURLtoFile(dataURL, thisCanvasState.filename);
 					} else {
 						if (cb) {
 							cb("DataType not found");
@@ -5567,14 +5566,13 @@
 			// 	mimeType(optional),
 			// 	width(required),
 			// 	height(required),
-			// 	backgroundColor(optional),
-			// 	quality(optional),
 			// 	drawWidth(optional),
 			// 	drawHeight(optional),
+			// 	quality(optional),
+			// 	background(optional),
 			// }
 
 			// imgStates = [{
-			// 	canvasWidth(required),
 			// 	src(required),
 			// 	index(required),
 			// 	width(required),
@@ -5605,48 +5603,48 @@
 				return false;
 			}
 
-			var cs = {};
-			copyObject(cs, defaultCanvasState);
+			var thisCanvasState = {};
+			copyObject(thisCanvasState, defaultCanvasState);
 
 			if (isString(canvState.filename)) {
-				cs.filename = toString(canvState.filename);
+				thisCanvasState.filename = toString(canvState.filename);
 			}
 			if (isString(canvState.mimeType)) {
-				cs.mimeType = toString(canvState.mimeType);
+				thisCanvasState.mimeType = toString(canvState.mimeType);
 			}
 			if (isString(canvState.dataType)) {
 				if (canvState.dataType.toLowerCase() === "url") {
-					cs.dataType = "url";
+					thisCanvasState.dataType = "url";
 				} else if (canvState.dataType.toLowerCase() === "file") {
-					cs.dataType = "file";
+					thisCanvasState.dataType = "file";
 				}
 			}
 			if (isNumeric(canvState.quality)) {
-				cs.quality = toNumber(canvState.quality);
+				thisCanvasState.quality = toNumber(canvState.quality);
 			}
-			if (isString(canvState.backgroundColor)) {
-				cs.backgroundColor = toString(canvState.backgroundColor);
+			if (isString(canvState.background)) {
+				thisCanvasState.background = toString(canvState.background);
 			}
 			if (isNumeric(canvState.width)) {
-				cs.width = toNumber(canvState.width);
+				thisCanvasState.width = toNumber(canvState.width);
 			}
 			if (isNumeric(canvState.height)) {
-				cs.height = toNumber(canvState.height);
+				thisCanvasState.height = toNumber(canvState.height);
 			}
 			if (isNumeric(canvState.drawWidth)) {
-				cs.drawWidth = toNumber(canvState.drawWidth);
+				thisCanvasState.drawWidth = toNumber(canvState.drawWidth);
 			} else {
-				cs.drawWidth = toNumber(canvState.width);
+				thisCanvasState.drawWidth = toNumber(canvState.width);
 			}
 			if (isNumeric(canvState.drawHeight)) {
-				cs.drawHeight = toNumber(canvState.drawHeight);
+				thisCanvasState.drawHeight = toNumber(canvState.drawHeight);
 			} else {
-				cs.drawHeight = toNumber(canvState.height);
+				thisCanvasState.drawHeight = toNumber(canvState.height);
 			}
 
 			if (
-				!cs.width ||
-				!cs.height
+				!thisCanvasState.width ||
+				!thisCanvasState.height
 			) {
 				if (cb) {
 					cb("Argument not found");
@@ -5655,16 +5653,16 @@
 			};
 
 			var sizes = getContainedSizes(
-				cs.width,
-				cs.height,
-				cs.drawWidth,
-				cs.drawHeight,
+				thisCanvasState.width,
+				thisCanvasState.height,
+				thisCanvasState.drawWidth,
+				thisCanvasState.drawHeight,
 			);
 
 			var canvas = drawCanvas({
 				width: sizes[0],
 				height: sizes[1],
-				backgroundColor: cs.backgroundColor
+				background: thisCanvasState.background
 			});
 			if (!canvas) {
 				if (cb) {
@@ -5696,11 +5694,11 @@
 			});
 
 			var result = {
-				filename: cs.filename,
-				mimeType: cs.mimeType,
-				dataType: cs.dataType,
-				quality: cs.quality,
-				backgroundColor: cs.backgroundColor,
+				filename: thisCanvasState.filename,
+				mimeType: thisCanvasState.mimeType,
+				dataType: thisCanvasState.dataType,
+				quality: thisCanvasState.quality,
+				background: thisCanvasState.background,
 				width: canvas.width,
 				height: canvas.height,
 				numberOfImages: drawables.length,
@@ -5722,7 +5720,7 @@
 				if (count < index) {
 					// recursive
 					var state = drawables[count];
-					drawImage(canvas, state.canvasWidth, state, function(err) {
+					drawImage(canvas, thisCanvasState.width, state, function(err) {
 						if (err) {
 							imageResults.push({
 								id: state.id,
@@ -5736,12 +5734,12 @@
 					});
 				} else {
 					// end
-					var dataURL = canvas.toDataURL(cs.mimeType, cs.quality);
+					var dataURL = canvas.toDataURL(thisCanvasState.mimeType, thisCanvasState.quality);
 					var data;
-					if (cs.dataType === "url") {
+					if (thisCanvasState.dataType === "url") {
 						data = dataURL;
-					} else if (cs.dataType === "file") {
-						data = dataURLtoFile(dataURL, cs.filename);
+					} else if (thisCanvasState.dataType === "file") {
+						data = dataURLtoFile(dataURL, thisCanvasState.filename);
 					} else {
 						if (cb) {
 							cb("DataType not found");
