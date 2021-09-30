@@ -7,18 +7,18 @@
     "css",
     "canvas"
   ],
-  "homepage": "https://github.com/eeecheol/canvaaas",
+  "homepage": "https://github.com/godicheol/canvaaas",
   "bugs": {
-    "url": "https://github.com/eeecheol/canvaaas/issues",
-    "email": "eeecheol@gmail.com"
+    "url": "https://github.com/godicheol/canvaaas/issues",
+    "email": "godicheol@gmail.com"
   },
   "main": "dist/canvaaas.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eeecheol/canvaaas.git"
+    "url": "git+https://github.com/godicheol/canvaaas.git"
   },
   "license": "MIT",
-  "author": "eeecheol <eeecheol@gmail.com>",
+  "author": "godicheol <godicheol@gmail.com>",
   "scripts": {
     "start": "nodemon bin/www"
   },

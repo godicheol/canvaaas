@@ -1,5 +1,5 @@
 // canvaaas.js
-// eeecheol@gmail.com
+// godicheol@gmail.com
 
 (function(window){
 	'use strict';
@@ -124,6 +124,10 @@
 				focusabled: true,
 				editabled: true,
 				drawabled: true,
+				cropTop: 0,
+				cropBottom: 0,
+				cropLeft: 0,
+				cropRight: 0,
 			}
 		};
 
@@ -136,7 +140,8 @@
 			undrawabled: "undrawabled",
 			onEdit: "onEdit",
 			onFocus: "onFocus",
-			onDrag: "onDrag"
+			onDrag: "onDrag",
+			onCrop: "onCrop",
 		};
 
 		Object.freeze(defaultConfig);
@@ -151,7 +156,7 @@
 		conatinerTemplate += "</div>";
 
 		var imageTemplate = "";
-		imageTemplate += "<img>";
+		imageTemplate += "<div class='canvaaas-image'><img></div>";
 		imageTemplate += "<div class='canvaaas-overlay'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-top'></div>";
 		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-bottom'></div>";
@@ -185,6 +190,14 @@
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
 
 		var loadingTemplate = "";
 		loadingTemplate += "<div class='canvaaas-loading'>";
@@ -254,7 +267,9 @@
 				eventState.onUpload = true;
 				var loading = startLoading(document.body);
 
-				recursiveFunc();
+				setTimeout(function(e){
+					recursiveFunc();
+				}, 100);
 
 				function recursiveFunc() {
 					if (count < index) {
@@ -1327,12 +1342,28 @@
 			return tmp.querySelector("img").src;
 		}
 
-		function getOrigin(id) {
+		function getOriginWrapper(id) {
 			return document.getElementById(originId + id);
 		}
 
-		function getClone(id) {
+		function getOriginImage(id) {
+			var wrapper = document.getElementById(originId + id);
+			if (!wrapper) {
+				return false;
+			}
+			return wrapper.querySelector("div.canvaaas-image");
+		}
+
+		function getCloneWrapper(id) {
 			return document.getElementById(cloneId + id);
+		}
+
+		function getCloneImage(id) {
+			var wrapper = document.getElementById(cloneId + id);
+			if (!wrapper) {
+				return false;
+			}
+			return wrapper.querySelector("div.canvaaas-image");
 		}
 
 		function getState(id) {
@@ -1399,11 +1430,24 @@
 				}
 			});
 
-			var originObj = document.getElementById(originId + id);
-			var cloneObj = document.getElementById(cloneId + id);
+			if (!state) {
+				return false;
+			}
 
-			var idChanged = false;
-			var oldId;
+			var originWrapper = document.getElementById(originId + id);
+			var cloneWrapper = document.getElementById(cloneId + id);
+			var originImage = originWrapper.querySelector("div.canvaaas-image");
+			var cloneImage = cloneWrapper.querySelector("div.canvaaas-image");
+
+			if (
+				!originWrapper ||
+				!cloneWrapper ||
+				!originImage ||
+				!cloneImage
+			) {
+				return false;
+			}
+
 			for(var key in newState) {
 				if (newState.hasOwnProperty(key)) {
 					if ([
@@ -1414,8 +1458,7 @@
 							!isExist(newState[key]) &&
 							!isEmpty(newState[key])
 						) {
-							idChanged = true;
-							oldId = state[key];
+							state["oldId"] = state[key];
 							state[key] = toString(newState[key]);
 						}
 					} else if ([
@@ -1430,6 +1473,10 @@
 						"scaleX",
 						"scaleY",
 						"opacity",
+						"cropTop",
+						"cropBottom",
+						"cropLeft",
+						"cropRight",
 					].indexOf(key) > -1) {
 						if (isNumeric(newState[key])) {
 							state[key] = toNumber(newState[key]);
@@ -1447,32 +1494,36 @@
 				}
 			}
 
-			if (idChanged === true) {
+			// id changed
+			if (state.oldId) {
 				// change focus
 				if (eventState.target) {
-					if (eventState.target === oldId) {
+					if (eventState.target === state.oldId) {
 						eventState.target = state.id;
 					}
 				}
 
-				// change element
-				originObj.id = originId + state.id;
-				cloneObj.id = cloneId + state.id;
+				// change element id
+				originWrapper.id = originId + state.id;
+				cloneWrapper.id = cloneId + state.id;
 
-				// change undo redo caches
+				// change undo caches
 				undoCaches.forEach(function(elem){
-					if (elem.id === oldId) {
+					if (elem.id === state.oldId) {
 						elem.id = state.id;
 						elem.state.id = state.id;
 					}
 				});
 
+				// change redo caches
 				redoCaches.forEach(function(elem){
-					if (elem.id === oldId) {
+					if (elem.id === state.oldId) {
 						elem.id = state.id;
 						elem.state.id = state.id;
 					}
 				});
+
+				state.oldId = undefined;
 			}
 
 			var index = state.index;
@@ -1499,36 +1550,36 @@
 				transform += "scaleY(" + state.scaleY + ")";
 			}
 
-			originObj.style.zIndex = index;
-			originObj.style.top = top;
-			originObj.style.left = left;
-			originObj.style.width = width;
-			originObj.style.height = height;
-			originObj.style.transform = transform;
-			originObj.querySelector("img").style.opacity = opacity;
+			originWrapper.style.zIndex = index;
+			originWrapper.style.top = top;
+			originWrapper.style.left = left;
+			originWrapper.style.width = width;
+			originWrapper.style.height = height;
+			originWrapper.style.transform = transform;
+			originImage.style.opacity = opacity;
 
-			cloneObj.style.zIndex = index;
-			cloneObj.style.top = top;
-			cloneObj.style.left = left;
-			cloneObj.style.width = width;
-			cloneObj.style.height = height;
-			cloneObj.style.transform = transform;
-			cloneObj.querySelector("img").style.opacity = opacity;
+			cloneWrapper.style.zIndex = index;
+			cloneWrapper.style.top = top;
+			cloneWrapper.style.left = left;
+			cloneWrapper.style.width = width;
+			cloneWrapper.style.height = height;
+			cloneWrapper.style.transform = transform;
+			cloneImage.style.opacity = opacity;
 
 			try {
 				if (state.restricted === false) {
-					if (!originObj.classList.contains(classNames.restricted)) {
-						originObj.classList.add(classNames.restricted);
+					if (!originWrapper.classList.contains(classNames.restricted)) {
+						originWrapper.classList.add(classNames.restricted);
 					}
-					if (!cloneObj.classList.contains(classNames.restricted)) {
-						cloneObj.classList.add(classNames.restricted);
+					if (!cloneWrapper.classList.contains(classNames.restricted)) {
+						cloneWrapper.classList.add(classNames.restricted);
 					}
 				} else {
-					if (originObj.classList.contains(classNames.restricted)) {
-						originObj.classList.remove(classNames.restricted);
+					if (originWrapper.classList.contains(classNames.restricted)) {
+						originWrapper.classList.remove(classNames.restricted);
 					}
-					if (cloneObj.classList.contains(classNames.restricted)) {
-						cloneObj.classList.remove(classNames.restricted);
+					if (cloneWrapper.classList.contains(classNames.restricted)) {
+						cloneWrapper.classList.remove(classNames.restricted);
 					}
 				}
 			} catch(err) {
@@ -1537,18 +1588,18 @@
 
 			try {
 				if (state.focusabled === false) {
-					if (!originObj.classList.contains(classNames.unfocusabled)) {
-						originObj.classList.add(classNames.unfocusabled);
+					if (!originWrapper.classList.contains(classNames.unfocusabled)) {
+						originWrapper.classList.add(classNames.unfocusabled);
 					}
-					if (!cloneObj.classList.contains(classNames.unfocusabled)) {
-						cloneObj.classList.add(classNames.unfocusabled);
+					if (!cloneWrapper.classList.contains(classNames.unfocusabled)) {
+						cloneWrapper.classList.add(classNames.unfocusabled);
 					}
 				} else {
-					if (originObj.classList.contains(classNames.unfocusabled)) {
-						originObj.classList.remove(classNames.unfocusabled);
+					if (originWrapper.classList.contains(classNames.unfocusabled)) {
+						originWrapper.classList.remove(classNames.unfocusabled);
 					}
-					if (cloneObj.classList.contains(classNames.unfocusabled)) {
-						cloneObj.classList.remove(classNames.unfocusabled);
+					if (cloneWrapper.classList.contains(classNames.unfocusabled)) {
+						cloneWrapper.classList.remove(classNames.unfocusabled);
 					}
 				}
 			} catch(err) {
@@ -1557,18 +1608,18 @@
 
 			try {
 				if (state.editabled === false) {
-					if (!originObj.classList.contains(classNames.uneditabled)) {
-						originObj.classList.add(classNames.uneditabled);
+					if (!originWrapper.classList.contains(classNames.uneditabled)) {
+						originWrapper.classList.add(classNames.uneditabled);
 					}
-					if (!cloneObj.classList.contains(classNames.uneditabled)) {
-						cloneObj.classList.add(classNames.uneditabled);
+					if (!cloneWrapper.classList.contains(classNames.uneditabled)) {
+						cloneWrapper.classList.add(classNames.uneditabled);
 					}
 				} else {
-					if (originObj.classList.contains(classNames.uneditabled)) {
-						originObj.classList.remove(classNames.uneditabled);
+					if (originWrapper.classList.contains(classNames.uneditabled)) {
+						originWrapper.classList.remove(classNames.uneditabled);
 					}
-					if (cloneObj.classList.contains(classNames.uneditabled)) {
-						cloneObj.classList.remove(classNames.uneditabled);
+					if (cloneWrapper.classList.contains(classNames.uneditabled)) {
+						cloneWrapper.classList.remove(classNames.uneditabled);
 					}
 				}
 			} catch(err) {
@@ -1577,18 +1628,18 @@
 
 			try {
 				if (state.drawabled === false) {
-					if (!originObj.classList.contains(classNames.undrawabled)) {
-						originObj.classList.add(classNames.undrawabled);
+					if (!originWrapper.classList.contains(classNames.undrawabled)) {
+						originWrapper.classList.add(classNames.undrawabled);
 					}
-					if (!cloneObj.classList.contains(classNames.undrawabled)) {
-						cloneObj.classList.add(classNames.undrawabled);
+					if (!cloneWrapper.classList.contains(classNames.undrawabled)) {
+						cloneWrapper.classList.add(classNames.undrawabled);
 					}
 				} else {
-					if (originObj.classList.contains(classNames.undrawabled)) {
-						originObj.classList.remove(classNames.undrawabled);
+					if (originWrapper.classList.contains(classNames.undrawabled)) {
+						originWrapper.classList.remove(classNames.undrawabled);
 					}
-					if (cloneObj.classList.contains(classNames.undrawabled)) {
-						cloneObj.classList.remove(classNames.undrawabled);
+					if (cloneWrapper.classList.contains(classNames.undrawabled)) {
+						cloneWrapper.classList.remove(classNames.undrawabled);
 					}
 				}
 			} catch(err) {
@@ -1603,14 +1654,14 @@
 				return false;
 			}
 			try {
-				var originObj = document.getElementById(originId + id);
-				var cloneObj = document.getElementById(cloneId + id);
+				var originWrapper = document.getElementById(originId + id);
+				var cloneWrapper = document.getElementById(cloneId + id);
 
-				if (!originObj.classList.contains(cls)) {
-					originObj.classList.add(cls);
+				if (!originWrapper.classList.contains(cls)) {
+					originWrapper.classList.add(cls);
 				}
-				if (!cloneObj.classList.contains(cls)) {
-					cloneObj.classList.add(cls);
+				if (!cloneWrapper.classList.contains(cls)) {
+					cloneWrapper.classList.add(cls);
 				}
 				return true;
 			} catch(err) {
@@ -1624,14 +1675,14 @@
 				return false;
 			}
 			try {
-				var originObj = document.getElementById(originId + id);
-				var cloneObj = document.getElementById(cloneId + id);
+				var originWrapper = document.getElementById(originId + id);
+				var cloneWrapper = document.getElementById(cloneId + id);
 
-				if (originObj.classList.contains(cls)) {
-					originObj.classList.remove(cls);
+				if (originWrapper.classList.contains(cls)) {
+					originWrapper.classList.remove(cls);
 				}
-				if (cloneObj.classList.contains(cls)) {
-					cloneObj.classList.remove(cls);
+				if (cloneWrapper.classList.contains(cls)) {
+					cloneWrapper.classList.remove(cls);
 				}
 				return true;
 			} catch(err) {
@@ -1676,17 +1727,17 @@
 				return false;
 			}
 
-			var originObj = document.getElementById(originId + id);
-			var cloneObj = document.getElementById(cloneId + id);
+			var originWrapper = document.getElementById(originId + id);
+			var cloneWrapper = document.getElementById(cloneId + id);
 			if (
-				!originObj ||
-				!cloneObj
+				!originWrapper ||
+				!cloneWrapper
 			) {
 				return false;
 			}
 
-			var originHandle = originObj.querySelector("div" + typ + direction);
-			var cloneHandle = cloneObj.querySelector("div" + typ + direction);
+			var originHandle = originWrapper.querySelector("div" + typ + direction);
+			var cloneHandle = cloneWrapper.querySelector("div" + typ + direction);
 			if (
 				!originHandle ||
 				!cloneHandle
@@ -1739,17 +1790,17 @@
 				return false;
 			}
 
-			var originObj = document.getElementById(originId + id);
-			var cloneObj = document.getElementById(cloneId + id);
+			var originWrapper = document.getElementById(originId + id);
+			var cloneWrapper = document.getElementById(cloneId + id);
 			if (
-				!originObj ||
-				!cloneObj
+				!originWrapper ||
+				!cloneWrapper
 			) {
 				return false;
 			}
 
-			var originHandle = originObj.querySelector("div" + typ + direction);
-			var cloneHandle = cloneObj.querySelector("div" + typ + direction);
+			var originHandle = originWrapper.querySelector("div" + typ + direction);
+			var cloneHandle = cloneWrapper.querySelector("div" + typ + direction);
 			if (
 				!originHandle ||
 				!cloneHandle
@@ -2073,7 +2124,7 @@
 				var found;
 				for(var i = 0; i < 3; i++) {
 					if (!found) {
-						if (tmp.classList.contains("canvaaas-image")) {
+						if (tmp.classList.contains("canvaaas-origin")) {
 							found = tmp;
 						}
 						if (tmp.classList.contains("canvaaas-clone")) {
@@ -2105,8 +2156,10 @@
 				return false;
 			}
 			try {
-				var originObj = getOrigin(id);
-				var cloneObj = getClone(id);
+				var originWrapper = getOriginWrapper(id);
+				var cloneWrapper = getCloneWrapper(id);
+				var originImage = getOriginImage(id);
+				var cloneImage = getCloneImage(id);
 
 				if (!canvasObject.classList.contains(classNames.onFocus)) {
 					canvasObject.classList.add(classNames.onFocus);
@@ -2115,51 +2168,51 @@
 					mirrorObject.classList.add(classNames.onFocus);
 				}
 
-				if (!originObj.classList.contains(classNames.onFocus)) {
-					originObj.classList.add(classNames.onFocus);
+				if (!originWrapper.classList.contains(classNames.onFocus)) {
+					originWrapper.classList.add(classNames.onFocus);
 				}
-				if (!cloneObj.classList.contains(classNames.onFocus)) {
-					cloneObj.classList.add(classNames.onFocus);
+				if (!cloneWrapper.classList.contains(classNames.onFocus)) {
+					cloneWrapper.classList.add(classNames.onFocus);
 				}
 
-				originObj.removeEventListener("mousedown", handlers.focusIn, false);
+				originWrapper.removeEventListener("mousedown", handlers.focusIn, false);
 
-				originObj.addEventListener("mousedown", handlers.startMove, false);
-				originObj.addEventListener("touchstart", handlers.startMove, false);
-				originObj.addEventListener("wheel", handlers.startWheelZoom, false);
+				originWrapper.addEventListener("mousedown", handlers.startMove, false);
+				originWrapper.addEventListener("touchstart", handlers.startMove, false);
+				originWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				originObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startRotate, false);
 					elem.addEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startResize, false);
 					elem.addEventListener("touchstart", handlers.startResize, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startFlip, false);
 					elem.addEventListener("touchstart", handlers.startFlip, false);
 				});
 
-				cloneObj.removeEventListener("mousedown", handlers.focusIn, false);
+				cloneWrapper.removeEventListener("mousedown", handlers.focusIn, false);
 
-				cloneObj.addEventListener("mousedown", handlers.startMove, false);
-				cloneObj.addEventListener("touchstart", handlers.startMove, false);
-				cloneObj.addEventListener("wheel", handlers.startWheelZoom, false);
+				cloneWrapper.addEventListener("mousedown", handlers.startMove, false);
+				cloneWrapper.addEventListener("touchstart", handlers.startMove, false);
+				cloneWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startRotate, false);
 					elem.addEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startResize, false);
 					elem.addEventListener("touchstart", handlers.startResize, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
 					elem.addEventListener("mousedown", handlers.startFlip, false);
 					elem.addEventListener("touchstart", handlers.startFlip, false);
 				});
@@ -2182,8 +2235,8 @@
 				return false;
 			}
 			try {
-				var originObj = getOrigin(id);
-				var cloneObj = getClone(id);
+				var originWrapper = getOriginWrapper(id);
+				var cloneWrapper = getCloneWrapper(id);
 
 				if (canvasObject.classList.contains(classNames.onFocus)) {
 					canvasObject.classList.remove(classNames.onFocus);
@@ -2192,51 +2245,51 @@
 					mirrorObject.classList.remove(classNames.onFocus);
 				}
 
-				if (originObj.classList.contains(classNames.onFocus)) {
-					originObj.classList.remove(classNames.onFocus);
+				if (originWrapper.classList.contains(classNames.onFocus)) {
+					originWrapper.classList.remove(classNames.onFocus);
 				}
-				if (cloneObj.classList.contains(classNames.onFocus)) {
-					cloneObj.classList.remove(classNames.onFocus);
+				if (cloneWrapper.classList.contains(classNames.onFocus)) {
+					cloneWrapper.classList.remove(classNames.onFocus);
 				}
 
-				originObj.addEventListener("mousedown", handlers.focusIn, false);
+				originWrapper.addEventListener("mousedown", handlers.focusIn, false);
 
-				originObj.removeEventListener("mousedown", handlers.startMove, false);
-				originObj.removeEventListener("touchstart", handlers.startMove, false);
-				originObj.removeEventListener("wheel", handlers.startWheelZoom, false);
+				originWrapper.removeEventListener("mousedown", handlers.startMove, false);
+				originWrapper.removeEventListener("touchstart", handlers.startMove, false);
+				originWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				originObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startRotate, false);
 					elem.removeEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startResize, false);
 					elem.removeEventListener("touchstart", handlers.startResize, false);
 				});
 
-				originObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+				originWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startFlip, false);
 					elem.removeEventListener("touchstart", handlers.startFlip, false);
 				});
 
-				cloneObj.addEventListener("mousedown", handlers.focusIn, false);
+				cloneWrapper.addEventListener("mousedown", handlers.focusIn, false);
 
-				cloneObj.removeEventListener("mousedown", handlers.startMove, false);
-				cloneObj.removeEventListener("touchstart", handlers.startMove, false);
-				cloneObj.removeEventListener("wheel", handlers.startWheelZoom, false);
+				cloneWrapper.removeEventListener("mousedown", handlers.startMove, false);
+				cloneWrapper.removeEventListener("touchstart", handlers.startMove, false);
+				cloneWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startRotate, false);
 					elem.removeEventListener("touchstart", handlers.startRotate, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startResize, false);
 					elem.removeEventListener("touchstart", handlers.startResize, false);
 				});
 
-				cloneObj.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
+				cloneWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
 					elem.removeEventListener("mousedown", handlers.startFlip, false);
 					elem.removeEventListener("touchstart", handlers.startFlip, false);
 				});
@@ -2726,11 +2779,33 @@
 			return [w, h]
 		}
 
-		function getExtension(str) {
-			if (!str) {
+		function getExtension(data) {
+			try {
+				if (
+					typeof(data) === "object" &&
+					data !== null
+				) {
+					if (data.type) {
+						return data.type.split("/").pop();
+					} else {
+						return false;
+					}
+				} else if (typeof(data) === "string") {
+					if (
+						data.trim !== "" &&
+						data.indexOf(".") > -1
+					) {
+						return data.split('.').pop();
+					} else {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			} catch (err) {
+				console.log(err);
 				return false;
 			}
-			return str.split('.').pop();
 		}
 
 		function getFilename(str) {
@@ -2972,31 +3047,27 @@
 		}
 
 		// asynchronous
-		function renderImage(file, exportedState, cb) {
+		function renderImage(data, exportedState, cb) {
 			var newImage = new Image();
-			var ext;
 			var src;
-			var typ;
+			var ext;
 
 			try {
 				// check file or url
-				if (isObject(file)) {
-					if (!file.name || !file.type || !file.size) {
+				if (isObject(data)) {
+					// file
+					try {
+						src = URL.createObjectURL(data);
+					} catch(err) {
+						console.log(err);
 						if (cb) {
 							cb("File not found");
 						}
 						return false;
 					}
-
-					// file
-					typ = "file";
-					ext = file.type.split("/").pop();
-					src = URL.createObjectURL(file);
-				} else if (isString(file)) {
+				} else if (isString(data)) {
 					// url
-					typ = "url";
-					ext = file.split('.').pop();
-					src = file;
+					src = data;
 				} else {
 					if (cb) {
 						cb("File not found");
@@ -3005,9 +3076,16 @@
 				}
 
 				// check mimeType
+				ext = getExtension(data);
+				if (!ext) {
+					if (cb) {
+						cb("Extension not found");
+					}
+					return false;
+				}
 				if (config.allowedExtensions.indexOf(ext.toLowerCase()) < 0) {
 					if (cb) {
-						cb("Extention not allowed => " + ext);
+						cb("Extension not allowed");
 					}
 					return false;
 				}
@@ -3022,7 +3100,8 @@
 			// start load
 			newImage.src = src;
 
-			newImage.onerror = function(e) {
+			newImage.onerror = function(err) {
+				console.log(err);
 				if (cb) {
 					cb("Image load failed");
 				}
@@ -3041,28 +3120,29 @@
 				}
 
 				var state = defaultImageState(newImage);
-				state.type = typ;
 
 				// create origin element
 				var newOrigin = document.createElement("div");
-				newOrigin.classList.add("canvaaas-image");
+				newOrigin.classList.add("canvaaas-origin");
 				newOrigin.id = originId + state.id;
 				newOrigin.innerHTML = imageTemplate;
-				newOrigin.querySelector("img").src = newImage.src;
+				var newOriginImage = newOrigin.querySelector("div.canvaaas-image");
+				newOriginImage.querySelector("img").src = newImage.src;
 
 				// create clone element
 				var newClone = document.createElement("div");
 				newClone.classList.add("canvaaas-clone");
 				newClone.id = cloneId + state.id;
 				newClone.innerHTML = imageTemplate;
-				newClone.querySelector("img").src = newImage.src;
+				var newCloneImage = newClone.querySelector("div.canvaaas-image");
+				newCloneImage.querySelector("img").src = newImage.src;
 
 				// set events
-				newOrigin.addEventListener("mousedown", handlers.focusIn, false);
-				newOrigin.addEventListener("touchstart", handlers.focusIn, false);
+				newOriginImage.addEventListener("mousedown", handlers.focusIn, false);
+				newOriginImage.addEventListener("touchstart", handlers.focusIn, false);
 
-				newClone.addEventListener("mousedown", handlers.focusIn, false);
-				newClone.addEventListener("touchstart", handlers.focusIn, false);
+				newCloneImage.addEventListener("mousedown", handlers.focusIn, false);
+				newCloneImage.addEventListener("touchstart", handlers.focusIn, false);
 
 				canvasObject.appendChild(newOrigin);
 				mirrorObject.appendChild(newClone);
@@ -3097,10 +3177,10 @@
 					}
 				}
 
-				var originObj = getOrigin(id);
-				var cloneObj = getClone(id);
+				var originWrapper = getOriginWrapper(id);
+				var cloneWrapper = getCloneWrapper(id);
 				var state = getState(id);
-				var src = originObj.querySelector("img").src;
+				var src = originWrapper.querySelector("img").src;
 
 				var seq = imageStates.findIndex(function(elem){
 					if (elem.id === state.id) {
@@ -3109,8 +3189,8 @@
 				});
 
 				imageStates.splice(seq, 1);
-				originObj.parentNode.removeChild(originObj);
-				cloneObj.parentNode.removeChild(cloneObj);
+				originWrapper.parentNode.removeChild(originWrapper);
+				cloneWrapper.parentNode.removeChild(cloneWrapper);
 
 				// clear caches
 				var filterdUC = undoCaches.filter(function(elem){
