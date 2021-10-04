@@ -591,11 +591,11 @@
 				">Focus Out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.restrict(canvaaas.this(), true)
-				">Restrict</a></li>
+					canvaaas.aspectRatio(canvaaas.this(), true)
+				">Lock Aspect Ratio</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.restrict(canvaaas.this(), false)
-				">Unrestrict</a></li>
+					canvaaas.aspectRatio(canvaaas.this(), false)
+				">Unlock Aspect Ratio</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusable(canvaaas.this(), true)
@@ -617,6 +617,13 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawable(canvaaas.this(), false)
 				">Undrawable</a></li>
+        <li class="rule"></li>
+        <li><a href="javascript:void(0)" onclick="
+					canvaaas.visible(canvaaas.this(), true)
+				">Show</a></li>
+        <li><a href="javascript:void(0)" onclick="
+					canvaaas.visible(canvaaas.this(), false)
+				">Hide</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.reset(canvaaas.this())
@@ -630,6 +637,16 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
+        <li><a href="javascript:void(0)" onclick="
+          canvaaas.filename(window.prompt('Type filename', 'untitled'), function(err, res){
+            if (err) {
+              console.log(err);
+              return false;
+            }
+            writeCanvasData();
+          })
+        ">Filename</a></li>
+        <li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize({
 						width: window.prompt('Type width', '1800'),
@@ -645,24 +662,24 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.editableAll(true)
-				">Editabled</a></li>
+				">Editable</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.editableAll(false)
-				">Uneditabled</a></li>
+				">Uneditable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusableAll(true)
-				">Set Focusable</a></li>
+				">Focusable</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusableAll(false)
-				">Unset Focusabled</a></li>
+				">Unfocusable</a></li>
 				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawableAll(true)
-				">Show Drawables</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawableAll(false)
-				">Hide Drawables</a></li>
+        <li><a href="javascript:void(0)" onclick="
+          canvaaas.drawableAll(true)
+        ">Show Undrawabled</a></li>
+        <li><a href="javascript:void(0)" onclick="
+          canvaaas.drawableAll(false)
+				">Hide Undrawabled</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.background(window.prompt('e.g. #FFFFFF, alpha', '#000000'), function(err, res){
@@ -672,10 +689,10 @@
 						}
 						writeCanvasData();
 					})
-				">Set Background</a></li>
+				">Set Background Color</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.background('alpha')
-				">Unset Background</a></li>
+				">Remove Background Color</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.checker(true)
@@ -734,7 +751,7 @@
       data-scaleX = "1"
       data-scaleY = "1"
       data-opacity = "1"
-      data-restricted = "false"
+      data-lockAspectRatio = "false"
       data-focusabled = "true"
       data-editabled = "true"
       data-drawabled = "true">
@@ -757,7 +774,8 @@
 	        "scaleX": 1,
 	        "scaleY": -1,
 	        "opacity": 1,
-	        "restricted": false,
+	        "lockAspectRatio": false,
+          "visible": true,
 	        "focusabled": true,
 	        "editabled": true,
 	        "drawabled": true,
@@ -1121,14 +1139,8 @@
 			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport(device screen)
 			maxDrawWidth: 4096 * 4, // number, iOS always has been adjusted 4096px
 			maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
-			renderScale: 0.5, // number, 0 ~ 1 scale in canvas
-			restrictAfterRender: false, // boolean
-			restrictMove: false, // boolean
-			restrictRotate: true, // boolean
-			restrictResize: true, // boolean
-			restrictFlip: false, // boolean
-			restrictRotateAngleUnit: 45, // number, 1 ~ 360
-			restrictFlipAngleUnit: 180, // number, 1 ~ 180
+			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+      lockAspectRatioAfterRender: false, // boolean
 			upload: undefined, // callback function
 			canvas: undefined, // callback function
 			focus: undefined, // callback function
@@ -1200,7 +1212,6 @@
 		    "dataType": "url",
 		    "editabled": true,
 		    "focusabled": true,
-		    "drawabled": true,
 		    "background": "#FFFFFF",
 		    "overlay": true,
 		    "checker": true,
@@ -1211,7 +1222,6 @@
 
 		var testImportStates = [{
         "id": "TEST_PNG",
-        "type": "url",
         "src": "./img/1.png",
         "index": 1,
         "originalWidth": 800, // no use
@@ -1224,7 +1234,8 @@
         "scaleX": 1,
         "scaleY": 1,
         "opacity": 1,
-        "restricted": false,
+        "lockAspectRatio": false,
+        "visible": true,
         "focusabled": true,
         "editabled": true,
         "drawabled": true,
@@ -1234,7 +1245,6 @@
         "top": 508.7198515769946 // no use
     }, {
         "id": "TEST_JPG",
-        "type": "url",
         "src": "./img/2.jpg",
         "index": 2,
         "originalWidth": 1350, // no use
@@ -1247,7 +1257,8 @@
         "scaleX": 1,
         "scaleY": -1,
         "opacity": 1,
-        "restricted": false,
+        "lockAspectRatio": false,
+        "visible": true,
         "focusabled": true,
         "editabled": true,
         "drawabled": true,
@@ -1257,7 +1268,6 @@
         "top": -29.94988231994472 // no use
     }, {
         "id": "TEST_JPEG",
-        "type": "url",
         "src": "./img/3.jpeg",
         "index": 3,
         "originalWidth": 1800, // no use
@@ -1270,7 +1280,8 @@
         "scaleX": -1,
         "scaleY": -1,
         "opacity": 1,
-        "restricted": false,
+        "lockAspectRatio": false,
+        "visible": true,
         "focusabled": true,
         "editabled": true,
         "drawabled": true,
@@ -1295,7 +1306,8 @@
 	        "scaleX": 1,
 	        "scaleY": 1,
 	        "opacity": 1,
-	        "restricted": false,
+	        "lockAspectRatio": false,
+          "visible": true,
 	        "focusabled": true,
 	        "editabled": true,
 	        "drawabled": true,

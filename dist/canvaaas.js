@@ -44,21 +44,9 @@
 
 			maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
 
-			renderScale: 0.5, // number, 0 ~ 1 scale in canvas
+			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 
-			restrictAfterRender: false, // boolean
-
-			restrictMove: false, // boolean
-
-			restrictResize: true, // boolean
-
-			restrictRotate: true, // boolean
-
-			restrictFlip: false, // boolean
-
-			restrictRotateAngleUnit: 45, // number, 1 ~ 360
-
-			restrictFlipAngleUnit: 180, // number, 1 ~ 180
+			lockAspectRatioAfterRender: false, // boolean
 
 			upload: undefined, // callback function
 
@@ -100,8 +88,8 @@
 			var fittedSizes = getContainedSizes(
 				newImage.width,
 				newImage.height,
-				canvasState.width * config.renderScale,
-				canvasState.height * config.renderScale
+				canvasState.width * config.imageScaleAfterRender,
+				canvasState.height * config.imageScaleAfterRender
 			);
 
 			return {
@@ -120,7 +108,8 @@
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,
-				restricted: config.restrictAfterRender,
+				lockAspectRatio: config.lockAspectRatioAfterRender || false,
+				visible: true,
 				focusabled: true,
 				editabled: true,
 				drawabled: true,
@@ -134,14 +123,13 @@
 		var classNames = {
 			hidden: "hidden",
 			checker: "checker",
-			restricted: "restricted",
-			unfocusabled: "unfocusabled",
-			uneditabled: "uneditabled",
-			undrawabled: "undrawabled",
 			onEdit: "onEdit",
 			onFocus: "onFocus",
 			onDrag: "onDrag",
 			onCrop: "onCrop",
+			unfocusabled: "unfocusabled",
+			uneditabled: "uneditabled",
+			undrawabled: "undrawabled"
 		};
 
 		Object.freeze(defaultConfig);
@@ -280,7 +268,7 @@
 								}
 							} else {
 								if (config.upload) {
-									config.upload(null, exportState(res));
+									config.upload(null, exportImageState(res));
 								}
 							}
 							count++;
@@ -295,7 +283,7 @@
 
 			// deprecated
 			hover: function(e) {
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 
@@ -336,13 +324,13 @@
 					return false;
 				}
 				if (eventState.target !== id) {
-					focusOut(eventState.target);
+					setFocusOut(eventState.target);
 				}
 
-				focusIn(id);
+				setFocusIn(id);
 
 				if (config.focus) {
-					config.focus(null, exportState(id));
+					config.focus(null, exportImageState(id));
 				}
 				return handlers.startMove(e);
 			},
@@ -360,7 +348,7 @@
 					return false;
 				}
 				if (eventState.target) {
-					focusOut(eventState.target);
+					setFocusOut(eventState.target);
 				}
 				if (config.focus) {
 					config.focus(null, null);
@@ -377,7 +365,7 @@
 				if (!isEditable(eventState.target)) {
 					return false;
 				}
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 				// fix osx wheel
@@ -427,7 +415,7 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || (config.restrictMove && state.restricted);
+				var onShiftKey = e.shiftKey;
 				var mouseX;
 				var mouseY;
 				if (typeof(e.touches) === "undefined") {
@@ -474,7 +462,7 @@
 
 				// callback
 				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
+					config.edit(null, exportImageState(eventState.target));
 				}
 			},
 
@@ -488,7 +476,7 @@
 				if (!isEditable(eventState.target)) {
 					return false;
 				}
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 
@@ -545,7 +533,7 @@
 				}
 
 				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || (config.restrictResize && state.restricted);
+				var onShiftKey = e.shiftKey || state.lockAspectRatio;
 				var direction = eventState.direction;
 				var aspectRatio = state.originalWidth / state.originalHeight;
 				var width = eventState.initialW;
@@ -725,7 +713,7 @@
 
 				// callback
 				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
+					config.edit(null, exportImageState(eventState.target));
 				}
 			},
 
@@ -748,7 +736,7 @@
 					if (!isEditable(eventState.target)) {
 						return false;
 					}
-					if (!whereContainer()) {
+					if (!whereIsContainer()) {
 						return false;
 					}
 
@@ -796,7 +784,7 @@
 
 					// callback
 					if (config.edit) {
-						config.edit(null, exportState(eventState.target));
+						config.edit(null, exportImageState(eventState.target));
 					}
 				}, 64);
 			},
@@ -814,7 +802,7 @@
 				if (!isEditable(eventState.target)) {
 					return false;
 				}
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 
@@ -885,7 +873,7 @@
 
 				// callback
 				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
+					config.edit(null, exportImageState(eventState.target));
 				}
 
 				// event propagation
@@ -902,7 +890,7 @@
 				if (!isEditable(eventState.target)) {
 					return false;
 				}
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 
@@ -938,7 +926,7 @@
 
 				var state = getState(eventState.target);
 				var direction = eventState.direction;
-				var onShiftKey = e.shiftKey || (config.restrictRotate && state.restricted);
+				var onShiftKey = e.shiftKey;
 				var radians;
 				var deg;
 				var mouseX;
@@ -982,7 +970,7 @@
 				}
 
 				if (onShiftKey) {
-					deg = Math.round(deg / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
+					deg = Math.round(deg / 45) * 45;
 				}
 
 				// save state
@@ -1013,7 +1001,7 @@
 
 				// callback
 				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
+					config.edit(null, exportImageState(eventState.target));
 				}
 			},
 
@@ -1027,7 +1015,7 @@
 				if (!isEditable(eventState.target)) {
 					return false;
 				}
-				if (!whereContainer()) {
+				if (!whereIsContainer()) {
 					return false;
 				}
 
@@ -1090,7 +1078,7 @@
 
 				var state = getState(eventState.target);
 				var direction = eventState.direction;
-				var onShiftKey = e.shiftKey || (config.restrictFlip && state.restricted);
+				var onShiftKey = e.shiftKey;
 				var degX = 0;
 				var degY = 0;
 				var mouseX;
@@ -1207,8 +1195,8 @@
 				}
 
 				if (onShiftKey) {
-					degX = Math.round(degX / config.restrictFlipAngleUnit) * config.restrictFlipAngleUnit;
-					degY = Math.round(degY / config.restrictFlipAngleUnit) * config.restrictFlipAngleUnit;
+					degX = Math.round(degX / 180) * 180;
+					degY = Math.round(degY / 180) * 180;
 				}
 
 				// save state
@@ -1261,7 +1249,7 @@
 
 				// callback
 				if (config.edit) {
-					config.edit(null, exportState(eventState.target));
+					config.edit(null, exportImageState(eventState.target));
 				}
 			},
 
@@ -1302,10 +1290,9 @@
 							height: state.height * scaleRatio
 						});
 					});
-
 				}
-
 			},
+
 		} // event handlers end
 
 		// methods
@@ -1390,36 +1377,6 @@
 			return tmp;
 		}
 
-		// deprecated
-		function getCanvas() {
-			var tmp = {};
-			for (var key in canvasState) {
-				if (canvasState.hasOwnProperty(key)) {
-					tmp[key] = canvasState[key];
-				}
-			}
-
-			var ar = getAspectRatio(tmp.width, tmp.height);
-			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
-
-			return tmp;
-		}
-
-		function getConfig() {
-			var tmp = {};
-			for(var key in config) {
-				if (config.hasOwnProperty(key)) {
-					if (typeof(config[key]) === "function") {
-						tmp[key] = true;
-					} else {
-						tmp[key] = config[key];
-					}
-				}
-			}
-
-			return tmp;
-		}
-
 		function setState(id, newState) {
 			if (!id) {
 				return false;
@@ -1429,7 +1386,6 @@
 					return elem;
 				}
 			});
-
 			if (!state) {
 				return false;
 			}
@@ -1482,7 +1438,28 @@
 							state[key] = toNumber(newState[key]);
 						}
 					} else if ([
-						"restricted",
+						"index",
+						"width",
+						"height",
+						"x",
+						"y",
+						"rotate",
+						"rotateX",
+						"rotateY",
+						"scaleX",
+						"scaleY",
+						"opacity",
+						"cropTop",
+						"cropBottom",
+						"cropLeft",
+						"cropRight",
+					].indexOf(key) > -1) {
+						if (isNumeric(newState[key])) {
+							state[key] = toNumber(newState[key]);
+						}
+					} else if ([
+						"lockAspectRatio",
+						"visible",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1523,6 +1500,7 @@
 					}
 				});
 
+				// clear old id
 				state.oldId = undefined;
 			}
 
@@ -1566,84 +1544,68 @@
 			cloneWrapper.style.transform = transform;
 			cloneImage.style.opacity = opacity;
 
-			try {
-				if (state.restricted === false) {
-					if (!originWrapper.classList.contains(classNames.restricted)) {
-						originWrapper.classList.add(classNames.restricted);
-					}
-					if (!cloneWrapper.classList.contains(classNames.restricted)) {
-						cloneWrapper.classList.add(classNames.restricted);
-					}
-				} else {
-					if (originWrapper.classList.contains(classNames.restricted)) {
-						originWrapper.classList.remove(classNames.restricted);
-					}
-					if (cloneWrapper.classList.contains(classNames.restricted)) {
-						cloneWrapper.classList.remove(classNames.restricted);
-					}
+			if (!state.visible) {
+				if (!originWrapper.classList.contains(classNames.hidden)) {
+					originWrapper.classList.add(classNames.hidden);
 				}
-			} catch(err) {
-				console.log(err);
+				if (!cloneWrapper.classList.contains(classNames.hidden)) {
+					cloneWrapper.classList.add(classNames.hidden);
+				}
+			} else {
+				if (originWrapper.classList.contains(classNames.hidden)) {
+					originWrapper.classList.remove(classNames.hidden);
+				}
+				if (cloneWrapper.classList.contains(classNames.hidden)) {
+					cloneWrapper.classList.remove(classNames.hidden);
+				}
 			}
 
-			try {
-				if (state.focusabled === false) {
-					if (!originWrapper.classList.contains(classNames.unfocusabled)) {
-						originWrapper.classList.add(classNames.unfocusabled);
-					}
-					if (!cloneWrapper.classList.contains(classNames.unfocusabled)) {
-						cloneWrapper.classList.add(classNames.unfocusabled);
-					}
-				} else {
-					if (originWrapper.classList.contains(classNames.unfocusabled)) {
-						originWrapper.classList.remove(classNames.unfocusabled);
-					}
-					if (cloneWrapper.classList.contains(classNames.unfocusabled)) {
-						cloneWrapper.classList.remove(classNames.unfocusabled);
-					}
+			if (!state.focusabled) {
+				if (!originWrapper.classList.contains(classNames.unfocusabled)) {
+					originWrapper.classList.add(classNames.unfocusabled);
 				}
-			} catch(err) {
-				console.log(err);
+				if (!cloneWrapper.classList.contains(classNames.unfocusabled)) {
+					cloneWrapper.classList.add(classNames.unfocusabled);
+				}
+			} else {
+				if (originWrapper.classList.contains(classNames.unfocusabled)) {
+					originWrapper.classList.remove(classNames.unfocusabled);
+				}
+				if (cloneWrapper.classList.contains(classNames.unfocusabled)) {
+					cloneWrapper.classList.remove(classNames.unfocusabled);
+				}
 			}
 
-			try {
-				if (state.editabled === false) {
-					if (!originWrapper.classList.contains(classNames.uneditabled)) {
-						originWrapper.classList.add(classNames.uneditabled);
-					}
-					if (!cloneWrapper.classList.contains(classNames.uneditabled)) {
-						cloneWrapper.classList.add(classNames.uneditabled);
-					}
-				} else {
-					if (originWrapper.classList.contains(classNames.uneditabled)) {
-						originWrapper.classList.remove(classNames.uneditabled);
-					}
-					if (cloneWrapper.classList.contains(classNames.uneditabled)) {
-						cloneWrapper.classList.remove(classNames.uneditabled);
-					}
+			if (!state.editabled) {
+				if (!originWrapper.classList.contains(classNames.uneditabled)) {
+					originWrapper.classList.add(classNames.uneditabled);
 				}
-			} catch(err) {
-				console.log(err);
+				if (!cloneWrapper.classList.contains(classNames.uneditabled)) {
+					cloneWrapper.classList.add(classNames.uneditabled);
+				}
+			} else {
+				if (originWrapper.classList.contains(classNames.uneditabled)) {
+					originWrapper.classList.remove(classNames.uneditabled);
+				}
+				if (cloneWrapper.classList.contains(classNames.uneditabled)) {
+					cloneWrapper.classList.remove(classNames.uneditabled);
+				}
 			}
 
-			try {
-				if (state.drawabled === false) {
-					if (!originWrapper.classList.contains(classNames.undrawabled)) {
-						originWrapper.classList.add(classNames.undrawabled);
-					}
-					if (!cloneWrapper.classList.contains(classNames.undrawabled)) {
-						cloneWrapper.classList.add(classNames.undrawabled);
-					}
-				} else {
-					if (originWrapper.classList.contains(classNames.undrawabled)) {
-						originWrapper.classList.remove(classNames.undrawabled);
-					}
-					if (cloneWrapper.classList.contains(classNames.undrawabled)) {
-						cloneWrapper.classList.remove(classNames.undrawabled);
-					}
+			if (!state.drawabled) {
+				if (!originWrapper.classList.contains(classNames.undrawabled)) {
+					originWrapper.classList.add(classNames.undrawabled);
 				}
-			} catch(err) {
-				console.log(err);
+				if (!cloneWrapper.classList.contains(classNames.undrawabled)) {
+					cloneWrapper.classList.add(classNames.undrawabled);
+				}
+			} else {
+				if (originWrapper.classList.contains(classNames.undrawabled)) {
+					originWrapper.classList.remove(classNames.undrawabled);
+				}
+				if (cloneWrapper.classList.contains(classNames.undrawabled)) {
+					cloneWrapper.classList.remove(classNames.undrawabled);
+				}
 			}
 
 			return true;
@@ -1817,6 +1779,20 @@
 			return true;
 		}
 
+		function exportConfig() {
+			var tmp = {};
+			for(var key in config) {
+				if (config.hasOwnProperty(key)) {
+					if (typeof(config[key]) === "function") {
+						tmp[key] = true;
+					} else {
+						tmp[key] = config[key];
+					}
+				}
+			}
+			return tmp;
+		}
+
 		function exportCanvasState() {
 			var tmp = {};
 			tmp.filename = canvasState.filename;
@@ -1827,7 +1803,6 @@
 			tmp.height = canvasState.originalHeight;
 			tmp.editabled = canvasState.editabled;
 			tmp.focusabled = canvasState.focusabled;
-			tmp.drawabled = canvasState.drawabled;
 			tmp.background = canvasState.background;
 			tmp.checker = canvasState.checker;
 			tmp.overlay = canvasState.overlay;
@@ -1838,7 +1813,7 @@
 			return tmp;
 		}
 
-		function importState(state) {
+		function importImageState(state) {
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
 			var tmp = {};
@@ -1870,7 +1845,8 @@
 							tmp[key] = toNumber(state[key]);
 						}
 					} else if ([
-						"restricted",
+						"lockAspectRatio",
+						"visible",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1885,7 +1861,7 @@
 			return tmp;
 		}
 
-		function exportState(id) {
+		function exportImageState(id) {
 			var state = getState(id);
 			var scaleRatio = canvasState.width / canvasState.originalWidth;
 
@@ -1895,7 +1871,6 @@
 					if ([
 						"id",
 						"src",
-						"type"
 					].indexOf(key) > -1) {
 						if (isString(state[key])) {
 							tmp[key] = toString(state[key]);
@@ -1927,7 +1902,8 @@
 							tmp[key] = toNumber(state[key]);
 						}
 					} else if ([
-						"restricted",
+						"lockAspectRatio",
+						"visible",
 						"focusabled",
 						"editabled",
 						"drawabled",
@@ -1939,11 +1915,11 @@
 				}
 			}
 
-			var oar = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
-			var ar = getAspectRatio(tmp.width, tmp.height);
+			var originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
+			var aspectRatio = getAspectRatio(tmp.width, tmp.height);
 
-			tmp.originalAspectRatio = "" + oar[0] + ":" + oar[1];
-			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
+			tmp.originalAspectRatio = "" + originalAspectRatio[0] + ":" + originalAspectRatio[1];
+			tmp.aspectRatio = "" + aspectRatio[0] + ":" + aspectRatio[1];
 			tmp.left = tmp.x - (0.5 * tmp.width);
 			tmp.top = tmp.y - (0.5 * tmp.height);
 
@@ -2019,7 +1995,8 @@
 				"scaleX",
 				"scaleY",
 				"opacity",
-				"restricted",
+				"lockAspectRatio",
+				"visible",
 				"focusabled",
 				"editabled",
 				"drawabled",
@@ -2027,13 +2004,12 @@
 
 			var thisAttrs = {};
 			for (var i = 0; i < stateKeys.length; i++) {
-				var j = stateKeys[i];
-				var tmp = elem.getAttribute("data-" + j);
+				var tmp = elem.getAttribute("data-" + stateKeys[i]);
 				if (!isEmpty(tmp)) {
 					if (isNumeric(tmp)) {
-						thisAttrs[j] = toNumber(tmp);
+						thisAttrs[stateKeys[i]] = toNumber(tmp);
 					} else {
-						thisAttrs[j] = tmp;
+						thisAttrs[stateKeys[i]] = tmp;
 					}
 				}
 			}
@@ -2095,7 +2071,7 @@
 			}
 		}
 
-		function whereContainer(e) {
+		function whereIsContainer(e) {
 			try {
 				var cont = containerObject.getBoundingClientRect();
 				containerState.left = cont.left;
@@ -2124,18 +2100,18 @@
 				var found;
 				for(var i = 0; i < 3; i++) {
 					if (!found) {
-						if (tmp.classList.contains("canvaaas-origin")) {
+						if (tmp.classList.contains("canvaaas-wrapper")) {
 							found = tmp;
-						}
-						if (tmp.classList.contains("canvaaas-clone")) {
-							found = tmp;
-						}
-						if (!found) {
+						} else {
 							if (tmp.parentNode) {
 								tmp = tmp.parentNode;
 							}
 						}
 					}
+				}
+
+				if (!found) {
+					return false;
 				}
 
 				var id = getId(found);
@@ -2150,7 +2126,7 @@
 			}
 		}
 
-		function focusIn(id) {
+		function setFocusIn(id) {
 			var exists = isExist(id);
 			if (!exists) {
 				return false;
@@ -2229,7 +2205,7 @@
 			return true;
 		}
 
-		function focusOut(id) {
+		function setFocusOut(id) {
 			var exists = isExist(id);
 			if (!exists) {
 				return false;
@@ -2320,9 +2296,15 @@
 			var aspectRatio = srcW / srcH;
 
 			if (areaH * aspectRatio < areaW) {
-				return [areaW, areaW / aspectRatio];
+				return [
+					areaW,
+					areaW / aspectRatio
+				];
 			} else {
-				return [areaH * aspectRatio, areaH];
+				return [
+					areaH * aspectRatio,
+					areaH
+				];
 			}
 		}
 
@@ -2344,7 +2326,7 @@
 			return [
 				Math.min(fooMax[0], Math.max(fooMin[0], options.width)),
 				Math.min(fooMax[1], Math.max(fooMin[1], options.height))
-			]
+			];
 		}
 
 		function getRotatedSizes(w, h, d) {
@@ -2659,20 +2641,27 @@
 		}
 
 		function isArray(arr) {
-			return Array.isArray(arr);
+			return arr !== undefined && Array.isArray(arr);
 		}
 
 		function isNode(obj){
 			return (
 				typeof Node === "object" ? obj instanceof Node :
-				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName==="string"
+				obj &&
+				typeof obj === "object" &&
+				typeof obj.nodeType === "number" &&
+				typeof obj.nodeName === "string"
 			);
 		}
 
 		function isElement(obj){
 			return (
 				typeof HTMLElement === "object" ? obj instanceof HTMLElement :
-				obj && typeof obj === "object" && obj !== null && obj.nodeType === 1 && typeof obj.nodeName==="string"
+				obj &&
+				typeof obj === "object" &&
+				obj !== null &&
+				obj.nodeType === 1 &&
+				typeof obj.nodeName==="string"
 			);
 		}
 
@@ -3123,7 +3112,7 @@
 
 				// create origin element
 				var newOrigin = document.createElement("div");
-				newOrigin.classList.add("canvaaas-origin");
+				newOrigin.classList.add("canvaaas-wrapper");
 				newOrigin.id = originId + state.id;
 				newOrigin.innerHTML = imageTemplate;
 				var newOriginImage = newOrigin.querySelector("div.canvaaas-image");
@@ -3131,7 +3120,7 @@
 
 				// create clone element
 				var newClone = document.createElement("div");
-				newClone.classList.add("canvaaas-clone");
+				newClone.classList.add("canvaaas-wrapper");
 				newClone.id = cloneId + state.id;
 				newClone.innerHTML = imageTemplate;
 				var newCloneImage = newClone.querySelector("div.canvaaas-image");
@@ -3149,14 +3138,15 @@
 
 				imageStates.push(state);
 
-				var adjustedState;
+				var newState;
 				if (isObject(exportedState)) {
-					adjustedState = importState(exportedState);
+					newState = importImageState(exportedState);
 				} else {
-					adjustedState = {};
+					newState = {};
 				}
 
-				setState(state.id, adjustedState);
+				// save state
+				setState(state.id, newState);
 
 				if (cb) {
 					cb(null, state.id);
@@ -3173,7 +3163,7 @@
 				// check focus
 				if (eventState.target) {
 					if (eventState.target === id) {
-						focusOut(id);
+						setFocusOut(id);
 					}
 				}
 
@@ -3312,6 +3302,22 @@
 				}
 			}
 
+			if (!canvasState.focusabled) {
+				if (!canvasObject.classList.contains(classNames.unfocusabled)) {
+					canvasObject.classList.add(classNames.unfocusabled);
+				}
+				if (!mirrorObject.classList.contains(classNames.unfocusabled)) {
+					mirrorObject.classList.add(classNames.unfocusabled);
+				}
+			} else {
+				if (canvasObject.classList.contains(classNames.unfocusabled)) {
+					canvasObject.classList.remove(classNames.unfocusabled);
+				}
+				if (mirrorObject.classList.contains(classNames.unfocusabled)) {
+					mirrorObject.classList.remove(classNames.unfocusabled);
+				}
+			}
+
 			if (!canvasState.editabled) {
 				if (!canvasObject.classList.contains(classNames.uneditabled)) {
 					canvasObject.classList.add(classNames.uneditabled);
@@ -3325,25 +3331,6 @@
 				}
 				if (mirrorObject.classList.contains(classNames.uneditabled)) {
 					mirrorObject.classList.remove(classNames.uneditabled);
-				}
-			}
-
-			if (!canvasState.focusabled) {
-				if (!canvasObject.classList.contains(classNames.unfocusabled)) {
-					canvasObject.classList.add(classNames.unfocusabled);
-				}
-				if (!mirrorObject.classList.contains(classNames.unfocusabled)) {
-					mirrorObject.classList.add(classNames.unfocusabled);
-				}
-				if (eventState.target) {
-					focusOut(eventState.target);
-				}
-			} else {
-				if (canvasObject.classList.contains(classNames.unfocusabled)) {
-					canvasObject.classList.remove(classNames.unfocusabled);
-				}
-				if (mirrorObject.classList.contains(classNames.unfocusabled)) {
-					mirrorObject.classList.remove(classNames.unfocusabled);
 				}
 			}
 
@@ -3376,8 +3363,14 @@
 			canvasObject.style.left = "";
 			canvasObject.style.top = "";
 
-			if (canvasObject.classList.contains(classNames.checker)) {
-				canvasObject.classList.remove(classNames.checker);
+			if (!canvasState.checker) {
+				if (canvasObject.classList.contains(classNames.checker)) {
+					canvasObject.classList.remove(classNames.checker);
+				}
+			} else {
+				if (!canvasObject.classList.contains(classNames.checker)) {
+					canvasObject.classList.add(classNames.checker);
+				}
 			}
 
 			mirrorObject.style.width = "";
@@ -3385,8 +3378,14 @@
 			mirrorObject.style.left = "";
 			mirrorObject.style.top = "";
 
-			if (mirrorObject.classList.contains(classNames.hidden)) {
-				mirrorObject.classList.remove(classNames.hidden);
+			if (!canvasState.overlay) {
+				if (!mirrorObject.classList.contains(classNames.hidden)) {
+					mirrorObject.classList.add(classNames.hidden);
+				}
+			} else {
+				if (mirrorObject.classList.contains(classNames.hidden)) {
+					mirrorObject.classList.remove(classNames.hidden);
+				}
 			}
 
 			backgroundObject.style.width = "";
@@ -3438,9 +3437,9 @@
 			containerObject.addEventListener('drop', handlers.drop, false);
 
 			if (cb) {
-				cb(null, getConfig());
+				cb(null, exportConfig());
 			}
-			return getConfig();
+			return exportConfig();
 		}
 
 		myObject.destroy = function(cb){
@@ -3537,10 +3536,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, exportState(res));
+					config.upload(null, exportImageState(res));
 				}
 				if (cb) {
-					cb(null, exportState(res));
+					cb(null, exportImageState(res));
 				}
 			});
 		}
@@ -3595,10 +3594,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, exportState(res));
+					config.upload(null, exportImageState(res));
 				}
 				if (cb) {
-					cb(null, exportState(res));
+					cb(null, exportImageState(res));
 				}
 			});
 		}
@@ -3655,10 +3654,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, exportState(res));
+					config.upload(null, exportImageState(res));
 				}
 				if (cb) {
-					cb(null, exportState(res));
+					cb(null, exportImageState(res));
 				}
 			});
 		}
@@ -3729,10 +3728,10 @@
 				}
 
 				if (config.upload) {
-					config.upload(null, exportState(res));
+					config.upload(null, exportImageState(res));
 				}
 				if (cb) {
-					cb(null, exportState(res));
+					cb(null, exportImageState(res));
 				}
 			});
 		}
@@ -3760,7 +3759,7 @@
 					}
 				}
 				if (isMatch === true) {
-					founds.push(exportState(elem.id));
+					founds.push(exportImageState(elem.id));
 				}
 			});
 
@@ -3803,7 +3802,7 @@
 					}
 				}
 				if (isMatch === true) {
-					founds.push(exportState(elem.id));
+					founds.push(exportImageState(elem.id));
 				}
 			});
 
@@ -3860,12 +3859,13 @@
 				return false;
 			}
 
+			// save state
 			setState(founds[0], updates);
 
 			if (cb) {
-				cb(null, exportState(founds[0]));
+				cb(null, exportImageState(founds[0]));
 			}
-			return exportState(founds[0]);
+			return exportImageState(founds[0]);
 		}
 
 		myObject.updateMany = function(query, updates, cb){
@@ -3903,9 +3903,10 @@
 
 			var results = [];
 			for (var i = 0; i < founds.length; i++) {
+				// save state
 				setState(founds[i], updates);
 
-				results.push(exportState(founds[i]));
+				results.push(exportImageState(founds[i]));
 			}
 
 			if (cb) {
@@ -3966,12 +3967,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(newId));
+				config.edit(null, exportImageState(newId));
 			}
 			if (cb) {
-				cb(null, exportState(newId));
+				cb(null, exportImageState(newId));
 			}
-			return exportState(newId);
+			return exportImageState(newId);
 		}
 
 		myObject.move = function(id, x, y, cb) {
@@ -4022,12 +4023,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.moveTo = function(id, x, y, cb) {
@@ -4119,12 +4120,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.zoom = function(id, ratio, cb) {
@@ -4171,12 +4172,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.zoomTo = function(id, ratio, cb) {
@@ -4258,12 +4259,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.rotate = function(id, deg, cb){
@@ -4308,10 +4309,6 @@
 				deg *= -1;
 			}
 
-			if (state.restricted) {
-				deg = Math.round(deg / 15) * 15;
-			}
-
 			// save cache
 			saveUndo(id);
 
@@ -4321,12 +4318,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.rotateTo = function(id, deg, cb){
@@ -4371,10 +4368,6 @@
 				deg *= -1;
 			}
 
-			if (state.restricted) {
-				deg = Math.round(deg / 15) * 15;
-			}
-
 			// save cache
 			saveUndo(id);
 
@@ -4384,12 +4377,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.flipX = function(id, cb){
@@ -4424,12 +4417,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.flipY = function(id, cb){
@@ -4464,12 +4457,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.opacity = function(id, num, cb){
@@ -4514,12 +4507,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.index = function(id, idx, cb) {
@@ -4556,17 +4549,18 @@
 			var state = getState(id);
 			idx = toNumber(idx);
 
+			// save state
 			setState(id, {
 				index: state.index + idx
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.indexTo = function(id, idx, cb) {
@@ -4602,17 +4596,18 @@
 
 			idx = toNumber(idx);
 
+			// save state
 			setState(id, {
 				index: idx
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.focusIn = function(id, cb) {
@@ -4639,18 +4634,18 @@
 			var state = getState(id);
 
 			if (eventState.target) {
-				focusOut(eventState.target);
+				setFocusOut(eventState.target);
 			}
 
-			focusIn(id);
+			setFocusIn(id);
 
 			if (config.focus) {
-				config.focus(null, exportState(id));
+				config.focus(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.focusOut = function(cb) {
@@ -4664,7 +4659,7 @@
 				return false;
 			}
 
-			focusOut(eventState.target);
+			setFocusOut(eventState.target);
 
 			if (config.focus) {
 				config.focus(null, null);
@@ -4675,7 +4670,7 @@
 			return true;
 		}
 
-		myObject.restrict = function(id, b, cb){
+		myObject.aspectRatio = function(id, b, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4713,7 +4708,7 @@
 			var rotate = state.rotate;
 
 			if (
-				state.restricted === false &&
+				state.lockAspectRatio === false &&
 				toBoolean(b) === true
 			) {
 				if (width > height * aspectRatio) {
@@ -4721,7 +4716,6 @@
 				} else {
 					width = height * aspectRatio;
 				}
-				rotate = Math.round(rotate / config.restrictRotateAngleUnit) * config.restrictRotateAngleUnit;
 			}
 
 			// save cache
@@ -4729,19 +4723,18 @@
 
 			// save state
 			setState(id, {
-				restricted: toBoolean(b),
+				lockAspectRatio: toBoolean(b),
 				width: width,
-				height: height,
-				rotate: rotate
+				height: height
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.focusable = function(id, b, cb){
@@ -4768,8 +4761,8 @@
 			var state = getState(id);
 
 			if (eventState.target) {
-				if (eventState.target === state.id) {
-					focusOut(state.id);
+				if (eventState.target === id) {
+					setFocusOut(id);
 				}
 			}
 
@@ -4782,12 +4775,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.editable = function(id, b, cb){
@@ -4822,12 +4815,12 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.drawable = function(id, b, cb){
@@ -4872,16 +4865,19 @@
 			});
 
 			if (config.edit) {
-				config.edit(null, exportState(id));
+				config.edit(null, exportImageState(id));
 			}
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
-		myObject.remove = function(id, cb) {
+		myObject.visible = function(id, b, cb){
 			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
 				if (cb) {
 					cb("Image not found");
 				}
@@ -4898,25 +4894,41 @@
 				return false;
 			}
 
-			var tmp = exportState(id);
-			var res = removeImage(id);
-			if (!res) {
-				if (config.remove) {
-					config.remove("Could not remove image");
+			if (!isBoolean(b)) {
+				if (config.edit) {
+					config.edit("Argument is not boolean");
 				}
 				if (cb) {
-					cb("Could not remove image");
+					cb("Argument is not boolean");
 				}
 				return false;
-			} else {
-				if (config.remove) {
-					config.remove(null, tmp);
-				}
-				if (cb) {
-					cb(null, tmp);
-				}
-				return tmp;
 			}
+
+			var state = getState(id);
+
+			if (toBoolean(b) === false) {
+				if (eventState.target) {
+					if (eventState.target === id) {
+						setFocusOut(id);
+					}
+				}
+			}
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				visible: toBoolean(b)
+			});
+
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
 		}
 
 		myObject.reset = function(id, cb) {
@@ -4945,8 +4957,8 @@
 			var fittedSizes = getContainedSizes(
 				state.originalWidth,
 				state.originalHeight,
-				canvasState.width * config.renderScale,
-				canvasState.height * config.renderScale,
+				canvasState.width * config.imageScaleAfterRender,
+				canvasState.height * config.imageScaleAfterRender,
 			);
 
 			// save cache
@@ -4962,16 +4974,56 @@
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,
-				restricted: config.restrictAfterRender,
+				lockAspectRatio: config.lockAspectRatioAfterRender || false,
+				visible: true,
 				focusabled: true,
 				editabled: true,
 				drawabled: true
 			});
 
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
+		}
+
+		myObject.remove = function(id, cb) {
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isEditable(id)) {
+				if (config.edit) {
+					config.edit("Image is not editabled");
+				}
+				if (cb) {
+					cb("Image is not editabled");
+				}
+				return false;
+			}
+
+			var tmp = exportImageState(id);
+			var res = removeImage(id);
+			if (!res) {
+				if (config.remove) {
+					config.remove("Could not remove image");
+				}
+				if (cb) {
+					cb("Could not remove image");
+				}
+				return false;
+			} else {
+				if (config.remove) {
+					config.remove(null, tmp);
+				}
+				if (cb) {
+					cb(null, tmp);
+				}
+				return tmp;
+			}
 		}
 
 		//
@@ -4997,9 +5049,9 @@
 			copyObject(config, newConfig);
 
 			if (cb) {
-				cb(null, getConfig());
+				cb(null, exportConfig());
 			}
-			return getConfig();
+			return exportConfig();
 		}
 
 		//
@@ -5088,9 +5140,6 @@
 			}
 			if (isBoolean(options.focusabled)) {
 				canvasState.focusabled = toBoolean(options.focusabled);
-			}
-			if (isBoolean(options.drawabled)) {
-				canvasState.drawabled = toBoolean(options.drawabled);
 			}
 			if (isString(options.background)) {
 				var colour = toString(options.background).trim();
@@ -5322,7 +5371,7 @@
 			return exportCanvasState();
 		}
 
-		myObject.drawableAll = function(b, cb) {
+		myObject.focusableAll = function(b, cb) {
 			if (!isBoolean(b)) {
 				if (config.canvas) {
 					config.canvas("Argument is not boolean");
@@ -5333,7 +5382,11 @@
 				return false;
 			}
 
-			canvasState.drawabled = toBoolean(b);
+			if (eventState.target) {
+				setFocusOut(eventState.target);
+			}
+
+			canvasState.focusabled = toBoolean(b);
 
 			initCanvas();
 
@@ -5346,7 +5399,7 @@
 			return exportCanvasState();
 		}
 
-		myObject.focusableAll = function(b, cb) {
+		myObject.drawableAll = function(b, cb) {
 			if (!isBoolean(b)) {
 				if (config.canvas) {
 					config.canvas("Argument is not boolean");
@@ -5357,7 +5410,7 @@
 				return false;
 			}
 
-			canvasState.focusabled = toBoolean(b);
+			canvasState.drawabled = toBoolean(b);
 
 			initCanvas();
 
@@ -5564,7 +5617,7 @@
 			var drawables = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawabled === true) {
-					drawables.push(exportState(imageStates[i].id));
+					drawables.push(exportImageState(imageStates[i].id));
 				}
 			}
 
@@ -5860,9 +5913,9 @@
 
 		myObject.getConfig = function(cb){
 			if (cb) {
-				cb(null, getConfig());
+				cb(null, exportConfig());
 			}
-			return getConfig();
+			return exportConfig();
 		}
 
 		myObject.getCanvas = function(cb){
@@ -5875,7 +5928,7 @@
 		myObject.getImages = function(cb){
 			var states = [];
 			imageStates.forEach(function(elem){
-				states.push(exportState(elem.id));
+				states.push(exportImageState(elem.id));
 			});
 
 			var results = states.sort(function(a, b){
@@ -5957,7 +6010,7 @@
 							});
 						} else {
 							results.push(
-								exportState(res)
+								exportImageState(res)
 							);
 						}
 						count++;
@@ -5995,17 +6048,17 @@
 			}
 
 			if (eventState.target) {
-				focusOut(eventState.target);
+				setFocusOut(eventState.target);
 			}
 
 			var id = callUndo();
 
-			focusIn(id);
+			setFocusIn(id);
 
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		myObject.redo = function(cb){
@@ -6024,17 +6077,17 @@
 			}
 
 			if (eventState.target) {
-				focusOut(eventState.target);
+				setFocusOut(eventState.target);
 			}
 
 			var id = callRedo();
 
-			focusIn(id);
+			setFocusIn(id);
 
 			if (cb) {
-				cb(null, exportState(id));
+				cb(null, exportImageState(id));
 			}
-			return exportState(id);
+			return exportImageState(id);
 		}
 
 		//
