@@ -33,37 +33,37 @@
 ```html
 <script>
   canvaaas.config({
-		allowedExtensionsForUpload: [
-			"jpg",
-			"jpeg",
-			"png",
-			"gif",
-			"svg",
-			"svg+xml",
-			"tiff",
-			"tif",
-			"webp",
-		], // array of allowed extensions
-		deniedTagNamesForFocusOut: [
-			"A",
-			"BUTTON",
-			"INPUT",
-			"LABEL",
-			"TEXTAREA",
-			"SELECT",
-			"OPTION",
-		], // array of denied tag names
-		cacheLevels: 999, // number
-		dragAndDrop: true, // boolean
-		containerAspectRatio: 1 / 1, // number, width / height
-		maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
-		maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
-		maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
-		maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
-		maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
-		maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
-		imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-		lockAspectRatioAfterRender: false, // boolean
+    allowedExtensionsForUpload: [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "svg",
+      "svg+xml",
+      "tiff",
+      "tif",
+      "webp",
+    ], // array of allowed extensions
+    deniedTagNamesForFocusOut: [
+      "A",
+      "BUTTON",
+      "INPUT",
+      "LABEL",
+      "TEXTAREA",
+      "SELECT",
+      "OPTION",
+    ], // array of denied tag names
+    cacheLevels: 999, // number
+    dragAndDrop: true, // boolean
+    containerAspectRatio: 1 / 1, // number, width / height
+    maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
+    maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
+    maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
+    maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
+    maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+    maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+    imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+    lockAspectRatioAfterRender: false, // boolean
     canvas: function(err, res){
       if (err) {
         console.log(err);
@@ -243,8 +243,8 @@
     mimeType: 'image/png', // optional, default "image/png"
     width: 1800, // required, px
     height: 1200, // required, px
-    drawWidth: 3600, // optional, default width
-    drawHeight: 3600, // optional, default height
+    drawWidth: 3600, // optional, default argument.width e.g. 1800
+    drawHeight: 3600, // optional, default argument.height e.g. 1200
     quality: 0.92, // optional, default 0.92
     background: '#FFFFFF', // optional, rgb format, default "#FFFFFF"
   }, {
