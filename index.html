@@ -989,33 +989,34 @@
 			writeCanvasData();
 		});
 
-		canvaaas.handle({
-			resize: {
-				n: true,
-				e: true,
-				s: true,
-				w: true,
-			},
-			crop: {
-				ne: true,
-				se: true,
-				sw: true,
-				nw: true
-			},
-			rotate: {
-				n: true,
-			},
-			flip: {
-				e: true,
-				s: true
-			}
-		}, function(err, res){
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("canvaaas.handle() callback", res);
-		})
+		// #3.1 handle style
+		// canvaaas.handle({
+		// 	resize: {
+		// 		n: true,
+		// 		e: true,
+		// 		s: true,
+		// 		w: true,
+		// 	},
+		// 	crop: {
+		// 		ne: true,
+		// 		se: true,
+		// 		sw: true,
+		// 		nw: true
+		// 	},
+		// 	rotate: {
+		// 		n: true,
+		// 	},
+		// 	flip: {
+		// 		e: true,
+		// 		s: true
+		// 	}
+		// }, function(err, res){
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return false;
+		// 	}
+		// 	console.log("canvaaas.handle() callback", res);
+		// })
 
 		// #4 upload test
 		// canvaaas.uploadUrl("./img/1.png", function(err, res){
