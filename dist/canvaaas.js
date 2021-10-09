@@ -624,6 +624,10 @@
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
 
+				// fix slow resize after crop
+				diffX *= (2 * (cropLeft + cropRight) + width) / width;
+				diffY *= (2 * (cropTop + cropBottom) + height) / height;
+
 				if (direction === "n") {
 					height -= diffY;
 					if (onShiftKey) {
@@ -720,78 +724,83 @@
 					return false;
 				}
 
-				cropTop *= height / eventState.height;
-				cropBottom *= height / eventState.height;
-				cropLeft *= width / eventState.width;
-				cropRight *= width / eventState.width;
+				cropTop = height * (eventState.cropTop / eventState.height);
+				cropBottom = height * (eventState.cropBottom / eventState.height);
+				cropLeft = width * (eventState.cropLeft / eventState.width);
+				cropRight = width * (eventState.cropRight / eventState.width);
+
+				// cropTop *= height / eventState.height;
+				// cropBottom *= height / eventState.height;
+				// cropLeft *= width / eventState.width;
+				// cropRight *= width / eventState.width;
 
 				diffX = (cropLeft - eventState.cropLeft) + (cropRight - eventState.cropRight);
 				diffY = (cropTop - eventState.cropTop) + (cropBottom - eventState.cropBottom);
 
 				// on developing
-				// bad performance crop after resize
+				// bad performance resize after crop
 
-				// very slow but correct calculation
-				// if (direction === "n") {
-				// 	axisX -= 0.5 * diffY * sinFraction;
-				// 	axisY += 0.5 * diffY * cosFraction;
-				// } else if (direction === "ne") {
-				// 	axisX -= 0.5 * diffX * cosFraction;
-				// 	axisY -= 0.5 * diffX * sinFraction;
-				// 	axisX -= 0.5 * diffY * sinFraction;
-				// 	axisY += 0.5 * diffY * cosFraction;
-				// } else if (direction === "e") {
-				// 	axisX -= 0.5 * diffX * cosFraction;
-				// 	axisY -= 0.5 * diffX * sinFraction;
-				// } else if (direction === "se") {
-				// 	axisX -= 0.5 * diffX * cosFraction;
-				// 	axisY -= 0.5 * diffX * sinFraction;
-				// 	axisX += 0.5 * diffY * sinFraction;
-				// 	axisY -= 0.5 * diffY * cosFraction;
-				// } else if (direction === "s") {
-				// 	axisX += 0.5 * diffY * sinFraction;
-				// 	axisY -= 0.5 * diffY * cosFraction;
-				// } else if (direction === "sw") {
-				// 	axisX += 0.5 * diffX * cosFraction;
-				// 	axisY += 0.5 * diffX * sinFraction;
-				// 	axisX += 0.5 * diffY * sinFraction;
-				// 	axisY -= 0.5 * diffY * cosFraction;
-				// } else if (direction === "w") {
-				// 	axisX += 0.5 * diffX * cosFraction;
-				// 	axisY += 0.5 * diffX * sinFraction;
-				// } else if (direction === "nw") {
-				// 	axisX += 0.5 * diffX * cosFraction;
-				// 	axisY += 0.5 * diffX * sinFraction;
-				// 	axisX -= 0.5 * diffY * sinFraction;
-				// 	axisY += 0.5 * diffY * cosFraction;
-				// } else {
-				// 	return false;
-				// }
-
-				// incorrect calculation but fast
+				// slow but correct calculation
 				if (direction === "n") {
-					height += diffY;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "ne") {
-					width += diffX;
-					height += diffY;
+					axisX -= 0.5 * diffX * cosFraction;
+					axisY -= 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else if (direction === "e") {
-					width += diffX;
+					axisX -= 0.5 * diffX * cosFraction;
+					axisY -= 0.5 * diffX * sinFraction;
 				} else if (direction === "se") {
-					width += diffX;
-					height += diffY;
+					axisX -= 0.5 * diffX * cosFraction;
+					axisY -= 0.5 * diffX * sinFraction;
+					axisX += 0.5 * diffY * sinFraction;
+					axisY -= 0.5 * diffY * cosFraction;
 				} else if (direction === "s") {
-					height += diffY;
+					axisX += 0.5 * diffY * sinFraction;
+					axisY -= 0.5 * diffY * cosFraction;
 				} else if (direction === "sw") {
-					width += diffX;
-					height += diffY;
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX += 0.5 * diffY * sinFraction;
+					axisY -= 0.5 * diffY * cosFraction;
 				} else if (direction === "w") {
-					width += diffX;
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
 				} else if (direction === "nw") {
-					width += diffX;
-					height += diffY;
+					axisX += 0.5 * diffX * cosFraction;
+					axisY += 0.5 * diffX * sinFraction;
+					axisX -= 0.5 * diffY * sinFraction;
+					axisY += 0.5 * diffY * cosFraction;
 				} else {
 					return false;
 				}
+
+				// incorrect calculation but fast
+				// if (direction === "n") {
+				// 	height += diffY;
+				// } else if (direction === "ne") {
+				// 	width += diffX;
+				// 	height += diffY;
+				// } else if (direction === "e") {
+				// 	width += diffX;
+				// } else if (direction === "se") {
+				// 	width += diffX;
+				// 	height += diffY;
+				// } else if (direction === "s") {
+				// 	height += diffY;
+				// } else if (direction === "sw") {
+				// 	width += diffX;
+				// 	height += diffY;
+				// } else if (direction === "w") {
+				// 	width += diffX;
+				// } else if (direction === "nw") {
+				// 	width += diffX;
+				// 	height += diffY;
+				// } else {
+				// 	return false;
+				// }
 
 				if (width - (cropLeft + cropRight) < 10) {
 					return false;
