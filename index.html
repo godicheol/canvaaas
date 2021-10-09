@@ -320,7 +320,7 @@
 					})
 				">Export</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(JSON.stringify(exportedStates), function(err, res){
+					canvaaas.import(exportedStates, function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -329,7 +329,7 @@
 					})
 				">Import</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(JSON.stringify(exportedStates), function(err, res){
+					canvaaas.import(exportedStates3, function(err, res){
 						if (err) {
 							console.log(err);
 							return false;

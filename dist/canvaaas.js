@@ -6938,27 +6938,22 @@
 			}
 
 			if (!isArray(states)) {
-				if (!isString(states)) {
+				if (cb) {
+					cb("Argument is not array");
+				}
+				return false;
+			} else {
+				var chk = true;
+				states.forEach(function(elem){
+					if (typeof(elem) !== "object") {
+						chk = false;
+					}
+				});
+				if (chk === false) {
 					if (cb) {
-						cb("Argument is not array");
+						cb("Argument is not object");
 					}
 					return false;
-				} else {
-					var tmp;
-					try {
-						tmp = JSON.parse(states);
-					} catch(err) {
-						console.log(err);
-						tmp = undefined;
-					}
-					if (!isArray(tmp)) {
-						if (cb) {
-							cb("Argument is not array");
-						}
-						return false;
-					} else {
-						states = tmp;
-					}
 				}
 			}
 
@@ -6981,9 +6976,7 @@
 								err: err
 							});
 						} else {
-							results.push(
-								exportImageState(res)
-							);
+							results.push(exportImageState(res));
 						}
 						count++;
 						recursiveFunc();
