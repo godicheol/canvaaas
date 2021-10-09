@@ -64,13 +64,6 @@
     maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
     lockAspectRatioAfterRender: false, // boolean
-    canvas: function(err, res){
-      if (err) {
-        console.log(err);
-        return false;
-      }
-      console.log("config.canvas callback", res);
-    },
     upload: function(err, res){
       if (err) {
         console.log(err);
