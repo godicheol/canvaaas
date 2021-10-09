@@ -153,6 +153,23 @@
 		border-top: 1px solid #575757;
 		color: #e7e7e7;
 	}
+
+	#myPreview{
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 1111;
+		background-color: #000;
+	}
+	#myPreview.hidden{
+		display: none;
+	}
+	#myPreview img{
+		border: 1px solid #ccc;
+	}
+
 </style>
 </head>
 <body style="padding-top: 0; padding-bottom: 0;">
@@ -199,7 +216,7 @@
 					)
 				">Upload from URL</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadState(testImportStates[0])
+					canvaaas.uploadState(exportedStates[0])
 				">Upload from State</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
@@ -208,6 +225,18 @@
 						)
 					)
 				">Upload from Element</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.draw({
+						dataType: 'url'
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						preview(res);
+					})
+				">Preview</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
@@ -267,7 +296,7 @@
 						drawWidth: 3600,
 						drawHeight: 3600
 					},
-					testImportStates,
+					exportedStates,
 					function(err, res, result){
 						if (err) {
 							console.log(err);
@@ -275,40 +304,7 @@
 						}
 						myDownload(res, result.filename); // iOS not supported
 					})
-				">Save from JSON<br />(iOS chrome not supported)</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'original',
-						dataType: 'url'
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						newTab(res);
-					})
-				">New Tab<br />(iOS safari not supported)</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawTo({
-				    filename: 'TEST',
-				    quality: 0.92,
-				    mimeType: 'image/png',
-				    dataType: 'url',
-				    background: '#FFFFFF',
-				    width: 1800,
-				    height: 1200,
-						drawWidth: 3600,
-						drawHeight: 3600
-					},
-					testImportStates,
-					function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						newTab(res);
-					})
-				">New Tab from JSON<br />(iOS safari not supported)</a></li>
+				">Save from JSON(TEST)</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res){
@@ -321,7 +317,7 @@
 					})
 				">Export</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(JSON.stringify(testImportStates), function(err, res){
+					canvaaas.import(JSON.stringify(exportedStates), function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -382,6 +378,29 @@
 				">Get Number of Redo Caches</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.config({
+						dragAndDrop: true
+					}, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log('config callback', res);
+					})
+				">Set Drag And Drop Upload</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.config({
+						dragAndDrop: false
+					}, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log('config callback', res);
+					})
+				">Unset Drag And Drop Upload</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.init(document.getElementById('myContainer'), function(err, res){
 						if (err) {
 							console.log(err);
@@ -438,7 +457,7 @@
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Find One {index: 2}</a></li>
+				">Find One</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.findMany({
 						index: 2
@@ -450,7 +469,7 @@
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Find Many {index: 2}</a></li>
+				">Find Many</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.updateOne({
@@ -466,7 +485,7 @@
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Update One {index: 2}</a></li>
+				">Update One</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.updateMany({
 						index: 2
@@ -481,7 +500,7 @@
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Update Many {index: 2}</a></li>
+				">Update Many</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.id(canvaaas.this(), window.prompt('Type new ID'))
@@ -572,6 +591,23 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.opacity(canvaaas.this(), window.prompt('0 ~ 1', '0.5'))
 				">Opacity</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.crop(canvaaas.this(), {
+						top: window.prompt('Top', '0'),
+						bottom: window.prompt('Bottom', '0'),
+						left: window.prompt('Left', '0'),
+						right: window.prompt('Right', '0'),
+					})
+				">Crop</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropTo(canvaaas.this(), {
+						top: window.prompt('Top', '0'),
+						bottom: window.prompt('Bottom', '0'),
+						left: window.prompt('Left', '0'),
+						right: window.prompt('Right', '0'),
+					})
+				">Crop To</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.indexTo(canvaaas.this(), window.prompt('Number', '5'))
@@ -676,10 +712,10 @@
 				<li class="rule"></li>
         <li><a href="javascript:void(0)" onclick="
           canvaaas.drawableAll(true)
-        ">Show Undrawabled</a></li>
+        ">Show Undrawables</a></li>
         <li><a href="javascript:void(0)" onclick="
           canvaaas.drawableAll(false)
-				">Hide Undrawabled</a></li>
+				">Hide Undrawables</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.background(window.prompt('e.g. #FFFFFF, alpha', '#000000'), function(err, res){
@@ -695,18 +731,18 @@
 				">Remove Background Color</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(true)
-				">Show Checker</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(false)
-				">Hide Checker</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.overlay(true)
 				">Show Overlay</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.overlay(false)
 				">Hide Overlay</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.checker(true)
+				">Show Checker</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.checker(false)
+				">Hide Checker</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
@@ -714,6 +750,73 @@
 			<ul class="header-list hidden">
 				<li><a id="showCanvas" href="javascript:void(0)">Show Canvas Data</a></li>
 				<li><a id="showImage" href="javascript:void(0)">Show Image Data</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.handle({
+						resize: {
+							n: true,
+							ne: true,
+							e: true,
+							se: true,
+							s: true,
+							sw: true,
+							w: true,
+							nw: true
+						},
+						rotate: {
+							n: true,
+						},
+						flip: {
+							e: true,
+						}
+					})
+				">Handle Style 1 (default)</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.handle({
+						crop: {
+							n: true,
+							ne: true,
+							e: true,
+							se: true,
+							s: true,
+							sw: true,
+							w: true,
+							nw: true
+						},
+						rotate: {
+							n: true,
+						},
+						flip: {
+							e: true,
+						}
+					})
+				">Handle Style 2</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.handle({
+						resize: {
+							n: true,
+							e: true,
+							s: true,
+							w: true,
+						},
+						crop: {
+							ne: true,
+							se: true,
+							sw: true,
+							nw: true
+						},
+						rotate: {
+							n: true,
+						},
+						flip: {
+							e: true,
+							s: true
+						}
+					})
+				">Handle Style 3</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.handle({})
+				">Hide Handles</a></li>
 			</ul>
 		</div>
 	</div>
@@ -734,6 +837,8 @@
 		<div id="myImage-state"></div>
 		<div style="clear: both;"></div>
 	</div>
+
+	<div id="myPreview" class="hidden"></div>
 
 	<div style="display: none;">
 		<!-- IMG with dataset -->
@@ -818,17 +923,6 @@
 
 		// #2 config
 		canvaaas.config({
-			canvas: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.canvas callback", res);
-			},
 			upload: function(err, res){
 				if (err) {
 					console.log(err);
@@ -891,9 +985,37 @@
 				console.log(err);
 				return false;
 			}
-			console.log("canvaaas.new() callback",res);
+			console.log("canvaaas.new() callback", res);
 			writeCanvasData();
 		});
+
+		canvaaas.handle({
+			resize: {
+				n: true,
+				e: true,
+				s: true,
+				w: true,
+			},
+			crop: {
+				ne: true,
+				se: true,
+				sw: true,
+				nw: true
+			},
+			rotate: {
+				n: true,
+			},
+			flip: {
+				e: true,
+				s: true
+			}
+		}, function(err, res){
+			if (err) {
+				console.log(err);
+				return false;
+			}
+			console.log("canvaaas.handle() callback", res);
+		})
 
 		// #4 upload test
 		// canvaaas.uploadUrl("./img/1.png", function(err, res){
@@ -904,12 +1026,11 @@
 		// 	console.log(res);
 		// });
 
+		// execute after page load
 		setTimeout(function(){
 
-
-
 			// #4 upload test
-			// canvaaas.uploadState(testImportStates[0], function(err, res){
+			// canvaaas.uploadState(exportedStates[0], function(err, res){
 			// 	if (err) {
 			// 		console.log(err);
 			// 		return false;
@@ -919,21 +1040,15 @@
 
 
 			// #4 upload test
-			// canvaaas.uploadState(testImportStates2, function(err, res){
+			// canvaaas.uploadState(exportedStates2, function(err, res){
 			// 	if (err) {
 			// 		console.log(err);
 			// 		return false;
 			// 	}
 			// 	console.log(res);
 			// });
-
-
 
 		}, 200);
-
-
-
-
 
 		//
 		//
@@ -976,6 +1091,35 @@
 
 			window.URL.revokeObjectURL(myData);
 		}
+
+		// example
+		function preview(myData){
+			var myElem = document.getElementById("myPreview");
+
+			var image = new Image();
+			image.src = myData;
+			image.style.position = 'absolute';
+			image.style.top = '50%';
+			image.style.left = '50%';
+			image.style.transform = 'translate(-50%, -50%)';
+			image.style.width = '100%';
+			image.style.height = 'auto';
+
+			myElem.appendChild(image);
+
+			if (myElem.classList.contains("hidden")) {
+				myElem.classList.remove("hidden");
+			}
+
+			window.URL.revokeObjectURL(myData);
+		}
+
+		document.getElementById("myPreview").addEventListener("click", function(e){
+			if (!this.classList.contains("hidden")) {
+				this.classList.add("hidden");
+			}
+			this.innerHTML = "";
+		});
 
 		function writeCanvasData(){
 			var state = canvaaas.getCanvas();
@@ -1122,7 +1266,7 @@
 		})();
 
 		var defaultConfig = {
-			allowedExtensions: [
+			allowedExtensionsForUpload: [
 				"jpg",
 				"jpeg",
 				"png",
@@ -1132,34 +1276,50 @@
 				"tiff",
 				"tif",
 				"webp",
-			], // array
+			], // array of allowed extensions
+
+			deniedTagNamesForFocusOut: [
+				"A",
+				"BUTTON",
+				"INPUT",
+				"LABEL",
+				"TEXTAREA",
+				"SELECT",
+				"OPTION",
+			], // array of denied tag names for mouse focus out
+
 			cacheLevels: 999, // number
+
+			dragAndDrop: true, // boolean
+
 			containerAspectRatio: 1 / 1, // number, width / height
-			maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport(device screen)
-			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport(device screen)
-			maxDrawWidth: 4096 * 4, // number, iOS always has been adjusted 4096px
-			maxDrawHeight: 4096 * 4, // number, iOS always has been adjusted 4096px
+
+			maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
+
+			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
+
+			maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
+
+			maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
+
+			maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+
+			maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-      lockAspectRatioAfterRender: false, // boolean
+
+			lockAspectRatioAfterRender: false, // boolean
+
 			upload: undefined, // callback function
-			canvas: undefined, // callback function
+
 			focus: undefined, // callback function
+
 			edit: undefined, // callback function
+
 			remove: undefined, // callback function
 		}
 
 		var testConfig = {
-			canvas: function(err, res){
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.canvas callback", res);
-			},
 			upload: function(err, res){
 				if (err) {
 					console.log(err);
@@ -1205,7 +1365,7 @@
 			},
 		}
 
-		var testCanvasState = {
+		var exportedCanvasState = {
 		    "filename": "TEST",
 		    "quality": 0.92,
 		    "mimeType": "image/png",
@@ -1220,7 +1380,7 @@
 		    "aspectRatio": "3:2"
 		}
 
-		var testImportStates = [{
+		var exportedStates = [{
         "id": "TEST_PNG",
         "src": "./img/1.png",
         "index": 1,
@@ -1291,31 +1451,31 @@
         "top": -25.049133677100826 // no use
     }];
 
-			var testImportStates2 = JSON.stringify({
-	        "id": "UPLOADED_FROM_STATE",
-	        "type": "url",
-	        "src": "./img/1.png",
-	        "index": 1,
-	        "originalWidth": 800, // no use
-	        "originalHeight": 800, // no use
-	        "width": 600.0000000000001,
-	        "height": 600.0000000000001,
-	        "x": 399.07235621521335,
-	        "y": 808.7198515769946,
-	        "rotate": 17.46323891797897,
-	        "scaleX": 1,
-	        "scaleY": 1,
-	        "opacity": 1,
-	        "lockAspectRatio": false,
-          "visible": true,
-	        "focusabled": true,
-	        "editabled": true,
-	        "drawabled": true,
-	        "originalAspectRatio": "1:1",
-	        "aspectRatio": "1:1",
-	        "left": 99.07235621521329, // no use
-	        "top": 508.7198515769946 // no use
-	    });
+		var exportedStates2 = JSON.stringify({
+        "id": "UPLOADED_FROM_STATE",
+        "type": "url",
+        "src": "./img/1.png",
+        "index": 1,
+        "originalWidth": 800, // no use
+        "originalHeight": 800, // no use
+        "width": 600.0000000000001,
+        "height": 600.0000000000001,
+        "x": 399.07235621521335,
+        "y": 808.7198515769946,
+        "rotate": 17.46323891797897,
+        "scaleX": 1,
+        "scaleY": 1,
+        "opacity": 1,
+        "lockAspectRatio": false,
+        "visible": true,
+        "focusabled": true,
+        "editabled": true,
+        "drawabled": true,
+        "originalAspectRatio": "1:1",
+        "aspectRatio": "1:1",
+        "left": 99.07235621521329, // no use
+        "top": 508.7198515769946 // no use
+    });
 
 	</script>
 </body>

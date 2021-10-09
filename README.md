@@ -33,29 +33,37 @@
 ```html
 <script>
   canvaaas.config({
-    allowedExtensions: [
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "svg",
-      "svg+xml",
-      "tiff",
-      "tif",
-      "webp"
-    ], // array
-    cacheLevels: 999, // number
-    containerAspectRatio: 1 / 1, // number, width / height
-    maxContainerWidth: 1, // number, 0 ~ 1, scale in viewport(device screen)
-    maxContainerHeight: 0.7, // number, 0 ~ 1, scale in viewport(device screen)
-    renderScale: 0.5, // number, 0 ~ 1, scale in canvas
-    restrictAfterRender: false, // boolean
-    restrictMove: false, // boolean
-    restrictRotate: true, // boolean
-    restrictResize: true, // boolean
-    restrictFlip: false, // boolean
-    restrictRotateAngleUnit: 45, // number, 1 ~ 360
-    restrictFlipAngleUnit: 180, // number, 1 ~ 180
+		allowedExtensionsForUpload: [
+			"jpg",
+			"jpeg",
+			"png",
+			"gif",
+			"svg",
+			"svg+xml",
+			"tiff",
+			"tif",
+			"webp",
+		], // array of allowed extensions
+		deniedTagNamesForFocusOut: [
+			"A",
+			"BUTTON",
+			"INPUT",
+			"LABEL",
+			"TEXTAREA",
+			"SELECT",
+			"OPTION",
+		], // array of denied tag names
+		cacheLevels: 999, // number
+		dragAndDrop: true, // boolean
+		containerAspectRatio: 1 / 1, // number, width / height
+		maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
+		maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
+		maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
+		maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
+		maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+		maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+		imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+		lockAspectRatioAfterRender: false, // boolean
     canvas: function(err, res){
       if (err) {
         console.log(err);
@@ -100,15 +108,15 @@
 ```html
 <script>
   canvaaas.new({
-    filename: "TEST",
+    filename: "filename", // string
     width: 1800, // number, px
     height: 1200, // number, px
-    overlay: true,
-    checker: true,
-    editabled: true,
-    focusabled: true,
-    drawabled: true,
-    background: "#000000" // rgb format or "alpha"
+    overlay: true, // boolean
+    checker: true, // boolean
+    editabled: true, // boolean
+    focusabled: true, // boolean
+    drawabled: true, // boolean
+    background: "#000000" // string, rgb format or "alpha"
   }, function(err, res){
     if (err) {
       console.log(err);
@@ -164,7 +172,8 @@
   data-scaleX = "1"
   data-scaleY = "1"
   data-opacity = "1"
-  data-restricted = "false"
+  data-lockAspectRatio = "false"
+  data-visible = "true"
   data-focusabled = "true"
   data-editabled = "true"
   data-drawabled = "true">
@@ -174,7 +183,6 @@
   src="./img/2.jpg"
   data-state='{
     "id": "2",
-    "type": "url",
     "index": 2,
     "width": 594.2754728305664,
     "height": 792.367297107422,
@@ -184,7 +192,8 @@
     "scaleX": 1,
     "scaleY": -1,
     "opacity": 1,
-    "restricted": false,
+    "lockAspectRatio": false,
+    "visible": true,
     "focusabled": true,
     "editabled": true,
     "drawabled": true
@@ -201,12 +210,12 @@
 </script>
 ```
 
-6. Save File
+6. Get Edited Image
 
 ```html
 <script>
   canvaaas.draw({
-    filename: 'thumbnail_256x256px', // optional, default "untitled"
+    filename: 'filename', // optional, default "untitled"
     dataType: 'url',  // optional, "url" or "file", default "url"
     mimeType: 'image/png', // optional, default "image/png"
     drawWidth: 256, // optional, default canvasWidth
@@ -223,13 +232,13 @@
 </script>
 ```
 
-7. Save File from JSON Data
+7. Get Edited Image from JSON Data
 
 ```html
 <script>
   canvaaas.drawTo({
     // getCanvas()
-    filename: 'drawTo_3600x3600px', // optional, default "untitled"
+    filename: 'filename', // optional, default "untitled"
     dataType: 'url', // optional, default "url"
     mimeType: 'image/png', // optional, default "image/png"
     width: 1800, // required, px
@@ -257,6 +266,63 @@
       return false;
     }
     console.log("canvaaas.drawTo() callback", res, result);
+  });
+</script>
+```
+
+
+0. Handle Controll
+
+```html
+<script>
+  canvaaas.handle({
+    // default handle
+    resize: {
+      n: true,
+      ne: true,
+      e: true,
+      se: true,
+      s: true,
+      sw: true,
+      w: true,
+      nw: true
+    },
+    crop: {
+      n: false,
+      ne: false,
+      e: false,
+      se: false,
+      s: false,
+      sw: false,
+      w: false,
+      nw: false
+    },
+    rotate: {
+      n: true,
+      ne: false,
+      e: false,
+      se: false,
+      s: false,
+      sw: false,
+      w: false,
+      nw: false
+    },
+    flip: {
+      n: false,
+      ne: false,
+      e: true,
+      se: false,
+      s: false,
+      sw: false,
+      w: false,
+      nw: false
+    }
+  }, function(err, res){
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log("canvaaas.handle() callback", res);
   });
 </script>
 ```

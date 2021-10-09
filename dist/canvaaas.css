@@ -2,47 +2,44 @@
 /* godicheol@gmail.com */
 
 /* on focus */
-.canvaaas-canvas.onFocus{
+.canvaaas-canvas.on-focus{
 	outline: 1px solid black;
 }
-.canvaaas-wrapper.onFocus{
+.canvaaas-wrapper.on-focus{
 	cursor: move;
 }
-.canvaaas-wrapper.onFocus .canvaaas-handle-resize{
-	display: block;
-}
-.canvaaas-wrapper.onFocus .canvaaas-handle-rotate.canvaaas-handle-n{
-	display: block;
-}
-.canvaaas-wrapper.onFocus .canvaaas-handle-flip.canvaaas-handle-e{
-	display: block;
-}
-.canvaaas-wrapper.onFocus .canvaaas-innerline{
+.canvaaas-wrapper.on-focus .canvaaas-innerline{
 	/* display: block; */
 }
-.canvaaas-wrapper.onFocus .canvaaas-outline{
+.canvaaas-wrapper.on-focus .canvaaas-outline{
 	display: block;
 }
 
 /* on edit */
-.canvaaas-wrapper.onEdit .canvaaas-overlay{
+.canvaaas-wrapper.on-edit .canvaaas-overlay{
 	display: block;
 }
-.canvaaas-handle.onDrag .canvaaas-handle-box{
+.canvaaas-handle.on-edit .canvaaas-handle-box{
 	border-color: #000000;
 	background-color: #000000;
 }
 
-
 /* uneditabled */
-.canvaaas-canvas.onFocus.uneditabled,
-.canvaaas-mirror.onFocus.uneditabled{
+.canvaaas-canvas.on-focus.uneditabled,
+.canvaaas-mirror.on-focus.uneditabled{
 	outline: 1px solid orange;
+	cursor: not-allowed !important;
+}
+.canvaaas-wrapper.uneditabled{
+	cursor: not-allowed !important;
 }
 .canvaaas-wrapper.uneditabled .canvaaas-innerline,
 .canvaaas-wrapper.uneditabled .canvaaas-outline,
 .canvaaas-wrapper.uneditabled .canvaaas-handle-box{
 	border-color: orange;
+}
+.canvaaas-wrapper.uneditabled .canvaaas-handle{
+	cursor: not-allowed !important;
 }
 
 /* unfocusabled */
@@ -156,6 +153,7 @@
 
 /* wrapper */
 .canvaaas-wrapper{
+	display: block;
 	position: absolute;
 	transform-origin: center center !important;
 	-webkit-touch-callout: none;
@@ -164,7 +162,6 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/* cursor: crosshair; */
 }
 
 .canvaaas-wrapper.hidden{
@@ -172,6 +169,15 @@
 }
 
 /* image */
+.canvaaas-image{
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: hidden;
+}
 .canvaaas-image.hidden{
 	visibility: hidden;
 }
@@ -179,12 +185,6 @@
 .canvaaas-image img{
 	display: block;
 	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	width: 100%;
-	height: 100%;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -302,9 +302,9 @@
 	height: 24px; /* click space */
 	cursor: grab;
 	border-color: inherit;
-
-	/* hide */
-	display: none;
+}
+.canvaaas-handle.hidden{
+	display: none !important;
 }
 .canvaaas-handle-box{
 	position: absolute;
