@@ -309,6 +309,27 @@
 						myDownload(res, result.filename); // iOS not supported
 					})
 				">Save from JSON(TEST)</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.drawTo({
+				    filename: 'TEST',
+				    quality: 0.92,
+				    mimeType: 'image/png',
+				    dataType: 'url',
+				    background: '#FFFFFF',
+				    width: 1800,
+				    height: 1200,
+						drawWidth: 3600,
+						drawHeight: 3600
+					},
+					exportedStates3,
+					function(err, res, result){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						myDownload(res, result.filename); // iOS not supported
+					})
+				">Save from JSON 2(TEST)</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res){
