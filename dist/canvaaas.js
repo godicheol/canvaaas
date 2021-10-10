@@ -42,13 +42,13 @@
 
 			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
 
-			maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
+			maxDrawWidth: 4096 * 4, // number, px
 
-			maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
+			maxDrawHeight: 4096 * 4, // number, px
 
-			maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+			maxDrawWidthOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
 
-			maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
+			maxDrawHeightOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
 
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 
@@ -3180,7 +3180,10 @@
 				maxWidth = config.maxDrawWidthOnMobile;
 				maxHeight = config.maxDrawHeightOnMobile;
 			};
-
+			if (isIos()) {
+				maxWidth = 4096;
+				maxHeight = 4096;
+			};
 			var canvasSizes = getFittedSizes({
 				width: drawSizes[0],
 				height: drawSizes[1],
@@ -3282,6 +3285,10 @@
 				if (isMobile()) {
 					maxWidth = config.maxDrawWidthOnMobile;
 					maxHeight = config.maxDrawHeightOnMobile;
+				}
+				if (isIos()) {
+					maxWidth = 4096;
+					maxHeight = 4096;
 				}
 				var resizedSizes = getFittedSizes({
 					width: imgState.width,
@@ -6693,21 +6700,27 @@
 				}
 			}
 
-			var drawables = [];
+			var thisImageStates = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawabled === true) {
-					drawables.push(exportImageState(imageStates[i].id));
+					thisImageStates.push(exportImageState(imageStates[i].id));
 				}
 			}
 
-			drawables.sort(function(a, b){
-				return a.index - b.index;
+			thisImageStates.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
 			});
 
 			eventState.onDraw = true;
 			var loading = startLoading(document.body);
 
-			drawCanvas(thisDrawState, thisCanvasState, drawables, function(err, res, result){
+			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, result){
 				eventState.onDraw = false;
 				endLoading(loading);
 
@@ -6742,13 +6755,18 @@
 			// imgStates = [{
 			// 	src(required),
 			// 	index(required),
+			// 	x(required),
+			// 	y(required),
 			// 	width(required),
 			// 	height(required),
-			// 	rotate(required),
-			// 	scaleX(required),
-			// 	scaleY(required),
-			// 	opacity(required),
-			//  drawabled(required),
+			// 	rotate(optional),
+			// 	scaleX(optinal),
+			// 	scaleY(optinal),
+			// 	opacity(optional),
+			// 	cropTop(optional),
+			// 	cropBottom(optional),
+			// 	cropLeft(optional),
+			// 	cropRight(optional),
 			// }]
 
 			if (eventState.onDraw === true) {
@@ -6821,32 +6839,68 @@
 				thisDrawState.height = toNumber(canvState.height);
 			}
 
-			var drawables = [];
+			var thisImageStates = [];
 			for (var i = 0; i < imgStates.length; i++) {
-				if (imgStates[i].drawabled !== false) {
-					var copied = {};
-					copyObject(copied, imgStates[i]);
-					if (!copied.src) {
-						if (copied.url) {
-							copied.src = copied.url;
-						} else if (copied.path) {
-							copied.src = copied.path;
-						}
+				var tmp = {};
+				copyObject(tmp, imgStates[i]);
+				if (!tmp.src) {
+					if (tmp.url) {
+						tmp.src = tmp.url;
+					} else if (tmp.path) {
+						tmp.src = tmp.path;
 					}
-					if (copied.src) {
-						drawables.push(copied);
-					}
+				}
+				if (tmp.rotate === undefined) {
+					tmp.rotate = 0;
+				}
+				if (tmp.scaleX === undefined) {
+					tmp.scaleX = 1;
+				}
+				if (tmp.scaleY === undefined) {
+					tmp.scaleY = 1;
+				}
+				if (tmp.opacity === undefined) {
+					tmp.opacity = 1;
+				}
+				if (tmp.cropTop === undefined) {
+					tmp.cropTop = 0;
+				}
+				if (tmp.cropBottom === undefined) {
+					tmp.cropBottom = 0;
+				}
+				if (tmp.cropLeft === undefined) {
+					tmp.cropLeft = 0;
+				}
+				if (tmp.cropRight === undefined) {
+					tmp.cropRight = 0;
+				}
+
+				if (
+					tmp.src !== undefined ||
+					tmp.index !== undefined ||
+					tmp.x !== undefined ||
+					tmp.y !== undefined ||
+					tmp.width !== undefined ||
+					tmp.height !== undefined
+				) {
+					thisImageStates.push(tmp);
 				}
 			}
 
-			drawables.sort(function(a, b){
-				return a.index - b.index;
+			thisImageStates.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
 			});
 
 			eventState.onDraw = true;
 			var loading = startLoading(document.body);
 
-			drawCanvas(thisDrawState, thisCanvasState, drawables, function(err, res, options){
+			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, options){
 				eventState.onDraw = false;
 				endLoading(loading);
 
@@ -6938,23 +6992,44 @@
 			}
 
 			if (!isArray(states)) {
-				if (cb) {
-					cb("Argument is not array");
-				}
-				return false;
-			} else {
-				var chk = true;
-				states.forEach(function(elem){
-					if (typeof(elem) !== "object") {
-						chk = false;
-					}
-				});
-				if (chk === false) {
+				if (!isString(states)) {
 					if (cb) {
-						cb("Argument is not object");
+						cb("Argument is not array");
 					}
 					return false;
+				} else {
+					try {
+						var tmp = JSON.parse(states);
+						if (!isArray(tmp)) {
+							if (cb) {
+								cb("Argument is not array");
+							}
+							return false;
+						}
+						states = tmp;
+					} catch(err) {
+						if (cb) {
+							cb("Argument is not array");
+						}
+						return false;
+					}
 				}
+			}
+
+			var chkObj = true;
+			states.forEach(function(elem){
+				if (
+					typeof(elem) !== "object" &&
+					elem !== null
+				) {
+					chkObj = false;
+				}
+			});
+			if (chkObj === false) {
+				if (cb) {
+					cb("Argument is not object");
+				}
+				return false;
 			}
 
 			var index = states.length;
