@@ -264,7 +264,7 @@
 ```
 
 
-0. Handle Controll
+0. Handle Style
 
 ```html
 <script>
