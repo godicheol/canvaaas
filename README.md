@@ -76,7 +76,7 @@
         console.log(err);
         return false;
       }
-        console.log("config.focus callback", res);
+      console.log("config.focus callback", res);
     },
     edit: function(err, res){
       if (err) {
@@ -165,6 +165,10 @@
   data-scaleX = "1"
   data-scaleY = "1"
   data-opacity = "1"
+  data-cropTop = "0"
+  data-cropBottom = "0"
+  data-cropLeft = "0"
+  data-cropRight = "0"
   data-lockAspectRatio = "false"
   data-visible = "true"
   data-focusabled = "true"
@@ -185,6 +189,10 @@
     "scaleX": 1,
     "scaleY": -1,
     "opacity": 1,
+    "cropTop": 0,
+    "cropBottom": 0,
+    "cropLeft": 0,
+    "cropRight": 0,
     "lockAspectRatio": false,
     "visible": true,
     "focusabled": true,
