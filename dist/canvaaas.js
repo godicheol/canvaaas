@@ -5225,13 +5225,13 @@
 			var state = getState(id);
 			deg = toNumber(deg);
 
-			if (state.scaleX === -1) {
-				deg *= -1;
-			}
-
-			if (state.scaleY === -1) {
-				deg *= -1;
-			}
+			// if (state.scaleX === -1) {
+			// 	deg *= -1;
+			// }
+			//
+			// if (state.scaleY === -1) {
+			// 	deg *= -1;
+			// }
 
 			// save cache
 			saveUndo(id);
@@ -5284,13 +5284,13 @@
 			var state = getState(id);
 			deg = toNumber(deg);
 
-			if (state.scaleX === -1) {
-				deg *= -1;
-			}
-
-			if (state.scaleY === -1) {
-				deg *= -1;
-			}
+			// if (state.scaleX === -1) {
+			// 	deg *= -1;
+			// }
+			//
+			// if (state.scaleY === -1) {
+			// 	deg *= -1;
+			// }
 
 			// save cache
 			saveUndo(id);
