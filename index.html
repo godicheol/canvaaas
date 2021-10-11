@@ -230,7 +230,7 @@
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						dataType: 'url'
-					}, function(err, res){
+					}, function(err, res, result){
 						if (err) {
 							console.log(err);
 							return false;
@@ -264,7 +264,6 @@
 						dataType: 'url',
 						drawWidth: 5120,
 						drawHeight: 5120,
-						quality: 0.5,
 						background: '#FFFFFF',
 					}, function(err, res, result){
 						if (err) {
@@ -277,7 +276,7 @@
 				">Preview To<br />5120 x 5120 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
-						filename: 'TEST',
+						filename: 'fromJSON',
 						quality: 0.92,
 						mimeType: 'image/png',
 						dataType: 'url',
@@ -309,15 +308,6 @@
 					})
 				">Export</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(exportedStates, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('import callback', res);
-					})
-				">Import</a></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.import(exportedStates3, function(err, res){
 						if (err) {
 							console.log(err);
@@ -325,7 +315,7 @@
 						}
 						console.log('import callback', res);
 					})
-				">Import 2</a></li>
+				">Import</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getConfig(function(err, res){
@@ -348,6 +338,16 @@
 					})
 				">Get Canvas Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
+					canvaaas.getImage(window.prompt('Type image ID'), function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log('getImage callback', res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Get Image Data</a></li>
+				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getImages(function(err, res){
 						if (err) {
 							alert(err);
@@ -356,7 +356,7 @@
 						console.log('getImages callback', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Image Data</a></li>
+				">Get Images Data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getUndo(function(err, res){
 						if (err) {
@@ -451,7 +451,7 @@
 						checkCaches();
 					})
 				">Redo</a></li>
-				<li class="rule"></li>
+				<!-- <li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.findOne({
 						id: window.prompt('Type new ID'))
@@ -475,7 +475,7 @@
 						console.log('findMany callback', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Find Many</a></li>
+				">Find Many</a></li> -->
 				<!-- <li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.updateOne({

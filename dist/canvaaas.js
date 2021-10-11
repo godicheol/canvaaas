@@ -6939,6 +6939,30 @@
 			return exportCanvasState();
 		}
 
+		myObject.getImage = function(id, cb){
+			if (!isString(id)) {
+				if (cb) {
+					cb("Argument is not string");
+				}
+				return false;
+			}
+			var found = imageStates.find(function(elem){
+				return elem.id === toString(id);
+			});
+
+			if (!found) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (cb) {
+				cb(null, exportImageState(found.id));
+			}
+			return exportImageState(found.id);
+		}
+
 		myObject.getImages = function(cb){
 			var states = [];
 			imageStates.forEach(function(elem){
