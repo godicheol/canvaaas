@@ -592,7 +592,6 @@
 				var state = getState(eventState.target);
 				var onShiftKey = e.shiftKey || state.lockAspectRatio;
 				var direction = eventState.direction;
-				var aspectRatio = state.originalWidth / state.originalHeight;
 				var width = eventState.width;
 				var height = eventState.height;
 				var axisX = eventState.x;
@@ -601,6 +600,9 @@
 				var cropBottom = eventState.cropBottom;
 				var cropLeft = eventState.cropLeft;
 				var cropRight = eventState.cropRight;
+				var croppedOriginalWidth = state.originalWidth - ((cropLeft + cropRight) / (eventState.width / state.originalWidth))
+				var croppedOriginalHeight = state.originalHeight - ((cropTop + cropBottom) / (eventState.height / state.originalHeight))
+				var aspectRatio = croppedOriginalWidth / croppedOriginalHeight;
 				var diffX;
 				var diffY;
 				var radians;
