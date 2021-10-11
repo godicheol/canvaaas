@@ -220,9 +220,6 @@
 					canvaaas.uploadState(exportedStates[0])
 				">Upload from State</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadState(exportedStates3[0])
-				">Upload from State</a></li>
-				<li><a href="javascript:void(0)" onclick="
 					canvaaas.uploadElement(
 						document.getElementById(
 							window.prompt('Type Element ID (e.g. image-2)', 'image-1')
@@ -238,22 +235,10 @@
 							console.log(err);
 							return false;
 						}
+						console.log('draw callback', result);
 						preview(res);
 					})
 				">Preview</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'original',
-						dataType: 'url'
-					}, function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						myDownload(res, result.filename);
-					});
-				">Save</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'thumbnail',
@@ -268,9 +253,10 @@
 							console.log(err);
 							return false;
 						}
-						myDownload(res, result.filename);
+						console.log('draw callback', result);
+						preview(res);
 					});
-				">Save To<br />256 x 256 px</a></li>
+				">Preview To<br />256 x 256 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'large',
@@ -285,39 +271,19 @@
 							console.log(err);
 							return false;
 						}
-						myDownload(res, result.filename);
+						console.log('draw callback', result);
+						preview(res);
 					});
-				">Save To<br />5120 x 5120 px</a></li>
+				">Preview To<br />5120 x 5120 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
-				    filename: 'TEST',
-				    quality: 0.92,
-				    mimeType: 'image/png',
-				    dataType: 'url',
-				    background: '#FFFFFF',
-				    width: 1800,
-				    height: 1200,
-						drawWidth: 3600,
-						drawHeight: 3600
-					},
-					exportedStates,
-					function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						myDownload(res, result.filename); // iOS not supported
-					})
-				">Save from JSON(TEST)</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawTo({
-				    filename: 'TEST',
-				    quality: 0.92,
-				    mimeType: 'image/png',
-				    dataType: 'url',
-				    background: '#FFFFFF',
-				    width: 1800,
-				    height: 1200,
+						filename: 'TEST',
+						quality: 0.92,
+						mimeType: 'image/png',
+						dataType: 'url',
+						background: '#FFFFFF',
+						width: 1800,
+						height: 1200,
 						drawWidth: 3600,
 						drawHeight: 3600
 					},
@@ -327,9 +293,10 @@
 							console.log(err);
 							return false;
 						}
-						myDownload(res, result.filename); // iOS not supported
+						console.log('drawTo callback', result);
+						preview(res);
 					})
-				">Save from JSON 2(TEST)</a></li>
+				">Preview from JSON</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.export(function(err, res){
@@ -440,11 +407,13 @@
 							console.log(err);
 							return false;
 						}
+						console.log('init callback', res);
 						canvaaas.config(testConfig, function(err, res){
 							if (err) {
 								console.log(err);
 								return false;
 							}
+							console.log('config callback', res);
 						})
 					})
 				">Init</a></li>
@@ -454,6 +423,7 @@
 							console.log(err);
 							return false;
 						}
+						console.log('destroy callback', res);
 					})
 				">Destroy</a></li>
 			</ul>
@@ -467,6 +437,7 @@
 							console.log(err);
 							return false;
 						}
+						console.log('undo callback', res);
 						checkCaches();
 					})
 				">Undo</a></li>
@@ -476,35 +447,36 @@
 							console.log(err);
 							return false;
 						}
+						console.log('redo callback', res);
 						checkCaches();
 					})
 				">Redo</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.findOne({
-						index: 2
+						id: window.prompt('Type new ID'))
 					}, function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log(res);
+						console.log('findOne callback', res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Find One</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.findMany({
-						index: 2
+						id: window.prompt('Type new ID'))
 					}, function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log(res);
+						console.log('findMany callback', res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Find Many</a></li>
-				<li class="rule"></li>
+				<!-- <li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.updateOne({
 						index: 2
@@ -534,24 +506,24 @@
 						console.log(res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Update Many</a></li>
+				">Update Many</a></li> -->
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.id(canvaaas.this(), window.prompt('Type new ID'))
-				">Set ID</a></li>
+				">Change ID</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.move(canvaaas.this(), 0, -10)
-				">Move Top</a></li>
+				">Move Top 10px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.move(canvaaas.this(), 0, 10)
-				">Move Bottom</a></li>
+				">Move Bottom 10px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.move(canvaaas.this(), -10, 0)
-				">Move Left</a></li>
+				">Move Left 10px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.move(canvaaas.this(), 10, 0)
-				">Move Right</a></li>
+				">Move Right 10px</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.moveTo(canvaaas.this(), 'left', 'top')
@@ -583,37 +555,37 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoom(canvaaas.this(), 0.1)
-				">Zoom In</a></li>
+				">Zoom In 0.1</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoom(canvaaas.this(), -0.1)
-				">Zoom Out</a></li>
+				">Zoom Out 0.1</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoomTo(canvaaas.this(), 0.01)
-				">Zoom 0.01</a></li>
+				">Zoom To 0.01</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoomTo(canvaaas.this(), 0.1)
-				">Zoom 0.1</a></li>
+				">Zoom To 0.1</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoomTo(canvaaas.this(), 1)
-				">Zoom 1</a></li>
+				">Zoom To 1</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoomTo(canvaaas.this(), 'cover')
-				">Zoom Cover</a></li>
+				">Zoom To Cover</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.zoomTo(canvaaas.this(), 'contain')
-				">Zoom Contain</a></li>
+				">Zoom To Contain</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.rotate(canvaaas.this(), -45)
-				">Rotate Left</a></li>
+				">Rotate Left 45</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.rotate(canvaaas.this(), 45)
-				">Rotate Right</a></li>
+				">Rotate Right 45</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.rotateTo(canvaaas.this(), 0)
-				">Rotate Reset</a></li>
+				">Rotate To 0</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.flipY(canvaaas.this())

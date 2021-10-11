@@ -600,8 +600,8 @@
 				var cropBottom = eventState.cropBottom;
 				var cropLeft = eventState.cropLeft;
 				var cropRight = eventState.cropRight;
-				var croppedOriginalWidth = state.originalWidth - ((cropLeft + cropRight) / (eventState.width / state.originalWidth))
-				var croppedOriginalHeight = state.originalHeight - ((cropTop + cropBottom) / (eventState.height / state.originalHeight))
+				var croppedOriginalWidth = state.originalWidth - ((eventState.cropLeft + eventState.cropRight) / (eventState.width / state.originalWidth));
+				var croppedOriginalHeight = state.originalHeight - ((eventState.cropTop + eventState.cropBottom) / (eventState.height / state.originalHeight));
 				var aspectRatio = croppedOriginalWidth / croppedOriginalHeight;
 				var diffX;
 				var diffY;
@@ -5097,26 +5097,58 @@
 			var state = getState(id);
 			var width;
 			var height;
+			var cropTop = state.cropTop;
+			var cropBottom = state.cropBottom;
+			var cropLeft = state.cropLeft;
+			var cropRight = state.cropRight;
+			var croppedWidth = state.width - (state.cropLeft + state.cropRight);
+			var croppedHeight = state.height - (state.cropTop + state.cropBottom);
+			var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
+			var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
+			var scaleCropTop;
+			var scaleCropBottom;
+			var scaleCropLeft;
+			var scaleCropRight;
 			var fittedSizes;
 			if (!isNumeric(ratio)) {
+				scaleCropTop = cropTop / croppedHeight;
+				scaleCropBottom = cropBottom / croppedHeight;
+				scaleCropLeft = cropLeft / croppedWidth;
+				scaleCropRight = cropRight / croppedWidth;
 				if (ratio === "cover") {
 					fittedSizes = getCoveredSizes(
-						state.originalWidth,
-						state.originalHeight,
+						croppedOriginalWidth,
+						croppedOriginalHeight,
 						canvasState.width,
 						canvasState.height
 					)
 					width = fittedSizes[0];
 					height = fittedSizes[1];
+
+					cropTop = height * scaleCropTop;
+					cropBottom = height * scaleCropBottom;
+					cropLeft = width * scaleCropLeft;
+					cropRight = width * scaleCropRight;
+
+					width += cropLeft + cropRight;
+					height += cropTop + cropBottom;
 				} else if (ratio === "contain") {
 					fittedSizes = getContainedSizes(
-						state.originalWidth,
-						state.originalHeight,
+						croppedOriginalWidth,
+						croppedOriginalHeight,
 						canvasState.width,
 						canvasState.height
 					)
 					width = fittedSizes[0];
 					height = fittedSizes[1];
+
+					cropTop = height * scaleCropTop;
+					cropBottom = height * scaleCropBottom;
+					cropLeft = width * scaleCropLeft;
+					cropRight = width * scaleCropRight;
+
+					width += cropLeft + cropRight;
+					height += cropTop + cropBottom;
 				} else {
 					if (cb) {
 						cb("Argument error");
@@ -5124,9 +5156,17 @@
 					return false;
 				}
 			} else {
+				scaleCropTop = state.cropTop / state.height;
+				scaleCropBottom = state.cropBottom / state.height;
+				scaleCropLeft = state.cropLeft / state.width;
+				scaleCropRight = state.cropRight / state.width;
 				ratio = toNumber(ratio);
 				width = state.originalWidth * ratio;
 				height = state.originalHeight * ratio;
+				cropTop = height * scaleCropTop;
+				cropBottom = height * scaleCropBottom;
+				cropLeft = width * scaleCropLeft;
+				cropRight = width * scaleCropRight;
 			}
 
 			// save cache
@@ -5136,10 +5176,10 @@
 			setState(id, {
 				width: width,
 				height: height,
-				cropTop: 0,
-				cropBottom: 0,
-				cropLeft: 0,
-				cropRight: 0,
+				cropTop: cropTop,
+				cropBottom: cropBottom,
+				cropLeft: cropLeft,
+				cropRight: cropRight,
 			});
 
 			if (config.edit) {
@@ -5471,8 +5511,6 @@
 
 			// save state
 			setState(id, {
-				// width: width,
-				// height: height,
 				cropTop: cropTop,
 				cropBottom: cropBottom,
 				cropLeft: cropLeft,
@@ -5556,8 +5594,6 @@
 
 			// save state
 			setState(id, {
-				// width: width,
-				// height: height,
 				cropTop: cropTop,
 				cropBottom: cropBottom,
 				cropLeft: cropLeft,
@@ -5760,29 +5796,45 @@
 			}
 
 			var state = getState(id);
-			var aspectRatio = state.originalWidth / state.originalHeight;
 			var width = state.width;
 			var height = state.height;
 			var cropTop = state.cropTop;
 			var cropBottom = state.cropBottom;
 			var cropLeft = state.cropLeft;
 			var cropRight = state.cropRight;
+			var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
+			var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
+			var aspectRatio = croppedOriginalWidth / croppedOriginalHeight;
+			var scaleCropTop;
+			var scaleCropBottom;
+			var scaleCropLeft;
+			var scaleCropRight;
 
 			if (
 				state.lockAspectRatio === false &&
 				toBoolean(b) === true
 			) {
+				width -= cropLeft + cropRight;
+				height -= cropTop + cropBottom;
+
+				scaleCropTop = cropTop / height;
+				scaleCropBottom = cropBottom / height;
+				scaleCropLeft = cropLeft / width;
+				scaleCropRight = cropRight / width;
+
 				if (width > height * aspectRatio) {
 					height = width / aspectRatio;
 				} else {
 					width = height * aspectRatio;
 				}
-				var scaleRatioX = (width / state.width);
-				var scaleRatioY = (height / state.height);
-				cropTop = cropTop * scaleRatioY;
-				cropBottom = cropBottom * scaleRatioY;
-				cropLeft = cropLeft * scaleRatioX;
-				cropRight = cropRight * scaleRatioX;
+
+				cropTop = height * scaleCropTop;
+				cropBottom = height * scaleCropBottom;
+				cropLeft = width * scaleCropLeft;
+				cropRight = width * scaleCropRight;
+
+				width += cropLeft + cropRight;
+				height += cropTop + cropBottom;
 			}
 
 			// save cache
