@@ -624,9 +624,15 @@
 				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
 
-				// fix slow resize after crop
-				diffX *= (2 * (cropLeft + cropRight) + width) / width;
-				diffY *= (2 * (cropTop + cropBottom) + height) / height;
+				var scaleCropTop = cropTop / height;
+				var scaleCropBottom = cropBottom / height;
+				var scaleCropLeft = cropLeft / width;
+				var scaleCropRight = cropRight / width;
+
+				diffX *= 1 + scaleCropLeft;
+				diffX *= 1 + scaleCropRight;
+				diffY *= 1 + scaleCropTop;
+				diffY *= 1 + scaleCropBottom;
 
 				if (direction === "n") {
 					height -= diffY;
@@ -724,10 +730,15 @@
 					return false;
 				}
 
-				cropTop = height * (eventState.cropTop / eventState.height);
-				cropBottom = height * (eventState.cropBottom / eventState.height);
-				cropLeft = width * (eventState.cropLeft / eventState.width);
-				cropRight = width * (eventState.cropRight / eventState.width);
+				cropTop = height * scaleCropTop;
+				cropBottom = height * scaleCropBottom;
+				cropLeft = width * scaleCropLeft;
+				cropRight = width * scaleCropRight;
+
+				// cropTop = height * (eventState.cropTop / eventState.height);
+				// cropBottom = height * (eventState.cropBottom / eventState.height);
+				// cropLeft = width * (eventState.cropLeft / eventState.width);
+				// cropRight = width * (eventState.cropRight / eventState.width);
 
 				// cropTop *= height / eventState.height;
 				// cropBottom *= height / eventState.height;
@@ -739,8 +750,6 @@
 
 				// on developing
 				// bad performance resize after crop
-
-				// slow but correct calculation
 				if (direction === "n") {
 					axisX -= 0.5 * diffY * sinFraction;
 					axisY += 0.5 * diffY * cosFraction;
@@ -777,7 +786,6 @@
 					return false;
 				}
 
-				// incorrect calculation but fast
 				// if (direction === "n") {
 				// 	height += diffY;
 				// } else if (direction === "ne") {
