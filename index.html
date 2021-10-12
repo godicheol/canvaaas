@@ -179,9 +179,9 @@
 			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
 		</div>
 		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
+			<a href="javascript:void(0)" class="header-subject">canvaaas.js</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About Canvaaas</a></li>
+				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About canvaaas</a></li>
 				<li><a href="https://github.com/godicheol/canvaaas">Back to Github</a></li>
 			</ul>
 		</div>
@@ -1109,8 +1109,8 @@
 			image.style.top = '50%';
 			image.style.left = '50%';
 			image.style.transform = 'translate(-50%, -50%)';
-			image.style.width = '100%';
-			image.style.height = 'auto';
+			image.style.maxWidth = '100%';
+			image.style.maxHeight = '100%';
 
 			myElem.appendChild(image);
 
