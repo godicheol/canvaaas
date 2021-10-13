@@ -168,7 +168,6 @@
 
 		var classNames = {
 			hidden: "hidden",
-			checker: "checker",
 			onEdit: "on-edit",
 			onFocus: "on-focus",
 			onCrop: "on-crop",
@@ -186,6 +185,7 @@
 		conatinerTemplate += "<div class='canvaaas'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
 		conatinerTemplate += "<div class='canvaaas-background'></div>";
+		conatinerTemplate += "<div class='canvaaas-checker'></div>";
 		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
 		conatinerTemplate += "</div>";
 
@@ -268,6 +268,7 @@
 		var canvasObject;
 		var mirrorObject;
 		var backgroundObject;
+		var checkerObject;
 
 		var viewportResizeEvent;
 
@@ -3616,14 +3617,19 @@
 			backgroundObject.style.top = canvasState.top + "px";
 			backgroundObject.style.background = canvasState.background;
 
+			checkerObject.style.width = canvasState.width + "px";
+			checkerObject.style.height = canvasState.height + "px";
+			checkerObject.style.left = canvasState.left + "px";
+			checkerObject.style.top = canvasState.top + "px";
+
 			// set class names
 			if (!canvasState.checker) {
-				if (canvasObject.classList.contains(classNames.checker)) {
-					canvasObject.classList.remove(classNames.checker);
+				if (!checkerObject.classList.contains(classNames.hidden)) {
+					checkerObject.classList.add(classNames.hidden);
 				}
 			} else {
-				if (!canvasObject.classList.contains(classNames.checker)) {
-					canvasObject.classList.add(classNames.checker);
+				if (checkerObject.classList.contains(classNames.hidden)) {
+					checkerObject.classList.remove(classNames.hidden);
 				}
 			}
 
@@ -4297,6 +4303,7 @@
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 			backgroundObject = target.querySelector("div.canvaaas-background");
+			checkerObject = target.querySelector("div.canvaaas-checker");
 
 			// set container
 			initContainer();
@@ -6094,6 +6101,8 @@
 				x: canvasState.width * 0.5,
 				y: canvasState.height * 0.5,
 				rotate: 0,
+				rotateX: 0,
+				rotateY: 0,
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,

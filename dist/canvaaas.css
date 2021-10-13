@@ -28,10 +28,10 @@
 .canvaaas-canvas.on-focus.uneditabled,
 .canvaaas-mirror.on-focus.uneditabled{
 	outline: 1px solid orange;
-	cursor: not-allowed !important;
+	cursor: not-allowed;
 }
 .canvaaas-wrapper.uneditabled{
-	cursor: not-allowed !important;
+	cursor: not-allowed;
 }
 .canvaaas-wrapper.uneditabled .canvaaas-innerline,
 .canvaaas-wrapper.uneditabled .canvaaas-outline,
@@ -39,18 +39,18 @@
 	border-color: orange;
 }
 .canvaaas-wrapper.uneditabled .canvaaas-handle{
-	cursor: not-allowed !important;
+	cursor: not-allowed;
 }
 
 /* unfocusabled */
 .canvaaas-canvas.unfocusabled,
 .canvaaas-mirror.unfocusabled{
-	pointer-events: none !important;
-	cursor: default !important;
+	pointer-events: none;
+	cursor: default;
 }
 .canvaaas-wrapper.unfocusabled{
-	pointer-events: none !important;
-	cursor: default !important;
+	pointer-events: none;
+	cursor: default;
 }
 
 /* undrawabled */
@@ -101,7 +101,7 @@
 }
 .canvaaas-canvas{
 	overflow: hidden;
-	z-index: 3;
+	z-index: 4;
 }
 .canvaaas-mirror{
 	overflow: visible;
@@ -110,30 +110,6 @@
 .canvaaas-mirror.hidden{
 	display: none;
 }
-.canvaaas-canvas.checker{
-    background: -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
-    background: -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
-    background-repeat: repeat, repeat;
-    background-position: 0px 0, 10px 10px;
-    -webkit-transform-origin: 0 0 0;
-    transform-origin: 0 0 0;
-    -webkit-background-origin: padding-box, padding-box;
-    background-origin: padding-box, padding-box;
-    -webkit-background-clip: border-box, border-box;
-    background-clip: border-box, border-box;
-    -webkit-background-size: 20px 20px, 20px 20px;
-    background-size: 20px 20px, 20px 20px;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    text-shadow: none;
-    -webkit-transition: none;
-    -moz-transition: none;
-    -o-transition: none;
-    transition: none;
-    -webkit-transform: scaleX(1) scaleY(1) scaleZ(1);
-    transform: scaleX(1) scaleY(1) scaleZ(1);
-}
 
 /* background */
 .canvaaas-background{
@@ -141,7 +117,7 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	z-index: 2;
+	z-index: 3;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -151,11 +127,51 @@
 	/* pointer-events: none; */
 }
 
+/* checker */
+.canvaaas-checker{
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	background: -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
+	background: -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
+	background: linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
+	background-repeat: repeat, repeat;
+	background-position: 0px 0, 10px 10px;
+	-webkit-transform-origin: 0 0 0;
+	transform-origin: 0 0 0;
+	-webkit-background-origin: padding-box, padding-box;
+	background-origin: padding-box, padding-box;
+	-webkit-background-clip: border-box, border-box;
+	background-clip: border-box, border-box;
+	-webkit-background-size: 20px 20px, 20px 20px;
+	background-size: 20px 20px, 20px 20px;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	text-shadow: none;
+	-webkit-transition: none;
+	-moz-transition: none;
+	-o-transition: none;
+	transition: none;
+	-webkit-transform: scaleX(1) scaleY(1) scaleZ(1);
+	transform: scaleX(1) scaleY(1) scaleZ(1);
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.canvaaas-checker.hidden{
+	display: none;
+}
+
 /* wrapper */
 .canvaaas-wrapper{
 	display: block;
 	position: absolute;
-	transform-origin: center center !important;
+	transform-origin: center center;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -304,7 +320,7 @@
 	border-color: inherit;
 }
 .canvaaas-handle.hidden{
-	display: none !important;
+	display: none;
 }
 .canvaaas-handle-box{
 	position: absolute;
@@ -456,6 +472,12 @@ body.canvaaas-fixed{
 	right: 0;
 	z-index: 1000;
 	background-color: rgba(0,0,0,0.7);
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 .canvaaas-loading{
 	color: official;
@@ -466,6 +488,12 @@ body.canvaaas-fixed{
 	transform: translate(-50%, -50%);
 	width: 80px;
 	height: 80px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 .canvaaas-loading div {
 	transform-origin: 40px 40px;
