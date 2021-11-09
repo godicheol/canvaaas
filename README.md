@@ -44,15 +44,6 @@
       "tif",
       "webp",
     ], // array of allowed extensions
-    deniedTagNamesForFocusOut: [
-      "A",
-      "BUTTON",
-      "INPUT",
-      "LABEL",
-      "TEXTAREA",
-      "SELECT",
-      "OPTION",
-    ], // array of denied tag names
     cacheLevels: 999, // number
     dragAndDrop: true, // boolean
     containerAspectRatio: 1 / 1, // number, width / height
