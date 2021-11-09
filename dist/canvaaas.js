@@ -22,16 +22,6 @@
 				"webp",
 			], // array of allowed extensions
 
-			deniedTagNamesForFocusOut: [
-				"A",
-				"BUTTON",
-				"INPUT",
-				"LABEL",
-				"TEXTAREA",
-				"SELECT",
-				"OPTION",
-			], // array of denied tag names
-
 			cacheLevels: 999, // number
 
 			dragAndDrop: true, // boolean
@@ -233,23 +223,6 @@
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
 		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
 
-		var loadingTemplate = "";
-		loadingTemplate += "<div class='canvaaas-loading'>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "<div></div>";
-		loadingTemplate += "</div>";
-
 		var config = {};
 
 		var originId = "canvaaas-o";
@@ -305,7 +278,6 @@
 				}
 
 				eventState.onUpload = true;
-				var loading = startLoading(document.body);
 
 				setTimeout(function(e){
 					recursiveFunc();
@@ -328,7 +300,6 @@
 						});
 					} else {
 						eventState.onUpload = false;
-						endLoading(loading);
 					}
 				}
 			},
@@ -391,12 +362,22 @@
 				e.preventDefault();
 				e.stopPropagation();
 
+				var deniedTagNames = [
+					"A",
+					"BUTTON",
+					"INPUT",
+					"LABEL",
+					"TEXTAREA",
+					"SELECT",
+					"OPTION"
+				];
+
 				if (typeof(e.touches) !== "undefined") {
 					if (e.touches.length > 1) {
 						return handlers.startMove(e);
 					}
 				}
-				if (config.deniedTagNamesForFocusOut.indexOf(e.target.tagName) > -1) {
+				if (deniedTagNames.indexOf(e.target.tagName) > -1) {
 					return false;
 				}
 				if (eventState.target) {
@@ -3514,9 +3495,13 @@
 					}
 				});
 
-				imageStates.splice(seq, 1);
 				originWrapper.parentNode.removeChild(originWrapper);
 				cloneWrapper.parentNode.removeChild(cloneWrapper);
+
+				// fix error
+				setTimeout(function(){
+					imageStates.splice(seq, 1);
+				}, 128);
 
 				// clear caches
 				var filterdUC = undoCaches.filter(function(elem){
@@ -3704,16 +3689,6 @@
 			canvasObject.style.left = "";
 			canvasObject.style.top = "";
 
-			if (!canvasState.checker) {
-				if (canvasObject.classList.contains(classNames.checker)) {
-					canvasObject.classList.remove(classNames.checker);
-				}
-			} else {
-				if (!canvasObject.classList.contains(classNames.checker)) {
-					canvasObject.classList.add(classNames.checker);
-				}
-			}
-
 			mirrorObject.style.width = "";
 			mirrorObject.style.height = "";
 			mirrorObject.style.left = "";
@@ -3734,6 +3709,21 @@
 			backgroundObject.style.left = "";
 			backgroundObject.style.top = "";
 			backgroundObject.style.background = "";
+
+			checkerObject.style.width = "";
+			checkerObject.style.height = "";
+			checkerObject.style.left = "";
+			checkerObject.style.top = "";
+
+			if (!canvasState.checker) {
+				if (!checkerObject.classList.contains(classNames.hidden)) {
+					checkerObject.classList.add(classNames.hidden);
+				}
+			} else {
+				if (checkerObject.classList.contains(classNames.hidden)) {
+					checkerObject.classList.remove(classNames.hidden);
+				}
+			}
 
 			return true;
 		}
@@ -3995,33 +3985,6 @@
 			} else {
 				return false;
 			}
-		}
-
-		function startLoading(target) {
-			var wrapper = document.createElement("div");
-			wrapper.classList.add("canvaaas-loading-wrapper");
-			wrapper.innerHTML = loadingTemplate;
-
-			eventState.scrollTop = document.documentElement.scrollTop || document.querySelector('html').scrollTop;
-
-			document.body.classList.add("canvaaas-fixed");
-
-			target.appendChild(wrapper);
-
-			return wrapper;
-		}
-
-		function endLoading(wrapper) {
-			document.body.classList.remove("canvaaas-fixed");
-
-			window.scrollTo({
-				top: eventState.scrollTop,
-				behavior:'smooth'
-			});
-
-			eventState.scrollTop = undefined;
-
-			wrapper.parentNode.removeChild(wrapper);
 		}
 
 		function dataURLtoFile(dataurl, filename) {
@@ -4400,11 +4363,9 @@
 			}
 
 			eventState.onUpload = true;
-			var loading = startLoading(document.body);
 
 			renderImage(thisFiles[0], null, function(err, res) {
 				eventState.onUpload = false;
-				endLoading(loading);
 
 				if (err) {
 					if (config.upload) {
@@ -4458,11 +4419,9 @@
 			}
 
 			eventState.onUpload = true;
-			var loading = startLoading(document.body);
 
 			renderImage(str, null, function(err, res) {
 				eventState.onUpload = false;
-				endLoading(loading);
 
 				if (err) {
 					if (config.upload) {
@@ -4516,11 +4475,9 @@
 			}
 
 			eventState.onUpload = true;
-			var loading = startLoading(document.body);
 
 			renderImage(thisState.src, thisState, function(err, res) {
 				eventState.onUpload = false;
-				endLoading(loading);
 
 				if (err) {
 					if (config.upload) {
@@ -4590,11 +4547,9 @@
 			}
 
 			eventState.onUpload = true;
-			var loading = startLoading(document.body);
 
 			renderImage(thisSrc, thisState, function(err, res) {
 				eventState.onUpload = false;
-				endLoading(loading);
 
 				if (err) {
 					if (config.upload) {
@@ -6715,11 +6670,9 @@
 			});
 
 			eventState.onDraw = true;
-			var loading = startLoading(document.body);
 
 			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, result){
 				eventState.onDraw = false;
-				endLoading(loading);
 
 				if (err) {
 					console.log(err);
@@ -6895,11 +6848,9 @@
 			});
 
 			eventState.onDraw = true;
-			var loading = startLoading(document.body);
 
 			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, options){
 				eventState.onDraw = false;
-				endLoading(loading);
 
 				if (err) {
 					console.log(err);
@@ -7058,7 +7009,6 @@
 			var results = [];
 
 			eventState.onUpload = true;
-			var loading = startLoading(document.body);
 
 			recursiveFunc()
 
@@ -7079,7 +7029,6 @@
 					});
 				} else {
 					eventState.onUpload = false;
-					endLoading(loading);
 
 					if (cb) {
 						cb(null, results);
