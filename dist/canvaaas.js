@@ -67,46 +67,32 @@
 			checker: true // boolean
 		};
 
+		// insidee: resize, crop
+		// outside: rotate, flip
+		// error! outside.ne: "rotate"
+		// error! outside.se: "rotate"
+		// error! outside.nw: "rotate"
+		// error! outside.sw: "rotate"
 		var defaultHandleState = {
-			resize: {
-				n: true,
-				ne: true,
-				e: true,
-				se: true,
-				s: true,
-				sw: true,
-				w: true,
-				nw: true
+			inside: {
+				n: "resize",
+				ne: "resize",
+				e: "resize",
+				se: "resize",
+				s: "resize",
+				sw: "resize",
+				w: "resize",
+				nw: "resize"
 			},
-			crop: {
-				n: false,
-				ne: false,
-				e: false,
-				se: false,
-				s: false,
-				sw: false,
-				w: false,
-				nw: false
-			},
-			rotate: {
-				n: true,
-				ne: false,
-				e: false,
-				se: false,
-				s: false,
-				sw: false,
-				w: false,
-				nw: false
-			},
-			flip: {
-				n: false,
-				ne: false,
-				e: true,
-				se: false,
-				s: false,
-				sw: false,
-				w: false,
-				nw: false
+			outside: {
+				n: "rotate",
+				ne: "crop",
+				e: "flip",
+				se: "crop",
+				s: "flip",
+				sw: "crop",
+				w: "flip",
+				nw: "crop"
 			}
 		};
 
@@ -190,38 +176,22 @@
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
 		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-rotate canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-resize canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-flip canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-handle-crop canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
+		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
 
 		var config = {};
 
@@ -338,23 +308,84 @@
 				}
 			},
 
+			route: function(e) {
+				var handle = e.target;
+				var id = getId(handle.parentNode);
+				var direction;
+				var position;
+
+				if (!id) {
+					return false;
+				}
+				if (!isFocusable(id)) {
+					return false;
+				}
+				if (!eventState.target) {
+					setFocusIn(id);
+				} else {
+					if (eventState.target !== id) {
+						setFocusOut(eventState.target);
+						setFocusIn(id);
+					}
+				}
+
+				if (handle.classList.contains("canvaaas-inhandle")) {
+					position = "inside";
+				} else if (handle.classList.contains("canvaaas-outhandle")) {
+					position = "outside";
+				}
+				if (handle.classList.contains("canvaaas-handle-n")) {
+					direction = "n";
+				} else if (handle.classList.contains("canvaaas-handle-ne")) {
+					direction = "ne";
+				} else if (handle.classList.contains("canvaaas-handle-e")) {
+					direction = "e";
+				} else if (handle.classList.contains("canvaaas-handle-se")) {
+					direction = "se";
+				} else if (handle.classList.contains("canvaaas-handle-s")) {
+					direction = "s";
+				} else if (handle.classList.contains("canvaaas-handle-sw")) {
+					direction = "sw";
+				} else if (handle.classList.contains("canvaaas-handle-w")) {
+					direction = "w";
+				} else if (handle.classList.contains("canvaaas-handle-nw")) {
+					direction = "nw";
+				} else {
+					return false;
+				}
+
+				if (handleState[position][direction] === "resize") {
+					return handlers.startResize(e);
+				} else if (handleState[position][direction] === "rotate") {
+					return handlers.startRotate(e);
+				} else if (handleState[position][direction] === "flip") {
+					return handlers.startFlip(e);
+				} else if (handleState[position][direction] === "crop") {
+					return handlers.startCrop(e);
+				} else {
+					return false;
+				}
+			},
+
 			focusIn: function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 
 				var id = getTarget(e);
+				if (!id) {
+					return false;
+				}
 				if (!isFocusable(id)) {
 					return false;
 				}
-				if (eventState.target !== id) {
-					setFocusOut(eventState.target);
+				if (eventState.target) {
+					if (eventState.target !== id) {
+						setFocusOut(eventState.target);
+					}
 				}
 
 				setFocusIn(id);
 
-				if (config.focus) {
-					config.focus(null, exportImageState(id));
-				}
 				return handlers.startMove(e);
 			},
 
@@ -382,9 +413,6 @@
 				}
 				if (eventState.target) {
 					setFocusOut(eventState.target);
-				}
-				if (config.focus) {
-					config.focus(null, null);
 				}
 			},
 
@@ -1997,16 +2025,12 @@
 			if (!id) {
 				return false;
 			}
-			var typ;
+			var position;
 			var direction;
-			if (handle.classList.contains("canvaaas-handle-rotate")) {
-				typ = ".canvaaas-handle-rotate";
-			} else if (handle.classList.contains("canvaaas-handle-resize")) {
-				typ = ".canvaaas-handle-resize";
-			} else if (handle.classList.contains("canvaaas-handle-flip")) {
-				typ = ".canvaaas-handle-flip";
-			} else if (handle.classList.contains("canvaaas-handle-crop")) {
-				typ = ".canvaaas-handle-crop";
+			if (handle.classList.contains("canvaaas-inhandle")) {
+				position = ".canvaaas-inhandle";
+			} else if (handle.classList.contains("canvaaas-outhandle")) {
+				position = ".canvaaas-outhandle";
 			} else {
 				return false;
 			}
@@ -2039,8 +2063,8 @@
 				return false;
 			}
 
-			var originHandle = originWrapper.querySelector("div" + typ + direction);
-			var cloneHandle = cloneWrapper.querySelector("div" + typ + direction);
+			var originHandle = originWrapper.querySelector("div" + position + direction);
+			var cloneHandle = cloneWrapper.querySelector("div" + position + direction);
 			if (
 				!originHandle ||
 				!cloneHandle
@@ -2062,16 +2086,12 @@
 			if (!id) {
 				return false;
 			}
-			var typ;
+			var position;
 			var direction;
-			if (handle.classList.contains("canvaaas-handle-rotate")) {
-				typ = ".canvaaas-handle-rotate";
-			} else if (handle.classList.contains("canvaaas-handle-resize")) {
-				typ = ".canvaaas-handle-resize";
-			} else if (handle.classList.contains("canvaaas-handle-flip")) {
-				typ = ".canvaaas-handle-flip";
-			} else if (handle.classList.contains("canvaaas-handle-crop")) {
-				typ = ".canvaaas-handle-crop";
+			if (handle.classList.contains("canvaaas-inhandle")) {
+				position = ".canvaaas-inhandle";
+			} else if (handle.classList.contains("canvaaas-outhandle")) {
+				position = ".canvaaas-outhandle";
 			} else {
 				return false;
 			}
@@ -2104,8 +2124,8 @@
 				return false;
 			}
 
-			var originHandle = originWrapper.querySelector("div" + typ + direction);
-			var cloneHandle = cloneWrapper.querySelector("div" + typ + direction);
+			var originHandle = originWrapper.querySelector("div" + position + direction);
+			var cloneHandle = cloneWrapper.querySelector("div" + position + direction);
 			if (
 				!originHandle ||
 				!cloneHandle
@@ -2119,311 +2139,6 @@
 			if (cloneHandle.classList.contains(cls)) {
 				cloneHandle.classList.remove(cls);
 			}
-			return true;
-		}
-
-		function unsetHandleState() {
-			handleState = {
-				resize: {
-					n: false,
-					ne: false,
-					e: false,
-					se: false,
-					s: false,
-					sw: false,
-					w: false,
-					nw: false
-				},
-				crop: {
-					n: false,
-					ne: false,
-					e: false,
-					se: false,
-					s: false,
-					sw: false,
-					w: false,
-					nw: false
-				},
-				rotate: {
-					n: false,
-					ne: false,
-					e: false,
-					se: false,
-					s: false,
-					sw: false,
-					w: false,
-					nw: false
-				},
-				flip: {
-					n: false,
-					ne: false,
-					e: false,
-					se: false,
-					s: false,
-					sw: false,
-					w: false,
-					nw: false
-				}
-			}
-			return true;
-		}
-
-		function setHandleState(newState) {
-			var resize = newState.resize;
-			var crop = newState.crop;
-			var rotate = newState.rotate;
-			var flip = newState.flip;
-
-			unsetHandleState();
-
-			if (
-				typeof(resize) === "object" &&
-				resize !== null
-			) {
-				for(var key in resize) {
-					if (resize.hasOwnProperty(key)) {
-						if (isBoolean(resize[key])) {
-							handleState["resize"][key] = toBoolean(resize[key]);
-						}
-					}
-				}
-			}
-			if (
-				typeof(crop) === "object" &&
-				crop !== null
-			) {
-				for(var key in crop) {
-					if (crop.hasOwnProperty(key)) {
-						if (isBoolean(crop[key])) {
-							handleState["crop"][key] = toBoolean(crop[key]);
-						}
-					}
-				}
-			}
-			if (
-				typeof(rotate) === "object" &&
-				rotate !== null
-			) {
-				for(var key in rotate) {
-					if (rotate.hasOwnProperty(key)) {
-						if (isBoolean(rotate[key])) {
-							handleState["rotate"][key] = toBoolean(rotate[key]);
-						}
-					}
-				}
-			}
-			if (
-				typeof(flip) === "object" &&
-				flip !== null
-			) {
-				for(var key in flip) {
-					if (flip.hasOwnProperty(key)) {
-						if (isBoolean(flip[key])) {
-							handleState["flip"][key] = toBoolean(flip[key]);
-						}
-					}
-				}
-			}
-			if (eventState.target) {
-				hideHandle(eventState.target);
-				showHandle(eventState.target);
-			}
-			return true;
-		}
-
-		function showHandle(id) {
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			var originResizeHandles = originWrapper.querySelectorAll("div.canvaaas-handle-resize");
-			var originCropHandles = originWrapper.querySelectorAll("div.canvaaas-handle-crop");
-			var originRotateHandles = originWrapper.querySelectorAll("div.canvaaas-handle-rotate");
-			var originFlipHandles = originWrapper.querySelectorAll("div.canvaaas-handle-flip");
-			var cloneResizeHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-resize");
-			var cloneCropHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-crop");
-			var cloneRotateHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate");
-			var cloneFlipHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-flip");
-
-			originResizeHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["resize"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			originCropHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["crop"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			originRotateHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["rotate"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			originFlipHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["flip"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			cloneResizeHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["resize"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			cloneCropHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["crop"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			cloneRotateHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["rotate"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			cloneFlipHandles.forEach(function(elem){
-				var direction = getDirection(elem);
-				if (handleState["flip"][direction] === true) {
-					if (elem.classList.contains(classNames.hidden)) {
-						elem.classList.remove(classNames.hidden);
-					}
-				} else {
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				}
-			});
-
-			return true;
-		}
-
-		function hideHandle(id) {
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			var originResizeHandles = originWrapper.querySelectorAll("div.canvaaas-handle-resize");
-			var originCropHandles = originWrapper.querySelectorAll("div.canvaaas-handle-crop");
-			var originRotateHandles = originWrapper.querySelectorAll("div.canvaaas-handle-rotate");
-			var originFlipHandles = originWrapper.querySelectorAll("div.canvaaas-handle-flip");
-			var cloneResizeHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-resize");
-			var cloneCropHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-crop");
-			var cloneRotateHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate");
-			var cloneFlipHandles = cloneWrapper.querySelectorAll("div.canvaaas-handle-flip");
-
-			originResizeHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			originCropHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			originRotateHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			originFlipHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			cloneResizeHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			cloneCropHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			cloneRotateHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
-			cloneFlipHandles.forEach(function(elem){
-				if (!elem.classList.contains(classNames.hidden)) {
-					elem.classList.add(classNames.hidden);
-				}
-			});
-
 			return true;
 		}
 
@@ -2442,37 +2157,8 @@
 		}
 
 		function exportHandleState() {
-			var resize = handleState.resize;
-			var crop = handleState.crop;
-			var rotate = handleState.rotate;
-			var flip = handleState.flip;
-			var tmp = {
-				resize: {},
-				crop: {},
-				rotate: {},
-				flip: {},
-			};
-
-			for(var key in resize) {
-				if (resize.hasOwnProperty(key)) {
-					tmp["resize"][key] = resize[key];
-				}
-			}
-			for(var key in crop) {
-				if (crop.hasOwnProperty(key)) {
-					tmp["crop"][key] = crop[key];
-				}
-			}
-			for(var key in rotate) {
-				if (rotate.hasOwnProperty(key)) {
-					tmp["rotate"][key] = rotate[key];
-				}
-			}
-			for(var key in flip) {
-				if (flip.hasOwnProperty(key)) {
-					tmp["flip"][key] = flip[key];
-				}
-			}
+			var tmp = {};
+			copyObject(tmp, handleState);
 
 			return tmp;
 		}
@@ -2858,59 +2544,20 @@
 				originWrapper.addEventListener("touchstart", handlers.startMove, false);
 				originWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				originWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startRotate, false);
-					elem.addEventListener("touchstart", handlers.startRotate, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startResize, false);
-					elem.addEventListener("touchstart", handlers.startResize, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startFlip, false);
-					elem.addEventListener("touchstart", handlers.startFlip, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-crop").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startCrop, false);
-					elem.addEventListener("touchstart", handlers.startCrop, false);
-				});
-
 				cloneWrapper.removeEventListener("mousedown", handlers.focusIn, false);
 
 				cloneWrapper.addEventListener("mousedown", handlers.startMove, false);
 				cloneWrapper.addEventListener("touchstart", handlers.startMove, false);
 				cloneWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startRotate, false);
-					elem.addEventListener("touchstart", handlers.startRotate, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startResize, false);
-					elem.addEventListener("touchstart", handlers.startResize, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startFlip, false);
-					elem.addEventListener("touchstart", handlers.startFlip, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-crop").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.startCrop, false);
-					elem.addEventListener("touchstart", handlers.startCrop, false);
-				});
-
 				document.addEventListener("mousedown", handlers.focusOut, false);
 				document.addEventListener("touchstart", handlers.focusOut, false);
 
-				showHandle(id);
-
 				eventState.target = id;
 
+				if (config.focus) {
+					config.focus(null, exportImageState(id));
+				}
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -2953,59 +2600,20 @@
 				originWrapper.removeEventListener("touchstart", handlers.startMove, false);
 				originWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				originWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startRotate, false);
-					elem.removeEventListener("touchstart", handlers.startRotate, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startResize, false);
-					elem.removeEventListener("touchstart", handlers.startResize, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startFlip, false);
-					elem.removeEventListener("touchstart", handlers.startFlip, false);
-				});
-
-				originWrapper.querySelectorAll("div.canvaaas-handle-crop").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startCrop, false);
-					elem.removeEventListener("touchstart", handlers.startCrop, false);
-				});
-
 				cloneWrapper.addEventListener("mousedown", handlers.focusIn, false);
 
 				cloneWrapper.removeEventListener("mousedown", handlers.startMove, false);
 				cloneWrapper.removeEventListener("touchstart", handlers.startMove, false);
 				cloneWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
 
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-rotate").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startRotate, false);
-					elem.removeEventListener("touchstart", handlers.startRotate, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-resize").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startResize, false);
-					elem.removeEventListener("touchstart", handlers.startResize, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-flip").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startFlip, false);
-					elem.removeEventListener("touchstart", handlers.startFlip, false);
-				});
-
-				cloneWrapper.querySelectorAll("div.canvaaas-handle-crop").forEach(function(elem){
-					elem.removeEventListener("mousedown", handlers.startCrop, false);
-					elem.removeEventListener("touchstart", handlers.startCrop, false);
-				});
-
 				document.removeEventListener("mousedown", handlers.focusOut, false);
 				document.removeEventListener("touchstart", handlers.focusOut, false);
 
-				hideHandle(id);
-
 				eventState.target = undefined;
 
+				if (config.focus) {
+					config.focus(null, null);
+				}
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -3353,7 +2961,6 @@
 					try {
 						src = URL.createObjectURL(data);
 					} catch(err) {
-						console.log(err);
 						if (cb) {
 							cb("File not found");
 						}
@@ -3385,7 +2992,6 @@
 				}
 			} catch(err) {
 				if (cb) {
-					console.log(err);
 					cb("Type error");
 				}
 				return false;
@@ -3430,25 +3036,33 @@
 				var newCloneImage = newClone.querySelector("div.canvaaas-image");
 				newCloneImage.querySelector("img").src = newImage.src;
 
-				// set handles hidden
-				newOrigin.querySelectorAll("div.canvaaas-handle").forEach(function(elem){
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				});
-
-				newClone.querySelectorAll("div.canvaaas-handle").forEach(function(elem){
-					if (!elem.classList.contains(classNames.hidden)) {
-						elem.classList.add(classNames.hidden);
-					}
-				});
-
 				// set events
 				newOriginImage.addEventListener("mousedown", handlers.focusIn, false);
 				newOriginImage.addEventListener("touchstart", handlers.focusIn, false);
 
 				newCloneImage.addEventListener("mousedown", handlers.focusIn, false);
 				newCloneImage.addEventListener("touchstart", handlers.focusIn, false);
+
+				newOrigin.querySelectorAll("div.canvaaas-inhandle").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.route, false);
+					elem.addEventListener("touchstart", handlers.route, false);
+				});
+				newOrigin.querySelectorAll("div.canvaaas-outhandle").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.route, false);
+					elem.addEventListener("touchstart", handlers.route, false);
+				});
+
+				newClone.querySelectorAll("div.canvaaas-inhandle").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.route, false);
+					elem.addEventListener("touchstart", handlers.route, false);
+				});
+				newClone.querySelectorAll("div.canvaaas-outhandle").forEach(function(elem){
+					elem.addEventListener("mousedown", handlers.route, false);
+					elem.addEventListener("touchstart", handlers.route, false);
+				});
+
+				
+
 
 				canvasObject.appendChild(newOrigin);
 				mirrorObject.appendChild(newClone);
@@ -3728,6 +3342,44 @@
 			return true;
 		}
 
+		function setHandleState(obj) {
+			if (
+				typeof(obj.inside) === "object" &&
+				obj.inside !== null
+			) {
+				for(var key in obj.inside) {
+					if (
+						obj.inside.hasOwnProperty(key) &&
+						handleState.inside.hasOwnProperty(key)
+					) {
+						handleState["inside"][key] = obj["inside"][key];
+					}
+				}
+			}
+
+			if (
+				typeof(obj.outside) === "object" &&
+				obj.outside !== null
+			) {
+				for(var key in obj.outside) {
+					if (
+						obj.outside.hasOwnProperty(key) &&
+						handleState.outside.hasOwnProperty(key)
+					) {
+						handleState["outside"][key] = obj["outside"][key];
+					}
+				}
+			}
+
+			return true;
+		}
+
+		function unsetHandleState() {
+			handleState = {};
+			copyObject(handleState, defaultHandleState);
+
+			return true;
+		}
 
 		function getContainedSizes(srcW, srcH, areaW, areaH) {
 			var aspectRatio = srcW / srcH;
@@ -5694,10 +5346,6 @@
 			}
 
 			setFocusIn(id);
-
-			if (config.focus) {
-				config.focus(null, exportImageState(id));
-			}
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
@@ -5717,9 +5365,6 @@
 
 			setFocusOut(eventState.target);
 
-			if (config.focus) {
-				config.focus(null, null);
-			}
 			if (cb) {
 				cb(null, null);
 			}

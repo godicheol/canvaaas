@@ -1,66 +1,8 @@
 /* canvaaas.js */
 /* godicheol@gmail.com */
 
-/* on focus */
-.canvaaas-canvas.on-focus{
-	outline: 1px solid black;
-}
-.canvaaas-wrapper.on-focus{
-	cursor: move;
-}
-.canvaaas-wrapper.on-focus .canvaaas-innerline{
-	/* display: block; */
-}
-.canvaaas-wrapper.on-focus .canvaaas-outline{
-	display: block;
-}
-
-/* on edit */
-.canvaaas-wrapper.on-edit .canvaaas-overlay{
-	display: block;
-}
-.canvaaas-handle.on-edit .canvaaas-handle-box{
-	border-color: #000000;
-	background-color: #000000;
-}
-
-/* uneditabled */
-.canvaaas-canvas.on-focus.uneditabled,
-.canvaaas-mirror.on-focus.uneditabled{
-	outline: 1px solid orange;
-	cursor: not-allowed;
-}
-.canvaaas-wrapper.uneditabled{
-	cursor: not-allowed;
-}
-.canvaaas-wrapper.uneditabled .canvaaas-innerline,
-.canvaaas-wrapper.uneditabled .canvaaas-outline,
-.canvaaas-wrapper.uneditabled .canvaaas-handle-box{
-	border-color: orange;
-}
-.canvaaas-wrapper.uneditabled .canvaaas-handle{
-	cursor: not-allowed;
-}
-
-/* unfocusabled */
-.canvaaas-canvas.unfocusabled,
-.canvaaas-mirror.unfocusabled{
-	pointer-events: none;
-	cursor: default;
-}
-.canvaaas-wrapper.unfocusabled{
-	pointer-events: none;
-	cursor: default;
-}
-
-/* undrawabled */
-.canvaaas-canvas.undrawabled .canvaaas-wrapper.undrawabled,
-.canvaaas-mirror.undrawabled .canvaaas-wrapper.undrawabled{
-	visibility: hidden;
-}
-
 /* container */
- .canvaaas{
+.canvaaas{
 	display: block;
 	position: relative;
 	line-height: 0;
@@ -179,7 +121,6 @@
 	-ms-user-select: none;
 	user-select: none;
 }
-
 .canvaaas-wrapper.hidden{
 	visibility: hidden;
 }
@@ -215,9 +156,7 @@
 	position: absolute;
 	pointer-events: none;
 	border-color: #777;
-
-	/* hide */
-	display: none;
+	display: none; /* hide */
 }
 .canvaaas-innerline-top{
 	top: 33%;
@@ -257,9 +196,7 @@
 	position: absolute;
 	pointer-events: none;
 	border-color: #000000;
-
-	/* hide */
-	display: none;
+	display: none; /* hide */
 }
 .canvaaas-outline-top{
 	top: 0;
@@ -311,15 +248,17 @@
 }
 
 /* handle */
-.canvaaas-handle{
+.canvaaas-inhandle,
+.canvaaas-outhandle{
 	position: absolute;
 	display: block;
-	width: 24px; /* click space */
-	height: 24px; /* click space */
+	width: 36px; /* click space */
+	height: 36px; /* click space */
 	cursor: grab;
 	border-color: inherit;
 }
-.canvaaas-handle.hidden{
+.canvaaas-inhandle.hidden,
+.canvaaas-outhandle.hidden{
 	display: none;
 }
 .canvaaas-handle-box{
@@ -335,123 +274,166 @@
 	background-color: #fff;
 	border-color: #000000;
 }
-.canvaaas-handle-n{
+.canvaaas-inhandle.canvaaas-handle-n{
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-ne{
+.canvaaas-inhandle.canvaaas-handle-ne{
 	top: 0;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-e{
+.canvaaas-inhandle.canvaaas-handle-e{
 	top: 50%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-se{
+.canvaaas-inhandle.canvaaas-handle-se{
 	top: 100%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-s{
+.canvaaas-inhandle.canvaaas-handle-s{
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-sw{
+.canvaaas-inhandle.canvaaas-handle-sw{
 	top: 100%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-w{
+.canvaaas-inhandle.canvaaas-handle-w{
 	top: 50%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-nw{
+.canvaaas-inhandle.canvaaas-handle-nw{
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-
-.canvaaas-handle-rotate.canvaaas-handle-n{
+.canvaaas-outhandle.canvaaas-handle-n{
 	top: -36px;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-rotate.canvaaas-handle-ne{
+.canvaaas-outhandle.canvaaas-handle-ne{
 	top: -36px;
-	left: auto;
 	right: -72px;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-rotate.canvaaas-handle-e{
-	left: auto;
+.canvaaas-outhandle.canvaaas-handle-e{
+	top: 50%;
 	right: -72px;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-rotate.canvaaas-handle-se{
-	top: auto;
+.canvaaas-outhandle.canvaaas-handle-se{
 	bottom: -72px;
-	left: auto;
 	right: -72px;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-rotate.canvaaas-handle-s{
-	top: auto;
+.canvaaas-outhandle.canvaaas-handle-s{
 	bottom: -72px;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-rotate.canvaaas-handle-sw{
-	top: auto;
-	bottom: -72px;
-	left: -36px;
-}
-.canvaaas-handle-rotate.canvaaas-handle-w{
-	left: -36px;
-}
-.canvaaas-handle-rotate.canvaaas-handle-nw{
-	top: -36px;
-	left: -36px;
-}
-
-.canvaaas-handle-flip.canvaaas-handle-n{
-	top: -36px;
-}
-.canvaaas-handle-flip.canvaaas-handle-ne{
-	top: -36px;
-	left: auto;
-	right: -72px;
-}
-.canvaaas-handle-flip.canvaaas-handle-e{
-	left: auto;
-	right: -72px;
-}
-.canvaaas-handle-flip.canvaaas-handle-se{
-	top: auto;
-	bottom: -72px;
-	left: auto;
-	right: -72px;
-}
-.canvaaas-handle-flip.canvaaas-handle-s{
-	top: auto;
-	bottom: -72px;
-}
-.canvaaas-handle-flip.canvaaas-handle-sw{
-	top: auto;
+.canvaaas-outhandle.canvaaas-handle-sw{
 	bottom: -72px;
 	left: -36px;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-flip.canvaaas-handle-w{
+.canvaaas-outhandle.canvaaas-handle-w{
+	top: 50%;
 	left: -36px;
+	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle-flip.canvaaas-handle-nw{
+.canvaaas-outhandle.canvaaas-handle-nw{
 	top: -36px;
 	left: -36px;
+	transform: translateX(-50%) translateY(-50%);
 }
 
 /* mobile */
 @media only screen and (max-width: 768px) {
 
-	.canvaaas-handle{
-		width: 36px; /* touch space */
-		height: 36px; /* touch space */
-	}
+}
 
+/* custom */
+.canvaaas-inhandle,
+.canvaaas-outhandle{
+	display: none; /* hide */
+}
+
+/* on focus */
+.canvaaas-canvas.on-focus{
+	outline: 1px solid black;
+}
+.canvaaas-wrapper.on-focus{
+	cursor: move;
+}
+.canvaaas-wrapper.on-focus .canvaaas-innerline{
+	/* display: block; */
+}
+.canvaaas-wrapper.on-focus .canvaaas-outline{
+	display: block;
+}
+.canvaaas-wrapper.on-focus .canvaaas-outhandle.canvaaas-handle-n,
+.canvaaas-wrapper.on-focus .canvaaas-outhandle.canvaaas-handle-e,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-n,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-ne,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-e,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-se,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-s,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-sw,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-w,
+.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-nw{
+	display: block;
+}
+
+/* on edit */
+.canvaaas-wrapper.on-edit .canvaaas-overlay{
+	display: block;
+}
+.canvaaas-inhandle.on-edit .canvaaas-handle-box,
+.canvaaas-outhandle.on-edit .canvaaas-handle-box{
+	border-color: #000000;
+	background-color: #000000;
+}
+
+/* uneditabled */
+.canvaaas-canvas.on-focus.uneditabled,
+.canvaaas-mirror.on-focus.uneditabled{
+	outline: 1px solid orange;
+	cursor: not-allowed;
+}
+.canvaaas-wrapper.uneditabled{
+	cursor: not-allowed;
+}
+.canvaaas-wrapper.uneditabled .canvaaas-innerline,
+.canvaaas-wrapper.uneditabled .canvaaas-outline,
+.canvaaas-wrapper.uneditabled .canvaaas-handle-box{
+	border-color: orange;
+}
+.canvaaas-wrapper.uneditabled .canvaaas-inhandle,
+.canvaaas-wrapper.uneditabled .canvaaas-outhandle{
+	cursor: not-allowed;
+}
+
+/* unfocusabled */
+.canvaaas-canvas.unfocusabled,
+.canvaaas-mirror.unfocusabled{
+	pointer-events: none;
+	cursor: default;
+}
+.canvaaas-wrapper.unfocusabled{
+	pointer-events: none;
+	cursor: default;
+}
+
+/* undrawabled */
+.canvaaas-canvas.undrawabled .canvaaas-wrapper.undrawabled,
+.canvaaas-mirror.undrawabled .canvaaas-wrapper.undrawabled{
+	visibility: hidden;
 }

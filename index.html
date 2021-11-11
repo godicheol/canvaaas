@@ -179,9 +179,9 @@
 			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
 		</div>
 		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">canvaaas.js</a>
+			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About canvaaas</a></li>
+				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About Canvaaas</a></li>
 				<li><a href="https://github.com/godicheol/canvaaas">Back to Github</a></li>
 			</ul>
 		</div>
@@ -661,8 +661,8 @@
 				">Undrawable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.visible(window.prompt('ID', ''), true)
-				">Show</a></li>
+							canvaaas.visible(canvaaas.this(), true)
+						">Show</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.visible(canvaaas.this(), false)
 				">Hide</a></li>
@@ -759,70 +759,70 @@
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
-						resize: {
-							n: true,
-							ne: true,
-							e: true,
-							se: true,
-							s: true,
-							sw: true,
-							w: true,
-							nw: true
+						inside: {
+							n: 'resize',
+							ne: 'resize',
+							e: 'resize',
+							se: 'resize',
+							s: 'resize',
+							sw: 'resize',
+							w: 'resize',
+							nw: 'resize',
 						},
-						rotate: {
-							n: true,
-						},
-						flip: {
-							e: true,
+						outside: {
+							n: 'rotate',
+							ne: 'flip',
+							e: 'flip',
+							se: 'flip',
+							s: 'flip',
+							sw: 'flip',
+							w: 'flip',
+							nw: 'flip',
 						}
 					})
 				">Handle Style 1 (default)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
-						crop: {
-							n: true,
-							ne: true,
-							e: true,
-							se: true,
-							s: true,
-							sw: true,
-							w: true,
-							nw: true
+						inside: {
+							n: 'crop',
+							ne: 'crop',
+							e: 'crop',
+							se: 'crop',
+							s: 'crop',
+							sw: 'crop',
+							w: 'crop',
+							nw: 'crop',
 						},
-						rotate: {
-							n: true,
-						},
-						flip: {
-							e: true,
+						outside: {
+							n: 'rotate',
+							e: 'flip',
 						}
 					})
-				">Handle Style 2</a></li>
+				">Handle Style 2 (crop mode)</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
-						resize: {
-							n: true,
-							e: true,
-							s: true,
-							w: true,
+						inside: {
+							n: 'resize',
+							ne: 'resize',
+							e: 'resize',
+							se: 'resize',
+							s: 'resize',
+							sw: 'resize',
+							w: 'resize',
+							nw: 'resize',
 						},
-						crop: {
-							ne: true,
-							se: true,
-							sw: true,
-							nw: true
-						},
-						rotate: {
-							n: true,
-						},
-						flip: {
-							e: true,
-							s: true
+						outside: {
+							n: 'crop',
+							ne: 'crop',
+							e: 'crop',
+							se: 'crop',
+							s: 'crop',
+							sw: 'crop',
+							w: 'crop',
+							nw: 'crop',
 						}
 					})
-				">Handle Style 3</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.handle({})
-				">Hide Handles</a></li>
+				">Handle Style 3 (crop & resize)</a></li>
 			</ul>
 		</div>
 	</div>
@@ -997,24 +997,15 @@
 
 		// #3.1 handle style
 		// canvaaas.handle({
-		// 	resize: {
-		// 		n: true,
-		// 		e: true,
-		// 		s: true,
-		// 		w: true,
+		// 	inside: {
+		// 		ne: "crop",
+		// 		se: "crop",
+		// 		sw: "crop",
+		// 		nw: "crop",
 		// 	},
-		// 	crop: {
-		// 		ne: true,
-		// 		se: true,
-		// 		sw: true,
-		// 		nw: true
-		// 	},
-		// 	rotate: {
-		// 		n: true,
-		// 	},
-		// 	flip: {
-		// 		e: true,
-		// 		s: true
+		// 	outside: {
+		// 		n: "flip",
+		// 		e: "rotate",
 		// 	}
 		// }, function(err, res){
 		// 	if (err) {
@@ -1022,7 +1013,7 @@
 		// 		return false;
 		// 	}
 		// 	console.log("canvaaas.handle() callback", res);
-		// })
+		// });
 
 		// #4 upload test
 		// canvaaas.uploadUrl("./img/1.png", function(err, res){
@@ -1109,8 +1100,8 @@
 			image.style.top = '50%';
 			image.style.left = '50%';
 			image.style.transform = 'translate(-50%, -50%)';
-			image.style.maxWidth = '100%';
-			image.style.maxHeight = '100%';
+			image.style.width = '100%';
+			image.style.height = 'auto';
 
 			myElem.appendChild(image);
 
@@ -1284,6 +1275,16 @@
 				"tif",
 				"webp",
 			], // array of allowed extensions
+
+			deniedTagNamesForFocusOut: [
+				"A",
+				"BUTTON",
+				"INPUT",
+				"LABEL",
+				"TEXTAREA",
+				"SELECT",
+				"OPTION",
+			], // array of denied tag names for mouse focus out
 
 			cacheLevels: 999, // number
 

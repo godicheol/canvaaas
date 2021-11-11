@@ -272,45 +272,25 @@
 <script>
   canvaaas.handle({
     // default handle
-    resize: {
-      n: true,
-      ne: true,
-      e: true,
-      se: true,
-      s: true,
-      sw: true,
-      w: true,
-      nw: true
+    inside: {
+      n: "resize", // resize, crop
+      ne: "resize", // resize, crop
+      e: "resize", // resize, crop
+      se: "resize", // resize, crop
+      s: "resize", // resize, crop
+      sw: "resize", // resize, crop
+      w: "resize", // resize, crop
+      nw: "resize" // resize, crop
     },
-    crop: {
-      n: false,
-      ne: false,
-      e: false,
-      se: false,
-      s: false,
-      sw: false,
-      w: false,
-      nw: false
-    },
-    rotate: {
-      n: true,
-      ne: false,
-      e: false,
-      se: false,
-      s: false,
-      sw: false,
-      w: false,
-      nw: false
-    },
-    flip: {
-      n: false,
-      ne: false,
-      e: true,
-      se: false,
-      s: false,
-      sw: false,
-      w: false,
-      nw: false
+    outside: {
+      n: "rotate", // rotate, flip, crop, resize
+      ne: "flip", // flip, crop, resize
+      e: "flip", // rotate, flip, crop, resize
+      se: "flip", // flip, crop, resize
+      s: "flip", // rotate, flip, crop, resize
+      sw: "flip", // flip, crop, resize
+      w: "flip", // rotate, flip, crop, resize
+      nw: "flip" // flip, crop, resize
     }
   }, function(err, res){
     if (err) {
