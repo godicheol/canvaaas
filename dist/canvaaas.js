@@ -158,7 +158,7 @@
 		Object.freeze(classNames);
 
 		var conatinerTemplate = "";
-		conatinerTemplate += "<div class='canvaaas'>";
+		conatinerTemplate += "<div class='canvaaas-container'>";
 		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
 		conatinerTemplate += "<div class='canvaaas-background'></div>";
 		conatinerTemplate += "<div class='canvaaas-checker'></div>";
@@ -3914,7 +3914,7 @@
 			target.innerHTML = conatinerTemplate;
 
 			// set element
-			containerObject = target.querySelector("div.canvaaas");
+			containerObject = target.querySelector("div.canvaaas-container");
 			canvasObject = target.querySelector("div.canvaaas-canvas");
 			mirrorObject = target.querySelector("div.canvaaas-mirror");
 			backgroundObject = target.querySelector("div.canvaaas-background");
