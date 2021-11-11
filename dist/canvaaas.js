@@ -390,9 +390,6 @@
 			},
 
 			focusOut: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
 				var deniedTagNames = [
 					"A",
 					"BUTTON",
@@ -411,6 +408,10 @@
 				if (deniedTagNames.indexOf(e.target.tagName) > -1) {
 					return false;
 				}
+
+				e.preventDefault();
+				e.stopPropagation();
+				
 				if (eventState.target) {
 					setFocusOut(eventState.target);
 				}
