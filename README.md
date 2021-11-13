@@ -114,15 +114,18 @@
 5. Open Image
 
 ```html
+<!-- Upload single -->
 <input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
 ```
 
 ```html
+<!-- Upload multiple -->
 <input id="blahblah" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
 ```
 
 ```html
 <script>
+  // Upload single
   canvaaas.uploadUrl("./img/1.png", function(err, res){
     if (err) {
       console.log(err);
@@ -135,6 +138,7 @@
 
 ```html
 <script>
+  // Upload multiple
   canvaaas.uploadUrls(["./img/1.png", "./img/2.png"], function(err, res){
     if (err) {
       console.log(err);
@@ -147,6 +151,7 @@
 
 ```html
 <script>
+  // Upload single
   canvaaas.uploadState({
     "id": "blahblah", // string
     "src": "./img/1.png", // string
@@ -180,6 +185,7 @@
 
 ```html
 <script>
+  // Upload multiple
   canvaaas.uploadStates([{
     "id": "blahblah-1", // string
     "src": "./img/1.png", // string
@@ -232,8 +238,8 @@
 </script>
 ```
 
-
 ```html
+<!-- Upload single -->
 <img
   id="blahblah"
   src="./img/1.png"
