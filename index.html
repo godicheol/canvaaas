@@ -1,177 +1,196 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>canvaaas</title>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>canvaaas</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<!-- ! -->
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel='stylesheet' href='./dist/canvaaas.css' />
-<script src="./dist/canvaaas.js"></script>
-<!-- ! -->
+	<!-- ! -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel='stylesheet' href='./dist/canvaaas.css' />
+	<script src="./dist/canvaaas.js"></script>
+	<!-- ! -->
 
-<style>
-	html,
-	body,
-	div{
-		margin: 0;
-		padding: 0;
-	}
+	<style>
+		html,
+		body,
+		div {
+			margin: 0;
+			padding: 0;
+		}
 
-	#myContainer{
-		margin-top: 27px;
-		padding: 24px;
-		overflow: hidden;
-		/*background-color: #000;*/
-	}
+		#myContainer {
+			margin-top: 27px;
+			padding: 24px;
+			overflow: hidden;
+			/*background-color: #000;*/
+		}
 
-	#myImage,
-	#myCanvas{
-		/*color: #FFF;*/
-		/*background-color: #000;*/
-		/*border-top: 1px solid black;*/
-		font-size: 0.8rem;
-		padding: 3px 24px;
-	}
+		#myImage,
+		#myCanvas {
+			/*color: #FFF;*/
+			/*background-color: #000;*/
+			/*border-top: 1px solid black;*/
+			font-size: 0.8rem;
+			padding: 3px 24px;
+		}
 
-	#myCanvas.hidden,
-	#myImage.hidden{
-		display: none;
-	}
+		#myCanvas.hidden,
+		#myImage.hidden {
+			display: none;
+		}
 
-	#myCanvas-filename{
-		float: left;
-	}
-	#myCanvas-editabled{
-		float: right;
-		margin-right: 6px;
-	}
-	#myCanvas-backgroundColor{
-		width: 1rem;
-		height: 1rem;
-		margin-right: 6px;
-		outline: 1px solid black;
-		float: right;
-	}
-	#myCanvas-state{
-		float: right;
-	}
+		#myCanvas-filename {
+			float: left;
+		}
 
-	#myImage-id{
-		float: left;
-	}
-	#myImage-state{
-		float: right;
-	}
+		#myCanvas-editabled {
+			float: right;
+			margin-right: 6px;
+		}
 
-	input[type='file']{
-		display: none;
-	}
-	label,
-	button{
-		font-family: arial;
-		padding: 3px 6px;
-		font-size: 14px;
-		border: 1px solid #777;
-		border-radius: 2px;
-		background-color: #e7e7e7;
-		cursor: pointer;
-	}
-	label:hover,
-	button:hover{
-		background-color: #c7c7c7;
-	}
-	label:active,
-	button:active{
-		background-color: #e7e7e7;
-	}
+		#myCanvas-backgroundColor {
+			width: 1rem;
+			height: 1rem;
+			margin-right: 6px;
+			outline: 1px solid black;
+			float: right;
+		}
 
-	.header{
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		font-size: 0;
-		font-family: sans-serif;
-		/*border-bottom: 1px solid black;*/
-	}
-	.header-hidden{
-		display: none;
-	}
-	.header-tab{
-		position: relative;
-		display: inline-block;
-		vertical-align: top;
-		width: auto;
-	}
-	.header-subject{
-		display: block;
-		color: inherit;
-		text-decoration: none;
-		font-size: 0.8rem;
-		font-weight: 700;
-		padding: 6px 12px;
-		cursor: default;
-	}
-	.header-tab:hover .header-subject{
-		background-color: #e7e7e7;
-	}
-	.header-list{
-		position: absolute;
-		list-style: none;
-		min-width: 150px;
-		margin: 0 6px;
-		padding: 6px 6px;
-		background-color: #171717;
-		max-height: 500px;
-		z-index: 999;
-		overflow-y: auto;
-	}
-	.header-list.hidden{
-		display: none;
-	}
-	.header-list a,
-	.header-list label{
-		display: block;
-		color: #e7e7e7;
-		text-decoration: none;
-		padding: 6px 6px;
-		margin: 0px;
-		cursor: default;
-		background-color: rgba(0,0,0,0);
-		border: 0;
-		border-radius: 0;
-		font-size: 0.8rem;
-	}
-	.header-list a:hover,
-	.header-list label:hover{
-		background-color: #373737;
-	}
-	.header-list li.rule{
-		margin: 6px;
-		border-top: 1px solid #575757;
-		color: #e7e7e7;
-	}
+		#myCanvas-state {
+			float: right;
+		}
 
-	#myPreview{
-		position: fixed;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		right: 0;
-		z-index: 1111;
-		background-color: #000;
-	}
-	#myPreview.hidden{
-		display: none;
-	}
-	#myPreview img{
-		border: 1px solid #ccc;
-	}
+		#myImage-id {
+			float: left;
+		}
 
-</style>
+		#myImage-state {
+			float: right;
+		}
+
+		input[type='file'] {
+			display: none;
+		}
+
+		label,
+		button {
+			font-family: arial;
+			padding: 3px 6px;
+			font-size: 14px;
+			border: 1px solid #777;
+			border-radius: 2px;
+			background-color: #e7e7e7;
+			cursor: pointer;
+		}
+
+		label:hover,
+		button:hover {
+			background-color: #c7c7c7;
+		}
+
+		label:active,
+		button:active {
+			background-color: #e7e7e7;
+		}
+
+		.header {
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			font-size: 0;
+			font-family: sans-serif;
+			/*border-bottom: 1px solid black;*/
+		}
+
+		.header-hidden {
+			display: none;
+		}
+
+		.header-tab {
+			position: relative;
+			display: inline-block;
+			vertical-align: top;
+			width: auto;
+		}
+
+		.header-subject {
+			display: block;
+			color: inherit;
+			text-decoration: none;
+			font-size: 0.8rem;
+			font-weight: 700;
+			padding: 6px 12px;
+			cursor: default;
+		}
+
+		.header-tab:hover .header-subject {
+			background-color: #e7e7e7;
+		}
+
+		.header-list {
+			position: absolute;
+			list-style: none;
+			min-width: 150px;
+			margin: 0 6px;
+			padding: 6px 6px;
+			background-color: #171717;
+			max-height: 500px;
+			z-index: 999;
+			overflow-y: auto;
+		}
+
+		.header-list.hidden {
+			display: none;
+		}
+
+		.header-list a,
+		.header-list label {
+			display: block;
+			color: #e7e7e7;
+			text-decoration: none;
+			padding: 6px 6px;
+			margin: 0px;
+			cursor: default;
+			background-color: rgba(0, 0, 0, 0);
+			border: 0;
+			border-radius: 0;
+			font-size: 0.8rem;
+		}
+
+		.header-list a:hover,
+		.header-list label:hover {
+			background-color: #373737;
+		}
+
+		.header-list li.rule {
+			margin: 6px;
+			border-top: 1px solid #575757;
+			color: #e7e7e7;
+		}
+
+		#myPreview {
+			position: fixed;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			z-index: 1111;
+			background-color: #000;
+		}
+
+		#myPreview.hidden {
+			display: none;
+		}
+
+		#myPreview img {
+			border: 1px solid #ccc;
+		}
+	</style>
 </head>
+
 <body style="padding-top: 0; padding-bottom: 0;">
 
 	<div id="header" class="header">
@@ -181,7 +200,8 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About Canvaaas</a></li>
+				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About Canvaaas</a>
+				</li>
 				<li><a href="https://github.com/godicheol/canvaaas">Back to Github</a></li>
 			</ul>
 		</div>
@@ -286,7 +306,7 @@
 						drawWidth: 3600,
 						drawHeight: 3600
 					},
-					exportedStates3,
+					exportedStates2,
 					function(err, res, result){
 						if (err) {
 							console.log(err);
@@ -308,7 +328,7 @@
 					})
 				">Export</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(exportedStates3, function(err, res){
+					canvaaas.import(exportedStates2, function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
@@ -679,7 +699,7 @@
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
-        <li><a href="javascript:void(0)" onclick="
+				<li><a href="javascript:void(0)" onclick="
           canvaaas.filename(window.prompt('Type filename', 'untitled'), function(err, res){
             if (err) {
               console.log(err);
@@ -688,7 +708,7 @@
             writeCanvasData();
           })
         ">Filename</a></li>
-        <li class="rule"></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.resize({
 						width: window.prompt('Type width', '1800'),
@@ -716,10 +736,10 @@
 					canvaaas.focusableAll(false)
 				">Unfocusable</a></li>
 				<li class="rule"></li>
-        <li><a href="javascript:void(0)" onclick="
+				<li><a href="javascript:void(0)" onclick="
           canvaaas.drawableAll(true)
         ">Show Undrawables</a></li>
-        <li><a href="javascript:void(0)" onclick="
+				<li><a href="javascript:void(0)" onclick="
           canvaaas.drawableAll(false)
 				">Hide Undrawables</a></li>
 				<li class="rule"></li>
@@ -848,61 +868,13 @@
 
 	<div style="display: none;">
 		<!-- IMG with dataset -->
-		<img
-			id="image-1"
-			src="./img/1.png"
-			data-id = "1"
-      data-src = "./img/1.png"
-      data-index = "1"
-      data-width = "600"
-      data-height = "600"
-      data-x = "399.07235621521335"
-      data-y = "808.7198515769946"
-      data-rotate = "17.46323891797897"
-      data-scaleX = "1"
-      data-scaleY = "1"
-      data-opacity = "1"
-      data-lockAspectRatio = "false"
-      data-focusabled = "true"
-      data-editabled = "true"
-      data-drawabled = "true">
+		<img id="image-1" src="./img/1.png" data-id="1" data-src="./img/1.png" data-index="1" data-width="600"
+			data-height="600" data-x="399.07235621521335" data-y="808.7198515769946" data-rotate="17.46323891797897"
+			data-scaleX="1" data-scaleY="1" data-opacity="1" data-lockAspectRatio="false" data-focusabled="true"
+			data-editabled="true" data-drawabled="true">
 
-		<!-- IMG with data-state JSON.stringify(state) -->
-		<img
-			id="image-2"
-			src="./img/2.jpg"
-			data-state='{
-	        "id": "2",
-	        "type": "url",
-	        "index": 2,
-	        "originalWidth": 1350,
-	        "originalHeight": 1800,
-	        "width": 594.2754728305664,
-	        "height": 792.367297107422,
-	        "x": 1629.1280148423007,
-	        "y": 366.2337662337663,
-	        "rotate": 383.231324008005,
-	        "scaleX": 1,
-	        "scaleY": -1,
-	        "opacity": 1,
-	        "lockAspectRatio": false,
-          "visible": true,
-	        "focusabled": true,
-	        "editabled": true,
-	        "drawabled": true,
-	        "originalAspectRatio": "3:4",
-	        "aspectRatio": "3:4",
-	        "left": 1331.9902784270175,
-	        "top": -29.94988231994472
-	    }'>
-
-		<img
-			id="image-3"
-			data-src="./img/3.jpeg"
-			data-width = "948.4312600294483"
-			data-height = "632.2875066862982"
-			data-x = "151.39146567717992"
-	    data-y = "291.0946196660483">
+		<img id="image-2" data-src="./img/3.jpeg" data-width="948.4312600294483" data-height="632.2875066862982"
+			data-x="151.39146567717992" data-y="291.0946196660483">
 
 	</div>
 
@@ -916,7 +888,7 @@
 		//
 
 		// #1 init
-		canvaaas.init(target, function(err, res){
+		canvaaas.init(target, function (err, res) {
 			if (err) {
 				console.log(err);
 				return false;
@@ -929,7 +901,7 @@
 
 		// #2 config
 		canvaaas.config({
-			upload: function(err, res){
+			upload: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -940,7 +912,7 @@
 
 				console.log("config.upload callback", res);
 			},
-			focus: function(err, res){
+			focus: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -951,7 +923,7 @@
 
 				console.log("config.focus callback", res);
 			},
-			edit: function(err, res){
+			edit: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -962,7 +934,7 @@
 
 				console.log("config.edit callback", res);
 			},
-			remove: function(err, res){
+			remove: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -972,7 +944,7 @@
 
 				console.log("config.remove callback", res);
 			},
-		}, function(err, res){
+		}, function (err, res) {
 			if (err) {
 				console.log(err);
 				return false;
@@ -986,7 +958,7 @@
 			filename: "TEST",
 			overlay: true,
 			checker: true
-		}, function(err, res){
+		}, function (err, res) {
 			if (err) {
 				console.log(err);
 				return false;
@@ -1025,20 +997,10 @@
 		// });
 
 		// execute after page load
-		setTimeout(function(){
+		setTimeout(function () {
 
 			// #4 upload test
 			// canvaaas.uploadState(exportedStates[0], function(err, res){
-			// 	if (err) {
-			// 		console.log(err);
-			// 		return false;
-			// 	}
-			// 	console.log(res);
-			// });
-
-
-			// #4 upload test
-			// canvaaas.uploadState(exportedStates2, function(err, res){
 			// 	if (err) {
 			// 		console.log(err);
 			// 		return false;
@@ -1058,7 +1020,7 @@
 
 		// example
 		// iOS chrome not supported (only large file?)
-		function myDownload(myData, filename){
+		function myDownload(myData, filename) {
 			var myLink = document.createElement('a');
 			myLink.setAttribute('href', myData);
 			myLink.setAttribute('download', filename);
@@ -1071,7 +1033,7 @@
 
 		// example
 		// iOS safari not supported
-		function newTab(myData){
+		function newTab(myData) {
 			var image = new Image();
 			image.src = myData;
 			image.style.position = 'absolute';
@@ -1091,7 +1053,7 @@
 		}
 
 		// example
-		function preview(myData){
+		function preview(myData) {
 			var myElem = document.getElementById("myPreview");
 
 			var image = new Image();
@@ -1112,14 +1074,14 @@
 			window.URL.revokeObjectURL(myData);
 		}
 
-		document.getElementById("myPreview").addEventListener("click", function(e){
+		document.getElementById("myPreview").addEventListener("click", function (e) {
 			if (!this.classList.contains("hidden")) {
 				this.classList.add("hidden");
 			}
 			this.innerHTML = "";
 		});
 
-		function writeCanvasData(){
+		function writeCanvasData() {
 			var state = canvaaas.getCanvas();
 
 			var sFilename = document.getElementById("myCanvas-filename");
@@ -1139,7 +1101,7 @@
 			sBackground.style.backgroundColor = state.background;
 		}
 
-		function writeImageData(state){
+		function writeImageData(state) {
 			var sId = document.getElementById("myImage-id");
 			var sState = document.getElementById("myImage-state");
 
@@ -1163,7 +1125,7 @@
 			sState.innerHTML += " opacity " + state.opacity;
 		}
 
-		function checkCaches(){
+		function checkCaches() {
 			var undo = document.getElementById("undo");
 			var redo = document.getElementById("redo");
 			if (canvaaas.getUndo() < 1) {
@@ -1186,7 +1148,7 @@
 			}
 		}
 
-		(function(){
+		(function () {
 			var sCanvas = document.getElementById("showCanvas");
 			var sImage = document.getElementById("showImage");
 
@@ -1218,13 +1180,13 @@
 			sImage.addEventListener("click", evtHandle, false);
 		})();
 
-		(function(){
+		(function () {
 			var header = document.getElementById("header");
 			var tabs = header.querySelectorAll("a.header-subject");
 			var opened;
 
-			tabs.forEach(function(t){
-				t.addEventListener("click", function(e){
+			tabs.forEach(function (t) {
+				t.addEventListener("click", function (e) {
 					e.preventDefault();
 					e.stopPropagation();
 
@@ -1250,9 +1212,9 @@
 				});
 
 				var btns = t.parentNode.querySelector(".header-list").querySelectorAll("li");
-				btns.forEach(function(b){
+				btns.forEach(function (b) {
 					if (!b.classList.contains("rule")) {
-						b.addEventListener("click", function(e){
+						b.addEventListener("click", function (e) {
 							if (opened) {
 								opened.classList.add("hidden");
 								opened = undefined;
@@ -1275,16 +1237,6 @@
 				"tif",
 				"webp",
 			], // array of allowed extensions
-
-			deniedTagNamesForFocusOut: [
-				"A",
-				"BUTTON",
-				"INPUT",
-				"LABEL",
-				"TEXTAREA",
-				"SELECT",
-				"OPTION",
-			], // array of denied tag names for mouse focus out
 
 			cacheLevels: 999, // number
 
@@ -1318,7 +1270,7 @@
 		}
 
 		var testConfig = {
-			upload: function(err, res){
+			upload: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -1329,7 +1281,7 @@
 
 				console.log("config.upload callback", res);
 			},
-			focus: function(err, res){
+			focus: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -1340,7 +1292,7 @@
 
 				console.log("config.focus callback", res);
 			},
-			edit: function(err, res){
+			edit: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -1351,7 +1303,7 @@
 
 				console.log("config.edit callback", res);
 			},
-			remove: function(err, res){
+			remove: function (err, res) {
 				if (err) {
 					console.log(err);
 					return false;
@@ -1364,217 +1316,189 @@
 		}
 
 		var exportedCanvasState = {
-		    "filename": "TEST",
-		    "quality": 0.92,
-		    "mimeType": "image/png",
-		    "dataType": "url",
-		    "editabled": true,
-		    "focusabled": true,
-		    "background": "#FFFFFF",
-		    "overlay": true,
-		    "checker": true,
-		    "width": 1800,
-		    "height": 1200,
-		    "aspectRatio": "3:2"
+			"filename": "TEST",
+			"quality": 0.92,
+			"mimeType": "image/png",
+			"dataType": "url",
+			"editabled": true,
+			"focusabled": true,
+			"background": "#FFFFFF",
+			"overlay": true,
+			"checker": true,
+			"width": 1800,
+			"height": 1200,
+			"aspectRatio": "3:2"
 		}
 
 		var exportedStates = [{
-        "id": "TEST_PNG",
-        "src": "./img/1.png",
-				"cropTop": 0,
-				"cropBottom": 0,
-				"cropLeft": 0,
-				"cropRight": 0,
-        "index": 1,
-        "originalWidth": 800, // no use
-        "originalHeight": 800, // no use
-        "width": 600.0000000000001,
-        "height": 600.0000000000001,
-        "x": 399.07235621521335,
-        "y": 808.7198515769946,
-        "rotate": 17.46323891797897,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1,
-        "lockAspectRatio": false,
-        "visible": true,
-        "focusabled": true,
-        "editabled": true,
-        "drawabled": true,
-        "originalAspectRatio": "1:1",
-        "aspectRatio": "1:1",
-        "left": 99.07235621521329, // no use
-        "top": 508.7198515769946 // no use
-    }, {
-        "id": "TEST_JPG",
-        "src": "./img/2.jpg",
-				"cropTop": 0,
-				"cropBottom": 0,
-				"cropLeft": 0,
-				"cropRight": 0,
-        "index": 2,
-        "originalWidth": 1350, // no use
-        "originalHeight": 1800, // no use
-        "width": 594.2754728305664,
-        "height": 792.367297107422,
-        "x": 1629.1280148423007,
-        "y": 366.2337662337663,
-        "rotate": 383.231324008005,
-        "scaleX": 1,
-        "scaleY": -1,
-        "opacity": 1,
-        "lockAspectRatio": false,
-        "visible": true,
-        "focusabled": true,
-        "editabled": true,
-        "drawabled": true,
-        "originalAspectRatio": "3:4",
-        "aspectRatio": "3:4",
-        "left": 1331.9902784270175, // no use
-        "top": -29.94988231994472 // no use
-    }, {
-        "id": "TEST_JPEG",
-        "src": "./img/3.jpeg",
-				"cropTop": 0,
-				"cropBottom": 0,
-				"cropLeft": 0,
-				"cropRight": 0,
-        "index": 3,
-        "originalWidth": 1800, // no use
-        "originalHeight": 1200, // no use
-        "width": 948.4312600294483,
-        "height": 632.2875066862982,
-        "x": 151.39146567717992,
-        "y": 291.0946196660483,
-        "rotate": 334.3516430373584,
-        "scaleX": -1,
-        "scaleY": -1,
-        "opacity": 1,
-        "lockAspectRatio": false,
-        "visible": true,
-        "focusabled": true,
-        "editabled": true,
-        "drawabled": true,
-        "originalAspectRatio": "3:2",
-        "aspectRatio": "3:2",
-        "left": -322.8241643375442, // no use
-        "top": -25.049133677100826 // no use
-    }];
+			"id": "TEST_PNG",
+			"src": "./img/1.png",
+			"cropTop": 0,
+			"cropBottom": 0,
+			"cropLeft": 0,
+			"cropRight": 0,
+			"index": 1,
+			"originalWidth": 800,
+			"originalHeight": 800,
+			"width": 600.0000000000001,
+			"height": 600.0000000000001,
+			"x": 399.07235621521335,
+			"y": 808.7198515769946,
+			"rotate": 17.46323891797897,
+			"scaleX": 1,
+			"scaleY": 1,
+			"opacity": 1,
+			"lockAspectRatio": false,
+			"visible": true,
+			"focusabled": true,
+			"editabled": true,
+			"drawabled": true,
+			"originalAspectRatio": "1:1",
+			"aspectRatio": "1:1",
+			"left": 99.07235621521329,
+			"top": 508.7198515769946
+		}, {
+			"id": "TEST_JPG",
+			"src": "./img/2.jpg",
+			"cropTop": 0,
+			"cropBottom": 0,
+			"cropLeft": 0,
+			"cropRight": 0,
+			"index": 2,
+			"originalWidth": 1350,
+			"originalHeight": 1800,
+			"width": 594.2754728305664,
+			"height": 792.367297107422,
+			"x": 1629.1280148423007,
+			"y": 366.2337662337663,
+			"rotate": 383.231324008005,
+			"scaleX": 1,
+			"scaleY": -1,
+			"opacity": 1,
+			"lockAspectRatio": false,
+			"visible": true,
+			"focusabled": true,
+			"editabled": true,
+			"drawabled": true,
+			"originalAspectRatio": "3:4",
+			"aspectRatio": "3:4",
+			"left": 1331.9902784270175,
+			"top": -29.94988231994472
+		}, {
+			"id": "TEST_JPEG",
+			"src": "./img/3.jpeg",
+			"cropTop": 0,
+			"cropBottom": 0,
+			"cropLeft": 0,
+			"cropRight": 0,
+			"index": 3,
+			"originalWidth": 1800,
+			"originalHeight": 1200,
+			"width": 948.4312600294483,
+			"height": 632.2875066862982,
+			"x": 151.39146567717992,
+			"y": 291.0946196660483,
+			"rotate": 334.3516430373584,
+			"scaleX": -1,
+			"scaleY": -1,
+			"opacity": 1,
+			"lockAspectRatio": false,
+			"visible": true,
+			"focusabled": true,
+			"editabled": true,
+			"drawabled": true,
+			"originalAspectRatio": "3:2",
+			"aspectRatio": "3:2",
+			"left": -322.8241643375442,
+			"top": -25.049133677100826
+		}];
 
-		var exportedStates2 = JSON.stringify({
-        "id": "UPLOADED_FROM_STATE",
-        "src": "./img/1.png",
-				"cropTop": 0,
-				"cropBottom": 0,
-				"cropLeft": 0,
-				"cropRight": 0,
-        "index": 1,
-        "originalWidth": 800, // no use
-        "originalHeight": 800, // no use
-        "width": 600.0000000000001,
-        "height": 600.0000000000001,
-        "x": 399.07235621521335,
-        "y": 808.7198515769946,
-        "rotate": 17.46323891797897,
-        "scaleX": 1,
-        "scaleY": 1,
-        "opacity": 1,
-        "lockAspectRatio": false,
-        "visible": true,
-        "focusabled": true,
-        "editabled": true,
-        "drawabled": true,
-        "originalAspectRatio": "1:1",
-        "aspectRatio": "1:1",
-        "left": 99.07235621521329, // no use
-        "top": 508.7198515769946 // no use
-    });
-
-		var exportedStates3 = [{
-      "id": "TEST_PNG",
-      "src": "./img/1.png",
-      "index": 1,
-      "originalWidth": 800,
-      "originalHeight": 800,
-      "width": 1389.1845477281024,
-      "height": 1452.5345652293522,
-      "x": 216.7047507081002,
-      "y": 904.9299631740255,
-      "rotate": 17.46323891797897,
-      "scaleX": 1,
-      "scaleY": 1,
-      "opacity": 1,
-      "lockAspectRatio": false,
-      "visible": true,
-      "focusabled": true,
-      "editabled": true,
-      "drawabled": true,
-      "cropTop": 529.1925640873653,
-      "cropBottom": 366.4937371942563,
-      "cropLeft": 401.27017944833125,
-      "cropRight": 409.5133951606077,
-      "originalAspectRatio": "1:1",
-      "aspectRatio": "22:23",
-      "left": -477.88752315595104,
-      "top": 178.66268055934938
-    },
-    {
-      "id": "TEST_JPG",
-      "src": "./img/2.jpg",
-      "index": 2,
-      "originalWidth": 1350,
-      "originalHeight": 1800,
-      "width": 1751.507666697458,
-      "height": 2335.3435555966116,
-      "x": 1447.1731276242556,
-      "y": 650.4442925495557,
-      "rotate": 527.5827758913651,
-      "scaleX": 1,
-      "scaleY": -1,
-      "opacity": 1,
-      "lockAspectRatio": false,
-      "visible": true,
-      "focusabled": true,
-      "editabled": true,
-      "drawabled": true,
-      "cropTop": 426.9755450634543,
-      "cropBottom": 380.74198598946873,
-      "cropLeft": 686.5002741759678,
-      "cropRight": 616.2810396067391,
-      "originalAspectRatio": "3:4",
-      "aspectRatio": "3:4",
-      "left": 571.4192942755266,
-      "top": -517.2274852487501
-    },
-    {
-      "id": "TEST_JPEG",
-      "src": "./img/3.jpeg",
-      "index": 3,
-      "originalWidth": 1800,
-      "originalHeight": 1200,
-      "width": 4472.358161839274,
-      "height": 3738.0871229562276,
-      "x": 770.1435807665739,
-      "y": 625.8704040235699,
-      "rotate": 532.2230993660178,
-      "scaleX": -1,
-      "scaleY": -1,
-      "opacity": 1,
-      "lockAspectRatio": false,
-      "visible": true,
-      "focusabled": true,
-      "editabled": true,
-      "drawabled": true,
-      "cropTop": 467.4256376666018,
-      "cropBottom": 1810.244266582043,
-      "cropLeft": 2076.7733033665018,
-      "cropRight": 2015.4215795849188,
-      "originalAspectRatio": "3:2",
-      "aspectRatio": "6:5",
-      "left": -1466.035500153063,
-      "top": -1243.1731574545438
-    }];
-
+		var exportedStates2 = [{
+				"id": "TEST_PNG",
+				"src": "./img/1.png",
+				"index": 1,
+				"originalWidth": 800,
+				"originalHeight": 800,
+				"width": 1389.1845477281024,
+				"height": 1452.5345652293522,
+				"x": 216.7047507081002,
+				"y": 904.9299631740255,
+				"rotate": 17.46323891797897,
+				"scaleX": 1,
+				"scaleY": 1,
+				"opacity": 1,
+				"lockAspectRatio": false,
+				"visible": true,
+				"focusabled": true,
+				"editabled": true,
+				"drawabled": true,
+				"cropTop": 529.1925640873653,
+				"cropBottom": 366.4937371942563,
+				"cropLeft": 401.27017944833125,
+				"cropRight": 409.5133951606077,
+				"originalAspectRatio": "1:1",
+				"aspectRatio": "22:23",
+				"left": -477.88752315595104,
+				"top": 178.66268055934938
+			},
+			{
+				"id": "TEST_JPG",
+				"src": "./img/2.jpg",
+				"index": 2,
+				"originalWidth": 1350,
+				"originalHeight": 1800,
+				"width": 1751.507666697458,
+				"height": 2335.3435555966116,
+				"x": 1447.1731276242556,
+				"y": 650.4442925495557,
+				"rotate": 527.5827758913651,
+				"scaleX": 1,
+				"scaleY": -1,
+				"opacity": 1,
+				"lockAspectRatio": false,
+				"visible": true,
+				"focusabled": true,
+				"editabled": true,
+				"drawabled": true,
+				"cropTop": 426.9755450634543,
+				"cropBottom": 380.74198598946873,
+				"cropLeft": 686.5002741759678,
+				"cropRight": 616.2810396067391,
+				"originalAspectRatio": "3:4",
+				"aspectRatio": "3:4",
+				"left": 571.4192942755266,
+				"top": -517.2274852487501
+			},
+			{
+				"id": "TEST_JPEG",
+				"src": "./img/3.jpeg",
+				"index": 3,
+				"originalWidth": 1800,
+				"originalHeight": 1200,
+				"width": 4472.358161839274,
+				"height": 3738.0871229562276,
+				"x": 770.1435807665739,
+				"y": 625.8704040235699,
+				"rotate": 532.2230993660178,
+				"scaleX": -1,
+				"scaleY": -1,
+				"opacity": 1,
+				"lockAspectRatio": false,
+				"visible": true,
+				"focusabled": true,
+				"editabled": true,
+				"drawabled": true,
+				"cropTop": 467.4256376666018,
+				"cropBottom": 1810.244266582043,
+				"cropLeft": 2076.7733033665018,
+				"cropRight": 2015.4215795849188,
+				"originalAspectRatio": "3:2",
+				"aspectRatio": "6:5",
+				"left": -1466.035500153063,
+				"top": -1243.1731574545438
+			}
+		];
 	</script>
 </body>
+
 </html>

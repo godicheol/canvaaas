@@ -2147,7 +2147,7 @@
 			var tmp = {};
 			for(var key in config) {
 				if (config.hasOwnProperty(key)) {
-					if (typeof(config[key]) === "function") {
+					if (isFunction(config[key])) {
 						tmp[key] = true;
 					} else {
 						tmp[key] = config[key];
@@ -2309,59 +2309,64 @@
 
 		function parseState(obj) {
 			var res = {};
-
 			if (isObject(obj)) {
 				var stateKeys = Object.keys(obj);
 				for (var i = 0; i < stateKeys.length; i++) {
 					var j = stateKeys[i];
 					if (obj.hasOwnProperty(j)) {
-						if (isNumeric(obj[j])) {
-							res[j] = toNumber(obj[j]);
-						} else if (isBoolean(obj[j])) {
-							res[j] = toBoolean(obj[j]);
-						} else if (isString(obj[j])) {
-							res[j] = toString(obj[j]);
-						}
-					}
-				}
-			} else if (isString(obj)) {
-				try {
-					var parsed = JSON.parse(obj);
-					var parsedKeys = Object.keys(parsed);
-					for (var i = 0; i < parsedKeys.length; i++) {
-						var j = parsedKeys[i];
-						if (parsed.hasOwnProperty(j)) {
-							if (isNumeric(parsed[j])) {
-								res[j] = toNumber(parsed[j]);
-							} else if (isBoolean(parsed[j])) {
-								res[j] = toBoolean(parsed[j]);
-							} else if (isString(parsed[j])) {
-								res[j] = parsed[j];
+						if ([
+							"id"
+						].indexOf(j) > -1) {
+							if (isString(obj[j])) {
+								res["id"] = toString(obj[j]);
+							}
+						} if ([
+							"src",
+							"url",
+							"path"
+						].indexOf(j) > -1) {
+							if (isString(obj[j])) {
+								res["src"] = toString(obj[j]);
+							}
+						} else if ([
+							"index",
+							"x",
+							"y",
+							"width",
+							"height",
+							"rotate",
+							"scaleX",
+							"scaleY",
+							"opacity",
+							"cropTop",
+							"cropBottom",
+							"cropLeft",
+							"cropRight",
+						].indexOf(j) > -1) {
+							if (isNumeric(obj[j])) {
+								res[j] = toNumber(obj[j]);
+							}
+						} else if ([
+							"lockAspectRatio",
+							"visible",
+							"focusabled",
+							"editabled",
+							"drawabled",
+						].indexOf(j) > -1) {
+							if (isBoolean(obj[j])) {
+								res[j] = toBoolean(obj[j]);
 							}
 						}
 					}
-				} catch(err) {
-					console.log(err);
-					return false;
 				}
 			} else {
 				return false;
 			}
-
-			if (!res.src) {
-				if (res.url) {
-					res.src = res.url;
-				} else if (res.path) {
-					res.src = res.path;
-				}
-			}
-
 			return res;
 		}
 
 		function getDataset(elem) {
-			var stateKeys = [
-				"state",
+			var datasetKeys = [
 				"_id",
 				"id",
 				"src",
@@ -2373,39 +2378,69 @@
 				"width",
 				"height",
 				"rotate",
-				"scaleX",
-				"scaleY",
+				"scalex",
+				"scaley",
+				"scale-x",
+				"scale-y",
 				"opacity",
-				"lockAspectRatio",
+				"lockaspectratio",
+				"lock-aspect-ratio",
 				"visible",
 				"focusabled",
 				"editabled",
 				"drawabled",
-				"cropTop",
-				"cropBottom",
-				"cropLeft",
-				"cropRight",
+				"croptop",
+				"cropbottom",
+				"cropleft",
+				"cropright",
+				"crop-top",
+				"crop-bottom",
+				"crop-right",
+				"crop-left",
 			];
 
-			var thisAttrs = {};
-			for (var i = 0; i < stateKeys.length; i++) {
-				var tmp = elem.getAttribute("data-" + stateKeys[i]);
-				if (!isEmpty(tmp)) {
-					if (isNumeric(tmp)) {
-						thisAttrs[stateKeys[i]] = toNumber(tmp);
-					} else {
-						thisAttrs[stateKeys[i]] = tmp;
-					}
+			var stateKeys = {
+				"_id": "id",
+				"id": "id",
+				"src": "src",
+				"url": "src",
+				"path": "src",
+				"index": "index",
+				"x": "x",
+				"y": "y",
+				"width": "width",
+				"height": "height",
+				"rotate": "rotate",
+				"scale-x": "scaleX",
+				"scale-y": "scaleY",
+				"scalex": "scaleX",
+				"scaley": "scaleY",
+				"opacity": "opacity",
+				"lock-aspect-ratio": "lockAspectRatio",
+				"lockaspectratio": "lockAspectRatio",
+				"visible": "visible",
+				"focusabled": "focusabled",
+				"editabled": "editabled",
+				"drawabled": "drawabled",
+				"croptop": "cropTop",
+				"cropbottom": "cropBottom",
+				"cropleft": "cropLeft",
+				"cropright": "cropRight",
+				"crop-top": "cropTop",
+				"crop-bottom": "cropBottom",
+				"crop-left": "cropLeft",
+				"crop-right": "cropRight",
+			}
+
+			var attr = {};
+			for (var i = 0; i < datasetKeys.length; i++) {
+				var v = elem.getAttribute("data-" + datasetKeys[i]);
+				if (!isEmpty(v)) {
+					attr[stateKeys[datasetKeys[i]]] = v;
 				}
 			}
 
-			var res;
-			if (thisAttrs.state) {
-				res = parseState(thisAttrs.state);
-			} else {
-				res = parseState(thisAttrs);
-			}
-			return res;
+			return parseState(attr);
 		}
 
 		function isEditable(id) {
@@ -3344,10 +3379,7 @@
 		}
 
 		function setHandleState(obj) {
-			if (
-				typeof(obj.inside) === "object" &&
-				obj.inside !== null
-			) {
+			if (isObject(obj.inside)) {
 				for(var key in obj.inside) {
 					if (
 						obj.inside.hasOwnProperty(key) &&
@@ -3358,10 +3390,7 @@
 				}
 			}
 
-			if (
-				typeof(obj.outside) === "object" &&
-				obj.outside !== null
-			) {
+			if (isObject(obj.outside)) {
 				for(var key in obj.outside) {
 					if (
 						obj.outside.hasOwnProperty(key) &&
@@ -3846,16 +3875,13 @@
 
 		function getExtension(data) {
 			try {
-				if (
-					typeof(data) === "object" &&
-					data !== null
-				) {
+				if (isObject(data)) {
 					if (data.type) {
 						return data.type.split("/").pop();
 					} else {
 						return false;
 					}
-				} else if (typeof(data) === "string") {
+				} else if (isString(data)) {
 					if (
 						data.trim !== "" &&
 						data.indexOf(".") > -1
@@ -3900,7 +3926,7 @@
 		//
 
 		//
-		// export methods start
+		// exports start
 		//
 
 		myObject.init = function(target, cb) {
@@ -3975,7 +4001,7 @@
 		}
 
 		// asynchronous
-		myObject.uploadFile = function(files, cb) {
+		myObject.uploadFile = function(imageFiles, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -3986,7 +4012,7 @@
 				return false;
 			}
 
-			if (!isObject(files)) {
+			if (!isObject(imageFiles)) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
@@ -3996,8 +4022,7 @@
 				return false;
 			}
 
-			var thisFiles = files;
-			if (thisFiles.length < 1) {
+			if (imageFiles.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
@@ -4005,7 +4030,7 @@
 					cb("File not found");
 				}
 				return false;
-			} else if (thisFiles.length > 1) {
+			} else if (imageFiles.length > 1) {
 				if (config.upload) {
 					config.upload("Multiple upload not allowed");
 				}
@@ -4017,7 +4042,7 @@
 
 			eventState.onUpload = true;
 
-			renderImage(thisFiles[0], null, function(err, res) {
+			renderImage(imageFiles[0], null, function(err, res) {
 				eventState.onUpload = false;
 
 				if (err) {
@@ -4040,7 +4065,7 @@
 		}
 
 		// asynchronous
-		myObject.uploadUrl = function(str, cb) {
+		myObject.uploadFiles = function(imageFiles, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -4051,7 +4076,82 @@
 				return false;
 			}
 
-			if (!str) {
+			if (!isObject(imageFiles)) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			if (imageFiles.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			var index = imageFiles.length;
+			var count = 0;
+			var result = [];
+			var status = [];
+
+			eventState.onUpload = true;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					renderImage(imageFiles[count], null, function(err, res) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+							status.push({
+								err: err,
+								status: false
+							});
+						} else {
+							if (config.upload) {
+								config.upload(null, exportImageState(res));
+							}
+							status.push({
+								err: null,
+								status: true
+							});
+							result.push(exportImageState(res))
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					eventState.onUpload = false;
+
+					if (cb) {
+						cb(null, result, status);
+					}
+				}
+			}
+		}
+
+		// asynchronous
+		myObject.uploadUrl = function(imageURL, cb) {
+			if (eventState.onUpload) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				}
+				return false;
+			}
+
+			if (!imageURL) {
 				if (config.upload) {
 					config.upload("URL not found");
 				}
@@ -4061,7 +4161,7 @@
 				return false;
 			}
 
-			if (!isString(str)) {
+			if (!isString(imageURL)) {
 				if (config.upload) {
 					config.upload("Argument is not string");
 				}
@@ -4073,7 +4173,7 @@
 
 			eventState.onUpload = true;
 
-			renderImage(str, null, function(err, res) {
+			renderImage(imageURL, null, function(err, res) {
 				eventState.onUpload = false;
 
 				if (err) {
@@ -4096,7 +4196,7 @@
 		}
 
 		// asynchronous
-		myObject.uploadState = function(obj, cb) {
+		myObject.uploadUrls = function(imageURLs, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -4107,8 +4207,83 @@
 				return false;
 			}
 
-			var thisState = parseState(obj);
-			if (!thisState) {
+			if (!isArray(imageURLs)) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			if (imageURLs.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			var index = imageURLs.length;
+			var count = 0;
+			var result = [];
+			var status = [];
+
+			eventState.onUpload = true;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					renderImage(imageURLs[count], null, function(err, res) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+							status.push({
+								err: err,
+								status: false
+							});
+						} else {
+							if (config.upload) {
+								config.upload(null, exportImageState(res));
+							}
+							status.push({
+								err: null,
+								status: true
+							});
+							result.push(exportImageState(res))
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					eventState.onUpload = false;
+
+					if (cb) {
+						cb(null, result, status);
+					}
+				}
+			}
+		}
+
+		// asynchronous
+		myObject.uploadState = function(exportedState, cb) {
+			if (eventState.onUpload) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				}
+				return false;
+			}
+
+			var parsedState = parseState(exportedState);
+			if (!parsedState) {
 				if (config.upload) {
 					config.upload("State not found");
 				}
@@ -4117,7 +4292,7 @@
 				}
 				return false;
 			}
-			if (!thisState.src) {
+			if (!parsedState.src) {
 				if (config.upload) {
 					config.upload("URL not found");
 				}
@@ -4129,7 +4304,7 @@
 
 			eventState.onUpload = true;
 
-			renderImage(thisState.src, thisState, function(err, res) {
+			renderImage(parsedState.src, parsedState, function(err, res) {
 				eventState.onUpload = false;
 
 				if (err) {
@@ -4149,6 +4324,100 @@
 					cb(null, exportImageState(res));
 				}
 			});
+		}
+
+		// asynchronous
+		myObject.uploadStates = function(exportedStates, cb) {
+			if (eventState.onUpload) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
+				if (cb) {
+					cb("Already in progress");
+				}
+				return false;
+			}
+
+			if (!isArray(exportedStates)) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			if (exportedStates.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+
+			var index = exportedStates.length;
+			var count = 0;
+			var result = [];
+			var status = [];
+
+			eventState.onUpload = true;
+
+			recursiveFunc();
+
+			function recursiveFunc() {
+				if (count < index) {
+					var parsedState = parseState(exportedStates[count]);
+					if (!parsedState) {
+						if (config.upload) {
+							config.upload("State not found");
+						}
+						status.push({
+							err: "State not found",
+							status: false
+						});
+					}
+					if (!parsedState.src) {
+						if (config.upload) {
+							config.upload("URL not found");
+						}
+						status.push({
+							err: "URL not found",
+							status: false
+						});
+					}
+					renderImage(parsedState.src, parsedState, function(err, res) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+							status.push({
+								err: err,
+								status: false
+							});
+						} else {
+							if (config.upload) {
+								config.upload(null, exportImageState(res));
+							}
+							status.push({
+								err: null,
+								status: true
+							});
+							result.push(exportImageState(res))
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					eventState.onUpload = false;
+
+					if (cb) {
+						cb(null, result, status);
+					}
+				}
+			}
 		}
 
 		// asynchronous
@@ -6601,7 +6870,7 @@
 
 		myObject.export = myObject.getImages;
 
-		myObject.import = function(states, cb){
+		myObject.import = function(exportedStates, cb){
 			if (!canvasState.editabled) {
 				if (cb) {
 					cb("Canvas has been uneditabled");
@@ -6609,37 +6878,16 @@
 				return false;
 			}
 
-			if (!isArray(states)) {
-				if (!isString(states)) {
-					if (cb) {
-						cb("Argument is not array");
-					}
-					return false;
-				} else {
-					try {
-						var tmp = JSON.parse(states);
-						if (!isArray(tmp)) {
-							if (cb) {
-								cb("Argument is not array");
-							}
-							return false;
-						}
-						states = tmp;
-					} catch(err) {
-						if (cb) {
-							cb("Argument is not array");
-						}
-						return false;
-					}
+			if (!isArray(exportedStates)) {
+				if (cb) {
+					cb("Argument is not array");
 				}
+				return false;
 			}
 
 			var chkObj = true;
-			states.forEach(function(elem){
-				if (
-					typeof(elem) !== "object" &&
-					elem !== null
-				) {
+			exportedStates.forEach(function(elem){
+				if (!isObject(elem)) {
 					chkObj = false;
 				}
 			});
@@ -6650,9 +6898,10 @@
 				return false;
 			}
 
-			var index = states.length;
+			var index = exportedStates.length;
 			var count = 0;
-			var results = [];
+			var result = [];
+			var status = [];
 
 			eventState.onUpload = true;
 
@@ -6660,15 +6909,18 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var thisState = states[count];
-					var thisSrc = thisState.src || thisState.url || thisState.path;
-					renderImage(thisSrc, thisState, function(err, res) {
+					renderImage(exportedStates[count].src, exportedStates[count], function(err, res) {
 						if (err) {
-							results.push({
-								err: err
+							status.push({
+								err: err,
+								status: false
 							});
 						} else {
-							results.push(exportImageState(res));
+							status.push({
+								err: null,
+								status: true
+							});
+							result.push(exportImageState(res));
 						}
 						count++;
 						recursiveFunc();
@@ -6677,7 +6929,7 @@
 					eventState.onUpload = false;
 
 					if (cb) {
-						cb(null, results);
+						cb(null, result, status);
 					}
 					return false;
 				}
@@ -6747,7 +6999,7 @@
 		}
 
 		//
-		// end
+		// exports end
 		//
 
 		return myObject;
