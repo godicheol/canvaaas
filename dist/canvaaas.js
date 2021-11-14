@@ -4378,6 +4378,9 @@
 							err: "State not found",
 							status: false
 						});
+						count++;
+						recursiveFunc();
+						return false;
 					}
 					if (!parsedState.src) {
 						if (config.upload) {
@@ -4387,6 +4390,9 @@
 							err: "URL not found",
 							status: false
 						});
+						count++;
+						recursiveFunc();
+						return false;
 					}
 					renderImage(parsedState.src, parsedState, function(err, res) {
 						if (err) {
