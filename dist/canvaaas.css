@@ -64,7 +64,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/* pointer-events: none; */
+	pointer-events: none;
 }
 
 /* checker */
@@ -152,9 +152,15 @@
 /* innerline */
 .canvaaas-innerline{
 	position: absolute;
-	pointer-events: none;
 	border-color: #777;
 	display: none; /* hide */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
 }
 .canvaaas-innerline-top{
 	top: 33%;
@@ -192,9 +198,15 @@
 /* outline */
 .canvaaas-outline{
 	position: absolute;
-	pointer-events: none;
 	border-color: #000000;
 	display: none; /* hide */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
 }
 .canvaaas-outline-top{
 	top: 0;

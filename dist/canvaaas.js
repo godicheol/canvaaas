@@ -3984,6 +3984,8 @@
 			containerObject = undefined;
 			canvasObject = undefined;
 			mirrorObject = undefined;
+			backgroundObject = undefined;
+			checkerObject = undefined;
 
 			viewportResizeEvent = undefined;
 
@@ -6233,6 +6235,10 @@
 					cb("Canvas has been not initialized");
 				}
 				return false;
+			}
+
+			if (eventState.target) {
+				setFocusOut(eventState.target);
 			}
 
 			eventState = {};
