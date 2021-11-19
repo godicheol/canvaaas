@@ -6214,8 +6214,6 @@
 					}
 				}
 				canvasState.background = colour;
-			} else (options.background === null) {
-				canvasState.background = "transparent";
 			}
 
 			initCanvas();
@@ -6339,8 +6337,6 @@
 					}
 				}
 				canvasState.background = colour;
-			} else (options.background === null) {
-				canvasState.background = "transparent";
 			}
 
 			initCanvas();
