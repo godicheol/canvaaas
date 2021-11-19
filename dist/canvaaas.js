@@ -6212,10 +6212,10 @@
 					if (colour.charAt(0) !== "#") {
 						colour = "#" + colour;
 					}
-					if (colour.length === 7) {
-						canvasState.background = colour;
-					}
 				}
+				canvasState.background = colour;
+			} else (options.background === null) {
+				canvasState.background = "transparent";
 			}
 
 			initCanvas();
@@ -6250,6 +6250,134 @@
 			});
 
 			clearCanvas();
+
+			if (cb) {
+				cb(null, exportCanvasState());
+			}
+			return exportCanvasState();
+		}
+
+		myObject.canvas = function(options, cb) {
+			// options = {
+			// 	width: number, (required)
+			// 	height: number, (required)
+			// 	filename: string, (optional, default 'untitled')
+			// 	overlay: boolean, (optional, default 'false')
+			// 	checker: boolean, (optional, default 'true')
+			// 	editabled: boolean, (optional, default 'true')
+			// 	focusabled: boolean, (optional, default 'true')
+			// 	drawabled: boolean, (optional, default 'true')
+			// 	background: string, (optional, default '#FFFFFF')
+			// }
+
+			if (
+				!containerState.width ||
+				!containerState.height
+			) {
+				if (cb) {
+					cb("Container has been not initialized");
+				}
+				return false;
+			}
+
+			if (
+				!canvasState.originalWidth ||
+				!canvasState.originalHeight
+			) {
+				if (cb) {
+					cb("Canvas has been not initialized");
+				}
+				return false;
+			}
+
+			if (!isObject(options)) {
+				if (cb) {
+					cb("Argument is not object");
+				}
+				return false;
+			}
+
+			if (isNumeric(options.width)) {
+				canvasState.originalWidth = toNumber(options.width);
+			}
+			if (isNumeric(options.height)) {
+				canvasState.originalHeight = toNumber(options.height);
+			}
+			if (isString(options.filename)) {
+				if (isEmpty(options.filename)) {
+					options.filename = "untitled";
+				}
+				canvasState.filename = toString(options.filename);
+			}
+			if (isBoolean(options.checker)) {
+				canvasState.checker = toBoolean(options.checker);
+			}
+			if (isBoolean(options.overlay)) {
+				canvasState.overlay = toBoolean(options.overlay);
+			}
+			if (isBoolean(options.editabled)) {
+				canvasState.editabled = toBoolean(options.editabled);
+			}
+			if (isBoolean(options.focusabled)) {
+				canvasState.focusabled = toBoolean(options.focusabled);
+				if (canvasState.focusabled === false) {
+					if (eventState.target) {
+						setFocusOut(eventState.target);
+					}
+				}
+			}
+			if (isString(options.background)) {
+				var colour = toString(options.background).trim();
+				if (
+					colour.toLowerCase() === "alpha" ||
+					colour.toLowerCase() === "transparent"
+				) {
+					colour = "transparent";
+				} else {
+					if (colour.charAt(0) !== "#") {
+						colour = "#" + colour;
+					}
+				}
+				canvasState.background = colour;
+			} else (options.background === null) {
+				canvasState.background = "transparent";
+			}
+
+			initCanvas();
+
+			// set images
+			imageStates.forEach(function(elem){
+				var maxX = canvasState.width;
+				var maxY = canvasState.height;
+				var minX = 0;
+				var minY = 0;
+
+				var axisX = elem.x;
+				var axisY = elem.y;
+
+				if (axisX > maxX) {
+					axisX = maxX;
+				}
+				if (axisX < minX) {
+					axisX = minX;
+				}
+				if (axisY > maxY) {
+					axisY = maxY;
+				}
+				if (axisY < minY) {
+					axisY = minY;
+				}
+
+				// save state
+				setState(elem.id, {
+					x: axisX,
+					y: axisY
+				});
+			});
+
+			// clear caches
+			undoCaches = [];
+			redoCaches = [];
 
 			if (cb) {
 				cb(null, exportCanvasState());
@@ -6448,8 +6576,7 @@
 
 			if (
 				colour.toLowerCase() === "alpha" ||
-				colour.toLowerCase() === "transparent" ||
-				colour.toLowerCase() === "unset"
+				colour.toLowerCase() === "transparent"
 			) {
 				colour = "transparent";
 			} else if (
