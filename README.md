@@ -15,7 +15,7 @@
 <!-- MAIN ELEMENT -->
 <div id="target"></div>
 ```
-## 1.Init
+## Init
 
 ```html
 <script>
@@ -28,7 +28,7 @@
   });
 </script>
 ```
-## 2.Set Config (optional)
+## Set Config (optional)
 
 ```html
 <script>
@@ -87,7 +87,7 @@
 </script>
 ```
 
-## 3.New Canvas (optional)
+## New Canvas (optional)
 
 ```html
 <script>
@@ -113,7 +113,7 @@
 </script>
 ```
 
-## 4.Open Image
+## Open Image
 
 ```html
 <input id="blahblah" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
@@ -190,7 +190,6 @@
   id="blahblah"
   src="./img/1.png"
   data-id = "1"
-  data-src = "./img/1.png"
   data-index = "1"
   data-width = "600"
   data-height = "600"
@@ -221,7 +220,7 @@
 </script>
 ```
 
-## 5.Get Edited Image
+## Get Edited Image
 
 ```html
 <script>
