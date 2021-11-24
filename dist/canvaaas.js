@@ -9,8 +9,8 @@
 		var myObject = {};
 
 		var defaultConfig = {
-
 			allowedExtensionsForUpload: [
+				"bmp",
 				"jpg",
 				"jpeg",
 				"png",
@@ -128,15 +128,15 @@
 				scaleX: 1,
 				scaleY: 1,
 				opacity: 1,
+				cropTop: 0,
+				cropBottom: 0,
+				cropLeft: 0,
+				cropRight: 0,
 				lockAspectRatio: config.lockAspectRatioAfterRender || false,
 				visible: true,
 				focusabled: true,
 				editabled: true,
 				drawabled: true,
-				cropTop: 0,
-				cropBottom: 0,
-				cropLeft: 0,
-				cropRight: 0,
 			}
 		};
 

@@ -34,6 +34,7 @@
 <script>
   canvaaas.config({
     allowedExtensionsForUpload: [
+      "bmp",
       "jpg",
       "jpeg",
       "png",
@@ -53,7 +54,7 @@
     maxDrawHeight: 4096 * 4, // number, px,
     maxDrawWidthOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
     maxDrawHeightOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
-    imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+    imageScaleAfterRender: 0.7, // number, 0 ~ 1 scale in canvas
     lockAspectRatioAfterRender: false, // boolean
     upload: function(err, res){
       if (err) {

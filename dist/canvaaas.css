@@ -369,12 +369,7 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
-/* mobile */
-@media only screen and (max-width: 768px) {
-
-}
-
-/* on focus */
+/* focusing */
 .canvaaas-canvas.focusing{
 	outline: 1px solid black;
 }
@@ -400,12 +395,20 @@
 	display: block;
 }
 
-/* on edit */
-.canvaaas-wrapper.editing .canvaaas-overlay{
+/* editing */
+.canvaaas-mirror .canvaaas-wrapper.editing .canvaaas-overlay{
+	opacity: 0.8;
+}
+.canvaaas-canvas .canvaaas-wrapper.editing .canvaaas-overlay{
 	display: block;
 }
 .canvaaas-inhandle.editing .canvaaas-handle-box,
 .canvaaas-outhandle.editing .canvaaas-handle-box{
 	border-color: #000000;
 	background-color: #000000;
+}
+
+/* mobile */
+@media only screen and (max-width: 768px) {
+
 }
