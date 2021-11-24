@@ -28,7 +28,7 @@
   });
 </script>
 ```
-## Set Config (optional)
+## Set config (optional)
 
 ```html
 <script>
@@ -87,7 +87,7 @@
 </script>
 ```
 
-## New Canvas (optional)
+## New canvas (optional)
 
 ```html
 <script>
@@ -113,7 +113,7 @@
 </script>
 ```
 
-## Open Image
+## Open image
 
 ```html
 <input id="blahblah" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
@@ -220,7 +220,7 @@
 </script>
 ```
 
-## Get Edited Image
+## Save image
 
 ```html
 <script>
@@ -232,17 +232,17 @@
     height: 256, // optional
     quality: 0.5, // optional
     background: '#000000', // optional, rgb format, 7 characters
-  }, function(err, res, result){
+  }, function(err, file, result){
     if (err) {
       console.log(err);
       return false;
     }
-    console.log("canvaaas.draw() callback", res, result);
+    console.log("canvaaas.draw() callback", file, result);
   });
 </script>
 ```
 
-## Get Edited Image from JSON Data
+## Save image from JSON data
 
 ```html
 <script>
@@ -271,17 +271,17 @@
     "cropBottom": 0, // optional
     "cropLeft": 0, // optional
     "cropRight": 0, // optional
-  }], function(err, res, result){
+  }], function(err, file, result){
     if (err) {
       console.log(err);
       return false;
     }
-    console.log("canvaaas.drawTo() callback", res, result);
+    console.log("canvaaas.drawTo() callback", file, result);
   });
 </script>
 ```
 
-## Handle Style
+## Handle style
 
 ```html
 <script>
