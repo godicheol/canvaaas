@@ -281,7 +281,7 @@
 </script>
 ```
 
-## Image edit
+## Edit image
 
 ```html
 <script>
