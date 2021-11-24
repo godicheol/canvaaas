@@ -281,6 +281,39 @@
 </script>
 ```
 
+## Image edit
+
+```html
+<script>
+  canvaaas.state(id, {
+    "id": "test", // string
+    "index": 1, // number
+    "x": 399.07235621521335, // number
+    "y": 808.7198515769946, // number
+    "width": 600.0000000000001, // number
+    "height": 600.0000000000001, // number
+    "rotate": 17.46323891797897, // number
+    "scaleX": 1, // number, 1 or -1
+    "scaleY": 1, // number, 1 or -1
+    "opacity": 1, // number, min: 0, max: 1
+    "cropTop": 0, // number, min: 0
+    "cropBottom": 0, // number, min: 0
+    "cropLeft": 0, // number, min: 0
+    "cropRight": 0, // number, min: 0
+    "lockAspectRatio": true, // boolean
+    "visible": true, // boolean
+    "editabled": true, // boolean
+    "focusabled": true, // boolean
+    "drawabled": true, // boolean
+  }, function(err, res) {
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log("canvaaas.state() callback", res);
+  })
+</script>
+```
 ## Handle style
 
 ```html
