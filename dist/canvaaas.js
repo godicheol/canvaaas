@@ -51,19 +51,17 @@
 			edit: undefined, // callback function
 
 			remove: undefined, // callback function
-
 		};
 
 		var defaultCanvasState = {
 			filename: "untitled", // string, without extension
 			mimeType: "image/png", // string
-			dataType: "url", // string, url, file
+			dataType: "url", // string, ["url", "file"]
 			quality: 0.92, // number, 0 ~ 1
 			editabled: true, // boolean
 			focusabled: true, // boolean
-			drawabled: true, // boolean
-			background: "transparent", // string, transparent or #FFFFFF ~ #000000
-			overlay: false, // boolean
+			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
+			overlay: true, // boolean
 			checker: true // boolean
 		};
 
@@ -142,20 +140,9 @@
 			}
 		};
 
-		var classNames = {
-			hidden: "hidden",
-			onEdit: "on-edit",
-			onFocus: "on-focus",
-			onCrop: "on-crop",
-			unfocusabled: "unfocusabled",
-			uneditabled: "uneditabled",
-			undrawabled: "undrawabled"
-		};
-
 		Object.freeze(defaultConfig);
 		Object.freeze(defaultCanvasState);
 		Object.freeze(defaultHandleState);
-		Object.freeze(classNames);
 
 		var conatinerTemplate = "";
 		conatinerTemplate += "<div class='canvaaas-container'>";
@@ -249,9 +236,7 @@
 
 				eventState.onUpload = true;
 
-				setTimeout(function(e){
-					recursiveFunc();
-				}, 100);
+				recursiveFunc();
 
 				function recursiveFunc() {
 					if (count < index) {
@@ -459,7 +444,7 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
 
 				// event
 				document.addEventListener("mousemove", handlers.onMove, false);
@@ -511,7 +496,7 @@
 				e.stopPropagation();
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
 
 				// clear
 				eventState.onMove = false;
@@ -581,8 +566,8 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
-				addClassToHandle(eventState.handle, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
+				addClassToHandle(eventState.handle, "editing");
 
 				// event
 				document.addEventListener("mousemove", handlers.onResize, false);
@@ -774,8 +759,8 @@
 				e.stopPropagation();
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
-				removeClassToHandle(eventState.handle, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
+				removeClassToHandle(eventState.handle, "editing");
 
 				// clear
 				eventState.onResize = false;
@@ -823,7 +808,7 @@
 					saveUndo(eventState.target);
 
 					// class
-					addClassToWrapper(eventState.target, classNames.onEdit);
+					addClassToWrapper(eventState.target, "editing");
 				}
 
 				var state = getState(eventState.target);
@@ -861,7 +846,7 @@
 					// clear
 					eventState.onZoom = false;
 					// class
-					removeClassToWrapper(eventState.target, classNames.onEdit);
+					removeClassToWrapper(eventState.target, "editing");
 					// callback
 					if (config.edit) {
 						config.edit(null, exportImageState(eventState.target));
@@ -904,7 +889,7 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
 
 				// event
 				document.addEventListener("touchmove", handlers.onPinchZoom, false);
@@ -954,7 +939,7 @@
 				e.stopPropagation();
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
 
 				// clear
 				eventState.onZoom = false;
@@ -1000,8 +985,8 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
-				addClassToHandle(eventState.handle, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
+				addClassToHandle(eventState.handle, "editing");
 
 				// event
 				document.addEventListener("mousemove", handlers.onRotate, false);
@@ -1079,8 +1064,8 @@
 				e.stopPropagation();
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
-				removeClassToHandle(eventState.handle, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
+				removeClassToHandle(eventState.handle, "editing");
 
 				// clear
 				eventState.onRotate = false;
@@ -1156,8 +1141,8 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
-				addClassToHandle(eventState.handle, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
+				addClassToHandle(eventState.handle, "editing");
 
 				// event
 				document.addEventListener("mousemove", handlers.onFlip, false);
@@ -1320,15 +1305,15 @@
 
 				if (Math.abs(rotateX) > 90) {
 					scaleY = -1 * scaleY;
-					var tmp = cropTop;
-					cropTop = cropBottom;
-					cropBottom = tmp;
+					// var tmp = cropTop;
+					// cropTop = cropBottom;
+					// cropBottom = tmp;
 				}
 				if (Math.abs(rotateY) > 90) {
 					scaleX = -1 * scaleX;
-					var tmp = cropLeft;
-					cropLeft = cropRight;
-					cropRight = tmp;
+					// var tmp = cropLeft;
+					// cropLeft = cropRight;
+					// cropRight = tmp;
 				}
 
 				// save state
@@ -1344,8 +1329,8 @@
 				});
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
-				removeClassToHandle(eventState.handle, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
+				removeClassToHandle(eventState.handle, "editing");
 
 				// toggle
 				eventState.onFlip = false;
@@ -1416,8 +1401,8 @@
 				saveUndo(eventState.target);
 
 				// class
-				addClassToWrapper(eventState.target, classNames.onEdit);
-				addClassToHandle(eventState.handle, classNames.onEdit);
+				addClassToWrapper(eventState.target, "editing");
+				addClassToHandle(eventState.handle, "editing");
 
 				// event
 				document.addEventListener("mousemove", handlers.onCrop, false);
@@ -1579,8 +1564,8 @@
 				e.stopPropagation();
 
 				// class
-				removeClassToWrapper(eventState.target, classNames.onEdit);
-				removeClassToHandle(eventState.handle, classNames.onEdit);
+				removeClassToWrapper(eventState.target, "editing");
+				removeClassToHandle(eventState.handle, "editing");
 
 				// clear
 				eventState.onCrop = false;
@@ -1723,6 +1708,9 @@
 			if (!id) {
 				return false;
 			}
+			if (typeof(newState) !== "object" || newState === null) {
+				return false;
+			}
 			var state = imageStates.find(function(elem){
 				if (elem.id === id) {
 					return elem;
@@ -1732,8 +1720,8 @@
 				return false;
 			}
 
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			if (
 				!originWrapper ||
 				!cloneWrapper
@@ -1759,91 +1747,192 @@
 				return false;
 			}
 
-			for(var key in newState) {
-				if (newState.hasOwnProperty(key)) {
-					if ([
-						"id"
-					].indexOf(key) > -1) {
-						if (
-							isString(newState[key]) &&
-							!isExist(newState[key]) &&
-							!isEmpty(newState[key])
-						) {
-							state["oldId"] = state[key];
-							state[key] = toString(newState[key]);
+			if (isString(newState.id)) {
+				if (!isExist(toString(newState.id))) {
+					// change focus
+					if (eventState.target) {
+						if (eventState.target === state.id) {
+							eventState.target = newState.id;
 						}
-					} else if ([
-						"index",
-						"width",
-						"height",
-						"x",
-						"y",
-						"rotate",
-						"rotateX",
-						"rotateY",
-						"scaleX",
-						"scaleY",
-						"opacity",
-						"cropTop",
-						"cropBottom",
-						"cropLeft",
-						"cropRight",
-					].indexOf(key) > -1) {
-						if (isNumeric(newState[key])) {
-							state[key] = toNumber(newState[key]);
+					}
+
+					// change element id
+					originWrapper.id = originId + newState.id;
+					cloneWrapper.id = cloneId + newState.id;
+
+					// change undo caches
+					undoCaches.forEach(function(elem){
+						if (elem.id === state.id) {
+							elem.id = newState.id;
+							elem.state.id = newState.id;
 						}
-					} else if ([
-						"lockAspectRatio",
-						"visible",
-						"focusabled",
-						"editabled",
-						"drawabled",
-					].indexOf(key) > -1) {
-						if (isBoolean(newState[key])) {
-							state[key] = toBoolean(newState[key]);
+					});
+
+					// change redo caches
+					redoCaches.forEach(function(elem){
+						if (elem.id === state.id) {
+							elem.id = newState.id;
+							elem.state.id = newState.id;
+						}
+					});
+
+					state.id = toString(newState.id);
+				}
+			}
+
+			if (isNumeric(newState.index)) {
+				state.index = toNumber(newState.index);
+			}
+			if (isNumeric(newState.x)) {
+				state.x = toNumber(newState.x);
+			}
+			if (isNumeric(newState.y)) {
+				state.y = toNumber(newState.y);
+			}
+			if (isNumeric(newState.width)) {
+				state.width = toNumber(newState.width);
+			}
+			if (isNumeric(newState.height)) {
+				state.height = toNumber(newState.height);
+			}
+			if (isNumeric(newState.rotate)) {
+				state.rotate = toNumber(newState.rotate);
+			}
+			if (isNumeric(newState.rotateX)) {
+				state.rotateX = toNumber(newState.rotateX);
+			}
+			if (isNumeric(newState.rotateY)) {
+				state.rotateY = toNumber(newState.rotateY);
+			}
+			if (isNumeric(newState.opacity)) {
+				state.opacity = toNumber(newState.opacity);
+			}
+
+			if (isBoolean(newState.visible)) {
+				state.visible = toBoolean(newState.visible);
+
+				if (!state.visible) {
+					if (eventState.target) {
+						if (eventState.target === state.id) {
+							setFocusOut(state.id);
 						}
 					}
 				}
 			}
+			if (isBoolean(newState.editabled)) {
+				state.editabled = toBoolean(newState.editabled);
+			}
+			if (isBoolean(newState.focusabled)) {
+				state.focusabled = toBoolean(newState.focusabled);
 
-			// id changed
-			if (state.oldId) {
-				// change focus
-				if (eventState.target) {
-					if (eventState.target === state.oldId) {
-						eventState.target = state.id;
+				if (!state.focusabled) {
+					if (eventState.target) {
+						if (eventState.target === state.id) {
+							setFocusOut(state.id);
+						}
 					}
 				}
-
-				// change element id
-				originWrapper.id = originId + state.id;
-				cloneWrapper.id = cloneId + state.id;
-
-				// change undo caches
-				undoCaches.forEach(function(elem){
-					if (elem.id === state.oldId) {
-						elem.id = state.id;
-						elem.state.id = state.id;
-					}
-				});
-
-				// change redo caches
-				redoCaches.forEach(function(elem){
-					if (elem.id === state.oldId) {
-						elem.id = state.id;
-						elem.state.id = state.id;
-					}
-				});
-
-				// clear old id
-				state.oldId = undefined;
+			}
+			if (isBoolean(newState.drawabled)) {
+				state.drawabled = toBoolean(newState.drawabled);
 			}
 
+			if (isNumeric(newState.cropTop)) {
+				if (toNumber(newState.cropTop) < 0) {
+					state.cropTop = 0;
+				} else if (toNumber(newState.cropTop) < state.height - (state.cropBottom + 10)) {
+					state.cropTop = toNumber(newState.cropTop);
+				}
+			}
+			if (isNumeric(newState.cropBottom)) {
+				if (toNumber(newState.cropBottom) < 0) {
+					state.cropBottom = 0;
+				} else if (toNumber(newState.cropBottom) < state.height - (state.cropTop + 10)) {
+					state.cropBottom = toNumber(newState.cropBottom);
+				}
+			}
+			if (isNumeric(newState.cropLeft)) {
+				if (toNumber(newState.cropLeft) < 0) {
+					state.cropLeft = 0;
+				} else if (toNumber(newState.cropLeft) < state.width - (state.cropRight + 10)) {
+					state.cropLeft = toNumber(newState.cropLeft);
+				}
+			}
+			if (isNumeric(newState.cropRight)) {
+				if (toNumber(newState.cropRight) < 0) {
+					state.cropRight = 0;
+				} else if (toNumber(newState.cropRight) < state.width - (state.cropLeft + 10)) {
+					state.cropRight = toNumber(newState.cropRight);
+				}
+			}
+
+			if (isNumeric(newState.scaleX)) {
+				if (
+					toNumber(newState.scaleX) === 1 ||
+					toNumber(newState.scaleX) === -1
+				) {
+					if (state.scaleX !== toNumber(newState.scaleX)) {
+						var tmp = state.cropLeft;
+						state.cropLeft = state.cropRight;
+						state.cropRight = tmp;
+					}
+					state.scaleX = toNumber(newState.scaleX);
+				}
+			}
+
+			if (isNumeric(newState.scaleY)) {
+				if (
+					toNumber(newState.scaleY) === 1 ||
+					toNumber(newState.scaleY) === -1
+				) {
+					if (state.scaleY !== toNumber(newState.scaleY)) {
+						var tmp = state.cropTop;
+						state.cropTop = state.cropBottom;
+						state.cropBottom = tmp;
+					}
+					state.scaleY = toNumber(newState.scaleY);
+				}
+			}
+
+			if (isBoolean(newState.lockAspectRatio)) {
+				if (
+					state.lockAspectRatio === false &&
+					toBoolean(newState.lockAspectRatio) === true
+				) {
+					var cw = state.width - (state.cropLeft + state.cropRight);
+					var ch = state.height - (state.cropTop + state.cropBottom);
+					var scaleCropTop = state.cropTop / ch;
+					var scaleCropBottom = state.cropBottom / ch;
+					var scaleCropLeft = state.cropLeft / cw;
+					var scaleCropRight = state.cropRight / cw;
+					var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
+					var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
+					var croppedOriginalAspectRatio = croppedOriginalWidth / croppedOriginalHeight;
+
+					if (cw > ch * croppedOriginalAspectRatio) {
+						ch = cw / croppedOriginalAspectRatio;
+					} else {
+						cw = ch * croppedOriginalAspectRatio;
+					}
+
+					state.cropTop = ch * scaleCropTop;
+					state.cropBottom = ch * scaleCropBottom;
+					state.cropLeft = cw * scaleCropLeft;
+					state.cropRight = cw * scaleCropRight;
+
+					state.width = cw + (cw * scaleCropLeft) + (cw * scaleCropRight);
+					state.height = ch + (ch * scaleCropTop) + (ch * scaleCropBottom);
+				}
+				
+				state.lockAspectRatio = toBoolean(newState.lockAspectRatio);
+			}
+
+			// set style
 			var index = state.index;
 			var width = state.width;
 			var height = state.height;
-			var top = (state.y - (state.height * 0.5));
-			var left = (state.x - (state.width * 0.5));
+			// var top = (state.y - (state.height * 0.5));
+			// var left = (state.x - (state.width * 0.5));
 			var opacity = state.opacity;
 			var croppedWidth = width - (state.cropLeft + state.cropRight);
 			var croppedHeight = height - (state.cropTop + state.cropBottom);
@@ -1908,68 +1997,48 @@
 			cloneImg.style.width = width + "px";
 			cloneImg.style.height = height + "px";
 			cloneImg.style.opacity = opacity;
-
+			
 			if (!state.visible) {
-				if (!originWrapper.classList.contains(classNames.hidden)) {
-					originWrapper.classList.add(classNames.hidden);
+				if (eventState.target) {
+					if (eventState.target === state.id) {
+						setFocusOut(state.id);
+					}
 				}
-				if (!cloneWrapper.classList.contains(classNames.hidden)) {
-					cloneWrapper.classList.add(classNames.hidden);
+
+				if (!originWrapper.classList.contains("hidden")) {
+					originWrapper.classList.add("hidden");
+				}
+				if (!cloneWrapper.classList.contains("hidden")) {
+					cloneWrapper.classList.add("hidden");
 				}
 			} else {
-				if (originWrapper.classList.contains(classNames.hidden)) {
-					originWrapper.classList.remove(classNames.hidden);
+				if (originWrapper.classList.contains("hidden")) {
+					originWrapper.classList.remove("hidden");
 				}
-				if (cloneWrapper.classList.contains(classNames.hidden)) {
-					cloneWrapper.classList.remove(classNames.hidden);
+				if (cloneWrapper.classList.contains("hidden")) {
+					cloneWrapper.classList.remove("hidden");
 				}
 			}
 
 			if (!state.focusabled) {
-				if (!originWrapper.classList.contains(classNames.unfocusabled)) {
-					originWrapper.classList.add(classNames.unfocusabled);
+				if (eventState.target) {
+					if (eventState.target === state.id) {
+						setFocusOut(state.id);
+					}
 				}
-				if (!cloneWrapper.classList.contains(classNames.unfocusabled)) {
-					cloneWrapper.classList.add(classNames.unfocusabled);
-				}
-			} else {
-				if (originWrapper.classList.contains(classNames.unfocusabled)) {
-					originWrapper.classList.remove(classNames.unfocusabled);
-				}
-				if (cloneWrapper.classList.contains(classNames.unfocusabled)) {
-					cloneWrapper.classList.remove(classNames.unfocusabled);
-				}
-			}
 
-			if (!state.editabled) {
-				if (!originWrapper.classList.contains(classNames.uneditabled)) {
-					originWrapper.classList.add(classNames.uneditabled);
+				if (!originWrapper.classList.contains("blurred")) {
+					originWrapper.classList.add("blurred");
 				}
-				if (!cloneWrapper.classList.contains(classNames.uneditabled)) {
-					cloneWrapper.classList.add(classNames.uneditabled);
-				}
-			} else {
-				if (originWrapper.classList.contains(classNames.uneditabled)) {
-					originWrapper.classList.remove(classNames.uneditabled);
-				}
-				if (cloneWrapper.classList.contains(classNames.uneditabled)) {
-					cloneWrapper.classList.remove(classNames.uneditabled);
-				}
-			}
-
-			if (!state.drawabled) {
-				if (!originWrapper.classList.contains(classNames.undrawabled)) {
-					originWrapper.classList.add(classNames.undrawabled);
-				}
-				if (!cloneWrapper.classList.contains(classNames.undrawabled)) {
-					cloneWrapper.classList.add(classNames.undrawabled);
+				if (!cloneWrapper.classList.contains("blurred")) {
+					cloneWrapper.classList.add("blurred");
 				}
 			} else {
-				if (originWrapper.classList.contains(classNames.undrawabled)) {
-					originWrapper.classList.remove(classNames.undrawabled);
+				if (originWrapper.classList.contains("blurred")) {
+					originWrapper.classList.remove("blurred");
 				}
-				if (cloneWrapper.classList.contains(classNames.undrawabled)) {
-					cloneWrapper.classList.remove(classNames.undrawabled);
+				if (cloneWrapper.classList.contains("blurred")) {
+					cloneWrapper.classList.remove("blurred");
 				}
 			}
 
@@ -1980,8 +2049,8 @@
 			if (!id) {
 				return false;
 			}
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			if (
 				!originWrapper ||
 				!cloneWrapper
@@ -2002,8 +2071,8 @@
 			if (!id) {
 				return false;
 			}
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			if (
 				!originWrapper ||
 				!cloneWrapper
@@ -2055,8 +2124,8 @@
 				return false;
 			}
 
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			if (
 				!originWrapper ||
 				!cloneWrapper
@@ -2116,8 +2185,8 @@
 				return false;
 			}
 
-			var originWrapper = document.getElementById(originId + id);
-			var cloneWrapper = document.getElementById(cloneId + id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			if (
 				!originWrapper ||
 				!cloneWrapper
@@ -2160,7 +2229,6 @@
 		function exportHandleState() {
 			var tmp = {};
 			copyObject(tmp, handleState);
-
 			return tmp;
 		}
 
@@ -2174,7 +2242,6 @@
 			tmp.height = canvasState.originalHeight;
 			tmp.editabled = canvasState.editabled;
 			tmp.focusabled = canvasState.focusabled;
-			tmp.drawabled = canvasState.drawabled;
 			tmp.background = canvasState.background;
 			tmp.checker = canvasState.checker;
 			tmp.overlay = canvasState.overlay;
@@ -2182,59 +2249,70 @@
 			var ar = getAspectRatio(tmp.width, tmp.height);
 			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
 
+			tmp.element = canvasObject;
+
 			return tmp;
 		}
 
 		function importImageState(state) {
 			var tmp = {};
-			for(var key in state) {
-				if (state.hasOwnProperty(key)) {
-					if ([
-						"id"
-					].indexOf(key) > -1) {
-						if (isString(state[key])) {
-							tmp[key] = toString(state[key]);
-						}
-					} else if ([
-						"width",
-						"x",
-						"cropLeft",
-						"cropRight",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]) * (canvasState.width / canvasState.originalWidth);
-						}
-					} else if ([
-						"height",
-						"y",
-						"cropTop",
-						"cropBottom",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]) * (canvasState.height / canvasState.originalHeight);
-						}
-					} else if ([
-						"index",
-						"rotate",
-						"scaleX",
-						"scaleY",
-						"opacity",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]);
-						}
-					} else if ([
-						"lockAspectRatio",
-						"visible",
-						"focusabled",
-						"editabled",
-						"drawabled",
-					].indexOf(key) > -1) {
-						if (isBoolean(state[key])) {
-							tmp[key] = toBoolean(state[key]);
-						}
-					}
-				}
+
+			if (isString(state.id)) {
+				tmp.id = toString(state.id);
+			}
+			if (isNumeric(state.index)) {
+				tmp.index = toNumber(state.index);
+			}
+			if (isNumeric(state.x)) {
+				tmp.x = toNumber(state.x) * (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.y)) {
+				tmp.y = toNumber(state.y) * (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.width)) {
+				tmp.width = toNumber(state.width) * (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.height)) {
+				tmp.height = toNumber(state.height) * (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.cropTop)) {
+				tmp.cropTop = toNumber(state.cropTop) * (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.cropBottom)) {
+				tmp.cropBottom = toNumber(state.cropBottom) * (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.cropLeft)) {
+				tmp.cropLeft = toNumber(state.cropLeft) * (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.cropRight)) {
+				tmp.cropRight = toNumber(state.cropRight) * (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.rotate)) {
+				tmp.rotate = toNumber(state.rotate);
+			}
+			if (isNumeric(state.scaleX)) {
+				tmp.scaleX = toNumber(state.scaleX);
+			}
+			if (isNumeric(state.scaleY)) {
+				tmp.scaleY = toNumber(state.scaleY);
+			}
+			if (isNumeric(state.opacity)) {
+				tmp.opacity = toNumber(state.opacity);
+			}
+			if (isBoolean(state.lockAspectRatio)) {
+				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
+			}
+			if (isBoolean(state.visible)) {
+				tmp.visible = toBoolean(state.visible);
+			}
+			if (isBoolean(state.editabled)) {
+				tmp.editabled = toBoolean(state.editabled);
+			}
+			if (isBoolean(state.focusabled)) {
+				tmp.focusabled = toBoolean(state.focusabled);
+			}
+			if (isBoolean(state.drawabled)) {
+				tmp.drawabled = toBoolean(state.drawabled);
 			}
 
 			return tmp;
@@ -2242,58 +2320,75 @@
 
 		function exportImageState(id) {
 			var state = getState(id);
+			var originWrapper = getOriginWrapper(id);
+			var cloneWrapper = getCloneWrapper(id);
 			var tmp = {};
-			for(var key in state) {
-				if (state.hasOwnProperty(key)) {
-					if ([
-						"id",
-						"src",
-					].indexOf(key) > -1) {
-						if (isString(state[key])) {
-							tmp[key] = toString(state[key]);
-						}
-					} else if ([
-						"width",
-						"x",
-						"cropLeft",
-						"cropRight",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]) / (canvasState.width / canvasState.originalWidth);
-						}
-					} else if ([
-						"height",
-						"y",
-						"cropTop",
-						"cropBottom",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]) / (canvasState.height / canvasState.originalHeight);
-						}
-					} else if ([
-						"originalWidth",
-						"originalHeight",
-						"index",
-						"rotate",
-						"scaleX",
-						"scaleY",
-						"opacity",
-					].indexOf(key) > -1) {
-						if (isNumeric(state[key])) {
-							tmp[key] = toNumber(state[key]);
-						}
-					} else if ([
-						"lockAspectRatio",
-						"visible",
-						"focusabled",
-						"editabled",
-						"drawabled",
-					].indexOf(key) > -1) {
-						if (isBoolean(state[key])) {
-							tmp[key] = toBoolean(state[key]);
-						}
-					}
-				}
+
+			if (isString(state.id)) {
+				tmp.id = toString(state.id);
+			}
+			if (isString(state.src)) {
+				tmp.src = toString(state.src);
+			}
+			if (isNumeric(state.index)) {
+				tmp.index = toNumber(state.index);
+			}
+			if (isNumeric(state.x)) {
+				tmp.x = toNumber(state.x) / (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.y)) {
+				tmp.y = toNumber(state.y) / (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.width)) {
+				tmp.width = toNumber(state.width) / (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.height)) {
+				tmp.height = toNumber(state.height) / (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.cropLeft)) {
+				tmp.cropLeft = toNumber(state.cropLeft) / (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.cropRight)) {
+				tmp.cropRight = toNumber(state.cropRight) / (canvasState.width / canvasState.originalWidth);
+			}
+			if (isNumeric(state.cropTop)) {
+				tmp.cropTop = toNumber(state.cropTop) / (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.cropBottom)) {
+				tmp.cropBottom = toNumber(state.cropBottom) / (canvasState.height / canvasState.originalHeight);
+			}
+			if (isNumeric(state.originalWidth)) {
+				tmp.originalWidth = toNumber(state.originalWidth);
+			}
+			if (isNumeric(state.originalHeight)) {
+				tmp.originalHeight = toNumber(state.originalHeight);
+			}
+			if (isNumeric(state.rotate)) {
+				tmp.rotate = toNumber(state.rotate);
+			}
+			if (isNumeric(state.scaleX)) {
+				tmp.scaleX = toNumber(state.scaleX);
+			}
+			if (isNumeric(state.scaleY)) {
+				tmp.scaleY = toNumber(state.scaleY);
+			}
+			if (isNumeric(state.opacity)) {
+				tmp.opacity = toNumber(state.opacity);
+			}
+			if (isBoolean(state.lockAspectRatio)) {
+				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
+			}
+			if (isBoolean(state.visible)) {
+				tmp.visible = toBoolean(state.visible);
+			}
+			if (isBoolean(state.editabled)) {
+				tmp.editabled = toBoolean(state.editabled);
+			}
+			if (isBoolean(state.focusabled)) {
+				tmp.focusabled = toBoolean(state.focusabled);
+			}
+			if (isBoolean(state.drawabled)) {
+				tmp.drawabled = toBoolean(state.drawabled);
 			}
 
 			var originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
@@ -2304,65 +2399,80 @@
 			tmp.left = tmp.x - (0.5 * tmp.width);
 			tmp.top = tmp.y - (0.5 * tmp.height);
 
+			tmp.elements = [originWrapper, cloneWrapper];
+
 			return tmp;
 		}
 
-		function parseState(obj) {
-			var res = {};
-			if (isObject(obj)) {
-				var stateKeys = Object.keys(obj);
-				for (var i = 0; i < stateKeys.length; i++) {
-					var j = stateKeys[i];
-					if (obj.hasOwnProperty(j)) {
-						if ([
-							"id"
-						].indexOf(j) > -1) {
-							if (isString(obj[j])) {
-								res["id"] = toString(obj[j]);
-							}
-						} if ([
-							"src",
-							"url",
-							"path"
-						].indexOf(j) > -1) {
-							if (isString(obj[j])) {
-								res["src"] = toString(obj[j]);
-							}
-						} else if ([
-							"index",
-							"x",
-							"y",
-							"width",
-							"height",
-							"rotate",
-							"scaleX",
-							"scaleY",
-							"opacity",
-							"cropTop",
-							"cropBottom",
-							"cropLeft",
-							"cropRight",
-						].indexOf(j) > -1) {
-							if (isNumeric(obj[j])) {
-								res[j] = toNumber(obj[j]);
-							}
-						} else if ([
-							"lockAspectRatio",
-							"visible",
-							"focusabled",
-							"editabled",
-							"drawabled",
-						].indexOf(j) > -1) {
-							if (isBoolean(obj[j])) {
-								res[j] = toBoolean(obj[j]);
-							}
-						}
-					}
-				}
-			} else {
-				return false;
+		function parseState(state) {
+			var tmp = {};
+			if (isString(state.id)) {
+				tmp.id = toString(state.id);
 			}
-			return res;
+			if (isString(state.url)) {
+				tmp.src = toString(state.url);
+			}
+			if (isString(state.path)) {
+				tmp.src = toString(state.path);
+			}
+			if (isString(state.src)) {
+				tmp.src = toString(state.src);
+			}
+			if (isNumeric(state.x)) {
+				tmp.x = toNumber(state.x);
+			}
+			if (isNumeric(state.y)) {
+				tmp.y = toNumber(state.y);
+			}
+			if (isNumeric(state.width)) {
+				tmp.width = toNumber(state.width);
+			}
+			if (isNumeric(state.height)) {
+				tmp.height = toNumber(state.height);
+			}
+			if (isNumeric(state.index)) {
+				tmp.index = toNumber(state.index);
+			}
+			if (isNumeric(state.rotate)) {
+				tmp.rotate = toNumber(state.rotate);
+			}
+			if (isNumeric(state.scaleX)) {
+				tmp.scaleX = toNumber(state.scaleX);
+			}
+			if (isNumeric(state.scaleY)) {
+				tmp.scaleY = toNumber(state.scaleY);
+			}
+			if (isNumeric(state.opacity)) {
+				tmp.opacity = toNumber(state.opacity);
+			}
+			if (isBoolean(state.lockAspectRatio)) {
+				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
+			}
+			if (isBoolean(state.visible)) {
+				tmp.visible = toBoolean(state.visible);
+			}
+			if (isBoolean(state.editabled)) {
+				tmp.editabled = toBoolean(state.editabled);
+			}
+			if (isBoolean(state.focusabled)) {
+				tmp.focusabled = toBoolean(state.focusabled);
+			}
+			if (isBoolean(state.drawabled)) {
+				tmp.drawabled = toBoolean(state.drawabled);
+			}
+			if (isNumeric(state.cropTop)) {
+				tmp.cropTop = toNumber(state.cropTop);
+			}
+			if (isNumeric(state.cropBottom)) {
+				tmp.cropBottom = toNumber(state.cropBottom);
+			}
+			if (isNumeric(state.cropLeft)) {
+				tmp.cropLeft = toNumber(state.cropLeft);
+			}
+			if (isNumeric(state.cropRight)) {
+				tmp.cropRight = toNumber(state.cropRight);
+			}
+			return tmp;
 		}
 
 		function getDataset(elem) {
@@ -2435,7 +2545,11 @@
 			var attr = {};
 			for (var i = 0; i < datasetKeys.length; i++) {
 				var v = elem.getAttribute("data-" + datasetKeys[i]);
-				if (!isEmpty(v)) {
+				if (
+					v !== undefined &&
+					v !== null &&
+					v !== ""
+				) {
 					attr[stateKeys[datasetKeys[i]]] = v;
 				}
 			}
@@ -2560,18 +2674,18 @@
 					return false;
 				}
 
-				if (!canvasObject.classList.contains(classNames.onFocus)) {
-					canvasObject.classList.add(classNames.onFocus);
+				if (!canvasObject.classList.contains("focusing")) {
+					canvasObject.classList.add("focusing");
 				}
-				if (!mirrorObject.classList.contains(classNames.onFocus)) {
-					mirrorObject.classList.add(classNames.onFocus);
+				if (!mirrorObject.classList.contains("focusing")) {
+					mirrorObject.classList.add("focusing");
 				}
 
-				if (!originWrapper.classList.contains(classNames.onFocus)) {
-					originWrapper.classList.add(classNames.onFocus);
+				if (!originWrapper.classList.contains("focusing")) {
+					originWrapper.classList.add("focusing");
 				}
-				if (!cloneWrapper.classList.contains(classNames.onFocus)) {
-					cloneWrapper.classList.add(classNames.onFocus);
+				if (!cloneWrapper.classList.contains("focusing")) {
+					cloneWrapper.classList.add("focusing");
 				}
 
 				originWrapper.removeEventListener("mousedown", handlers.focusIn, false);
@@ -2616,18 +2730,18 @@
 					return false;
 				}
 
-				if (canvasObject.classList.contains(classNames.onFocus)) {
-					canvasObject.classList.remove(classNames.onFocus);
+				if (canvasObject.classList.contains("focusing")) {
+					canvasObject.classList.remove("focusing");
 				}
-				if (mirrorObject.classList.contains(classNames.onFocus)) {
-					mirrorObject.classList.remove(classNames.onFocus);
+				if (mirrorObject.classList.contains("focusing")) {
+					mirrorObject.classList.remove("focusing");
 				}
 
-				if (originWrapper.classList.contains(classNames.onFocus)) {
-					originWrapper.classList.remove(classNames.onFocus);
+				if (originWrapper.classList.contains("focusing")) {
+					originWrapper.classList.remove("focusing");
 				}
-				if (cloneWrapper.classList.contains(classNames.onFocus)) {
-					cloneWrapper.classList.remove(classNames.onFocus);
+				if (cloneWrapper.classList.contains("focusing")) {
+					cloneWrapper.classList.remove("focusing");
 				}
 
 				originWrapper.addEventListener("mousedown", handlers.focusIn, false);
@@ -2826,12 +2940,12 @@
 
 		// asynchronous
 		function drawImage(mainCanvas, imgState, cb) {
-			var thisImage = new Image();
-			thisImage.src = imgState.src;
-			thisImage.onerror = function(err) {
+			var newImage = new Image();
+			newImage.src = imgState.src;
+			newImage.onerror = function(err) {
 				return cb(err);
 			}
-			thisImage.onload = function(e) {
+			newImage.onload = function(e) {
 				// create canvas
 				var canvasA = document.createElement("canvas");
 				var canvasB = document.createElement("canvas");
@@ -2876,7 +2990,7 @@
 				ctxA.fillRect(0, 0, canvasA.width, canvasA.height);
 
 				ctxA.drawImage(
-					thisImage,
+					newImage,
 					0, 0,
 					canvasA.width, canvasA.height
 				);
@@ -2985,26 +3099,26 @@
 		}
 
 		// asynchronous
-		function renderImage(data, exportedState, cb) {
+		function renderImage(file, exportedState, cb) {
 			var newImage = new Image();
 			var src;
 			var ext;
 
 			try {
 				// check file or url
-				if (isObject(data)) {
+				if (isObject(file)) {
 					// file
 					try {
-						src = URL.createObjectURL(data);
+						src = URL.createObjectURL(file);
 					} catch(err) {
 						if (cb) {
 							cb("File not found");
 						}
 						return false;
 					}
-				} else if (isString(data)) {
+				} else if (isString(file)) {
 					// url
-					src = data;
+					src = file;
 				} else {
 					if (cb) {
 						cb("File not found");
@@ -3013,7 +3127,7 @@
 				}
 
 				// check mimeType
-				ext = getExtension(data);
+				ext = getExtension(file);
 				if (!ext) {
 					if (cb) {
 						cb("Extension not found");
@@ -3096,9 +3210,6 @@
 					elem.addEventListener("mousedown", handlers.route, false);
 					elem.addEventListener("touchstart", handlers.route, false);
 				});
-
-				
-
 
 				canvasObject.appendChild(newOrigin);
 				mirrorObject.appendChild(newClone);
@@ -3259,70 +3370,28 @@
 
 			// set class names
 			if (!canvasState.checker) {
-				if (!checkerObject.classList.contains(classNames.hidden)) {
-					checkerObject.classList.add(classNames.hidden);
+				if (!checkerObject.classList.contains("hidden")) {
+					checkerObject.classList.add("hidden");
 				}
 			} else {
-				if (checkerObject.classList.contains(classNames.hidden)) {
-					checkerObject.classList.remove(classNames.hidden);
+				if (checkerObject.classList.contains("hidden")) {
+					checkerObject.classList.remove("hidden");
 				}
 			}
 
 			if (!canvasState.overlay) {
-				if (!mirrorObject.classList.contains(classNames.hidden)) {
-					mirrorObject.classList.add(classNames.hidden);
+				if (!mirrorObject.classList.contains("hidden")) {
+					mirrorObject.classList.add("hidden");
 				}
 			} else {
-				if (mirrorObject.classList.contains(classNames.hidden)) {
-					mirrorObject.classList.remove(classNames.hidden);
+				if (mirrorObject.classList.contains("hidden")) {
+					mirrorObject.classList.remove("hidden");
 				}
 			}
 
 			if (!canvasState.focusabled) {
-				if (!canvasObject.classList.contains(classNames.unfocusabled)) {
-					canvasObject.classList.add(classNames.unfocusabled);
-				}
-				if (!mirrorObject.classList.contains(classNames.unfocusabled)) {
-					mirrorObject.classList.add(classNames.unfocusabled);
-				}
-			} else {
-				if (canvasObject.classList.contains(classNames.unfocusabled)) {
-					canvasObject.classList.remove(classNames.unfocusabled);
-				}
-				if (mirrorObject.classList.contains(classNames.unfocusabled)) {
-					mirrorObject.classList.remove(classNames.unfocusabled);
-				}
-			}
-
-			if (!canvasState.editabled) {
-				if (!canvasObject.classList.contains(classNames.uneditabled)) {
-					canvasObject.classList.add(classNames.uneditabled);
-				}
-				if (!mirrorObject.classList.contains(classNames.uneditabled)) {
-					mirrorObject.classList.add(classNames.uneditabled);
-				}
-			} else {
-				if (canvasObject.classList.contains(classNames.uneditabled)) {
-					canvasObject.classList.remove(classNames.uneditabled);
-				}
-				if (mirrorObject.classList.contains(classNames.uneditabled)) {
-					mirrorObject.classList.remove(classNames.uneditabled);
-				}
-			}
-
-			if (!canvasState.drawabled) {
-				if (!canvasObject.classList.contains(classNames.undrawabled)) {
-					canvasObject.classList.add(classNames.undrawabled);
-				}
-				if (!mirrorObject.classList.contains(classNames.undrawabled)) {
-					mirrorObject.classList.add(classNames.undrawabled);
-				}
-			} else {
-				if (canvasObject.classList.contains(classNames.undrawabled)) {
-					canvasObject.classList.remove(classNames.undrawabled);
-				}
-				if (mirrorObject.classList.contains(classNames.undrawabled)) {
-					mirrorObject.classList.remove(classNames.undrawabled);
+				if (eventState.target) {
+					setFocusOut(eventState.target);
 				}
 			}
 
@@ -3345,12 +3414,12 @@
 			mirrorObject.style.top = "";
 
 			if (!canvasState.overlay) {
-				if (!mirrorObject.classList.contains(classNames.hidden)) {
-					mirrorObject.classList.add(classNames.hidden);
+				if (!mirrorObject.classList.contains("hidden")) {
+					mirrorObject.classList.add("hidden");
 				}
 			} else {
-				if (mirrorObject.classList.contains(classNames.hidden)) {
-					mirrorObject.classList.remove(classNames.hidden);
+				if (mirrorObject.classList.contains("hidden")) {
+					mirrorObject.classList.remove("hidden");
 				}
 			}
 
@@ -3366,12 +3435,12 @@
 			checkerObject.style.top = "";
 
 			if (!canvasState.checker) {
-				if (!checkerObject.classList.contains(classNames.hidden)) {
-					checkerObject.classList.add(classNames.hidden);
+				if (!checkerObject.classList.contains("hidden")) {
+					checkerObject.classList.add("hidden");
 				}
 			} else {
-				if (checkerObject.classList.contains(classNames.hidden)) {
-					checkerObject.classList.remove(classNames.hidden);
+				if (checkerObject.classList.contains("hidden")) {
+					checkerObject.classList.remove("hidden");
 				}
 			}
 
@@ -3691,30 +3760,6 @@
 			return firstPart + secondPart;
 		}
 
-		function isEmpty(obj) {
-			if (typeof(obj) === "undefined") {
-				return true;
-			} else if (typeof(obj) === "string") {
-				return obj.trim() === "";
-			} else if (typeof(obj) === "number") {
-				return obj === NaN;
-			} else if (Array.isArray(obj)) {
-				return obj.length < 1;
-			} else if (typeof(obj) === "object") {
-				if (obj === null) {
-					return true;
-				}
-				for (var key in obj) {
-					if (obj.hasOwnProperty(key)) {
-						return false;
-					}
-				}
-				return JSON.stringify(obj) === JSON.stringify({});
-			} else {
-				return false;
-			}
-		}
-
 		function isBoolean(b) {
 			return b !== undefined && (
 				typeof(b) === "boolean" ||
@@ -3791,9 +3836,28 @@
 		}
 
 		function isMobile() {
-			let check = false;
+			var check = false;
 			(function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
 			return check;
+		}
+
+		function isDataType(str) {
+			var chk = false;
+			try {
+				return ["url", "file"].indexOf(str.toLowerCase()) > -1;
+			} catch (err) {
+				return false;
+			}
+		}
+
+		function isMimeType(str) {
+			var pattern = new RegExp("(application|audio|font|example|image|message|model|multipart|text|video|x-(?:[0-9A-Za-z!#$%&'*+.^_`|~-]+))/([0-9A-Za-z!#$%&'*+.^_`|~-]+)((?:[ \t]*;[ \t]*[0-9A-Za-z!#$%&'*+.^_`|~-]+=(?:[0-9A-Za-z!#$%&'*+.^_`|~-]+|\"(?:[^\"\\\\]|\\.)*\"))*)");
+			return str.match(pattern);
+		}
+
+		function isColor(str) {
+			var pattern = new RegExp("^(?:#(?:[A-Fa-f0-9]{3}){1,2}|(?:rgb[(](?:\s*0*(?:\d\d?(?:\.\d+)?(?:\s*%)?|\.\d+\s*%|100(?:\.0*)?\s*%|(?:1\d\d|2[0-4]\d|25[0-5])(?:\.\d+)?)\s*(?:,(?![)])|(?=[)]))){3}|hsl[(]\s*0*(?:[12]?\d{1,2}|3(?:[0-5]\d|60))\s*(?:\s*,\s*0*(?:\d\d?(?:\.\d+)?\s*%|\.\d+\s*%|100(?:\.0*)?\s*%)){2}\s*|(?:rgba[(](?:\s*0*(?:\d\d?(?:\.\d+)?(?:\s*%)?|\.\d+\s*%|100(?:\.0*)?\s*%|(?:1\d\d|2[0-4]\d|25[0-5])(?:\.\d+)?)\s*,){3}|hsla[(]\s*0*(?:[12]?\d{1,2}|3(?:[0-5]\d|60))\s*(?:\s*,\s*0*(?:\d\d?(?:\.\d+)?\s*%|\.\d+\s*%|100(?:\.0*)?\s*%)){2}\s*,)\s*0*(?:\.\d+|1(?:\.0*)?)\s*)[)])$");
+			return str.match(pattern);
 		}
 
 		function toBoolean(b) {
@@ -4003,70 +4067,6 @@
 		}
 
 		// asynchronous
-		myObject.uploadFile = function(imageFiles, cb) {
-			if (eventState.onUpload) {
-				if (config.upload) {
-					config.upload("Already in progress");
-				}
-				if (cb) {
-					cb("Already in progress");
-				}
-				return false;
-			}
-
-			if (!isObject(imageFiles)) {
-				if (config.upload) {
-					config.upload("File not found");
-				}
-				if (cb) {
-					cb("File not found");
-				}
-				return false;
-			}
-
-			if (imageFiles.length < 1) {
-				if (config.upload) {
-					config.upload("File not found");
-				}
-				if (cb) {
-					cb("File not found");
-				}
-				return false;
-			} else if (imageFiles.length > 1) {
-				if (config.upload) {
-					config.upload("Multiple upload not allowed");
-				}
-				if (cb) {
-					cb("Multiple upload not allowed");
-				}
-				return false;
-			}
-
-			eventState.onUpload = true;
-
-			renderImage(imageFiles[0], null, function(err, res) {
-				eventState.onUpload = false;
-
-				if (err) {
-					if (config.upload) {
-						config.upload(err);
-					}
-					if (cb) {
-						cb(err);
-					}
-					return false;
-				}
-
-				if (config.upload) {
-					config.upload(null, exportImageState(res));
-				}
-				if (cb) {
-					cb(null, exportImageState(res));
-				}
-			});
-		}
-
-		// asynchronous
 		myObject.uploadFiles = function(imageFiles, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
@@ -4115,7 +4115,7 @@
 								config.upload(err);
 							}
 							status.push({
-								err: err,
+								message: err,
 								status: false
 							});
 						} else {
@@ -4123,7 +4123,7 @@
 								config.upload(null, exportImageState(res));
 							}
 							status.push({
-								err: null,
+								message: null,
 								status: true
 							});
 							result.push(exportImageState(res))
@@ -4139,62 +4139,6 @@
 					}
 				}
 			}
-		}
-
-		// asynchronous
-		myObject.uploadUrl = function(imageURL, cb) {
-			if (eventState.onUpload) {
-				if (config.upload) {
-					config.upload("Already in progress");
-				}
-				if (cb) {
-					cb("Already in progress");
-				}
-				return false;
-			}
-
-			if (!imageURL) {
-				if (config.upload) {
-					config.upload("URL not found");
-				}
-				if (cb) {
-					cb("URL not found");
-				}
-				return false;
-			}
-
-			if (!isString(imageURL)) {
-				if (config.upload) {
-					config.upload("Argument is not string");
-				}
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
-
-			eventState.onUpload = true;
-
-			renderImage(imageURL, null, function(err, res) {
-				eventState.onUpload = false;
-
-				if (err) {
-					if (config.upload) {
-						config.upload(err);
-					}
-					if (cb) {
-						cb(err);
-					}
-					return false;
-				}
-
-				if (config.upload) {
-					config.upload(null, exportImageState(res));
-				}
-				if (cb) {
-					cb(null, exportImageState(res));
-				}
-			});
 		}
 
 		// asynchronous
@@ -4246,7 +4190,7 @@
 								config.upload(err);
 							}
 							status.push({
-								err: err,
+								message: err,
 								status: false
 							});
 						} else {
@@ -4254,7 +4198,7 @@
 								config.upload(null, exportImageState(res));
 							}
 							status.push({
-								err: null,
+								message: null,
 								status: true
 							});
 							result.push(exportImageState(res))
@@ -4270,62 +4214,6 @@
 					}
 				}
 			}
-		}
-
-		// asynchronous
-		myObject.uploadState = function(exportedState, cb) {
-			if (eventState.onUpload) {
-				if (config.upload) {
-					config.upload("Already in progress");
-				}
-				if (cb) {
-					cb("Already in progress");
-				}
-				return false;
-			}
-
-			var parsedState = parseState(exportedState);
-			if (!parsedState) {
-				if (config.upload) {
-					config.upload("State not found");
-				}
-				if (cb) {
-					cb("State not found");
-				}
-				return false;
-			}
-			if (!parsedState.src) {
-				if (config.upload) {
-					config.upload("URL not found");
-				}
-				if (cb) {
-					cb("URL not found");
-				}
-				return false;
-			}
-
-			eventState.onUpload = true;
-
-			renderImage(parsedState.src, parsedState, function(err, res) {
-				eventState.onUpload = false;
-
-				if (err) {
-					if (config.upload) {
-						config.upload(err);
-					}
-					if (cb) {
-						cb(err);
-					}
-					return false;
-				}
-
-				if (config.upload) {
-					config.upload(null, exportImageState(res));
-				}
-				if (cb) {
-					cb(null, exportImageState(res));
-				}
-			});
 		}
 
 		// asynchronous
@@ -4377,7 +4265,7 @@
 							config.upload("State not found");
 						}
 						status.push({
-							err: "State not found",
+							message: "State not found",
 							status: false
 						});
 						count++;
@@ -4389,7 +4277,7 @@
 							config.upload("URL not found");
 						}
 						status.push({
-							err: "URL not found",
+							message: "URL not found",
 							status: false
 						});
 						count++;
@@ -4402,7 +4290,7 @@
 								config.upload(err);
 							}
 							status.push({
-								err: err,
+								message: err,
 								status: false
 							});
 						} else {
@@ -4410,7 +4298,7 @@
 								config.upload(null, exportImageState(res));
 							}
 							status.push({
-								err: null,
+								message: null,
 								status: true
 							});
 							result.push(exportImageState(res))
@@ -4429,7 +4317,7 @@
 		}
 
 		// asynchronous
-		myObject.uploadElement = function(target, cb) {
+		myObject.uploadElements = function(targets, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -4439,65 +4327,88 @@
 				}
 				return false;
 			}
-			if (!target) {
+			if (!isArray(targets)) {
 				if (config.upload) {
-					config.upload("Target not found");
+					config.upload("Argument is not array");
 				}
 				if (cb) {
-					cb("Target not found");
-				}
-				return false;
-			}
-			if (!isElement(target)) {
-				if (config.upload) {
-					config.upload("Target is not DOM Object");
-				}
-				if (cb) {
-					cb("Target is not DOM Object");
+					cb("Argument is not array");
 				}
 				return false;
 			}
 
-			var thisState = getDataset(target);
-			var thisSrc;
-			if (!target.src) {
-				if (!thisState.src) {
-					if (config.upload) {
-						config.upload("File not found");
-					}
-					if (cb) {
-						cb("File not found");
-					}
-					return false;
-				} else {
-					thisSrc = thisState.src;
-				}
-			} else {
-				thisSrc = target.src;
-			}
+			var index = targets.length;
+			var count = 0;
+			var result = [];
+			var status = [];
 
 			eventState.onUpload = true;
 
-			renderImage(thisSrc, thisState, function(err, res) {
-				eventState.onUpload = false;
+			recursiveFunc();
 
-				if (err) {
-					if (config.upload) {
-						config.upload(err);
+			function recursiveFunc() {
+				if (count < index) {
+					if (!isElement(targets[count])) {
+						if (config.upload) {
+							config.upload("Target is not DOM Object");
+						}
+						status.push({
+							message: "Target is not DOM Object",
+							status: false
+						});
+						count++;
+						recursiveFunc();
+						return false;
 					}
+					var state = getDataset(targets[count]);
+					var src;
+					if (!targets[count].src) {
+						if (!state.src) {
+							if (config.upload) {
+								config.upload("URL not found");
+							}
+							status.push({
+								message: "URL not found",
+								status: false
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						}
+						src = state.src;
+					} else {
+						src = targets[count].src;
+					}
+					renderImage(src, state, function(err, res) {
+						if (err) {
+							if (config.upload) {
+								config.upload(err);
+							}
+							status.push({
+								message: err,
+								status: false
+							});
+						} else {
+							if (config.upload) {
+								config.upload(null, exportImageState(res));
+							}
+							status.push({
+								message: null,
+								status: true
+							});
+							result.push(exportImageState(res))
+						}
+						count++;
+						recursiveFunc();
+					});
+				} else {
+					eventState.onUpload = false;
+
 					if (cb) {
-						cb(err);
+						cb(null, result, status);
 					}
-					return false;
 				}
-
-				if (config.upload) {
-					config.upload(null, exportImageState(res));
-				}
-				if (cb) {
-					cb(null, exportImageState(res));
-				}
-			});
+			}
 		}
 
 		//
@@ -4583,105 +4494,7 @@
 			return founds;
 		}
 
-		// deprecated
-		myObject.updateOne = function(query, updates, cb){
-			if (
-				!isObject(query) ||
-				!isObject(updates)
-			) {
-				if (cb) {
-					cb("Argument is not obejct");
-				}
-				return false;
-			}
-
-			var founds = [];
-			imageStates.forEach(function(elem){
-				var isMatch = true;
-				for(var key in query) {
-					if (query.hasOwnProperty(key)) {
-						if (elem[key] !== query[key]) {
-							isMatch = false;
-						}
-					}
-				}
-				if (isMatch === true) {
-					founds.push(elem.id);
-				}
-			});
-
-			if (founds.length < 1) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (founds.length > 1) {
-				if (cb) {
-					cb("Image found more than one");
-				}
-				return false;
-			}
-
-			// save state
-			setState(founds[0], updates);
-
-			if (cb) {
-				cb(null, exportImageState(founds[0]));
-			}
-			return exportImageState(founds[0]);
-		}
-
-		// deprecated
-		myObject.updateMany = function(query, updates, cb){
-			if (
-				!isObject(query) ||
-				!isObject(updates)
-			) {
-				if (cb) {
-					cb("Argument is not obejct");
-				}
-				return false;
-			}
-
-			var founds = [];
-			imageStates.forEach(function(elem){
-				var isMatch = true;
-				for(var key in query) {
-					if (query.hasOwnProperty(key)) {
-						if (elem[key] !== query[key]) {
-							isMatch = false;
-						}
-					}
-				}
-				if (isMatch === true) {
-					founds.push(elem.id);
-				}
-			});
-
-			if (founds.length < 1) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			var results = [];
-			for (var i = 0; i < founds.length; i++) {
-				// save state
-				setState(founds[i], updates);
-
-				results.push(exportImageState(founds[i]));
-			}
-
-			if (cb) {
-				cb(null, results);
-			}
-			return results;
-		}
-
-		myObject.id = function(id, newId, cb) {
+		myObject.state = function(id, newState, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4692,7 +4505,17 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
+			if (!isObject(newState)) {
+				if (config.edit) {
+					config.edit("Argument is not object");
+				}
+				if (cb) {
+					cb("Argument is not object");
+				}
+				return false;
+			}
+
+			if (!isEditable(id) && !newState.editabled) {
 				if (config.edit) {
 					config.edit("Image is not editabled");
 				}
@@ -4702,46 +4525,38 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var updates = importImageState(newState);
 
-			if (isEmpty(newId)) {
-				if (config.edit) {
-					config.edit("Argument is null");
+			if (updates.id) {
+				if (isExist(updates.id)) {
+					if (config.edit) {
+						config.edit("ID duplicated");
+					}
+					if (cb) {
+						cb("ID duplicated");
+					}
+					return false;
 				}
-				if (cb) {
-					cb("Argument is null");
-				}
-				return false;
-			}
-
-			if (isExist(newId)) {
-				if (config.edit) {
-					config.edit("ID duplicated");
-				}
-				if (cb) {
-					cb("ID duplicated");
-				}
-				return false;
+			} else {
+				updates.id = id;
 			}
 
 			// save cache
 			saveUndo(id);
 
 			// save state
-			setState(id, {
-				id: newId
-			});
+			setState(id, updates);
 
 			if (config.edit) {
-				config.edit(null, exportImageState(newId));
+				config.edit(null, exportImageState(updates.id));
 			}
 			if (cb) {
-				cb(null, exportImageState(newId));
+				cb(null, exportImageState(updates.id));
 			}
-			return exportImageState(newId);
+			return exportImageState(updates.id);
 		}
 
-		myObject.move = function(id, x, y, cb) {
+		myObject.moveX = function(id, n, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4762,10 +4577,7 @@
 				return false;
 			}
 
-			if (
-				!isNumeric(x) ||
-				!isNumeric(y)
-			) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
 				}
@@ -4776,16 +4588,13 @@
 			}
 
 			var state = getState(id);
-			x = toNumber(x);
-			y = toNumber(y);
 
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				x: state.x + x,
-				y: state.y + y
+				x: state.x + toNumber(n)
 			});
 
 			if (config.edit) {
@@ -4797,7 +4606,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.moveTo = function(id, x, y, cb) {
+		myObject.moveY = function(id, n, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4818,73 +4627,24 @@
 				return false;
 			}
 
-			if (
-				(typeof(x) !== "string" && typeof(x) !== "number") ||
-				(typeof(y) !== "string" && typeof(y) !== "number")
-			) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric or string");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric or string");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
 
 			var state = getState(id);
 
-			if (isNumeric(x) === true) {
-				x = toNumber(x);
-			} else {
-				var adjw = state.width - (state.cropLeft + state.cropRight);
-				if (
-					x.toLowerCase() === "l" ||
-					x.toLowerCase() === "left"
-				) {
-					x = (canvasState.width * 0) + (adjw * 0.5);
-				} else if (
-					x.toLowerCase() === "c" ||
-					x.toLowerCase() === "center"
-				) {
-					x = (canvasState.width * 0.5);
-				} else if (
-					x.toLowerCase() === "r" ||
-					x.toLowerCase() === "right"
-				) {
-					x = (canvasState.width * 1) - (adjw * 0.5);
-				}
-			}
-
-			if (isNumeric(y) === true) {
-				y = toNumber(y);
-			} else {
-				var adjh = state.height - (state.cropTop + state.cropBottom);
-				if (
-					y.toLowerCase() === "t" ||
-					y.toLowerCase() === "top"
-				) {
-					y = (canvasState.height * 0) + (adjh * 0.5);
-				} else if (
-					y.toLowerCase() === "c" ||
-					y.toLowerCase() === "center" ||
-					y.toLowerCase() === "middle"
-				) {
-					y = (canvasState.height * 0.5);
-				} else if (
-					y.toLowerCase() === "b" ||
-					y.toLowerCase() === "bottom"
-				) {
-					y = (canvasState.height * 1) - (adjh * 0.5);
-				}
-			}
-
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				x: x,
-				y: y
+				y: state.y + toNumber(n)
 			});
 
 			if (config.edit) {
@@ -4896,7 +4656,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.zoom = function(id, ratio, cb) {
+		myObject.zoom = function(id, n, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4917,7 +4677,7 @@
 				return false;
 			}
 
-			if (!isNumeric(ratio)) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
 				}
@@ -4928,7 +4688,7 @@
 			}
 
 			var state = getState(id);
-			ratio = toNumber(ratio);
+			var ratio = toNumber(n);
 
 			// save cache
 			saveUndo(id);
@@ -4952,7 +4712,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.zoomTo = function(id, ratio, cb) {
+		myObject.cover = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -4973,101 +4733,45 @@
 				return false;
 			}
 
-			if (
-				typeof(ratio) !== "number" &&
-				typeof(ratio) !== "string"
-			) {
-				if (config.edit) {
-					config.edit("Argument is not numeric or string");
-				}
-				if (cb) {
-					cb("Argument is not numeric or string");
-				}
-				return false;
-			}
-
 			var state = getState(id);
-			var width;
-			var height;
-			var cropTop = state.cropTop;
-			var cropBottom = state.cropBottom;
-			var cropLeft = state.cropLeft;
-			var cropRight = state.cropRight;
+			var axisX = 0.5 * canvasState.width;
+			var axisY = 0.5 * canvasState.height;
 			var croppedWidth = state.width - (state.cropLeft + state.cropRight);
 			var croppedHeight = state.height - (state.cropTop + state.cropBottom);
 			var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
 			var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
-			var scaleCropTop;
-			var scaleCropBottom;
-			var scaleCropLeft;
-			var scaleCropRight;
-			var fittedSizes;
-			if (!isNumeric(ratio)) {
-				scaleCropTop = cropTop / croppedHeight;
-				scaleCropBottom = cropBottom / croppedHeight;
-				scaleCropLeft = cropLeft / croppedWidth;
-				scaleCropRight = cropRight / croppedWidth;
-				if (ratio === "cover") {
-					fittedSizes = getCoveredSizes(
-						croppedOriginalWidth,
-						croppedOriginalHeight,
-						canvasState.width,
-						canvasState.height
-					)
-					width = fittedSizes[0];
-					height = fittedSizes[1];
+			var scaleCropTop = state.cropTop / croppedHeight;
+			var scaleCropBottom = state.cropBottom / croppedHeight;
+			var scaleCropLeft = state.cropLeft / croppedWidth;
+			var scaleCropRight = state.cropRight / croppedWidth;
 
-					cropTop = height * scaleCropTop;
-					cropBottom = height * scaleCropBottom;
-					cropLeft = width * scaleCropLeft;
-					cropRight = width * scaleCropRight;
+			var fittedSizes = getCoveredSizes(
+				croppedOriginalWidth,
+				croppedOriginalHeight,
+				canvasState.width,
+				canvasState.height
+			);
 
-					width += cropLeft + cropRight;
-					height += cropTop + cropBottom;
-				} else if (ratio === "contain") {
-					fittedSizes = getContainedSizes(
-						croppedOriginalWidth,
-						croppedOriginalHeight,
-						canvasState.width,
-						canvasState.height
-					)
-					width = fittedSizes[0];
-					height = fittedSizes[1];
+			var cropTop = fittedSizes[1] * scaleCropTop;
+			var cropBottom = fittedSizes[1] * scaleCropBottom;
+			var cropLeft = fittedSizes[0] * scaleCropLeft;
+			var cropRight = fittedSizes[0] * scaleCropRight;
 
-					cropTop = height * scaleCropTop;
-					cropBottom = height * scaleCropBottom;
-					cropLeft = width * scaleCropLeft;
-					cropRight = width * scaleCropRight;
-
-					width += cropLeft + cropRight;
-					height += cropTop + cropBottom;
-				} else {
-					if (cb) {
-						cb("Argument error");
-					}
-					return false;
-				}
-			} else {
-				scaleCropTop = state.cropTop / state.height;
-				scaleCropBottom = state.cropBottom / state.height;
-				scaleCropLeft = state.cropLeft / state.width;
-				scaleCropRight = state.cropRight / state.width;
-				ratio = toNumber(ratio);
-				width = state.originalWidth * ratio;
-				height = state.originalHeight * ratio;
-				cropTop = height * scaleCropTop;
-				cropBottom = height * scaleCropBottom;
-				cropLeft = width * scaleCropLeft;
-				cropRight = width * scaleCropRight;
-			}
+			var width = fittedSizes[0] + cropLeft + cropRight;
+			var height = fittedSizes[1] + cropTop + cropBottom;
 
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
+				x: axisX,
+				y: axisY,
 				width: width,
 				height: height,
+				rotate: 0,
+				scaleX: 1,
+				scaleY: 1,
 				cropTop: cropTop,
 				cropBottom: cropBottom,
 				cropLeft: cropLeft,
@@ -5083,7 +4787,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.rotate = function(id, deg, cb){
+		myObject.contain = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5104,33 +4808,49 @@
 				return false;
 			}
 
-			if (!isNumeric(deg)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
 			var state = getState(id);
-			deg = toNumber(deg);
+			var axisX = 0.5 * canvasState.width;
+			var axisY = 0.5 * canvasState.height;
+			var croppedWidth = state.width - (state.cropLeft + state.cropRight);
+			var croppedHeight = state.height - (state.cropTop + state.cropBottom);
+			var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
+			var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
+			var scaleCropTop = state.cropTop / croppedHeight;
+			var scaleCropBottom = state.cropBottom / croppedHeight;
+			var scaleCropLeft = state.cropLeft / croppedWidth;
+			var scaleCropRight = state.cropRight / croppedWidth;
 
-			// if (state.scaleX === -1) {
-			// 	deg *= -1;
-			// }
-			//
-			// if (state.scaleY === -1) {
-			// 	deg *= -1;
-			// }
+			var fittedSizes = getContainedSizes(
+				croppedOriginalWidth,
+				croppedOriginalHeight,
+				canvasState.width,
+				canvasState.height
+			);
+
+			var cropTop = fittedSizes[1] * scaleCropTop;
+			var cropBottom = fittedSizes[1] * scaleCropBottom;
+			var cropLeft = fittedSizes[0] * scaleCropLeft;
+			var cropRight = fittedSizes[0] * scaleCropRight;
+
+			var width = fittedSizes[0] + cropLeft + cropRight;
+			var height = fittedSizes[1] + cropTop + cropBottom;
 
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				rotate: state.rotate + deg
+				x: axisX,
+				y: axisY,
+				width: width,
+				height: height,
+				rotate: 0,
+				scaleX: 1,
+				scaleY: 1,
+				cropTop: cropTop,
+				cropBottom: cropBottom,
+				cropLeft: cropLeft,
+				cropRight: cropRight,
 			});
 
 			if (config.edit) {
@@ -5142,7 +4862,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.rotateTo = function(id, deg, cb){
+		myObject.rotate = function(id, n, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5163,7 +4883,7 @@
 				return false;
 			}
 
-			if (!isNumeric(deg)) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
 				}
@@ -5174,22 +4894,13 @@
 			}
 
 			var state = getState(id);
-			deg = toNumber(deg);
-
-			// if (state.scaleX === -1) {
-			// 	deg *= -1;
-			// }
-			//
-			// if (state.scaleY === -1) {
-			// 	deg *= -1;
-			// }
 
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				rotate: deg
+				rotate: state.rotate + toNumber(n)
 			});
 
 			if (config.edit) {
@@ -5229,9 +4940,7 @@
 
 			// save state
 			setState(id, {
-				scaleY: state.scaleY * -1,
-				cropTop: state.cropBottom,
-				cropBottom: state.cropTop
+				scaleY: state.scaleY * -1
 			});
 
 			if (config.edit) {
@@ -5271,9 +4980,7 @@
 
 			// save state
 			setState(id, {
-				scaleX: state.scaleX * -1,
-				cropLeft: state.cropRight,
-				cropRight: state.cropLeft
+				scaleX: state.scaleX * -1
 			});
 
 			if (config.edit) {
@@ -5285,7 +4992,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.opacity = function(id, num, cb){
+		myObject.opacity = function(id, n, cb){
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5306,7 +5013,7 @@
 				return false;
 			}
 
-			if (!isNumeric(num)) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
 				}
@@ -5316,14 +5023,12 @@
 				return false;
 			}
 
-			num = toNumber(num);
-
 			// save cache
 			saveUndo(id);
 
 			// save state
 			setState(id, {
-				opacity: num
+				opacity: toNumber(n)
 			});
 
 			if (config.edit) {
@@ -5335,7 +5040,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.crop = function(id, obj, cb) {
+		myObject.cropTop = function(id, n, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5356,44 +5061,188 @@
 				return false;
 			}
 
-			if (!isObject(obj)) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not object");
+					config.edit("Argument is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument is not numeric");
 				}
 				return false;
 			}
 
 			var state = getState(id);
-			var scaleRatioX = canvasState.width / canvasState.originalWidth;
-			var scaleRatioY = canvasState.height / canvasState.originalHeight;
-			var cropTop = state.cropTop;
-			var cropBottom = state.cropBottom;
-			var cropLeft = state.cropLeft;
-			var cropRight = state.cropRight;
-			if (isNumeric(obj.top)) {
-				cropTop += toNumber(obj.top) * scaleRatioY;
-			}
-			if (isNumeric(obj.bottom)) {
-				cropBottom += toNumber(obj.bottom) * scaleRatioY;
-			}
-			if (isNumeric(obj.left)) {
-				cropLeft += toNumber(obj.left) * scaleRatioX;
-			}
-			if (isNumeric(obj.right)) {
-				cropRight += toNumber(obj.right) * scaleRatioX;
-			}
+			var scaleRatio = canvasState.height / canvasState.originalHeight;
+
+			var cropTop = state.cropTop + (toNumber(n) * scaleRatio);
 			if (cropTop < 0) {
 				cropTop = 0;
 			}
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				cropTop: cropTop
+			});
+
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.cropBottom = function(id, n, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isEditable(id)) {
+				if (config.edit) {
+					config.edit("Image is not editabled");
+				}
+				if (cb) {
+					cb("Image is not editabled");
+				}
+				return false;
+			}
+
+			if (!isNumeric(n)) {
+				if (config.edit) {
+					config.edit("Argument is not numeric");
+				}
+				if (cb) {
+					cb("Argument is not numeric");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+			var scaleRatio = canvasState.height / canvasState.originalHeight;
+
+			var cropBottom = state.cropBottom + (toNumber(n) * scaleRatio);
 			if (cropBottom < 0) {
 				cropBottom = 0;
 			}
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				cropBottom: cropBottom
+			});
+
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.cropLeft = function(id, n, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isEditable(id)) {
+				if (config.edit) {
+					config.edit("Image is not editabled");
+				}
+				if (cb) {
+					cb("Image is not editabled");
+				}
+				return false;
+			}
+
+			if (!isNumeric(n)) {
+				if (config.edit) {
+					config.edit("Argument is not numeric");
+				}
+				if (cb) {
+					cb("Argument is not numeric");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			var cropLeft = state.cropLeft + (toNumber(n) * scaleRatio);
 			if (cropLeft < 0) {
 				cropLeft = 0;
 			}
+
+			// save cache
+			saveUndo(id);
+
+			// save state
+			setState(id, {
+				cropLeft: cropLeft
+			});
+
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.cropRight = function(id, n, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			if (!isEditable(id)) {
+				if (config.edit) {
+					config.edit("Image is not editabled");
+				}
+				if (cb) {
+					cb("Image is not editabled");
+				}
+				return false;
+			}
+
+			if (!isNumeric(n)) {
+				if (config.edit) {
+					config.edit("Argument is not numeric");
+				}
+				if (cb) {
+					cb("Argument is not numeric");
+				}
+				return false;
+			}
+
+			var state = getState(id);
+			var scaleRatio = canvasState.width / canvasState.originalWidth;
+
+			var cropRight = state.cropRight + (toNumber(n) * scaleRatio);
 			if (cropRight < 0) {
 				cropRight = 0;
 			}
@@ -5403,10 +5252,7 @@
 
 			// save state
 			setState(id, {
-				cropTop: cropTop,
-				cropBottom: cropBottom,
-				cropLeft: cropLeft,
-				cropRight: cropRight,
+				cropRight: cropRight
 			});
 
 			if (config.edit) {
@@ -5418,7 +5264,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.cropTo = function(id, obj, cb) {
+		myObject.index = function(id, n, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5439,90 +5285,7 @@
 				return false;
 			}
 
-			if (!isObject(obj)) {
-				if (config.edit) {
-					config.edit("Argument is not object");
-				}
-				if (cb) {
-					cb("Argument is not object");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var scaleRatioX = canvasState.width / canvasState.originalWidth;
-			var scaleRatioY = canvasState.height / canvasState.originalHeight;
-			var cropTop = state.cropTop;
-			var cropBottom = state.cropBottom;
-			var cropLeft = state.cropLeft;
-			var cropRight = state.cropRight;
-			if (isNumeric(obj.top)) {
-				cropTop = toNumber(obj.top) * scaleRatioY;
-			}
-			if (isNumeric(obj.bottom)) {
-				cropBottom = toNumber(obj.bottom) * scaleRatioY;
-			}
-			if (isNumeric(obj.left)) {
-				cropLeft = toNumber(obj.left) *scaleRatioX;
-			}
-			if (isNumeric(obj.right)) {
-				cropRight = toNumber(obj.right) *scaleRatioX;
-			}
-			if (cropTop < 0) {
-				cropTop = 0;
-			}
-			if (cropBottom < 0) {
-				cropBottom = 0;
-			}
-			if (cropLeft < 0) {
-				cropLeft = 0;
-			}
-			if (cropRight < 0) {
-				cropRight = 0;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				cropTop: cropTop,
-				cropBottom: cropBottom,
-				cropLeft: cropLeft,
-				cropRight: cropRight,
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.index = function(id, idx, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(idx)) {
+			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
 				}
@@ -5533,58 +5296,10 @@
 			}
 
 			var state = getState(id);
-			idx = toNumber(idx);
 
 			// save state
 			setState(id, {
-				index: state.index + idx
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.indexTo = function(id, idx, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(idx)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
-			idx = toNumber(idx);
-
-			// save state
-			setState(id, {
-				index: idx
+				index: state.index + toNumber(n)
 			});
 
 			if (config.edit) {
@@ -5624,6 +5339,7 @@
 			}
 
 			setFocusIn(id);
+			
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
@@ -5647,296 +5363,6 @@
 				cb(null, null);
 			}
 			return true;
-		}
-
-		myObject.aspectRatio = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isBoolean(b)) {
-				if (config.edit) {
-					config.edit("Argument is not boolean");
-				}
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var width = state.width;
-			var height = state.height;
-			var cropTop = state.cropTop;
-			var cropBottom = state.cropBottom;
-			var cropLeft = state.cropLeft;
-			var cropRight = state.cropRight;
-			var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
-			var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
-			var aspectRatio = croppedOriginalWidth / croppedOriginalHeight;
-			var scaleCropTop;
-			var scaleCropBottom;
-			var scaleCropLeft;
-			var scaleCropRight;
-
-			if (
-				state.lockAspectRatio === false &&
-				toBoolean(b) === true
-			) {
-				width -= cropLeft + cropRight;
-				height -= cropTop + cropBottom;
-
-				scaleCropTop = cropTop / height;
-				scaleCropBottom = cropBottom / height;
-				scaleCropLeft = cropLeft / width;
-				scaleCropRight = cropRight / width;
-
-				if (width > height * aspectRatio) {
-					height = width / aspectRatio;
-				} else {
-					width = height * aspectRatio;
-				}
-
-				cropTop = height * scaleCropTop;
-				cropBottom = height * scaleCropBottom;
-				cropLeft = width * scaleCropLeft;
-				cropRight = width * scaleCropRight;
-
-				width += cropLeft + cropRight;
-				height += cropTop + cropBottom;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				lockAspectRatio: toBoolean(b),
-				width: width,
-				height: height,
-				cropTop: cropTop,
-				cropBottom: cropBottom,
-				cropLeft: cropLeft,
-				cropRight: cropRight,
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.focusable = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isBoolean(b)) {
-				if (config.edit) {
-					config.edit("Argument is not boolean");
-				}
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			if (eventState.target) {
-				if (eventState.target === id) {
-					setFocusOut(id);
-				}
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				focusabled: toBoolean(b)
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.editable = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isBoolean(b)) {
-				if (config.edit) {
-					config.edit("Argument is not boolean");
-				}
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				editabled: toBoolean(b)
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.drawable = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isBoolean(b)) {
-				if (config.edit) {
-					config.edit("Argument is not boolean");
-				}
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				drawabled: toBoolean(b)
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.visible = function(id, b, cb){
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isBoolean(b)) {
-				if (config.edit) {
-					config.edit("Argument is not boolean");
-				}
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
-			if (toBoolean(b) === false) {
-				if (eventState.target) {
-					if (eventState.target === id) {
-						setFocusOut(id);
-					}
-				}
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				visible: toBoolean(b)
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
 		}
 
 		myObject.reset = function(id, cb) {
@@ -6111,6 +5537,29 @@
 		//
 
 		myObject.handle = function(obj, cb) {
+			// obj = {
+			// 	inside: {
+			// 		n: "resize", // resize, crop
+			// 		ne: "resize", // resize, crop
+			// 		e: "resize", // resize, crop
+			// 		se: "resize", // resize, crop
+			// 		s: "resize", // resize, crop
+			// 		sw: "resize", // resize, crop
+			// 		w: "resize", // resize, crop
+			// 		nw: "resize" // resize, crop
+			// 	},
+			// 	outside: {
+			// 		n: "rotate", // rotate, flip, crop, resize
+			// 		ne: "flip", // flip, crop, resize
+			// 		e: "flip", // rotate, flip, crop, resize
+			// 		se: "flip", // flip, crop, resize
+			// 		s: "flip", // rotate, flip, crop, resize
+			// 		sw: "flip", // flip, crop, resize
+			// 		w: "flip", // rotate, flip, crop, resize
+			// 		nw: "flip" // flip, crop, resize
+			// 	}
+			// }
+			
 			if (!isObject(obj)) {
 				if (cb) {
 					cb("Argument is not object");
@@ -6135,11 +5584,13 @@
 			// 	width: number, (required)
 			// 	height: number, (required)
 			// 	filename: string, (optional, default 'untitled')
+			//  quality: number, (optional, default '0.92')
+			//  mimeType: string, (optional, default 'image/png')
+			//  dataType: string, (optional, default 'url')
 			// 	overlay: boolean, (optional, default 'false')
 			// 	checker: boolean, (optional, default 'true')
 			// 	editabled: boolean, (optional, default 'true')
 			// 	focusabled: boolean, (optional, default 'true')
-			// 	drawabled: boolean, (optional, default 'true')
 			// 	background: string, (optional, default '#FFFFFF')
 			// }
 
@@ -6184,10 +5635,29 @@
 			canvasState.originalHeight = toNumber(options.height);
 
 			if (isString(options.filename)) {
-				if (isEmpty(options.filename)) {
+				if (toString(options.filename).trim() === "") {
 					options.filename = "untitled";
 				}
 				canvasState.filename = toString(options.filename);
+			}
+			if (isString(options.mimeType)) {
+				if (isMimeType(toString(options.mimeType))) {
+					canvasState.mimeType = toString(options.mimeType);
+				}
+			}
+			if (isString(options.dataType)) {
+				if (isDataType(toString(options.dataType))) {
+					canvasState.dataType = toString(options.dataType);
+				}
+			}
+			if (isNumeric(options.quality)) {
+				if (toNumber(options.quality) > 1) {
+					canvasState.quality = 1;
+				} else if (toNumber(options.quality) < 0) {
+					canvasState.quality = 0;
+				} else {
+					canvasState.quality = toNumber(options.quality);
+				}
 			}
 			if (isBoolean(options.checker)) {
 				canvasState.checker = toBoolean(options.checker);
@@ -6202,18 +5672,17 @@
 				canvasState.focusabled = toBoolean(options.focusabled);
 			}
 			if (isString(options.background)) {
-				var colour = toString(options.background).trim();
+				var colour = toString(options.background).toLowerCase().trim();
 				if (
-					colour.toLowerCase() === "alpha" ||
-					colour.toLowerCase() === "transparent"
+					colour === "alpha" ||
+					colour === "transparent" ||
+					colour === "none" ||
+					colour === "unset"
 				) {
-					colour = "transparent";
-				} else {
-					if (colour.charAt(0) !== "#") {
-						colour = "#" + colour;
-					}
+					canvasState.background = "transparent";
+				} else if (isColor(colour)) {
+					canvasState.background = colour;
 				}
-				canvasState.background = colour;
 			}
 
 			initCanvas();
@@ -6255,13 +5724,20 @@
 			return exportCanvasState();
 		}
 
-		myObject.resize = function(options, cb) {
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
+		myObject.canvas = function(options, cb) {
+			// options = {
+			// 	width: number, (required)
+			// 	height: number, (required)
+			// 	filename: string, (optional, default 'untitled')
+			//  quality: number, (optional, default '0.92')
+			//  mimeType: string, (optional, default 'image/png')
+			//  dataType: string, (optional, default 'url')
+			// 	overlay: boolean, (optional, default 'false')
+			// 	checker: boolean, (optional, default 'true')
+			// 	editabled: boolean, (optional, default 'true')
+			// 	focusabled: boolean, (optional, default 'true')
+			// 	background: string, (optional, default '#FFFFFF')
+			// }
 
 			if (
 				!containerState.width ||
@@ -6290,223 +5766,62 @@
 				return false;
 			}
 
-			if (
-				!isNumeric(options.width) ||
-				!isNumeric(options.height)
-			) {
-				if (cb) {
-					cb("Argument is not allowed");
+			if (isString(options.filename)) {
+				if (toString(options.filename).trim() === "") {
+					options.filename = "untitled";
 				}
-				return false;
+				canvasState.filename = toString(options.filename);
 			}
-
-			canvasState.originalWidth = toNumber(options.width);
-			canvasState.originalHeight = toNumber(options.height);
-
-			// set canvas
-			initCanvas();
-
-			// set images
-			imageStates.forEach(function(elem){
-				var maxX = canvasState.width;
-				var maxY = canvasState.height;
-				var minX = 0;
-				var minY = 0;
-
-				var axisX = elem.x;
-				var axisY = elem.y;
-
-				if (axisX > maxX) {
-					axisX = maxX;
-				}
-				if (axisX < minX) {
-					axisX = minX;
-				}
-				if (axisY > maxY) {
-					axisY = maxY;
-				}
-				if (axisY < minY) {
-					axisY = minY;
-				}
-
-				// save state
-				setState(elem.id, {
-					x: axisX,
-					y: axisY
-				});
-			});
-
-			// clear caches
-			undoCaches = [];
-			redoCaches = [];
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.filename = function(str, cb) {
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
-			if (!isString(str)) {
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
-
-			if (isEmpty(str)) {
-				if (cb) {
-					cb("Filename cannot be empty ");
-				}
-				return false;
-			}
-
-			canvasState.filename = str;
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.editableAll = function(b, cb) {
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			canvasState.editabled = toBoolean(b);
-
-			initCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.focusableAll = function(b, cb) {
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			if (eventState.target) {
-				setFocusOut(eventState.target);
-			}
-
-			canvasState.focusabled = toBoolean(b);
-
-			initCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.drawableAll = function(b, cb) {
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument is not boolean");
-				}
-				return false;
-			}
-
-			canvasState.drawabled = toBoolean(b);
-
-			initCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.background = function(colour, cb) {
-			if (!isString(colour)) {
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
-
-			colour = toString(colour);
-
-			if (
-				colour.toLowerCase() === "alpha" ||
-				colour.toLowerCase() === "transparent"
-			) {
-				colour = "transparent";
-			} else if (
-				colour.length < 6 ||
-				colour.length > 7
-			) {
-				if (cb) {
-					cb("Argument is not rgb format");
-				}
-				return false;
-			} else {
-				if (colour.charAt(0) !== "#") {
-					colour = "#" + colour;
-				}
-
-				if (colour.length !== 7) {
-					if (cb) {
-						cb("Argument is not rgb format");
-					}
-					return false;
+			if (isString(options.mimeType)) {
+				if (isMimeType(toString(options.mimeType))) {
+					canvasState.mimeType = toString(options.mimeType);
 				}
 			}
-
-			canvasState.background = colour;
-
-			initCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.overlay = function(b, cb) {
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument is not boolean");
+			if (isString(options.dataType)) {
+				if (isDataType(toString(options.dataType))) {
+					canvasState.dataType = toString(options.dataType);
 				}
-				return false;
 			}
-
-			canvasState.overlay = toBoolean(b);
-
-			initCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
-		}
-
-		myObject.checker = function(b, cb) {
-			if (!isBoolean(b)) {
-				if (cb) {
-					cb("Argument is not boolean");
+			if (isNumeric(options.quality)) {
+				if (toNumber(options.quality) > 1) {
+					canvasState.quality = 1;
+				} else if (toNumber(options.quality) < 0) {
+					canvasState.quality = 0;
+				} else {
+					canvasState.quality = toNumber(options.quality);
 				}
-				return false;
 			}
-
-			canvasState.checker = toBoolean(b);
+			if (isNumeric(options.width)) {
+				canvasState.originalWidth = toNumber(options.width);
+			}
+			if (isNumeric(options.height)) {
+				canvasState.originalHeight = toNumber(options.height);
+			}
+			if (isBoolean(options.checker)) {
+				canvasState.checker = toBoolean(options.checker);
+			}
+			if (isBoolean(options.overlay)) {
+				canvasState.overlay = toBoolean(options.overlay);
+			}
+			if (isBoolean(options.editabled)) {
+				canvasState.editabled = toBoolean(options.editabled);
+			}
+			if (isBoolean(options.focusabled)) {
+				canvasState.focusabled = toBoolean(options.focusabled);
+			}
+			if (isString(options.background)) {
+				var colour = toString(options.background).toLowerCase().trim();
+				if (
+					colour === "alpha" ||
+					colour === "transparent" ||
+					colour === "none" ||
+					colour === "unset"
+				) {
+					canvasState.background = "transparent";
+				} else if (isColor(colour)) {
+					canvasState.background = colour;
+				}
+			}
 
 			initCanvas();
 
@@ -6520,13 +5835,13 @@
 		// draw
 		//
 
-		myObject.draw = function(canvState, cb){
-			// canvState = {
+		myObject.draw = function(options, cb){
+			// options = {
 			// 	filename: string, (optional, default 'getCanvas().filename')
 			// 	dataType: string 'url' or 'file', (optional, default 'getCanvas().dataType')
 			// 	mimeType: string, (optional, default 'getCanvas().mimeType')
-			// 	drawWidth(or width): number, (optional, default 'getCanvas().width')
-			// 	drawHeight(or height): number, (optional, default 'getCanvas().height')
+			// 	width(or drawWidth): number, (optional, default 'getCanvas().width')
+			// 	height(or drawHeight): number, (optional, default 'getCanvas().height')
 			// 	background: string, (optional, default 'getCanvas().background')
 			// 	quality: number, (optional, default 'getCanvas().quality')
 			// }
@@ -6538,52 +5853,52 @@
 				return false;
 			}
 
-			var thisCanvasState = exportCanvasState();
-			var thisDrawState = {};
+			var canvState = exportCanvasState();
+			var drawState = {};
 
-			thisDrawState.width = canvasState.originalWidth;
-			thisDrawState.height = canvasState.originalHeight;
+			drawState.width = canvasState.originalWidth;
+			drawState.height = canvasState.originalHeight;
 
-			if (isObject(canvState)) {
-				if (isString(canvState.filename)) {
-					thisCanvasState.filename = toString(canvState.filename);
+			if (isObject(options)) {
+				if (isString(options.filename)) {
+					canvState.filename = toString(options.filename);
 				}
-				if (isString(canvState.mimeType)) {
-					thisCanvasState.mimeType = toString(canvState.mimeType);
+				if (isString(options.mimeType)) {
+					canvState.mimeType = toString(options.mimeType);
 				}
-				if (isString(canvState.dataType)) {
-					if (canvState.dataType.toLowerCase() === "url") {
-						thisCanvasState.dataType = "url";
-					} else if (canvState.dataType.toLowerCase() === "file") {
-						thisCanvasState.dataType = "file";
+				if (isString(options.dataType)) {
+					if (options.dataType.toLowerCase() === "url") {
+						canvState.dataType = "url";
+					} else if (options.dataType.toLowerCase() === "file") {
+						canvState.dataType = "file";
 					}
 				}
-				if (isNumeric(canvState.quality)) {
-					thisCanvasState.quality = toNumber(canvState.quality);
+				if (isNumeric(options.quality)) {
+					canvState.quality = toNumber(options.quality);
 				}
-				if (isString(canvState.background)) {
-					thisCanvasState.background = toString(canvState.background);
+				if (isString(options.background)) {
+					canvState.background = toString(options.background);
 				}
-				if (isNumeric(canvState.drawWidth)) {
-					thisDrawState.width = toNumber(canvState.drawWidth);
-				} else if (isNumeric(canvState.width)) {
-					thisDrawState.width = toNumber(canvState.width);
+				if (isNumeric(options.width)) {
+					drawState.width = toNumber(options.width);
+				} else if (isNumeric(options.drawWidth)) {
+					drawState.width = toNumber(options.drawWidth);
 				}
-				if (isNumeric(canvState.drawHeight)) {
-					thisDrawState.height = toNumber(canvState.drawHeight);
-				} else if (isNumeric(canvState.height)) {
-					thisDrawState.height = toNumber(canvState.height);
+				if (isNumeric(options.height)) {
+					drawState.height = toNumber(options.height);
+				} else if (isNumeric(options.drawHeight)) {
+					drawState.height = toNumber(options.drawHeight);
 				}
 			}
 
-			var thisImageStates = [];
+			var imgStates = [];
 			for (var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].drawabled === true) {
-					thisImageStates.push(exportImageState(imageStates[i].id));
+					imgStates.push(exportImageState(imageStates[i].id));
 				}
 			}
 
-			thisImageStates.sort(function(a, b){
+			imgStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6595,38 +5910,35 @@
 
 			eventState.onDraw = true;
 
-			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, result){
-				eventState.onDraw = false;
-
+			drawCanvas(drawState, canvState, imgStates, function(err, res, result){
 				if (err) {
 					console.log(err);
 					if (cb) {
 						cb(err);
 					}
-					return false;
 				} else {
 					if (cb) {
 						cb(null, res, result);
 					}
-					return true;
 				}
+				eventState.onDraw = false;
 			});
 		}
 
-		myObject.drawTo = function(canvState, imgStates, cb){
-			// canvState = {
-			// 	filename(optional),
-			// 	dataType(optional),
-			// 	mimeType(optional),
-			// 	width(required),
-			// 	height(required),
-			// 	drawWidth(optional),
-			// 	drawHeight(optional),
-			// 	quality(optional),
-			// 	background(optional),
+		myObject.drawTo = function(options, states, cb){
+			// options = {
+			// 	filename: string, (optional, default 'getCanvas().filename')
+			// 	dataType: string 'url' or 'file', (optional, default 'getCanvas().dataType')
+			// 	mimeType: string, (optional, default 'getCanvas().mimeType')
+			// 	width: number, (required)
+			// 	drawWidth: number, (optional, default 'width')
+			// 	height: number, (required)
+			// 	drawHeight: number, (optional, default 'height')
+			// 	background: string, (optional, default 'getCanvas().background')
+			// 	quality: number, (optional, default 'getCanvas().quality')
 			// }
 
-			// imgStates = [{
+			// states = [{
 			// 	src(required),
 			// 	index(required),
 			// 	x(required),
@@ -6649,74 +5961,84 @@
 				}
 				return false;
 			}
-			if (!isObject(canvState)) {
+			if (!isObject(options)) {
 				if (cb) {
 					cb("Argument is not object");
 				}
 				return false;
 			}
-			if (!isArray(imgStates)) {
+			if (!isArray(states)) {
 				if (cb) {
 					cb("Argument is not array");
 				}
 				return false;
 			}
 
-			var thisCanvasState = {};
-			var thisDrawState = {};
+			var canvState = {};
+			var drawState = {};
 
-			copyObject(thisCanvasState, defaultCanvasState);
+			copyObject(canvState, defaultCanvasState);
 
-			if (isString(canvState.filename)) {
-				thisCanvasState.filename = toString(canvState.filename);
+			if (isString(options.filename)) {
+				canvState.filename = toString(options.filename);
 			}
-			if (isString(canvState.mimeType)) {
-				thisCanvasState.mimeType = toString(canvState.mimeType);
+			if (isString(options.mimeType)) {
+				canvState.mimeType = toString(options.mimeType);
 			}
-			if (isString(canvState.dataType)) {
-				if (canvState.dataType.toLowerCase() === "url") {
-					thisCanvasState.dataType = "url";
-				} else if (canvState.dataType.toLowerCase() === "file") {
-					thisCanvasState.dataType = "file";
+			if (isString(options.dataType)) {
+				if (options.dataType.toLowerCase() === "url") {
+					canvState.dataType = "url";
+				} else if (options.dataType.toLowerCase() === "file") {
+					canvState.dataType = "file";
 				}
 			}
-			if (isNumeric(canvState.quality)) {
-				thisCanvasState.quality = toNumber(canvState.quality);
+			if (isNumeric(options.quality)) {
+				canvState.quality = toNumber(options.quality);
 			}
-			if (isString(canvState.background)) {
-				thisCanvasState.background = toString(canvState.background);
+			if (isString(options.background)) {
+				canvState.background = toString(options.background);
 			}
-			if (isNumeric(canvState.width)) {
-				thisCanvasState.width = toNumber(canvState.width);
+			if (isNumeric(options.width)) {
+				canvState.width = toNumber(options.width);
 			} else {
 				if (cb) {
-					cb("Argument not found");
+					cb("Argument error");
 				}
 				return false;
 			}
-			if (isNumeric(canvState.height)) {
-				thisCanvasState.height = toNumber(canvState.height);
+			if (isNumeric(options.height)) {
+				canvState.height = toNumber(options.height);
 			} else {
 				if (cb) {
-					cb("Argument not found");
+					cb("Argument error");
 				}
 				return false;
 			}
-			if (isNumeric(canvState.drawWidth)) {
-				thisDrawState.width = toNumber(canvState.drawWidth);
+			if (isNumeric(options.width)) {
+				drawState.width = toNumber(options.width);
+			} else if (isNumeric(options.drawWidth)) {
+				drawState.width = toNumber(options.drawWidth);
 			} else {
-				thisDrawState.width = toNumber(canvState.width);
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
 			}
-			if (isNumeric(canvState.drawHeight)) {
-				thisDrawState.height = toNumber(canvState.drawHeight);
+			if (isNumeric(options.height)) {
+				drawState.height = toNumber(options.height);
+			} else if (isNumeric(options.drawHeight)) {
+				drawState.height = toNumber(options.drawHeight);
 			} else {
-				thisDrawState.height = toNumber(canvState.height);
+				if (cb) {
+					cb("Argument error");
+				}
+				return false;
 			}
 
-			var thisImageStates = [];
-			for (var i = 0; i < imgStates.length; i++) {
+			var imgStates = [];
+			for (var i = 0; i < states.length; i++) {
 				var tmp = {};
-				copyObject(tmp, imgStates[i]);
+				copyObject(tmp, states[i]);
 				if (!tmp.src) {
 					if (tmp.url) {
 						tmp.src = tmp.url;
@@ -6757,11 +6079,11 @@
 					tmp.width !== undefined ||
 					tmp.height !== undefined
 				) {
-					thisImageStates.push(tmp);
+					imgStates.push(tmp);
 				}
 			}
 
-			thisImageStates.sort(function(a, b){
+			imgStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6773,21 +6095,18 @@
 
 			eventState.onDraw = true;
 
-			drawCanvas(thisDrawState, thisCanvasState, thisImageStates, function(err, res, options){
-				eventState.onDraw = false;
-
+			drawCanvas(drawState, canvState, imgStates, function(err, res, result){
 				if (err) {
 					console.log(err);
 					if (cb) {
 						cb(err);
 					}
-					return false;
 				} else {
 					if (cb) {
-						cb(null, res, options);
+						cb(null, res, result);
 					}
-					return true;
 				}
+				eventState.onDraw = false;
 			});
 		}
 
@@ -6804,9 +6123,9 @@
 			}
 
 			if (cb) {
-				cb(null, eventState.target);
+				cb(null, exportImageState(eventState.target));
 			}
-			return eventState.target;
+			return exportImageState(eventState.target);
 		}
 
 		myObject.getConfig = function(cb){
@@ -6830,9 +6149,79 @@
 				}
 				return false;
 			}
-			var found = imageStates.find(function(elem){
-				return elem.id === toString(id);
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.getImages = function(cb){
+			var states = [];
+			imageStates.forEach(function(elem){
+				states.push(exportImageState(elem.id));
 			});
+
+			var sorted = states.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
+			if (cb) {
+				cb(null, sorted);
+			}
+			return sorted;
+		}
+
+		myObject.getPreviousImage = function(id, cb){
+			if (!isString(id)) {
+				if (cb) {
+					cb("Argument is not string");
+				}
+				return false;
+			}
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var states = [];
+			var state = getState(id);
+
+			imageStates.forEach(function(elem){
+				states.push(elem);
+			});
+
+			var sorted = states.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
+			var found;
+			for (var i = 0; i < sorted.length; i++) {
+				if (sorted[i].id === id) {
+					if (sorted[i - 1]) {
+						found = exportImageState(sorted[i - 1].id);
+					}
+				}
+			}
 
 			if (!found) {
 				if (cb) {
@@ -6842,39 +6231,92 @@
 			}
 
 			if (cb) {
-				cb(null, exportImageState(found.id));
+				cb(null, found);
 			}
-			return exportImageState(found.id);
+			return found;
 		}
 
-		myObject.getImages = function(cb){
+		myObject.getNextImage = function(id, cb){
+			if (!isString(id)) {
+				if (cb) {
+					cb("Argument is not string");
+				}
+				return false;
+			}
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
 			var states = [];
+			var state = getState(id);
+
 			imageStates.forEach(function(elem){
-				states.push(exportImageState(elem.id));
+				states.push(elem);
 			});
 
-			var results = states.sort(function(a, b){
-				return a.index - b.index;
+			var sorted = states.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
 			});
+
+			var found;
+			for (var i = 0; i < sorted.length; i++) {
+				if (sorted[i].id === id) {
+					if (sorted[i + 1]) {
+						found = exportImageState(sorted[i + 1].id);
+					}
+				}
+			}
+
+			if (!found) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
 
 			if (cb) {
-				cb(null, results);
+				cb(null, found);
 			}
-			return results;
+			return found;
 		}
 
 		myObject.getUndo = function(cb){
-			if (cb) {
-				cb(null, undoCaches.length);
+			var tmp = [];
+
+			for(var i = 0; i < undoCaches.length; i++) {
+				var copy = {};
+				copyObject(copy, undoCaches[i]);
+				tmp.push(copy);
 			}
-			return undoCaches.length;
+
+			if (cb) {
+				cb(null, tmp);
+			}
+			return tmp;
 		}
 
 		myObject.getRedo = function(cb){
-			if (cb) {
-				cb(null, redoCaches.length);
+			var tmp = [];
+
+			for(var i = 0; i < redoCaches.length; i++) {
+				var copy = {};
+				copyObject(copy, redoCaches[i]);
+				tmp.push(copy);
 			}
-			return redoCaches.length;
+
+			if (cb) {
+				cb(null, tmp);
+			}
+			return tmp;
 		}
 
 		myObject.export = myObject.getImages;
@@ -6921,12 +6363,12 @@
 					renderImage(exportedStates[count].src, exportedStates[count], function(err, res) {
 						if (err) {
 							status.push({
-								err: err,
+								message: err,
 								status: false
 							});
 						} else {
 							status.push({
-								err: null,
+								message: null,
 								status: true
 							});
 							result.push(exportImageState(res));

@@ -1,6 +1,6 @@
 [DEMO](https://godicheol.github.io/canvaaas/)
 
-1. HTML
+## HTML
 
 ```html
 <style>
@@ -15,7 +15,7 @@
 <!-- MAIN ELEMENT -->
 <div id="target"></div>
 ```
-2. Init
+## 1.Init
 
 ```html
 <script>
@@ -28,7 +28,7 @@
   });
 </script>
 ```
-3. Set Config (optional)
+## 2.Set Config (optional)
 
 ```html
 <script>
@@ -87,20 +87,22 @@
 </script>
 ```
 
-4. New Canvas (optional)
+## 3.New Canvas (optional)
 
 ```html
 <script>
   canvaaas.new({
     filename: "filename", // string
-    width: 1800, // number, px
-    height: 1200, // number, px
+    dataType: "url", // string
+    mimeType: "image/png", // string
+    quality: 0.92, // number, 0 ~ 1
+    width: 1800, // number, required, px
+    height: 1200, // number, required, px
     overlay: true, // boolean
     checker: true, // boolean
     editabled: true, // boolean
     focusabled: true, // boolean
-    drawabled: true, // boolean
-    background: "#000000" // string, rgb format(7 characters) or "alpha" or "transparent"
+    background: "#FFFFFF" // string, rgb format(7 characters) or "alpha" or "transparent"
   }, function(err, res){
     if (err) {
       console.log(err);
@@ -111,81 +113,26 @@
 </script>
 ```
 
-5. Open Image
+## 4.Open Image
 
 ```html
-<!-- Upload single -->
-<input id="blahblah" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
-```
-
-```html
-<!-- Upload multiple -->
 <input id="blahblah" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
 ```
 
 ```html
 <script>
-  // Upload single
-  canvaaas.uploadUrl("./img/1.png", function(err, res){
+  canvaaas.uploadUrls(["./img/1.png", "./img/2.png"], function(err, res, status){
     if (err) {
       console.log(err);
       return false;
     }
-    console.log("canvaaas.uploadUrl() callback", res);
+    console.log("canvaaas.uploadUrls() callback", res, status);
   });
 </script>
 ```
 
 ```html
 <script>
-  // Upload multiple
-  canvaaas.uploadUrls(["./img/1.png", "./img/2.png"], function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.uploadUrl() callback", res);
-  });
-</script>
-```
-
-```html
-<script>
-  // Upload single
-  canvaaas.uploadState({
-    "id": "blahblah", // string
-    "src": "./img/1.png", // string
-    "cropTop": 0, // number
-    "cropBottom": 0, // number
-    "cropLeft": 0, // number
-    "cropRight": 0, // number
-    "index": 1, // number
-    "width": 600.0000000000001, // number
-    "height": 600.0000000000001, // number
-    "x": 399.07235621521335, // number
-    "y": 808.7198515769946, // number
-    "rotate": 17.46323891797897, // number
-    "scaleX": 1, // number
-    "scaleY": 1, // number
-    "opacity": 1, // number
-    "lockAspectRatio": false, // boolean
-    "visible": true, // boolean
-    "focusabled": true, // boolean
-    "editabled": true, // boolean
-    "drawabled": true, // boolean
-  }, function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.uploadState() callback", res);
-  });
-</script>
-```
-
-```html
-<script>
-  // Upload multiple
   canvaaas.uploadStates([{
     "id": "blahblah-1", // string
     "src": "./img/1.png", // string
@@ -233,13 +180,12 @@
       console.log(err);
       return false;
     }
-    console.log("canvaaas.uploadState() callback", res);
+    console.log("canvaaas.uploadStates() callback", res, status);
   });
 </script>
 ```
 
 ```html
-<!-- Upload single -->
 <img
   id="blahblah"
   src="./img/1.png"
@@ -265,27 +211,26 @@
   data-drawabled = "true">
 
 <script>
-  canvaaas.uploadElement(document.getElementById("blahblah"), function(err, res){
+  canvaaas.uploadElements([document.getElementById("blahblah")], function(err, res, status){
     if (err) {
       console.log(err);
       return false;
     }
-    console.log("canvaaas.uploadElement() callback", res);
+    console.log("canvaaas.uploadElements() callback", res, status);
   });
 </script>
 ```
 
-6. Get Edited Image
+## 5.Get Edited Image
 
 ```html
 <script>
   canvaaas.draw({
-    // default options => canvaaas.new option
     filename: 'filename', // optional
     dataType: 'url',  // optional, "url" or "file"
     mimeType: 'image/png', // optional
-    drawWidth: 256, // optional
-    drawHeight: 256, // optional
+    width: 256, // optional
+    height: 256, // optional
     quality: 0.5, // optional
     background: '#000000', // optional, rgb format, 7 characters
   }, function(err, res, result){
@@ -298,12 +243,11 @@
 </script>
 ```
 
-7. Get Edited Image from JSON Data
+## Get Edited Image from JSON Data
 
 ```html
 <script>
   canvaaas.drawTo({
-    // default options => canvaaas.new option
     filename: 'filename', // optional
     dataType: 'url', // optional
     mimeType: 'image/png', // optional
@@ -313,7 +257,7 @@
     drawHeight: 3600, // optional
     quality: 0.92, // optional
     background: '#FFFFFF', // optional, rgb format, 7 characters
-  }, {
+  }, [{
     "src": "./img/1.png", // required
     "index": 1, // required
     "width": 600.0000000000001, // required
@@ -328,7 +272,7 @@
     "cropBottom": 0, // optional
     "cropLeft": 0, // optional
     "cropRight": 0, // optional
-  }, function(err, res, result){
+  }], function(err, res, result){
     if (err) {
       console.log(err);
       return false;
@@ -338,13 +282,11 @@
 </script>
 ```
 
-
-0. Handle Style
+## Handle Style
 
 ```html
 <script>
   canvaaas.handle({
-    // default handle
     inside: {
       n: "resize", // resize, crop
       ne: "resize", // resize, crop
@@ -375,7 +317,21 @@
 </script>
 ```
 
-0. Import
+## Export
+
+```html
+<script>
+  canvaaas.export(function(err, res){
+    if (err) {
+      console.log(err);
+      return false;
+    }
+    console.log('canvaaas.export()', res);
+  });
+</script>
+```
+
+## Import
 
 ```html
 <script>

@@ -121,6 +121,10 @@
 }
 .canvaaas-wrapper.hidden{
 	visibility: hidden;
+	pointer-events: none;
+}
+.canvaaas-wrapper.blurred{
+	pointer-events: none;
 }
 
 /* image */
@@ -146,7 +150,7 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	/* pointer-events: none; */
+	pointer-events: none;
 }
 
 /* innerline */
@@ -261,7 +265,7 @@
 .canvaaas-inhandle,
 .canvaaas-outhandle{
 	position: absolute;
-	display: block;
+	display: none; /* hide */
 	width: 36px; /* click space */
 	height: 36px; /* click space */
 	cursor: grab;
@@ -370,80 +374,38 @@
 
 }
 
-/* custom */
-.canvaaas-inhandle,
-.canvaaas-outhandle{
-	display: none; /* hide */
-}
-
 /* on focus */
-.canvaaas-canvas.on-focus{
+.canvaaas-canvas.focusing{
 	outline: 1px solid black;
 }
-.canvaaas-wrapper.on-focus{
+.canvaaas-wrapper.focusing{
 	cursor: move;
 }
-.canvaaas-wrapper.on-focus .canvaaas-innerline{
+.canvaaas-wrapper.focusing .canvaaas-innerline{
 	/* display: block; */
 }
-.canvaaas-wrapper.on-focus .canvaaas-outline{
+.canvaaas-wrapper.focusing .canvaaas-outline{
 	display: block;
 }
-.canvaaas-wrapper.on-focus .canvaaas-outhandle.canvaaas-handle-n,
-.canvaaas-wrapper.on-focus .canvaaas-outhandle.canvaaas-handle-e,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-n,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-ne,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-e,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-se,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-s,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-sw,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-w,
-.canvaaas-wrapper.on-focus .canvaaas-inhandle.canvaaas-handle-nw{
+.canvaaas-wrapper.focusing .canvaaas-outhandle.canvaaas-handle-n,
+.canvaaas-wrapper.focusing .canvaaas-outhandle.canvaaas-handle-e,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-n,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-ne,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-e,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-se,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-s,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-sw,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-w,
+.canvaaas-wrapper.focusing .canvaaas-inhandle.canvaaas-handle-nw{
 	display: block;
 }
 
 /* on edit */
-.canvaaas-wrapper.on-edit .canvaaas-overlay{
+.canvaaas-wrapper.editing .canvaaas-overlay{
 	display: block;
 }
-.canvaaas-inhandle.on-edit .canvaaas-handle-box,
-.canvaaas-outhandle.on-edit .canvaaas-handle-box{
+.canvaaas-inhandle.editing .canvaaas-handle-box,
+.canvaaas-outhandle.editing .canvaaas-handle-box{
 	border-color: #000000;
 	background-color: #000000;
-}
-
-/* uneditabled */
-.canvaaas-canvas.on-focus.uneditabled,
-.canvaaas-mirror.on-focus.uneditabled{
-	outline: 1px solid orange;
-	cursor: not-allowed;
-}
-.canvaaas-wrapper.uneditabled{
-	cursor: not-allowed;
-}
-.canvaaas-wrapper.uneditabled .canvaaas-innerline,
-.canvaaas-wrapper.uneditabled .canvaaas-outline,
-.canvaaas-wrapper.uneditabled .canvaaas-handle-box{
-	border-color: orange;
-}
-.canvaaas-wrapper.uneditabled .canvaaas-inhandle,
-.canvaaas-wrapper.uneditabled .canvaaas-outhandle{
-	cursor: not-allowed;
-}
-
-/* unfocusabled */
-.canvaaas-canvas.unfocusabled,
-.canvaaas-mirror.unfocusabled{
-	pointer-events: none;
-	cursor: default;
-}
-.canvaaas-wrapper.unfocusabled{
-	pointer-events: none;
-	cursor: default;
-}
-
-/* undrawabled */
-.canvaaas-canvas.undrawabled .canvaaas-wrapper.undrawabled,
-.canvaaas-mirror.undrawabled .canvaaas-wrapper.undrawabled{
-	visibility: hidden;
 }

@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>canvaaas</title>
+	<title>canvaaas.js</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
@@ -28,10 +28,19 @@
 		}
 
 		#myImage,
-		#myCanvas {
+		#myImage2,
+		#myImage3,
+		#myCanvas,
+		#myCanvas2{
 			/*color: #FFF;*/
 			/*background-color: #000;*/
 			/*border-top: 1px solid black;*/
+			font-size: 0.8rem;
+			padding: 3px 24px;
+		}
+
+		#myShortCut {
+			text-align: right;
 			font-size: 0.8rem;
 			padding: 3px 24px;
 		}
@@ -45,9 +54,12 @@
 			float: left;
 		}
 
-		#myCanvas-editabled {
+		#myCanvas-editabled,
+		#myCanvas-focusabled,
+		#myCanvas-checker,
+		#myCanvas-overlay {
 			float: right;
-			margin-right: 6px;
+			margin-left: 6px;
 		}
 
 		#myCanvas-backgroundColor {
@@ -66,10 +78,18 @@
 			float: left;
 		}
 
-		#myImage-state {
+		#myImage-state,
+		#myImage-crop {
 			float: right;
 		}
-
+		#myImage-editabled,
+		#myImage-focusabled,
+		#myImage-drawabled,
+		#myImage-lockAspectRatio,
+		#myImage-visible {
+			float: right;
+			margin-left: 6px;
+		}
 		input[type='file'] {
 			display: none;
 		}
@@ -133,7 +153,7 @@
 		.header-list {
 			position: absolute;
 			list-style: none;
-			min-width: 150px;
+			min-width: 200px;
 			margin: 0 6px;
 			padding: 6px 6px;
 			background-color: #171717;
@@ -195,12 +215,13 @@
 
 	<div id="header" class="header">
 		<div class="header-hidden">
-			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFile(this.files)" accept="image/*">
+			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*">
+			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
 		</div>
 		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">Canvaaas.js</a>
+			<a href="javascript:void(0)" class="header-subject">canvaaas.js</a>
 			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About Canvaaas</a>
+				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About canvaaas.js</a>
 				</li>
 				<li><a href="https://github.com/godicheol/canvaaas">Back to Github</a></li>
 			</ul>
@@ -217,7 +238,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log(res);
+						console.log('canvaaas.new()', res);
 					})
 				">New</a></li>
 				<li><a href="javascript:void(0)" onclick="
@@ -226,26 +247,43 @@
 							console.log(err);
 							return false;
 						}
-						console.log(res);
+						console.log('canvaaas.close()', res);
 					})
 				">Close</a></li>
 				<li class="rule"></li>
-				<li><label for="uploadSingle">Upload from File</label></li>
+				<li><label for="uploadMultiple">Upload from files</label></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrl(
-						window.prompt('Type image URL(URLs are case sensitive in github.io)', './img/1.png')
-					)
-				">Upload from URL</a></li>
+					canvaaas.uploadUrls([
+						window.prompt('Type image URL(URL`s are case sensitive in github.io)', './img/1.png')
+					], function(err, res, status) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.uploadUrls()', res, status);
+					})
+				">Upload from URLs</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadState(exportedStates[0])
-				">Upload from State</a></li>
+					canvaaas.uploadStates(exportedStates, function(err, res, status) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.uploadStates()', res, status);
+					})
+				">Upload from states</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadElement(
-						document.getElementById(
-							window.prompt('Type Element ID (e.g. image-2)', 'image-1')
-						)
-					)
-				">Upload from Element</a></li>
+					canvaaas.uploadElements([
+						document.getElementById('image-1'),
+						document.getElementById('image-2')
+					], function(err, res, status) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.uploadElements()', res, status);
+					})
+				">Upload from elements</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
@@ -255,7 +293,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('draw callback', result);
+						console.log('canvaaas.draw()', result);
 						preview(res);
 					})
 				">Preview</a></li>
@@ -273,10 +311,10 @@
 							console.log(err);
 							return false;
 						}
-						console.log('draw callback', result);
+						console.log('canvaaas.draw()', result);
 						preview(res);
 					});
-				">Preview To<br />256 x 256 px</a></li>
+				">Preview to<br />256 x 256 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.draw({
 						filename: 'large',
@@ -290,10 +328,10 @@
 							console.log(err);
 							return false;
 						}
-						console.log('draw callback', result);
+						console.log('canvaaas.draw()', result);
 						preview(res);
 					});
-				">Preview To<br />5120 x 5120 px</a></li>
+				">Preview to<br />5120 x 5120 px</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.drawTo({
 						filename: 'fromJSON',
@@ -303,8 +341,8 @@
 						background: '#FFFFFF',
 						width: 1800,
 						height: 1200,
-						drawWidth: 3600,
-						drawHeight: 3600
+						drawWidth: 5120,
+						drawHeight: 5120
 					},
 					exportedStates2,
 					function(err, res, result){
@@ -312,7 +350,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('drawTo callback', result);
+						console.log('canvaaas.drawTo()', result);
 						preview(res);
 					})
 				">Preview from JSON</a></li>
@@ -323,7 +361,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('export callback', res);
+						console.log('canvaaas.export()', res);
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Export</a></li>
@@ -333,7 +371,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('import callback', res);
+						console.log('canvaaas.import()', res);
 					})
 				">Import</a></li>
 				<li class="rule"></li>
@@ -343,83 +381,80 @@
 							alert(err);
 							return false;
 						}
-						console.log('getConfig callback', res);
+						console.log('canvaaas.getConfig()', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Config Data</a></li>
+				">Get config data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getCanvas(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log('getCanvas callback', res);
+						console.log('canvaaas.getCanvas()', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Canvas Data</a></li>
+				">Get canvas data</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getImage(window.prompt('Type image ID'), function(err, res){
+					canvaaas.getImage(canvaaas.this().id, function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log('getImage callback', res);
+						console.log('canvaaas.getImage()', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Image Data</a></li>
+				">Get image data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getImages(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log('getImages callback', res);
+						console.log('canvaaas.getImages()', res);
 						alert(JSON.stringify(res, null, 2));
 					})
-				">Get Images Data</a></li>
+				">Get images data</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.getPreviousImage(canvaaas.this().id, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log('canvaaas.getPreviousImage()', res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Get previous image data</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.getNextImage(canvaaas.this().id, function(err, res){
+						if (err) {
+							alert(err);
+							return false;
+						}
+						console.log('canvaaas.getNextImage()', res);
+						alert(JSON.stringify(res, null, 2));
+					})
+				">Get next image data</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getUndo(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log('getUndo callback', res);
-						alert(JSON.stringify(res, null, 2));
+						console.log('canvaaas.getUndo()', res);
+						alert(JSON.stringify(res.length, null, 2));
 					})
-				">Get Number of Undo Caches</a></li>
+				">Get number of undo caches</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.getRedo(function(err, res){
 						if (err) {
 							alert(err);
 							return false;
 						}
-						console.log('getRedo callback', res);
-						alert(JSON.stringify(res, null, 2));
+						console.log('canvaaas.getRedo()', res);
+						alert(JSON.stringify(res.length, null, 2));
 					})
-				">Get Number of Redo Caches</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.config({
-						dragAndDrop: true
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('config callback', res);
-					})
-				">Set Drag And Drop Upload</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.config({
-						dragAndDrop: false
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('config callback', res);
-					})
-				">Unset Drag And Drop Upload</a></li>
+				">Get number of redo caches</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.init(document.getElementById('myContainer'), function(err, res){
@@ -427,13 +462,13 @@
 							console.log(err);
 							return false;
 						}
-						console.log('init callback', res);
+						console.log('canvaaas.init()', res);
 						canvaaas.config(testConfig, function(err, res){
 							if (err) {
 								console.log(err);
 								return false;
 							}
-							console.log('config callback', res);
+							console.log('canvaaas.config()', res);
 						})
 					})
 				">Init</a></li>
@@ -443,7 +478,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('destroy callback', res);
+						console.log('canvaaas.destroy()', res);
 					})
 				">Destroy</a></li>
 			</ul>
@@ -457,7 +492,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('undo callback', res);
+						console.log('canvaaas.undo()', res);
 						checkCaches();
 					})
 				">Undo</a></li>
@@ -467,7 +502,7 @@
 							console.log(err);
 							return false;
 						}
-						console.log('redo callback', res);
+						console.log('canvaaas.redo()', res);
 						checkCaches();
 					})
 				">Redo</a></li>
@@ -496,203 +531,238 @@
 						alert(JSON.stringify(res, null, 2));
 					})
 				">Find Many</a></li> -->
-				<!-- <li class="rule"></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.updateOne({
-						index: 2
-					}, {
-						x: 0,
-						y: 0
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log(res);
-						alert(JSON.stringify(res, null, 2));
+					canvaaas.state(canvaaas.this().id, {
+						id: window.prompt('Type new ID')
 					})
-				">Update One</a></li>
+				">ID</a></li>
+				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.updateMany({
-						index: 2
-					}, {
-						x: 0,
-						y: 0
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log(res);
-						alert(JSON.stringify(res, null, 2));
+					canvaaas.moveY(canvaaas.this().id, -10)
+				">Move top +10px</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveY(canvaaas.this().id, 10)
+				">Move bottom +10px</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveX(canvaaas.this().id, -10)
+				">Move left +10px</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.moveX(canvaaas.this().id, 10)
+				">Move right +10px</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoom(canvaaas.this().id, 0.1)
+				">Zoom +0.1</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.zoom(canvaaas.this().id, -0.1)
+				">Zoom -0.1</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cover(canvaaas.this().id)
+				">Fit cover</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.contain(canvaaas.this().id)
+				">Fit contain</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.rotate(canvaaas.this().id, -45)
+				">Rotate left 45</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.rotate(canvaaas.this().id, 45)
+				">Rotate right 45</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.state(canvaaas.this().id, {
+						rotate: 0
 					})
-				">Update Many</a></li> -->
+				">Rotate to 0</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.id(canvaaas.this(), window.prompt('Type new ID'))
-				">Change ID</a></li>
+					canvaaas.flipY(canvaaas.this().id)
+				">Flip horizontally</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.flipX(canvaaas.this().id)
+				">Flip vertically</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.state(canvaaas.this().id, {
+						scaleX: 1,
+						scaleY: 1,
+					})
+				">Flip reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 0, -10)
-				">Move Top 10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 0, 10)
-				">Move Bottom 10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), -10, 0)
-				">Move Left 10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.move(canvaaas.this(), 10, 0)
-				">Move Right 10px</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'left', 'top')
-				">Move Top-Left</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'center', 'top')
-				">Move Top-Center</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'right', 'top')
-				">Move Top-Right</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'left', 'middle')
-				">Move Middle-Left</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'center', 'middle')
-				">Move Middle-Center</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'right', 'middle')
-				">Move Middle-Right</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'left', 'bottom')
-				">Move Bottom-Left</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'center', 'bottom')
-				">Move Bottom-Center</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveTo(canvaaas.this(), 'right', 'bottom')
-				">Move Bottom-Right</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoom(canvaaas.this(), 0.1)
-				">Zoom In 0.1</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoom(canvaaas.this(), -0.1)
-				">Zoom Out 0.1</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoomTo(canvaaas.this(), 0.01)
-				">Zoom To 0.01</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoomTo(canvaaas.this(), 0.1)
-				">Zoom To 0.1</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoomTo(canvaaas.this(), 1)
-				">Zoom To 1</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoomTo(canvaaas.this(), 'cover')
-				">Zoom To Cover</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoomTo(canvaaas.this(), 'contain')
-				">Zoom To Contain</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.rotate(canvaaas.this(), -45)
-				">Rotate Left 45</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.rotate(canvaaas.this(), 45)
-				">Rotate Right 45</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.rotateTo(canvaaas.this(), 0)
-				">Rotate To 0</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipY(canvaaas.this())
-				">Flip Horizontally</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipX(canvaaas.this())
-				">Flip Vertically</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.opacity(canvaaas.this(), window.prompt('0 ~ 1', '0.5'))
+					canvaaas.opacity(canvaaas.this().id, window.prompt('0 ~ 1', '0.5'))
 				">Opacity</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.crop(canvaaas.this(), {
-						top: window.prompt('Top', '0'),
-						bottom: window.prompt('Bottom', '0'),
-						left: window.prompt('Left', '0'),
-						right: window.prompt('Right', '0'),
-					})
-				">Crop</a></li>
+					canvaaas.cropTop(canvaaas.this().id, 10)
+				">Crop top +10</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropTo(canvaaas.this(), {
-						top: window.prompt('Top', '0'),
-						bottom: window.prompt('Bottom', '0'),
-						left: window.prompt('Left', '0'),
-						right: window.prompt('Right', '0'),
-					})
-				">Crop To</a></li>
+					canvaaas.cropTop(canvaaas.this().id, -10)
+				">Crop top -10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropBottom(canvaaas.this().id, 10)
+				">Crop bottom +10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropBottom(canvaaas.this().id, -10)
+				">Crop bottom -10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropLeft(canvaaas.this().id, 10)
+				">Crop left +10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropLeft(canvaaas.this().id, -10)
+				">Crop left -10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropRight(canvaaas.this().id, 10)
+				">Crop right +10</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.cropRight(canvaaas.this().id, -10)
+				">Crop right -10</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.indexTo(canvaaas.this(), window.prompt('Number', '5'))
-				">Index To</a></li>
+					canvaaas.state(canvaaas.this().id, {
+						index: window.prompt('Number', '5')
+					})
+				">Index to</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.index(canvaaas.this(), 1)
+					canvaaas.index(canvaaas.this().id, 1)
 				">Index +1</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.index(canvaaas.this(), -1)
+					canvaaas.index(canvaaas.this().id, -1)
 				">Index -1</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusIn(window.prompt('ID'))
-				">Focus In</a></li>
+				">Focus in</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.focusOut()
-				">Focus Out</a></li>
+				">Focus out</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.aspectRatio(canvaaas.this(), true)
-				">Lock Aspect Ratio</a></li>
+					canvaaas.state(canvaaas.this().id, {
+						lockAspectRatio: true
+					})
+				">Lock aspect ratio</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.aspectRatio(canvaaas.this(), false)
-				">Unlock Aspect Ratio</a></li>
+					canvaaas.state(canvaaas.this().id, {
+						lockAspectRatio: false
+					})
+				">Unlock aspect ratio</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({}, function(err, res) {
+						if (err) {
+							return false
+						}
+						res.forEach(function(elem){
+							canvaaas.state(elem.id, {
+								focusabled: true
+							})
+						})
+					})
+				">Lock aspect ratio all</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusable(canvaaas.this(), true)
+					canvaaas.state(canvaaas.this().id, {
+						focusabled: true
+					})
 				">Focusable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusable(canvaaas.this(), false)
+					canvaaas.state(canvaaas.this().id, {
+						focusabled: false
+					})
 				">Unfocusable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({}, function(err, res) {
+						if (err) {
+							return false
+						}
+						res.forEach(function(elem){
+							canvaaas.state(elem.id, {
+								focusabled: true
+							})
+						})
+					})
+				">Focusable all</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editable(canvaaas.this(), true)
+					canvaaas.state(canvaaas.this().id, {
+						editabled: true
+					})
 				">Editable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editable(canvaaas.this(), false)
+					canvaaas.state(canvaaas.this().id, {
+						editabled: false
+					})
 				">Uneditable</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({}, function(err, res) {
+						if (err) {
+							return false
+						}
+						res.forEach(function(elem){
+							canvaaas.state(elem.id, {
+								editabled: true
+							})
+						})
+					})
+				">Editable all</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawable(canvaaas.this(), true)
+					canvaaas.state(canvaaas.this().id, {
+						drawabled: true
+					})
 				">Drawable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawable(canvaaas.this(), false)
+					canvaaas.state(canvaaas.this().id, {
+						drawabled: false
+					})
 				">Undrawable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-							canvaaas.visible(canvaaas.this(), true)
-						">Show</a></li>
+					canvaaas.state(canvaaas.this().id, {
+						visible: true
+					})
+				">Show</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.visible(canvaaas.this(), false)
+					canvaaas.state(canvaaas.this().id, {
+						visible: false
+					})
 				">Hide</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({
+						visible: false
+					}, function(err, res) {
+						if (err) {
+							return false
+						}
+						res.forEach(function(elem){
+							canvaaas.state(elem.id, {
+								visible: true
+							})
+						})
+					})
+				">Show all</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.findMany({
+						visible: true
+					}, function(err, res) {
+						if (err) {
+							return false
+						}
+						res.forEach(function(elem){
+							canvaaas.state(elem.id, {
+								visible: false
+							})
+						})
+					})
+				">Hide all</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.reset(canvaaas.this())
+					canvaaas.reset(canvaaas.this().id)
 				">Reset</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.remove(canvaaas.this())
+					canvaaas.remove(canvaaas.this().id)
 				">Remove</a></li>
 			</ul>
 		</div>
@@ -700,17 +770,56 @@
 			<a href="javascript:void(0)" class="header-subject">Canvas</a>
 			<ul class="header-list hidden">
 				<li><a href="javascript:void(0)" onclick="
-          canvaaas.filename(window.prompt('Type filename', 'untitled'), function(err, res){
-            if (err) {
-              console.log(err);
-              return false;
-            }
-            writeCanvasData();
-          })
-        ">Filename</a></li>
+					canvaaas.canvas({
+						filename: window.prompt('Type filename', 'untitled')
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Filename</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						dataType: window.prompt('Type output data type (url of file)', 'url')
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Data type</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						mimeType: window.prompt('Type mime type', 'image/jpeg')
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Mime type</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						quality: window.prompt('Type quality (0 ~ 1)', '0.92')
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Quality</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.resize({
+					canvaaas.canvas({
 						width: window.prompt('Type width', '1800'),
 						height: window.prompt('Type height', '1200'),
 					}, function(err, res){
@@ -718,65 +827,140 @@
 							console.log(err);
 							return false;
 						}
+						console.log('canvaaas.canvas()', res);
 						writeCanvasData();
 					})
 				">Resize</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editableAll(true)
-				">Editable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.editableAll(false)
-				">Uneditable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusableAll(true)
-				">Focusable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusableAll(false)
-				">Unfocusable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-          canvaaas.drawableAll(true)
-        ">Show Undrawables</a></li>
-				<li><a href="javascript:void(0)" onclick="
-          canvaaas.drawableAll(false)
-				">Hide Undrawables</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.background(window.prompt('e.g. #FFFFFF, alpha', '#000000'), function(err, res){
+					canvaaas.canvas({
+						editabled: true
+					}, function(err, res){
 						if (err) {
 							console.log(err);
 							return false;
 						}
+						console.log('canvaaas.canvas()', res);
 						writeCanvasData();
 					})
-				">Set Background Color</a></li>
+				">Editable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.background('alpha')
-				">Remove Background Color</a></li>
+					canvaaas.canvas({
+						editabled: false
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Uneditable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.overlay(true)
-				">Show Overlay</a></li>
+					canvaaas.canvas({
+						focusabled: true
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Focusable</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.overlay(false)
-				">Hide Overlay</a></li>
+					canvaaas.canvas({
+						focusabled: false
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Unfocusable</a></li>
 				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(true)
-				">Show Checker</a></li>
+					canvaaas.canvas({
+						background: window.prompt('e.g. #FFFFFF, alpha', '#000000')
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Set background</a></li>
 				<li><a href="javascript:void(0)" onclick="
-					canvaaas.checker(false)
-				">Hide Checker</a></li>
+					canvaaas.canvas({
+						background: 'transparent'
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Unset background</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						overlay: true
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Show overlay</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						overlay: false
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Hide overlay</a></li>
+				<li class="rule"></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						checker: true
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Show checker</a></li>
+				<li><a href="javascript:void(0)" onclick="
+					canvaaas.canvas({
+						checker: false
+					}, function(err, res){
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.canvas()', res);
+						writeCanvasData();
+					})
+				">Hide checker</a></li>
 			</ul>
 		</div>
 		<div class="header-tab">
 			<a href="javascript:void(0)" class="header-subject">View</a>
 			<ul class="header-list hidden">
-				<li><a id="showCanvas" href="javascript:void(0)">Show Canvas Data</a></li>
-				<li><a id="showImage" href="javascript:void(0)">Show Image Data</a></li>
-				<li class="rule"></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
 						inside: {
@@ -799,8 +983,14 @@
 							w: 'flip',
 							nw: 'flip',
 						}
+					}, function(err, res) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.handle()', res);
 					})
-				">Handle Style 1 (default)</a></li>
+				">Handle Style default</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
 						inside: {
@@ -817,8 +1007,14 @@
 							n: 'rotate',
 							e: 'flip',
 						}
+					}, function(err, res) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.handle()', res);
 					})
-				">Handle Style 2 (crop mode)</a></li>
+				">Handle style crop mode</a></li>
 				<li><a href="javascript:void(0)" onclick="
 					canvaaas.handle({
 						inside: {
@@ -841,27 +1037,236 @@
 							w: 'crop',
 							nw: 'crop',
 						}
+					}, function(err, res) {
+						if (err) {
+							console.log(err);
+							return false;
+						}
+						console.log('canvaaas.handle()', res);
 					})
-				">Handle Style 3 (crop & resize)</a></li>
+				">Handle style 3</a></li>
 			</ul>
 		</div>
 	</div>
 
 	<div id="myContainer"></div>
 
-	<div id="myCanvas" class="hidden">
+	
+	<div id="myCanvas" class="">
 		<div id="myCanvas-filename"></div>
 		<div id="myCanvas-state"></div>
 		<div id="myCanvas-backgroundColor"></div>
-		<span style="float: right; font-size: 0.8rem; margin-right: 0.1rem;">bg:</span>
-		<div id="myCanvas-editabled"></div>
 		<div style="clear: both;"></div>
 	</div>
+
+	<div id="myCanvas2" class="">
+		<div id="myCanvas-editabled"></div>
+		<div id="myCanvas-focusabled"></div>
+		<div id="myCanvas-overlay"></div>
+		<div id="myCanvas-checker"></div>
+		<div style="clear: both;"></div>
+	</div>
+
+	<div style="border-bottom: 1px solid #000;"></div>
 
 	<div id="myImage" class="">
 		<div id="myImage-id"></div>
 		<div id="myImage-state"></div>
 		<div style="clear: both;"></div>
+	</div>
+
+	<div id="myImage2" class="">
+		<div id="myImage-crop"></div>
+		<div style="clear: both;"></div>
+	</div>
+
+	<div id="myImage3" class="">
+		<div id="myImage-visible"></div>
+		<div id="myImage-editabled"></div>
+		<div id="myImage-focusabled"></div>
+		<div id="myImage-drawabled"></div>
+		<div id="myImage-lockAspectRatio"></div>
+		<div style="clear: both;"></div>
+	</div>
+
+	<div style="border-bottom: 1px solid #000;"></div>
+
+	<div id="myShortCut">
+		<div style="margin: 4px 0;">
+			Short cuts
+		</div>
+		<div style="margin: 4px 0;">
+			<a href="javascript:void(0)" onclick="
+				canvaaas.handle({
+					inside: {
+						n: 'resize',
+						ne: 'resize',
+						e: 'resize',
+						se: 'resize',
+						s: 'resize',
+						sw: 'resize',
+						w: 'resize',
+						nw: 'resize',
+					}
+				}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					console.log('canvaaas.handle()', res);
+				})
+			">Resize mode</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.handle({
+					inside: {
+						n: 'crop',
+						ne: 'crop',
+						e: 'crop',
+						se: 'crop',
+						s: 'crop',
+						sw: 'crop',
+						w: 'crop',
+						nw: 'crop',
+					}
+				}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					console.log('canvaaas.handle()', res);
+				})
+			">Crop mode</a>
+		</div>
+		<div style="margin: 4px 0;">
+			<a href="javascript:void(0)" onclick="
+				canvaaas.getPreviousImage(canvaaas.this().id, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					var a = canvaaas.this().index;
+					var b = res.index;
+
+					canvaaas.state(canvaaas.this().id, {
+						index: b
+					})
+
+					canvaaas.state(res.id, {
+						index: a
+					})
+				})
+			">Change previous index</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.getNextImage(canvaaas.this().id, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					var a = canvaaas.this().index;
+					var b = res.index;
+
+					canvaaas.state(canvaaas.this().id, {
+						index: b
+					})
+
+					canvaaas.state(res.id, {
+						index: a
+					})
+				})
+			">Change next index</a>
+			/
+			<input type="range" value="1" min="0" max="1" step="0.01" oninput="
+				var v = this.value;
+				canvaaas.findMany({}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					res.forEach(function(elem){
+						canvaaas.state(elem.id, {
+							opacity: v
+						});
+					})
+				})
+			">
+			/
+			<input type="range" value="0" min="0" max="360" oninput="
+				var v = this.value;
+				canvaaas.findMany({}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					res.forEach(function(elem){
+						canvaaas.state(elem.id, {
+							rotate: v
+						});
+					})
+				})
+			">
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.findMany({}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					res.forEach(function(elem){
+						canvaaas.state(elem.id, {
+							visible: false
+						});
+					})
+				})
+			">Hide all</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.findMany({}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					res.forEach(function(elem){
+						canvaaas.state(elem.id, {
+							visible: true
+						});
+					})
+				})
+			">Show all</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.findMany({}, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					res.forEach(function(elem){
+						canvaaas.zoom(elem.id, 0.1);
+					})
+				})
+			">Zoom all</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.getPreviousImage(canvaaas.this().id, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					canvaaas.focusIn(res.id);
+				})
+			">Select previous</a>
+			/
+			<a href="javascript:void(0)" onclick="
+				canvaaas.getNextImage(canvaaas.this().id, function(err, res) {
+					if (err) {
+						console.log(err);
+						return false;
+					}
+					canvaaas.focusIn(res.id);
+				})
+			">Select next</a>
+		</div>
 	</div>
 
 	<div id="myPreview" class="hidden"></div>
@@ -870,12 +1275,11 @@
 		<!-- IMG with dataset -->
 		<img id="image-1" src="./img/1.png" data-id="1" data-src="./img/1.png" data-index="1" data-width="600"
 			data-height="600" data-x="399.07235621521335" data-y="808.7198515769946" data-rotate="17.46323891797897"
-			data-scaleX="1" data-scaleY="1" data-opacity="1" data-lockAspectRatio="false" data-focusabled="true"
+			data-scale-x="1" data-scale-y="1" data-opacity="1" data-lock-aspect-ratio="false" data-focusabled="true"
 			data-editabled="true" data-drawabled="true">
 
 		<img id="image-2" data-src="./img/3.jpeg" data-width="948.4312600294483" data-height="632.2875066862982"
 			data-x="151.39146567717992" data-y="291.0946196660483">
-
 	</div>
 
 	<script>
@@ -929,7 +1333,6 @@
 					return false;
 				}
 
-				writeImageData(res);
 				checkCaches();
 
 				console.log("config.edit callback", res);
@@ -953,9 +1356,9 @@
 
 		// #3 create canvas
 		canvaaas.new({
+			filename: "Test",
 			width: 1800, // number, px
 			height: 1200, // number, px
-			filename: "TEST",
 			overlay: true,
 			checker: true
 		}, function (err, res) {
@@ -1086,49 +1489,81 @@
 
 			var sFilename = document.getElementById("myCanvas-filename");
 			var sEditabled = document.getElementById("myCanvas-editabled");
+			var sFocusabled = document.getElementById("myCanvas-focusabled");
+			var sOverlay = document.getElementById("myCanvas-overlay");
+			var sChecker = document.getElementById("myCanvas-checker");
 			var sBackground = document.getElementById("myCanvas-backgroundColor");
 			var sState = document.getElementById("myCanvas-state");
 
 			sFilename.innerHTML = state.filename + "." + state.mimeType.split("/").pop();
 
 			sState.innerHTML = "";
-			sState.innerHTML += "w:" + Math.floor(state.width);
-			sState.innerHTML += " h:" + Math.floor(state.height);
+			sState.innerHTML += Math.floor(state.width) + " x " + Math.floor(state.height);
+			sState.innerHTML += " px";
 
-			sEditabled.innerHTML = state.editabled ?
-				"" : "<span style='color: red;'>Uneditabled</span>";
-
+			sEditabled.innerHTML = state.editabled ? "" : "<span style='color: red;'>Uneditabled</span>";
+			sFocusabled.innerHTML = state.focusabled ? "" : "<span style='color: red;'>Unfocusabled</span>";
+			sOverlay.innerHTML = state.overlay ? "" : "<span style='color: red;'>Hide overlay</span>";
+			sChecker.innerHTML = state.checker ? "" : "<span style='color: red;'>Hide checker</span>";
 			sBackground.style.backgroundColor = state.background;
 		}
 
 		function writeImageData(state) {
 			var sId = document.getElementById("myImage-id");
 			var sState = document.getElementById("myImage-state");
+			var sCrop = document.getElementById("myImage-crop"); 
+			var sEditabled = document.getElementById("myImage-editabled");
+			var sFocusabled = document.getElementById("myImage-focusabled");
+			var sVisible = document.getElementById("myImage-visible");
+			var sAspectRatio = document.getElementById("myImage-lockAspectRatio");
+			var sDrawabled = document.getElementById("myImage-drawabled");
 
 			if (!state) {
 				sId.innerHTML = "";
 				sState.innerHTML = "";
+				sCrop.innerHTML = "";
+				sEditabled.innerHTML = "";
+				sFocusabled.innerHTML = "";
+				sVisible.innerHTML = "";
+				sAspectRatio.innerHTML = "";
+				sDrawabled.innerHTML = "";
 				return false;
 			}
 
 			sId.innerHTML = state.id;
 
 			sState.innerHTML = "";
-			sState.innerHTML += " index:" + state.index;
-			sState.innerHTML += " x:" + Math.floor(state.x);
-			sState.innerHTML += " y:" + Math.floor(state.y);
-			sState.innerHTML += " w:" + Math.floor(state.width);
-			sState.innerHTML += " h:" + Math.floor(state.height);
-			sState.innerHTML += " deg:" + Math.floor(state.rotate);
-			sState.innerHTML += " flipX:" + state.scaleY;
-			sState.innerHTML += " flipY:" + state.scaleX;
-			sState.innerHTML += " opacity " + state.opacity;
+			sState.innerHTML += "index: " + state.index;
+			sState.innerHTML += " / x: " + Math.floor(state.x);
+			sState.innerHTML += " / y: " + Math.floor(state.y);
+			sState.innerHTML += " / w: " + Math.floor(state.width);
+			sState.innerHTML += " / h: " + Math.floor(state.height);
+			sState.innerHTML += " / deg: " + Math.floor(state.rotate);
+			sState.innerHTML += " / flip-x: " + state.scaleY;
+			sState.innerHTML += " / flip-y: " + state.scaleX;
+			sState.innerHTML += " / opacity " + state.opacity;
+
+			sEditabled.innerHTML = state.editabled ? "" : "<span style='color: red;'>Uneditabled</span>";
+			sFocusabled.innerHTML = state.focusabled ? "" : "<span style='color: red;'>Unfocusabled</span>";
+			sDrawabled.innerHTML = state.drawabled ? "" : "<span style='color: red;'>Undrawabled</span>";
+			sVisible.innerHTML = state.visible ? "" : "<span style='color: red;'>Hidden</span>";
+			sAspectRatio.innerHTML = state.lockAspectRatio ? "<span style='color: red;'>Lock Aspect Ratio</span>" : "";
+
+			sCrop.innerHTML = "";
+			sCrop.innerHTML += "crop-top: ";
+			sCrop.innerHTML += Math.floor(state.cropTop);
+			sCrop.innerHTML += " / crop-bottom: ";
+			sCrop.innerHTML += Math.floor(state.cropBottom);
+			sCrop.innerHTML += " / crop-left: ";
+			sCrop.innerHTML += Math.floor(state.cropLeft);
+			sCrop.innerHTML += " / crop-right: ";
+			sCrop.innerHTML += Math.floor(state.cropRight);
 		}
 
 		function checkCaches() {
 			var undo = document.getElementById("undo");
 			var redo = document.getElementById("redo");
-			if (canvaaas.getUndo() < 1) {
+			if (canvaaas.getUndo().length < 1) {
 				undo.style.pointerEvents = "none";
 				undo.style.cursor = "default";
 				undo.style.color = "#777";
@@ -1137,7 +1572,7 @@
 				undo.style.cursor = "";
 				undo.style.color = "";
 			}
-			if (canvaaas.getRedo() < 1) {
+			if (canvaaas.getRedo().length < 1) {
 				redo.style.pointerEvents = "none";
 				redo.style.cursor = "default";
 				redo.style.color = "#777";
@@ -1147,38 +1582,6 @@
 				redo.style.color = "";
 			}
 		}
-
-		(function () {
-			var sCanvas = document.getElementById("showCanvas");
-			var sImage = document.getElementById("showImage");
-
-			var aCanvas = document.getElementById("myCanvas");
-			var aImage = document.getElementById("myImage");
-
-			var opened = aImage;
-
-			function evtHandle(e) {
-				if (opened) {
-					if (opened.isSameNode(aCanvas)) {
-						aCanvas.classList.add("hidden");
-					} else if (opened.isSameNode(aImage)) {
-						aImage.classList.add("hidden");
-					}
-					opened = undefined;
-				}
-
-				if (e.target.isSameNode(sCanvas)) {
-					aCanvas.classList.remove("hidden");
-					opened = aCanvas;
-				} else if (e.target.isSameNode(sImage)) {
-					aImage.classList.remove("hidden");
-					opened = aImage;
-				}
-			}
-
-			sCanvas.addEventListener("click", evtHandle, false);
-			sImage.addEventListener("click", evtHandle, false);
-		})();
 
 		(function () {
 			var header = document.getElementById("header");
