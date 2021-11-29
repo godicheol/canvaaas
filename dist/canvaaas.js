@@ -9,102 +9,107 @@
 		var myObject = {};
 
 		var defaultConfig = {
-			allowedExtensionsForUpload: [
-				"bmp",
-				"jpg",
-				"jpeg",
-				"png",
-				"gif",
-				"svg",
-				"svg+xml",
-				"tiff",
-				"tif",
-				"webp",
-			], // array of allowed extensions
+
+			allowedMimeTypes: [
+				"image/bmp",
+				"image/x-ms-bmp",
+				"image/jpg",
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/svg",
+				"image/svg+xml",
+				"image/tiff",
+				"image/tif",
+				"image/webp",
+			], // array of allowed mimetypes
 
 			cacheLevels: 999, // number
 
-			dragAndDrop: true, // boolean
-
 			containerAspectRatio: 1 / 1, // number, width / height
 
-			maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
+			maxContainerWidth: undefined, // number, px
 
-			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
+			maxContainerHeight: undefined, // number, px
 
-			maxDrawWidth: 4096 * 4, // number, px
+			startIndexAfterRender: 1, // number
 
-			maxDrawHeight: 4096 * 4, // number, px
-
-			maxDrawWidthOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
-
-			maxDrawHeightOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
+			maxIndexAfterRender: 1000, // number
 
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 
 			lockAspectRatioAfterRender: false, // boolean
 
-			upload: undefined, // callback function
+			doubleClick: undefined, // function, callback
 
-			focus: undefined, // callback function
+			longPress: undefined, // function, callback
 
-			edit: undefined, // callback function
+			rightClick: undefined, // function, callback
 
-			remove: undefined, // callback function
+			hover: undefined, // function, callback
+
+			click: undefined, // function, callback
+
+			upload: undefined, // function, callback
+
+			edit: undefined, // function, callback
+
+			remove: undefined, // function, callback
 		};
 
 		var defaultCanvasState = {
 			filename: "untitled", // string, without extension
-			mimeType: "image/png", // string
-			dataType: "url", // string, ["url", "file"]
+			mimetype: "image/png", // string
 			quality: 0.92, // number, 0 ~ 1
-			editabled: true, // boolean
-			focusabled: true, // boolean
 			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
 			overlay: true, // boolean
-			checker: true // boolean
+			checker: true, // boolean
+			grid: true, // boolean
+			pivot: true, // boolean
+			clickable: true, // boolean
+			editable: true, // boolean
 		};
 
-		// insidee: resize, crop
-		// outside: rotate, flip
-		// error! outside.ne: "rotate"
-		// error! outside.se: "rotate"
-		// error! outside.nw: "rotate"
-		// error! outside.sw: "rotate"
+		// allowed values = ["resize", "crop", "rotate", "flip"];
 		var defaultHandleState = {
-			inside: {
-				n: "resize",
-				ne: "resize",
-				e: "resize",
-				se: "resize",
-				s: "resize",
-				sw: "resize",
-				w: "resize",
-				nw: "resize"
-			},
-			outside: {
-				n: "rotate",
-				ne: "crop",
-				e: "flip",
-				se: "crop",
-				s: "flip",
-				sw: "crop",
-				w: "flip",
-				nw: "crop"
-			}
+			"n": "resize",
+			"ne": "resize",
+			"e": "resize",
+			"se": "resize",
+			"s": "resize",
+			"sw": "resize",
+			"w": "resize",
+			"nw": "resize",
+			"n-nw": "rotate",
+			"n-n": "rotate",
+			"n-ne": "rotate",
+			"ne-n": "crop",
+			"ne-ne": "crop",
+			"ne-e": "crop",
+			"e-ne": "flip",
+			"e-e": "flip",
+			"e-se": "flip",
+			"se-s": "crop",
+			"se-se": "crop",
+			"se-e": "crop",
+			"s-sw": "flip",
+			"s-s": "flip",
+			"s-se": "flip",
+			"sw-s": "crop",
+			"sw-sw": "crop",
+			"sw-w": "crop",
+			"w-nw": "flip",
+			"w-w": "flip",
+			"w-sw": "flip",
+			"nw-n": "crop",
+			"nw-nw": "crop",
+			"nw-w": "crop",
 		};
 
-		// to get default state of image
-		var defaultImageState = function(newImage) {
+		// generate default state of image
+		var generateImageState = function(newImage) {
 			var id = getShortId();
-
-			var nextIndex = 0;
-			imageStates.forEach(function(elem){
-				if (nextIndex < elem.index) {
-					nextIndex = elem.index;
-				}
-			});
-
+			var lastIndex = config.startIndexAfterRender;
 			var fittedSizes = getContainedSizes(
 				newImage.width,
 				newImage.height,
@@ -112,10 +117,18 @@
 				canvasState.height * config.imageScaleAfterRender
 			);
 
+			for(var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].index < config.maxIndexAfterRender) {
+					if (imageStates[i].index > lastIndex) {
+						lastIndex = imageStates[i].index;
+					}
+				}
+			}
+
 			return {
 				id: id,
 				src: newImage.src,
-				index: nextIndex + 1,
+				index: lastIndex + 1,
 				originalWidth: newImage.width,
 				originalHeight: newImage.height,
 				width: fittedSizes[0],
@@ -132,79 +145,139 @@
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
-				lockAspectRatio: config.lockAspectRatioAfterRender || false,
+				lockAspectRatio: config.lockAspectRatioAfterRender,
 				visible: true,
-				focusabled: true,
-				editabled: true,
-				drawabled: true,
+				clickable: true,
+				editable: true,
+				drawable: true,
 			}
 		};
 
-		Object.freeze(defaultConfig);
-		Object.freeze(defaultCanvasState);
-		Object.freeze(defaultHandleState);
+		var _containerTemplate = "";
+		_containerTemplate += "<div class='canvaaas-container'>";
+		_containerTemplate += "<div class='canvaaas-mirror'></div>";
+		_containerTemplate += "<div class='canvaaas-background'></div>";
+		_containerTemplate += "<div class='canvaaas-checker'></div>";
+		_containerTemplate += "<div class='canvaaas-canvas'></div>";
+		_containerTemplate += "</div>";
 
-		var conatinerTemplate = "";
-		conatinerTemplate += "<div class='canvaaas-container'>";
-		conatinerTemplate += "<div class='canvaaas-mirror'></div>";
-		conatinerTemplate += "<div class='canvaaas-background'></div>";
-		conatinerTemplate += "<div class='canvaaas-checker'></div>";
-		conatinerTemplate += "<div class='canvaaas-canvas'></div>";
-		conatinerTemplate += "</div>";
+		var _imageTemplate = "";
+		_imageTemplate += "<div class='canvaaas-image'><img></div>";
+		_imageTemplate += "<div class='canvaaas-overlay'></div>";
+		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
+		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-2x2 canvaaas-direction-x'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-2x2 canvaaas-direction-y'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-x-1'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-x-2'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-y-1'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-y-2'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-x-1'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-x-2'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-y-1'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-y-2'></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-nw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-n'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-ne'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-ne'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-e'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-se'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-sw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-s'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-se'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-nw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-w'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-sw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-n'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-ne'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-e'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-n'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-nw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-w'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-s'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-se'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-e'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-s'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-sw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-w'><div class='canvaaas-handle-square'></div></div>";
 
-		var imageTemplate = "";
-		imageTemplate += "<div class='canvaaas-image'><img></div>";
-		imageTemplate += "<div class='canvaaas-overlay'></div>";
-		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-top'></div>";
-		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-bottom'></div>";
-		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-left'></div>";
-		imageTemplate += "<div class='canvaaas-innerline canvaaas-innerline-right'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-top'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-bottom'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-left'></div>";
-		imageTemplate += "<div class='canvaaas-outline canvaaas-outline-right'></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-inhandle canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-n'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-e'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-s'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-w'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-ne'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-nw'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-se'><div class='canvaaas-handle-box'></div></div>";
-		imageTemplate += "<div class='canvaaas-outhandle canvaaas-handle-sw'><div class='canvaaas-handle-box'></div></div>";
+		var _directions = [
+			"n",
+			"s",
+			"e",
+			"w",
+			"nw",
+			"ne",
+			"sw",
+			"se",
+			"n-nw",
+			"n-n",
+			"n-ne",
+			"s-sw",
+			"s-s",
+			"s-se",
+			"e-ne",
+			"e-e",
+			"e-se",
+			"w-nw",
+			"w-w",
+			"w-sw",
+			"nw-n",
+			"nw-nw",
+			"nw-w",
+			"ne-n",
+			"ne-ne",
+			"ne-e",
+			"sw-s",
+			"sw-sw",
+			"sw-w",
+			"se-s",
+			"se-se",
+			"se-e",
+		];
+
+		var _maxWidth;
+		var _maxHeight;
+		var _minWidth = 1;
+		var _minHeight = 1;
+		var _originId = "canvaaas-" + getShortId() + "-";
+		var _cloneId = "canvaaas-" + getShortId() + "-";
 
 		var config = {};
-
-		var originId = "canvaaas-o";
-		var cloneId = "canvaaas-c";
-
-		var undoCaches = [];
-		var redoCaches = [];
-
 		var eventState = {};
 		var containerState = {};
 		var canvasState = {};
 		var handleState = {};
 		var imageStates = [];
+		var undoCaches = [];
+		var redoCaches = [];
+		var containerElement;
+		var canvasElement;
+		var mirrorElement;
+		var backgroundElement;
+		var checkerElement;
+		var windowResizeEvent;
+		var windowScrollEvent;
+		var handleEvents = {};
 
-		var containerObject;
-		var canvasObject;
-		var mirrorObject;
-		var backgroundObject;
-		var checkerObject;
-
-		var viewportResizeEvent;
+		Object.freeze(defaultConfig);
+		Object.freeze(defaultCanvasState);
+		Object.freeze(defaultHandleState);
 
 		copyObject(config, defaultConfig);
 		copyObject(canvasState, defaultCanvasState);
 		copyObject(handleState, defaultHandleState);
+
+		// get limited canvas sizes
+		getMaximumCanvas();
 
 		//
 		// event handlers start
@@ -218,1369 +291,1613 @@
 			},
 
 			drop: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				var dt = e.dataTransfer;
-				var files = dt.files;
-
-				var index = files.length;
-				var count = 0;
-
-				if (eventState.onUpload === true) {
-					if (config.upload) {
-						config.upload("Already in progress");
+				try {
+					var dt = e.dataTransfer;
+					var files = dt.files;
+					var index = files.length;
+					var count = 0;
+	
+					if (eventState.onUpload) {
+						if (config.upload) {
+							config.upload("Already in progress");
+						}
+						return false;
 					}
+	
+					eventState.onUpload = true;
+	
+					recursiveFunc();
+
+					function recursiveFunc() {
+						if (count < index) {
+							renderImage(files[count], null, function(err, res) {
+								if (err) {
+									if (config.upload) {
+										config.upload(err);
+									}
+								} else {
+									if (config.upload) {
+										config.upload(null, exportImageState(res));
+									}
+								}
+								count++;
+								recursiveFunc();
+							});
+						} else {
+							eventState.onUpload = false;
+						}
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
+				}				
+			},
+
+			click: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
+			},
 
-				eventState.onUpload = true;
+			doubleClick: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
 
-				recursiveFunc();
+			longClick: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+			
+			touch: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
 
-				function recursiveFunc() {
-					if (count < index) {
-						renderImage(files[count], null, function(err, res) {
-							if (err) {
-								if (config.upload) {
-									config.upload(err);
-								}
-							} else {
-								if (config.upload) {
-									config.upload(null, exportImageState(res));
-								}
-							}
-							count++;
-							recursiveFunc();
+			doubleTouch: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			longTouch: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			rightClick: function(e) {
+				try {
+					if (e.button !== 2) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					// var id = getTargetId(e);
+					// var state = getImageState(id);
+
+					if (config.rightClick) {
+
+						eventState.onMenu = true;
+
+						config.rightClick(e, {
+							end: function() {
+								eventState.onMenu = false;
+							},
 						});
-					} else {
-						eventState.onUpload = false;
+						return false;
 					}
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
 			},
 
-			// deprecated
 			hover: function(e) {
-				if (!whereIsContainer()) {
+				try {
+					console.log(e.target);
+				} catch(err) {
+					console.log(err);
 					return false;
-				}
-
-				var scaleRatio = canvasState.width / canvasState.originalWidth;
-				var result;
-				var mouseX;
-				var mouseY;
-				var target;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.left);
-					mouseY = e.clientY - (containerState.top + canvasState.top);
-					target = getTarget(e);
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
-					target = getTarget(e.touches[0]);
-				} else {
-					return false;
-				}
-
-				result = {
-					x: mouseX / scaleRatio,
-					y: mouseY / scaleRatio,
-					target: target
-				}
-
-				if (config.hover) {
-					config.hover(null, result)
-				}
-			},
-
-			route: function(e) {
-				var handle = e.target;
-				var id = getId(handle.parentNode);
-				var direction;
-				var position;
-
-				if (!id) {
-					return false;
-				}
-				if (!isFocusable(id)) {
-					return false;
-				}
-				if (!eventState.target) {
-					setFocusIn(id);
-				} else {
-					if (eventState.target !== id) {
-						setFocusOut(eventState.target);
-						setFocusIn(id);
-					}
-				}
-
-				if (handle.classList.contains("canvaaas-inhandle")) {
-					position = "inside";
-				} else if (handle.classList.contains("canvaaas-outhandle")) {
-					position = "outside";
-				}
-				if (handle.classList.contains("canvaaas-handle-n")) {
-					direction = "n";
-				} else if (handle.classList.contains("canvaaas-handle-ne")) {
-					direction = "ne";
-				} else if (handle.classList.contains("canvaaas-handle-e")) {
-					direction = "e";
-				} else if (handle.classList.contains("canvaaas-handle-se")) {
-					direction = "se";
-				} else if (handle.classList.contains("canvaaas-handle-s")) {
-					direction = "s";
-				} else if (handle.classList.contains("canvaaas-handle-sw")) {
-					direction = "sw";
-				} else if (handle.classList.contains("canvaaas-handle-w")) {
-					direction = "w";
-				} else if (handle.classList.contains("canvaaas-handle-nw")) {
-					direction = "nw";
-				} else {
-					return false;
-				}
-
-				if (handleState[position][direction] === "resize") {
-					return handlers.startResize(e);
-				} else if (handleState[position][direction] === "rotate") {
-					return handlers.startRotate(e);
-				} else if (handleState[position][direction] === "flip") {
-					return handlers.startFlip(e);
-				} else if (handleState[position][direction] === "crop") {
-					return handlers.startCrop(e);
-				} else {
-					return false;
-				}
-			},
-
-			focusIn: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				var id = getTarget(e);
-				if (!id) {
-					return false;
-				}
-				if (!isFocusable(id)) {
-					return false;
-				}
-				if (eventState.target) {
-					if (eventState.target !== id) {
-						setFocusOut(eventState.target);
-					}
-				}
-
-				setFocusIn(id);
-
-				return handlers.startMove(e);
-			},
-
-			focusOut: function(e) {
-				var deniedTagNames = [
-					"A",
-					"BUTTON",
-					"INPUT",
-					"LABEL",
-					"TEXTAREA",
-					"SELECT",
-					"OPTION"
-				];
-
-				if (typeof(e.touches) !== "undefined") {
-					if (e.touches.length > 1) {
-						return handlers.startMove(e);
-					}
-				}
-				if (deniedTagNames.indexOf(e.target.tagName) > -1) {
-					return false;
-				}
-
-				e.preventDefault();
-				e.stopPropagation();
-				
-				if (eventState.target) {
-					setFocusOut(eventState.target);
 				}
 			},
 
 			startMove: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var mouseX;
+					var mouseY;
 
-				if (!chkTarget(e)) {
+					// fix osx wheeling
+					if (eventState.onZoom) {
+						return false;
+					}
+					// fix opened menu
+					if (eventState.onMenu) {
+						return false;
+					}
+					// fix right click
+					if (e.button === 2) {
+						return false;
+					}
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+					// save mouse coordinates
+					if (typeof(e.touches) === "undefined") {
+						// desktop
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else if(e.touches.length === 1) {
+						// mobile
+						mouseX = e.touches[0].clientX;
+						mouseY = e.touches[0].clientY;
+					} else {
+						// mobile
+						eventState.onMove = false;
+						eventState.target = id;
+						return handlers.startPinchZoom(e);
+					}
+	
+					// save event state
+					eventState.onMove = true;
+					eventState.target = id;
+					eventState.x = state.x;
+					eventState.y = state.y;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+	
+					// save cache
+					saveUndo(eventState.target);
+	
+					// add class
+					addClassToImage(eventState.target, "editing");
+	
+					// add events
+					document.addEventListener("mousemove", handlers.onMove, false);
+					document.addEventListener("mouseup", handlers.endMove, false);
+	
+					document.addEventListener("touchmove", handlers.onMove, false);
+					document.addEventListener("touchend", handlers.endMove, false);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				// fix osx wheel
-				if (eventState.onZoom) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX;
-					mouseY = e.clientY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX;
-					mouseY = e.touches[0].clientY;
-				} else {
-					return handlers.startPinchZoom(e);
-				}
-
-				eventState.onMove = true;
-				eventState.x = state.x;
-				eventState.y = state.y;
-				eventState.mouseX = mouseX;
-				eventState.mouseY = mouseY;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-
-				// event
-				document.addEventListener("mousemove", handlers.onMove, false);
-				document.addEventListener("mouseup", handlers.endMove, false);
-
-				document.addEventListener("touchmove", handlers.onMove, false);
-				document.addEventListener("touchend", handlers.endMove, false);
 			},
 
 			onMove: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				if (!eventState.onMove) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - eventState.mouseX;
-					mouseY = e.clientY - eventState.mouseY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - eventState.mouseX;
-					mouseY = e.touches[0].clientY - eventState.mouseY;
-				} else {
-					return false;
-				}
-
-				if (onShiftKey) {
-					if (Math.abs(mouseX) > Math.abs(mouseY)) {
-						mouseY = 0;
-					} else if (Math.abs(mouseX) < Math.abs(mouseY)) {
-						mouseX = 0;
+					if (!eventState.onMove) {
+						return false;
 					}
-				}
 
-				// save state
-				setState(eventState.target, {
-					x: eventState.x + mouseX,
-					y: eventState.y + mouseY,
-				});
+					// var state = getImageState(eventState.target);
+					var onShiftKey = e.shiftKey;
+					var mouseX;
+					var mouseY;
+
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - eventState.mouseX;
+						mouseY = e.clientY - eventState.mouseY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - eventState.mouseX;
+						mouseY = e.touches[0].clientY - eventState.mouseY;
+					} else {
+						return false;
+					}
+
+					// check press shift
+					if (onShiftKey) {
+						if (Math.abs(mouseX) > Math.abs(mouseY)) {
+							mouseY = 0;
+						} else if (Math.abs(mouseX) < Math.abs(mouseY)) {
+							mouseX = 0;
+						}
+					}
+
+					// save image state
+					setImageState(eventState.target, {
+						x: eventState.x + mouseX,
+						y: eventState.y + mouseY,
+					});
+					// set image style
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
 			},
 
 			endMove: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				// class
-				removeClassToWrapper(eventState.target, "editing");
+					// remove class
+					removeClassToImage(eventState.target, "editing");
 
-				// clear
-				eventState.onMove = false;
+					// remove events
+					document.removeEventListener("mousemove", handlers.onMove, false);
+					document.removeEventListener("mouseup", handlers.endMove, false);
 
-				// event
-				document.removeEventListener("mousemove", handlers.onMove, false);
-				document.removeEventListener("mouseup", handlers.endMove, false);
+					document.removeEventListener("touchmove", handlers.onMove, false);
+					document.removeEventListener("touchend", handlers.endMove, false);
 
-				document.removeEventListener("touchmove", handlers.onMove, false);
-				document.removeEventListener("touchend", handlers.endMove, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
-				}
-			},
-
-			startResize: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!chkTarget(e)) {
-					return false;
-				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var handle = e.target;
-				var direction = getFlippedDirection(handle, state.scaleX, state.scaleY);
-				var mouseX;
-				var mouseY;
-
-				if (!direction) {
-					return false;
-				}
-
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX;
-					mouseY = e.clientY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX;
-					mouseY = e.touches[0].clientY;
-				} else {
-					return false;
-				}
-
-				eventState.onResize = true;
-				eventState.handle = handle;
-				eventState.direction = direction;
-				eventState.mouseX = mouseX;
-				eventState.mouseY = mouseY;
-				eventState.width = state.width;
-				eventState.height = state.height;
-				eventState.x = state.x;
-				eventState.y = state.y;
-				eventState.cropTop = state.cropTop;
-				eventState.cropBottom = state.cropBottom;
-				eventState.cropLeft = state.cropLeft;
-				eventState.cropRight = state.cropRight;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-				addClassToHandle(eventState.handle, "editing");
-
-				// event
-				document.addEventListener("mousemove", handlers.onResize, false);
-				document.addEventListener("mouseup", handlers.endResize, false);
-
-				document.addEventListener("touchmove", handlers.onResize, false);
-				document.addEventListener("touchend", handlers.endResize, false);
-			},
-
-			onResize: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!eventState.onResize) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var onShiftKey = e.shiftKey || state.lockAspectRatio;
-				var direction = eventState.direction;
-				var width = eventState.width;
-				var height = eventState.height;
-				var axisX = eventState.x;
-				var axisY = eventState.y;
-				var cropTop = eventState.cropTop;
-				var cropBottom = eventState.cropBottom;
-				var cropLeft = eventState.cropLeft;
-				var cropRight = eventState.cropRight;
-				var croppedOriginalWidth = state.originalWidth - ((eventState.cropLeft + eventState.cropRight) / (eventState.width / state.originalWidth));
-				var croppedOriginalHeight = state.originalHeight - ((eventState.cropTop + eventState.cropBottom) / (eventState.height / state.originalHeight));
-				var aspectRatio = croppedOriginalWidth / croppedOriginalHeight;
-				var diffX;
-				var diffY;
-				var radians;
-				var cosFraction;
-				var sinFraction;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - eventState.mouseX;
-					mouseY = e.clientY - eventState.mouseY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - eventState.mouseX;
-					mouseY = e.touches[0].clientY - eventState.mouseY;
-				} else {
-					return false;
-				}
-
-				radians = state.rotate * Math.PI / 180;
-				cosFraction = Math.cos(radians);
-				sinFraction = Math.sin(radians);
-				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
-				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-
-				width -= cropLeft + cropRight;
-				height -= cropTop + cropBottom;
-
-				var scaleCropTop = cropTop / height;
-				var scaleCropBottom = cropBottom / height;
-				var scaleCropLeft = cropLeft / width;
-				var scaleCropRight = cropRight / width;
-
-				if (direction === "n") {
-					height -= diffY;
-					if (onShiftKey) {
-						width = height * aspectRatio;
-					}
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "ne") {
-					width += diffX;
-					height -= diffY;
-					if (onShiftKey) {
-						if (2 * diffX < 2 * -diffY * aspectRatio) {
-							diffX -= width - (height * aspectRatio);
-							width = height * aspectRatio;
-						} else {
-							diffY += height - (width / aspectRatio);
-							height = width / aspectRatio;
-						}
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "e") {
-					width += diffX;
-					if (onShiftKey) {
-						height = width / aspectRatio;
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "se") {
-					width += diffX;
-					height += diffY;
-					if (onShiftKey) {
-						if (2 * diffX < 2 * diffY * aspectRatio) {
-							diffX -= width - (height * aspectRatio);
-							width = height * aspectRatio;
-						} else {
-							diffY -= height - (width / aspectRatio);
-							height = width / aspectRatio;
-						}
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "s") {
-					height += diffY;
-					if (onShiftKey) {
-						width = height * aspectRatio;
-					}
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "sw") {
-					width -= diffX;
-					height += diffY;
-					if (onShiftKey) {
-						if (2 * -diffX < 2 * diffY * aspectRatio) {
-							diffX += width - (height * aspectRatio);
-							width = height * aspectRatio;
-						} else {
-							diffY -= height - (width / aspectRatio);
-							height = width / aspectRatio;
-						}
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "w") {
-					width -= diffX;
-					if (onShiftKey) {
-						height = width / aspectRatio;
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "nw") {
-					width -= diffX;
-					height -= diffY;
-					if (onShiftKey) {
-						if (2 * -diffX < 2 * -diffY * aspectRatio) {
-							diffX += width - (height * aspectRatio);
-							width = height * aspectRatio;
-						} else {
-							diffY += height - (width / aspectRatio);
-							height = width / aspectRatio;
-						}
-					}
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else {
-					return false;
-				}
-
-				cropTop = height * scaleCropTop;
-				cropBottom = height * scaleCropBottom;
-				cropLeft = width * scaleCropLeft;
-				cropRight = width * scaleCropRight;
-
-				width += cropLeft + cropRight;
-				height += cropTop + cropBottom;
-
-				if (width - (cropLeft + cropRight) < 10) {
-					return false;
-				}
-				if (height - (cropTop + cropBottom) < 10) {
-					return false;
-				}
-
-				// save state
-				setState(eventState.target, {
-					x: axisX,
-					y: axisY,
-					width: width,
-					height: height,
-					cropTop: cropTop,
-					cropBottom: cropBottom,
-					cropLeft: cropLeft,
-					cropRight: cropRight
-				});
-			},
-
-			endResize: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				// class
-				removeClassToWrapper(eventState.target, "editing");
-				removeClassToHandle(eventState.handle, "editing");
-
-				// clear
-				eventState.onResize = false;
-				eventState.handle = undefined;
-
-				// event
-				document.removeEventListener("mousemove", handlers.onResize, false);
-				document.removeEventListener("mouseup", handlers.endResize, false);
-
-				document.removeEventListener("touchmove", handlers.onResize, false);
-				document.removeEventListener("touchend", handlers.endResize, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
-				}
-			},
-
-			startWheelZoom: function(e){
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (
-					eventState.onMove === true ||
-					eventState.onResize === true ||
-					eventState.onRotate === true
-				) {
-					return false;
-				}
-
-				if (!eventState.onZoom) {
-					if (!chkTarget(e)) {
-						return false;
-					}
-					if (!isEditable(eventState.target)) {
-						return false;
-					}
-					if (!whereIsContainer()) {
-						return false;
-					}
-
-					eventState.onZoom = true;
-
-					// cache
-					saveUndo(eventState.target);
-
-					// class
-					addClassToWrapper(eventState.target, "editing");
-				}
-
-				var state = getState(eventState.target);
-				var ratio = -e.deltaY * 0.001;
-				var width = state.width + (state.width * ratio);
-				var height = state.height + (state.height * ratio);
-				var cropTop = state.cropTop + (state.cropTop * ratio);
-				var cropBottom = state.cropBottom + (state.cropBottom * ratio);
-				var cropLeft = state.cropLeft + (state.cropLeft * ratio);
-				var cropRight = state.cropRight + (state.cropRight * ratio);
-
-				// add timer
-				clearTimeout(eventState.wheeling);
-
-				if (width < 10) {
-					return false;
-				}
-				if (height < 10) {
-					return false;
-				}
-
-				// save state
-				setState(eventState.target, {
-					width: width,
-					height: height,
-					cropTop: cropTop,
-					cropBottom: cropBottom,
-					cropLeft: cropLeft,
-					cropRight: cropRight
-				});
-
-				eventState.wheeling = setTimeout(function() {
-					// remove timer
-					eventState.wheeling = undefined;
-					// clear
-					eventState.onZoom = false;
-					// class
-					removeClassToWrapper(eventState.target, "editing");
 					// callback
 					if (config.edit) {
 						config.edit(null, exportImageState(eventState.target));
 					}
-				}, 64);
+
+					// clear event state
+					eventState.onMove = false;
+					eventState.target = undefined;
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			startResize: function(e) {
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var handle = e.target;
+					var direction = getDirection(e.target);
+					var mouseX;
+					var mouseY;
+
+					// fix osx wheeling
+					if (eventState.onZoom) {
+						return false;
+					}
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+					if (!direction) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX;
+						mouseY = e.touches[0].clientY;
+					} else {
+						return false;
+					}
+
+					// save event state
+					eventState.onResize = true;
+					eventState.target = id;
+					eventState.handle = handle;
+					eventState.direction = direction;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+					eventState.width = state.width;
+					eventState.height = state.height;
+					eventState.x = state.x;
+					eventState.y = state.y;
+					eventState.cropTop = state.cropTop;
+					eventState.cropBottom = state.cropBottom;
+					eventState.cropLeft = state.cropLeft;
+					eventState.cropRight = state.cropRight;
+
+					// save cache
+					saveUndo(eventState.target);
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onResize, false);
+					document.addEventListener("mouseup", handlers.endResize, false);
+
+					document.addEventListener("touchmove", handlers.onResize, false);
+					document.addEventListener("touchend", handlers.endResize, false);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}	
+			},
+
+			onResize: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!eventState.onResize) {
+						return false;
+					}
+
+					var state = getImageState(eventState.target);
+					var onShiftKey = e.shiftKey || state.lockAspectRatio;
+					var direction = eventState.direction;
+					var width;
+					var height;
+					var axisX = eventState.x;
+					var axisY = eventState.y;
+					var cropTop;
+					var cropBottom;
+					var cropLeft;
+					var cropRight;
+					var croppedW = eventState.width - (eventState.cropLeft + eventState.cropRight);
+					var croppedH = eventState.height - (eventState.cropTop + eventState.cropBottom);
+					var croppedOW = state.originalWidth - ((eventState.cropLeft + eventState.cropRight) / (eventState.width / state.originalWidth));
+					var croppedOH = state.originalHeight - ((eventState.cropTop + eventState.cropBottom) / (eventState.height / state.originalHeight));
+					var aspectRatio = croppedOW / croppedOH;
+					var diffX;
+					var diffY;
+					var radians = state.rotate * Math.PI / 180;;
+					var cosFraction = Math.cos(radians);
+					var sinFraction = Math.sin(radians);
+					var mouseX;
+					var mouseY;
+					var scaleCropTop = eventState.cropTop / croppedH;
+					var scaleCropBottom = eventState.cropBottom / croppedH;
+					var scaleCropLeft = eventState.cropLeft / croppedW;
+					var scaleCropRight = eventState.cropRight / croppedW;
+
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - eventState.mouseX;
+						mouseY = e.clientY - eventState.mouseY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - eventState.mouseX;
+						mouseY = e.touches[0].clientY - eventState.mouseY;
+					} else {
+						return false;
+					}
+
+					diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
+					diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
+
+					width = croppedW;
+					height = croppedH;
+
+					if (direction === "n") {
+						height -= diffY;
+						if (onShiftKey) {
+							width = height * aspectRatio;
+						}
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (direction === "ne") {
+						width += diffX;
+						height -= diffY;
+						if (onShiftKey) {
+							if (2 * diffX < 2 * -diffY * aspectRatio) {
+								diffX -= width - (height * aspectRatio);
+								width = height * aspectRatio;
+							} else {
+								diffY += height - (width / aspectRatio);
+								height = width / aspectRatio;
+							}
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (direction === "e") {
+						width += diffX;
+						if (onShiftKey) {
+							height = width / aspectRatio;
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (direction === "se") {
+						width += diffX;
+						height += diffY;
+						if (onShiftKey) {
+							if (2 * diffX < 2 * diffY * aspectRatio) {
+								diffX -= width - (height * aspectRatio);
+								width = height * aspectRatio;
+							} else {
+								diffY -= height - (width / aspectRatio);
+								height = width / aspectRatio;
+							}
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (direction === "s") {
+						height += diffY;
+						if (onShiftKey) {
+							width = height * aspectRatio;
+						}
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (direction === "sw") {
+						width -= diffX;
+						height += diffY;
+						if (onShiftKey) {
+							if (2 * -diffX < 2 * diffY * aspectRatio) {
+								diffX += width - (height * aspectRatio);
+								width = height * aspectRatio;
+							} else {
+								diffY -= height - (width / aspectRatio);
+								height = width / aspectRatio;
+							}
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (direction === "w") {
+						width -= diffX;
+						if (onShiftKey) {
+							height = width / aspectRatio;
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (direction === "nw") {
+						width -= diffX;
+						height -= diffY;
+						if (onShiftKey) {
+							if (2 * -diffX < 2 * -diffY * aspectRatio) {
+								diffX += width - (height * aspectRatio);
+								width = height * aspectRatio;
+							} else {
+								diffY += height - (width / aspectRatio);
+								height = width / aspectRatio;
+							}
+						}
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else {
+						return false;
+					}
+
+					cropTop = height * scaleCropTop;
+					cropBottom = height * scaleCropBottom;
+					cropLeft = width * scaleCropLeft;
+					cropRight = width * scaleCropRight;
+
+					width += cropLeft + cropRight;
+					height += cropTop + cropBottom;
+
+					if (width - (cropLeft + cropRight) < 10) {
+						return false;
+					}
+					if (height - (cropTop + cropBottom) < 10) {
+						return false;
+					}
+
+					// save image state
+					setImageState(eventState.target, {
+						x: axisX,
+						y: axisY,
+						width: width,
+						height: height,
+						cropTop: cropTop,
+						cropBottom: cropBottom,
+						cropLeft: cropLeft,
+						cropRight: cropRight
+					});
+					// set image style
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			endResize: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
+
+					// remove events
+					document.removeEventListener("mousemove", handlers.onResize, false);
+					document.removeEventListener("mouseup", handlers.endResize, false);
+
+					document.removeEventListener("touchmove", handlers.onResize, false);
+					document.removeEventListener("touchend", handlers.endResize, false);
+
+					// callback
+					if (config.edit) {
+						config.edit(null, exportImageState(eventState.target));
+					}
+
+					// clear event state
+					eventState.onResize = false;
+					eventState.target = undefined;
+					eventState.handle = undefined;
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			startWheelZoom: function(e){
+				try {
+					if (eventState.onMove) {
+						return false;
+					}
+					if (eventState.onResize) {
+						return false;
+					}
+					if (eventState.onRotate) {
+						return false;
+					}
+					if (eventState.onMenu) {
+						return false;
+					}
+
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var ratio = -e.deltaY * 0.001;
+					var width;
+					var height;
+					var cropTop;
+					var cropBottom;
+					var cropLeft;
+					var cropRight;
+					
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+					
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!eventState.onZoom) {
+						
+						if (!canvasState.editable) {
+							return false;
+						}
+						if (!state.editable) {
+							return false;
+						}
+
+						eventState.onZoom = true;
+
+						// save cache
+						saveUndo(state.id);
+
+						// add class
+						addClassToImage(state.id, "editing");
+					}
+
+					// clear timer
+					if (eventState.wheeling) {
+						clearTimeout(eventState.wheeling);
+					}
+
+					width = state.width + (state.width * ratio);
+					height = state.height + (state.height * ratio);
+					cropTop = state.cropTop + (state.cropTop * ratio);
+					cropBottom = state.cropBottom + (state.cropBottom * ratio);
+					cropLeft = state.cropLeft + (state.cropLeft * ratio);
+					cropRight = state.cropRight + (state.cropRight * ratio);
+
+					if (width < 10) {
+						return false;
+					}
+					if (height < 10) {
+						return false;
+					}
+
+					// save image state
+					setImageState(state.id, {
+						width: width,
+						height: height,
+						cropTop: cropTop,
+						cropBottom: cropBottom,
+						cropLeft: cropLeft,
+						cropRight: cropRight
+					});
+					setImage(state.id);
+
+					eventState.wheeling = setTimeout(function() {
+						// remove timer
+						eventState.wheeling = undefined;
+						// clear event state
+						eventState.onZoom = false;
+						// remove class
+						removeClassToImage(state.id, "editing");
+						// callback
+						if (config.edit) {
+							config.edit(null, exportImageState(state.id));
+						}
+					}, 64);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
 			},
 
 			startPinchZoom: function(e){
-				e.preventDefault();
-				e.stopPropagation();
+				try {
 
-				if (eventState.onMove) {
-					handlers.endMove(e);
-				}
-				if (!chkTarget(e)) {
+
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+					var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+					var diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
+
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					// if (eventState.onMove) {
+					// 	handlers.endMove(e);
+					// }
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+
+					// save event state
+					eventState.onZoom = true;
+					eventState.target = id;
+					eventState.width = state.width;
+					eventState.height = state.height;
+					eventState.cropTop = state.cropTop;
+					eventState.cropBottom = state.cropBottom;
+					eventState.cropLeft = state.cropLeft;
+					eventState.cropRight = state.cropRight;
+					eventState.diagonal = diagonal;
+
+					// save cache
+					saveUndo(eventState.target);
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+
+					// add events
+					document.addEventListener("touchmove", handlers.onPinchZoom, false);
+					document.addEventListener("touchend", handlers.endPinchZoom, false);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-				var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-				var diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
-
-				eventState.onZoom = true;
-				eventState.width = state.width;
-				eventState.height = state.height;
-				eventState.cropTop = state.cropTop;
-				eventState.cropBottom = state.cropBottom;
-				eventState.cropLeft = state.cropLeft;
-				eventState.cropRight = state.cropRight;
-				eventState.diagonal = diagonal;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-
-				// event
-				document.addEventListener("touchmove", handlers.onPinchZoom, false);
-				document.addEventListener("touchend", handlers.endPinchZoom, false);
 			},
 
 			onPinchZoom: function(e){
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				if (!eventState.onZoom) {
+					var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+					var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+					var diagonal = getDiagonal(mouseX, mouseY);
+					var ratio = ((diagonal - eventState.diagonal) * 0.01);
+					var width = eventState.width + (eventState.width * ratio);
+					var height = eventState.height + (eventState.height * ratio);
+					var cropTop = eventState.cropTop + (eventState.cropTop * ratio);
+					var cropBottom = eventState.cropBottom + (eventState.cropBottom * ratio);
+					var cropLeft = eventState.cropLeft + (eventState.cropLeft * ratio);
+					var cropRight = eventState.cropRight + (eventState.cropRight * ratio);
+
+					if (!eventState.onZoom) {
+						return false;
+					}
+					if (width < 10) {
+						return false;
+					}
+					if (height < 10) {
+						return false;
+					}
+
+					// save image state
+					setImageState(eventState.target, {
+						width: width,
+						height: height,
+						cropTop: cropTop,
+						cropBottom: cropBottom,
+						cropLeft: cropLeft,
+						cropRight: cropRight,
+					});
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-
-				var state = getState(eventState.target);
-				var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-				var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-				var diagonal = getDiagonal(mouseX, mouseY);
-				var ratio = ((diagonal - eventState.diagonal) * 0.01);
-				var width = eventState.width + (eventState.width * ratio);
-				var height = eventState.height + (eventState.height * ratio);
-				var cropTop = eventState.cropTop + (eventState.cropTop * ratio);
-				var cropBottom = eventState.cropBottom + (eventState.cropBottom * ratio);
-				var cropLeft = eventState.cropLeft + (eventState.cropLeft * ratio);
-				var cropRight = eventState.cropRight + (eventState.cropRight * ratio);
-
-				if (width < 10) {
-					return false;
-				}
-				if (height < 10) {
-					return false;
-				}
-
-				// save state
-				setState(eventState.target, {
-					width: width,
-					height: height,
-					cropTop: cropTop,
-					cropBottom: cropBottom,
-					cropLeft: cropLeft,
-					cropRight: cropRight,
-				});
 			},
 
 			endPinchZoom: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-
-				// class
-				removeClassToWrapper(eventState.target, "editing");
-
-				// clear
-				eventState.onZoom = false;
-
-				// event
-				document.removeEventListener("touchmove", handlers.onPinchZoom, false);
-				document.removeEventListener("touchend", handlers.endPinchZoom, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+	
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+	
+					// remove event
+					document.removeEventListener("touchmove", handlers.onPinchZoom, false);
+					document.removeEventListener("touchend", handlers.endPinchZoom, false);
+	
+					// callback
+					if (config.edit) {
+						config.edit(null, exportImageState(id));
+					}
+	
+					// clear event state
+					eventState.onZoom = false;
+					eventState.target = undefined;
+					
+					// event propagation
+					handlers.startMove(e);
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
-
-				// event propagation
-				handlers.startMove(e);
 			},
 
 			startRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				if (!chkTarget(e)) {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var handle = e.target;
+					var mouseX;
+					var mouseY;
+					var radians;
+
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+					// fix container offset
+					if (!chkContainerCoordinates()) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - (containerState.left + canvasState.left);
+						mouseY = e.clientY - (containerState.top + canvasState.top);
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+						mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+					} else {
+						return false;
+					}
+
+					// calculate degree
+					radians = Math.atan2(state.y - mouseY, mouseX - state.x) * 180 / Math.PI;
+
+					// save event state
+					eventState.onRotate = true;
+					eventState.target = id;
+					eventState.handle = handle;
+					eventState.rotate = state.rotate;
+					eventState.radians = radians;
+
+					// save cache
+					saveUndo(eventState.target);
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onRotate, false);
+					document.addEventListener("mouseup", handlers.endRotate, false);
+
+					document.addEventListener("touchmove", handlers.onRotate, false);
+					document.addEventListener("touchend", handlers.endRotate, false);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				var handle = e.target;
-				var direction = getDirection(handle);
-				if (!direction) {
-					return false;
-				}
-
-				eventState.onRotate = true;
-				eventState.handle = handle;
-				eventState.direction = direction;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-				addClassToHandle(eventState.handle, "editing");
-
-				// event
-				document.addEventListener("mousemove", handlers.onRotate, false);
-				document.addEventListener("mouseup", handlers.endRotate, false);
-
-				document.addEventListener("touchmove", handlers.onRotate, false);
-				document.addEventListener("touchend", handlers.endRotate, false);
 			},
 
 			onRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				if (!eventState.onRotate) {
+					var state = getImageState(eventState.target);
+					var onShiftKey = e.shiftKey;
+					var radians;
+					var rotate = eventState.rotate;
+					var deg;
+					var diff;
+					var mouseX;
+					var mouseY;
+	
+					if (!eventState.onRotate) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - (containerState.left + canvasState.left);
+						mouseY = e.clientY - (containerState.top + canvasState.top);
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+						mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+					} else {
+						return false;
+					}
+	
+					// calculate degree
+					radians = Math.atan2(state.y - mouseY, mouseX - state.x) * 180 / Math.PI;
+					diff = -((radians - eventState.radians) % 360);
+					deg = rotate + diff;
+
+					if (onShiftKey) {
+						deg = Math.round(deg / 45) * 45;
+					}
+	
+					// save image state
+					setImageState(eventState.target, {
+						rotate: deg
+					});
+					// set image style
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-
-				var state = getState(eventState.target);
-				var direction = eventState.direction;
-				var onShiftKey = e.shiftKey;
-				var radians;
-				var deg;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.left);
-					mouseY = e.clientY - (containerState.top + canvasState.top);
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
-				} else {
-					return false;
-				}
-
-				// calculate degree
-				radians = Math.atan2(state.y-mouseY, mouseX-state.x) * 180 / Math.PI;
-
-				if (direction === "n") {
-					deg = 360 - ((radians + 270) % 360);
-				} else if (direction === "ne") {
-					deg = 360 - ((radians + 315) % 360);
-				} else if (direction === "e") {
-					deg = 360 - ((radians + 360) % 360);
-				} else if (direction === "se") {
-					deg = 360 - ((radians + 405) % 360);
-				} else if (direction === "s") {
-					deg = 360 - ((radians + 450) % 360);
-				} else if (direction === "sw") {
-					deg = 360 - ((radians + 495) % 360);
-				} else if (direction === "w") {
-					deg = 360 - ((radians + 540) % 360);
-				} else if (direction === "nw") {
-					deg = 360 - ((radians + 585) % 360);
-				}
-
-				if (state.scaleX < 0) {
-					deg = deg;
-				}
-				if (state.scaleY < 0) {
-					deg = deg + 180;
-				}
-
-				if (onShiftKey) {
-					deg = Math.round(deg / 45) * 45;
-				}
-
-				// save state
-				setState(eventState.target, {
-					rotate: deg
-				});
 			},
 
 			endRotate: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				// class
-				removeClassToWrapper(eventState.target, "editing");
-				removeClassToHandle(eventState.handle, "editing");
+					var id = eventState.target;
 
-				// clear
-				eventState.onRotate = false;
-				eventState.handle = undefined;
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
 
-				// event
-				document.removeEventListener("mousemove", handlers.onRotate, false);
-				document.removeEventListener("mouseup", handlers.endRotate, false);
+					// clear event state
+					eventState.onRotate = false;
+					eventState.handle = undefined;
+					eventState.target = undefined;
 
-				document.removeEventListener("touchmove", handlers.onRotate, false);
-				document.removeEventListener("touchend", handlers.endRotate, false);
+					// remove events
+					document.removeEventListener("mousemove", handlers.onRotate, false);
+					document.removeEventListener("mouseup", handlers.endRotate, false);
 
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
+					document.removeEventListener("touchmove", handlers.onRotate, false);
+					document.removeEventListener("touchend", handlers.endRotate, false);
+
+					// callback
+					if (config.edit) {
+						config.edit(null, exportImageState(id));
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
 			},
 
 			startFlip: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var handle = e.target;
+					var direction = getDirection(e.target);
+					var diffX;
+					var diffY;
+					var mouseX;
+					var mouseY;
+					var maxDiagonal;
 
-				if (!chkTarget(e)) {
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+					if (!direction) {
+						return false;
+					}
+					// fix container offset
+					if (!chkContainerCoordinates()) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - (containerState.left + canvasState.left);
+						mouseY = e.clientY - (containerState.top + canvasState.top);
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+						mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+					} else {
+						return false;
+					}
+
+					diffX = Math.abs(state.x) - Math.abs(mouseX);
+					diffY = Math.abs(state.y) - Math.abs(mouseY);
+
+					maxDiagonal = getDiagonal(
+						state.x + diffX - mouseX,
+						state.y + diffY - mouseY
+					);
+
+					// save event state
+					eventState.onFlip = true;
+					eventState.target = id;
+					eventState.handle = handle;
+					eventState.direction = direction;
+					eventState.maxDiagonal = maxDiagonal;
+					eventState.x = state.x + diffX;
+					eventState.y = state.y + diffY;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+
+					// save cache
+					saveUndo(eventState.target);
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onFlip, false);
+					document.addEventListener("mouseup", handlers.endFlip, false);
+
+					document.addEventListener("touchmove", handlers.onFlip, false);
+					document.addEventListener("touchend", handlers.endFlip, false);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var handle = e.target;
-				var direction = getDirection(handle);
-				var diffX;
-				var diffY;
-				var mouseX;
-				var mouseY;
-
-				if (!direction) {
-					return false;
-				}
-
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.left);
-					mouseY = e.clientY - (containerState.top + canvasState.top);
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
-				} else {
-					return false;
-				}
-
-				diffX = Math.abs(state.x) - Math.abs(mouseX);
-				diffY = Math.abs(state.y) - Math.abs(mouseY);
-
-				var diagonal = getDiagonal(
-					state.x + diffX - mouseX,
-					state.y + diffY - mouseY
-				);
-
-				eventState.onFlip = true;
-				eventState.handle = handle;
-				eventState.direction = direction;
-				eventState.diagonal = diagonal;
-				eventState.x = state.x + diffX;
-				eventState.y = state.y + diffY;
-				eventState.mouseX = mouseX;
-				eventState.mouseY = mouseY;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-				addClassToHandle(eventState.handle, "editing");
-
-				// event
-				document.addEventListener("mousemove", handlers.onFlip, false);
-				document.addEventListener("mouseup", handlers.endFlip, false);
-
-				document.addEventListener("touchmove", handlers.onFlip, false);
-				document.addEventListener("touchend", handlers.endFlip, false);
 			},
 
 			onFlip: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+	
+					// var state = getImageState(eventState.target);
+					var direction = eventState.direction;
+					var onShiftKey = e.shiftKey;
+					var degX;
+					var degY;
+					var mouseX;
+					var mouseY;
+					var maxDiagonal = eventState.maxDiagonal;
+					var distanceMoved;
+					var distanceFromPivot;
 
-				if (!eventState.onFlip) {
+					if (!eventState.onFlip) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - (containerState.left + canvasState.left);
+						mouseY = e.clientY - (containerState.top + canvasState.top);
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
+						mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
+					} else {
+						return false;
+					}
+	
+					if (eventState.mouseX < eventState.x) {
+						if (mouseX > eventState.x) {
+							mouseX = eventState.x;
+						}
+					} else {
+						if (mouseX < eventState.x) {
+							mouseX = eventState.x;
+						}
+					}
+					if (eventState.mouseY < eventState.y) {
+						if (mouseY > eventState.y) {
+							mouseY = eventState.y;
+						}
+					} else {
+						if (mouseY < eventState.y) {
+							mouseY = eventState.y;
+						}
+					}
+	
+					// mouse distance moved
+					distanceMoved = getDiagonal(
+						eventState.mouseX - mouseX,
+						eventState.mouseY - mouseY
+					);
+
+					// distance from pivot
+					distanceFromPivot = getDiagonal(
+						eventState.x - mouseX,
+						eventState.y - mouseY
+					);
+	
+					if (
+						direction === "n" ||
+						direction === "n-nw" ||
+						direction === "n-n" ||
+						direction === "n-ne" ||
+						direction === "nw-n" ||
+						direction === "ne-n"
+					) {
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degY = 0;
+						}
+					} else if (
+						direction === "ne" ||
+						direction === "ne-ne"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+							degY = 0;
+						}
+					} else if (
+						direction === "e" ||
+						direction === "e-ne" ||
+						direction === "e-e" ||
+						direction === "e-se" ||
+						direction === "ne-e" ||
+						direction === "se-e"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+						}
+					} else if (
+						direction === "se" ||
+						direction === "se-se"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+							degY = 0;
+						}
+					} else if (
+						direction === "s" ||
+						direction === "s-sw" ||
+						direction === "s-s" ||
+						direction === "s-se" ||
+						direction === "se-s" ||
+						direction === "sw-s"
+					) {
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degY = 0;
+						}
+					} else if (
+						direction === "sw" ||
+						direction === "sw-sw"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+							degY = 0;
+						}
+					} else if (
+						direction === "w" ||
+						direction === "w-nw" ||
+						direction === "w-w" ||
+						direction === "w-sw" ||
+						direction === "nw-w" ||
+						direction === "sw-w"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+						}
+					} else if (
+						direction === "nw" ||
+						direction === "nw-nw"
+					) {
+						degX = distanceMoved * (180 / maxDiagonal);
+						degY = distanceMoved * (180 / maxDiagonal);
+	
+						if (distanceFromPivot > maxDiagonal) {
+							degX = 0;
+							degY = 0;
+						}
+					}
+	
+					if (degX > 180) {
+						degX = 180;
+					}
+					if (degX < -180) {
+						degX = -180;
+					}
+					if (degY > 180) {
+						degY = 180;
+					}
+					if (degY < -180) {
+						degY = -180;
+					}
+	
+					if (onShiftKey) {
+						degX = Math.round(degX / 180) * 180;
+						degY = Math.round(degY / 180) * 180;
+					}
+	
+					// save image state
+					setImageState(eventState.target, {
+						rotateX: degY,
+						rotateY: degX
+					});
+					// set image style
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-
-				var state = getState(eventState.target);
-				var direction = eventState.direction;
-				var onShiftKey = e.shiftKey;
-				var degX = 0;
-				var degY = 0;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - (containerState.left + canvasState.left);
-					mouseY = e.clientY - (containerState.top + canvasState.top);
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - (containerState.left + canvasState.left);
-					mouseY = e.touches[0].clientY - (containerState.top + canvasState.top);
-				} else {
-					return false;
-				}
-
-				if (eventState.mouseX < eventState.x) {
-					if (mouseX > eventState.x) {
-						mouseX = eventState.x;
-					}
-				} else {
-					if (mouseX < eventState.x) {
-						mouseX = eventState.x;
-					}
-				}
-				if (eventState.mouseY < eventState.y) {
-					if (mouseY > eventState.y) {
-						mouseY = eventState.y;
-					}
-				} else {
-					if (mouseY < eventState.y) {
-						mouseY = eventState.y;
-					}
-				}
-
-				var maxDiagonal = eventState.diagonal;
-				var diagonalA = getDiagonal(
-					eventState.mouseX - mouseX,
-					eventState.mouseY - mouseY
-				);
-				var diagonalB = getDiagonal(
-					eventState.x - mouseX,
-					eventState.y - mouseY
-				);
-
-				if (direction === "n") {
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degY = 0;
-					}
-				} else if (direction === "ne") {
-					degX = diagonalA * (180 / maxDiagonal);
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-						degY = 0;
-					}
-				} else if (direction === "e") {
-					degX = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-					}
-				} else if (direction === "se") {
-					degX = diagonalA * (180 / maxDiagonal);
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-						degY = 0;
-					}
-				} else if (direction === "s") {
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degY = 0;
-					}
-				} else if (direction === "sw") {
-					degX = diagonalA * (180 / maxDiagonal);
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-						degY = 0;
-					}
-				} else if (direction === "w") {
-					degX = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-					}
-				} else if (direction === "nw") {
-					degX = diagonalA * (180 / maxDiagonal);
-					degY = diagonalA * (180 / maxDiagonal);
-
-					if (diagonalB > maxDiagonal) {
-						degX = 0;
-						degY = 0;
-					}
-				}
-
-				if (degX > 180) {
-					degX = 180;
-				}
-				if (degX < -180) {
-					degX = -180;
-				}
-				if (degY > 180) {
-					degY = 180;
-				}
-				if (degY < -180) {
-					degY = -180;
-				}
-
-				if (onShiftKey) {
-					degX = Math.round(degX / 180) * 180;
-					degY = Math.round(degY / 180) * 180;
-				}
-
-				// save state
-				setState(eventState.target, {
-					rotateX: degY,
-					rotateY: degX
-				});
 			},
 
 			endFlip: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
 
-				var state = getState(eventState.target);
-				var rotateX = state.rotateX;
-				var rotateY = state.rotateY;
-				var scaleX = state.scaleX;
-				var scaleY = state.scaleY;
-				var cropTop = state.cropTop;
-				var cropBottom = state.cropBottom;
-				var cropLeft = state.cropLeft;
-				var cropRight = state.cropRight;
+					var state = getImageState(eventState.target);
+					var rotateX = state.rotateX;
+					var rotateY = state.rotateY;
+					var scaleX = state.scaleX;
+					var scaleY = state.scaleY;
+	
+					if (Math.abs(rotateX) > 90) {
+						scaleY = -1 * scaleY;
+					}
+					if (Math.abs(rotateY) > 90) {
+						scaleX = -1 * scaleX;
+					}
+	
+					// save image state
+					setImageState(eventState.target, {
+						rotateX: 0,
+						rotateY: 0,
+						scaleX: scaleX,
+						scaleY: scaleY,
+					});
+					// set image style
+					setImage(eventState.target);
 
-				if (Math.abs(rotateX) > 90) {
-					scaleY = -1 * scaleY;
-					// var tmp = cropTop;
-					// cropTop = cropBottom;
-					// cropBottom = tmp;
-				}
-				if (Math.abs(rotateY) > 90) {
-					scaleX = -1 * scaleX;
-					// var tmp = cropLeft;
-					// cropLeft = cropRight;
-					// cropRight = tmp;
-				}
+					// accelerate function
+					(function(){
+						var a = 0;
+						var acc = 0;
+						var b = 600;
+						var timer;
+						function testMotion(){
+							if(a >= 600){
+								a = b;
+							}else{
+								a ++;
+								acc ++;
+								a += acc;
+								timer = setTimeout(testMotion,10);
+							}
+						}
+					})()
+	
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
 
-				// save state
-				setState(eventState.target, {
-					rotateX: 0,
-					rotateY: 0,
-					scaleX: scaleX,
-					scaleY: scaleY,
-					cropTop: cropTop,
-					cropBottom: cropBottom,
-					cropLeft: cropLeft,
-					cropRight: cropRight,
-				});
+					// remove events
+					document.removeEventListener("mousemove", handlers.onFlip, false);
+					document.removeEventListener("mouseup", handlers.endFlip, false);
+	
+					document.removeEventListener("touchmove", handlers.onFlip, false);
+					document.removeEventListener("touchend", handlers.endFlip, false);
+	
+					// callback
+					if (config.edit) {
+						config.edit(null, exportImageState(eventState.target));
+					}
 
-				// class
-				removeClassToWrapper(eventState.target, "editing");
-				removeClassToHandle(eventState.handle, "editing");
-
-				// toggle
-				eventState.onFlip = false;
-				eventState.handle = undefined;
-
-				// event
-				document.removeEventListener("mousemove", handlers.onFlip, false);
-				document.removeEventListener("mouseup", handlers.endFlip, false);
-
-				document.removeEventListener("touchmove", handlers.onFlip, false);
-				document.removeEventListener("touchend", handlers.endFlip, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
+					// clear event state
+					eventState.onFlip = false;
+					eventState.target = undefined;
+					eventState.handle = undefined;
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
 			},
 
 			startCrop: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var handle = e.target;
+					var direction = getDirection(e.target);
+					var mouseX;
+					var mouseY;
 
-				if (!chkTarget(e)) {
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (!canvasState.editable) {
+						return false;
+					}
+					if (!state.editable) {
+						return false;
+					}
+					if (!direction) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX;
+						mouseY = e.touches[0].clientY;
+					} else {
+						return false;
+					}
+
+					// save event state
+					eventState.onCrop = true;
+					eventState.target = id;
+					eventState.handle = handle;
+					eventState.direction = direction;
+					eventState.cropTop = state.cropTop;
+					eventState.cropBottom = state.cropBottom;
+					eventState.cropLeft = state.cropLeft;
+					eventState.cropRight = state.cropRight;
+					eventState.width = state.width;
+					eventState.height = state.height;
+					eventState.x = state.x;
+					eventState.y = state.y;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+
+					// save cache
+					saveUndo(eventState.target);
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onCrop, false);
+					document.addEventListener("mouseup", handlers.endCrop, false);
+
+					document.addEventListener("touchmove", handlers.onCrop, false);
+					document.addEventListener("touchend", handlers.endCrop, false);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-				if (!isEditable(eventState.target)) {
-					return false;
-				}
-				if (!whereIsContainer()) {
-					return false;
-				}
-
-				var state = getState(eventState.target);
-				var handle = e.target;
-				var direction = getFlippedDirection(handle, state.scaleX, state.scaleY);
-				var mouseX;
-				var mouseY;
-
-				if (!direction) {
-					return false;
-				}
-
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX;
-					mouseY = e.clientY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX;
-					mouseY = e.touches[0].clientY;
-				} else {
-					return false;
-				}
-
-				eventState.onCrop = true;
-				eventState.handle = handle;
-				eventState.direction = direction;
-				eventState.top = state.cropTop;
-				eventState.bottom = state.cropBottom;
-				eventState.left = state.cropLeft;
-				eventState.right = state.cropRight;
-				eventState.width = state.width;
-				eventState.height = state.height;
-				eventState.x = state.x;
-				eventState.y = state.y;
-				eventState.mouseX = mouseX;
-				eventState.mouseY = mouseY;
-
-				// cache
-				saveUndo(eventState.target);
-
-				// class
-				addClassToWrapper(eventState.target, "editing");
-				addClassToHandle(eventState.handle, "editing");
-
-				// event
-				document.addEventListener("mousemove", handlers.onCrop, false);
-				document.addEventListener("mouseup", handlers.endCrop, false);
-
-				document.addEventListener("touchmove", handlers.onCrop, false);
-				document.addEventListener("touchend", handlers.endCrop, false);
 			},
 
 			onCrop: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+	
+					var state = getImageState(eventState.target);
+					var onShiftKey = e.shiftKey;
+					var direction = eventState.direction;
+					var axisX = eventState.x;
+					var axisY = eventState.y;
+					var width = eventState.width;
+					var height = eventState.height;
+					var cropTop = eventState.cropTop;
+					var cropBottom = eventState.cropBottom;
+					var cropLeft = eventState.cropLeft;
+					var cropRight = eventState.cropRight;
+					var diffX;
+					var diffY;
+					var radians;
+					var cosFraction;
+					var sinFraction;
+					var mouseX;
+					var mouseY;
+	
+					if (!eventState.onCrop) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - eventState.mouseX;
+						mouseY = e.clientY - eventState.mouseY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - eventState.mouseX;
+						mouseY = e.touches[0].clientY - eventState.mouseY;
+					} else {
+						return false;
+					}
+	
+					radians = state.rotate * Math.PI / 180;
+					cosFraction = Math.cos(radians);
+					sinFraction = Math.sin(radians);
+					diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
+					diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
+	
+					if (
+						direction === "n" ||
+						direction === "n-n" ||
+						direction === "ne-n" ||
+						direction === "nw-n"
+					) {
+						if (-diffY > cropTop) {
+							diffY = -cropTop;
+						}
+						cropTop += diffY;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (
+						direction === "ne" ||
+						direction === "ne-ne"
+					) {
+						if (-diffY > cropTop) {
+							diffY = -cropTop;
+						}
+						if (diffX > cropRight) {
+							diffX = cropRight;
+						}
+						cropTop += diffY;
+						cropRight -= diffX;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (
+						direction === "e" ||
+						direction === "e-e" ||
+						direction === "ne-e" ||
+						direction === "se-e"
+					) {
+						if (diffX > cropRight) {
+							diffX = cropRight;
+						}
+						cropRight -= diffX;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (
+						direction === "se" ||
+						direction === "se-se"
+					) {
+						if (diffY > cropBottom) {
+							diffY = cropBottom;
+						}
+						if (diffX > cropRight) {
+							diffX = cropRight;
+						}
+						cropBottom -= diffY;
+						cropRight -= diffX;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (
+						direction === "s" ||
+						direction === "s-s" ||
+						direction === "se-s" ||
+						direction === "sw-s"
+					) {
+						if (diffY > cropBottom) {
+							diffY = cropBottom;
+						}
+						cropBottom -= diffY;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+					} else if (
+						direction === "sw" ||
+						direction === "sw-sw"
+					) {
+						if (diffY > cropBottom) {
+							diffY = cropBottom;
+						}
+						if (-diffX > cropLeft) {
+							diffX = -cropLeft;
+						}
+						cropBottom -= diffY;
+						cropLeft += diffX;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (
+						direction === "w" ||
+						direction === "w-w" ||
+						direction === "nw-w" ||
+						direction === "sw-w"
+					) {
+						if (-diffX > cropLeft) {
+							diffX = -cropLeft;
+						}
+						cropLeft += diffX;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else if (
+						direction === "nw" ||
+						direction === "nw-nw"
+					) {
+						if (-diffY > cropTop) {
+							diffY = -cropTop;
+						}
+						if (-diffX > cropLeft) {
+							diffX = -cropLeft;
+						}
+						cropTop += diffY;
+						cropLeft += diffX;
+						axisX -= 0.5 * diffY * sinFraction;
+						axisY += 0.5 * diffY * cosFraction;
+						axisX += 0.5 * diffX * cosFraction;
+						axisY += 0.5 * diffX * sinFraction;
+					} else {
+						return false;
+					}
 
-				if (!eventState.onCrop) {
+					// min height 10px
+					if (cropTop + cropBottom > height - 10) {
+						return false;
+					}
+					// min width 10px
+					if (cropLeft + cropRight > width - 10) {
+						return false;
+					}
+	
+					// save image state
+					setImageState(eventState.target, {
+						x: axisX,
+						y: axisY,
+						cropTop: cropTop,
+						cropBottom: cropBottom,
+						cropLeft: cropLeft,
+						cropRight: cropRight
+					});
+					// set image style
+					setImage(eventState.target);
+				} catch(err) {
+					console.log(err);
 					return false;
 				}
-
-				var state = getState(eventState.target);
-				// var onShiftKey = e.shiftKey || state.lockAspectRatio;
-				var direction = eventState.direction;
-				var aspectRatio = state.originalWidth / state.originalHeight;
-				var axisX = eventState.x;
-				var axisY = eventState.y;
-				var width = eventState.width;
-				var height = eventState.height;
-				var top = eventState.top;
-				var bottom = eventState.bottom;
-				var left = eventState.left;
-				var right = eventState.right;
-				var diffX;
-				var diffY;
-				var radians;
-				var cosFraction;
-				var sinFraction;
-				var mouseX;
-				var mouseY;
-				var reset = false;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX - eventState.mouseX;
-					mouseY = e.clientY - eventState.mouseY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX - eventState.mouseX;
-					mouseY = e.touches[0].clientY - eventState.mouseY;
-				} else {
-					return false;
-				}
-
-				radians = state.rotate * Math.PI / 180;
-				cosFraction = Math.cos(radians);
-				sinFraction = Math.sin(radians);
-				diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
-				diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-
-				if (direction === "n") {
-					if (-diffY > top) {
-						diffY = -top;
-					}
-					top += diffY;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "ne") {
-					if (-diffY > top) {
-						diffY = -top;
-					}
-					if (diffX > right) {
-						diffX = right;
-					}
-					top += diffY;
-					right -= diffX;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "e") {
-					if (diffX > right) {
-						diffX = right;
-					}
-					right -= diffX;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "se") {
-					if (diffY > bottom) {
-						diffY = bottom;
-					}
-					if (diffX > right) {
-						diffX = right;
-					}
-					bottom -= diffY;
-					right -= diffX;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "s") {
-					if (diffY > bottom) {
-						diffY = bottom;
-					}
-					bottom -= diffY;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-				} else if (direction === "sw") {
-					if (diffY > bottom) {
-						diffY = bottom;
-					}
-					if (-diffX > left) {
-						diffX = -left;
-					}
-					bottom -= diffY;
-					left += diffX;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "w") {
-					if (-diffX > left) {
-						diffX = -left;
-					}
-					left += diffX;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else if (direction === "nw") {
-					if (-diffY > top) {
-						diffY = -top;
-					}
-					if (-diffX > left) {
-						diffX = -left;
-					}
-					top += diffY;
-					left += diffX;
-					axisX -= 0.5 * diffY * sinFraction;
-					axisY += 0.5 * diffY * cosFraction;
-					axisX += 0.5 * diffX * cosFraction;
-					axisY += 0.5 * diffX * sinFraction;
-				} else {
-					return false;
-				}
-
-				if (top + bottom > height - 10) {
-					return false;
-				}
-
-				if (left + right > width - 10) {
-					return false;
-				}
-
-				// save state
-				setState(eventState.target, {
-					x: axisX,
-					y: axisY,
-					cropTop: top,
-					cropBottom: bottom,
-					cropLeft: left,
-					cropRight: right
-				});
 			},
 
 			endCrop: function(e) {
-				e.preventDefault();
-				e.stopPropagation();
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+	
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
+	
+					// remove events
+					document.removeEventListener("mousemove", handlers.onCrop, false);
+					document.removeEventListener("mouseup", handlers.endCrop, false);
+	
+					document.removeEventListener("touchmove", handlers.onCrop, false);
+					document.removeEventListener("touchend", handlers.endCrop, false);
+	
+					// callback
+					if (config.edit) {
+						config.edit(null, exportImageState(eventState.target));
+					}
 
-				// class
-				removeClassToWrapper(eventState.target, "editing");
-				removeClassToHandle(eventState.handle, "editing");
-
-				// clear
-				eventState.onCrop = false;
-				eventState.handle = undefined;
-
-				// event
-				document.removeEventListener("mousemove", handlers.onCrop, false);
-				document.removeEventListener("mouseup", handlers.endCrop, false);
-
-				document.removeEventListener("touchmove", handlers.onCrop, false);
-				document.removeEventListener("touchend", handlers.endCrop, false);
-
-				// callback
-				if (config.edit) {
-					config.edit(null, exportImageState(eventState.target));
+					// clear event state
+					eventState.onCrop = false;
+					eventState.target = undefined;
+					eventState.handle = undefined;
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
 			},
 
@@ -1594,1044 +1911,73 @@
 				};
 			},
 
-			resizeViewport: function(e){
-				e.preventDefault();
-				e.stopPropagation();
+			resizeWindow: function(e){
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+	
+					var oldWidth = containerState.width;
+					var oldHeight = containerState.height;
+					var newWidth;
+					var newHeight;
+					var scaleRatioX;
+					var scaleRatioY;
+					var initialized = canvasState.originalWidth && canvasState.originalHeight;
 
-				var oldWidth = containerState.width;
-				var oldHeight = containerState.height;
-
-				initContainer();
-
-				if (
-					canvasState.originalWidth &&
-					canvasState.originalHeight
-				) {
-					initCanvas();
-
-					var newWidth = containerState.width;
-					var newHeight = containerState.height;
-					var scaleRatioX = newWidth / oldWidth;
-					var scaleRatioY = newHeight / oldHeight;
-
-					imageStates.forEach(function(state){
-						// save state
-						setState(state.id, {
-							x: state.x * scaleRatioX,
-							y: state.y * scaleRatioY,
-							width: state.width * scaleRatioX,
-							height: state.height * scaleRatioY,
-							cropTop: state.cropTop * scaleRatioY,
-							cropBottom: state.cropBottom * scaleRatioY,
-							cropLeft: state.cropLeft * scaleRatioX,
-							cropRight: state.cropRight * scaleRatioX
-						});
-					});
+					setContainer();
+	
+					if (initialized) {
+						setCanvas();
+	
+						newWidth = containerState.width;
+						newHeight = containerState.height;
+						scaleRatioX = newWidth / oldWidth;
+						scaleRatioY = newHeight / oldHeight;
+	
+						for(var i = 0; i < imageStates.length; i++) {
+							var state = imageStates[i];
+							// save image state
+							setImageState(state.id, {
+								x: state.x * scaleRatioX,
+								y: state.y * scaleRatioY,
+								width: state.width * scaleRatioX,
+								height: state.height * scaleRatioY,
+								cropTop: state.cropTop * scaleRatioY,
+								cropBottom: state.cropBottom * scaleRatioY,
+								cropLeft: state.cropLeft * scaleRatioX,
+								cropRight: state.cropRight * scaleRatioX
+							});
+							// set image style
+							setImage(state.id);
+						}
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
 				}
 			},
 
-		}
+			scrollWindow: function(e){
+				try {
+					console.log("Window Moved");
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
 
-		//
-		// event handlers end
-		//
+		};
 
 		//
 		// methods start
 		//
-
-		function getId(obj) {
-			if (!obj) {
-				return false;
-			}
-			var id = obj.id;
-			if (!obj.id) {
-				return false;
-			}
-			if (id.indexOf(originId) > -1) {
-				return id.replace(originId, "");
-			} else if (id.indexOf(cloneId) > -1) {
-				return id.replace(cloneId, "");
-			} else {
-				return false;
-			}
-		}
-
-		function getOriginWrapper(id) {
-			return document.getElementById(originId + id);
-		}
-
-		function getOriginImage(id) {
-			var wrapper = document.getElementById(originId + id);
-			if (!wrapper) {
-				return false;
-			}
-			return wrapper.querySelector("div.canvaaas-image");
-		}
-
-		function getCloneWrapper(id) {
-			return document.getElementById(cloneId + id);
-		}
-
-		function getCloneImage(id) {
-			var wrapper = document.getElementById(cloneId + id);
-			if (!wrapper) {
-				return false;
-			}
-			return wrapper.querySelector("div.canvaaas-image");
-		}
-
-		function getState(id) {
-			if (!id) {
-				return false;
-			}
-			var state = imageStates.find(function(elem){
-				if (elem.id === id) {
-					return elem;
-				}
-			});
-			if (!state) {
-				return false;
-			}
-
-			var tmp = {};
-			for (var key in state) {
-				if (state.hasOwnProperty(key)) {
-					tmp[key] = state[key];
-				}
-			}
-
-			return tmp;
-		}
-
-		function setState(id, newState) {
-			if (!id) {
-				return false;
-			}
-			if (typeof(newState) !== "object" || newState === null) {
-				return false;
-			}
-			var state = imageStates.find(function(elem){
-				if (elem.id === id) {
-					return elem;
-				}
-			});
-			if (!state) {
-				return false;
-			}
-
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			var originImage = originWrapper.querySelector("div.canvaaas-image");
-			var cloneImage = cloneWrapper.querySelector("div.canvaaas-image");
-			if (
-				!originImage ||
-				!cloneImage
-			) {
-				return false;
-			}
-
-			var originImg = originImage.querySelector("img");
-			var cloneImg = cloneImage.querySelector("img");
-			if (
-				!originImg ||
-				!cloneImg
-			) {
-				return false;
-			}
-
-			if (isString(newState.id)) {
-				if (!isExist(toString(newState.id))) {
-					// change focus
-					if (eventState.target) {
-						if (eventState.target === state.id) {
-							eventState.target = newState.id;
-						}
-					}
-
-					// change element id
-					originWrapper.id = originId + newState.id;
-					cloneWrapper.id = cloneId + newState.id;
-
-					// change undo caches
-					undoCaches.forEach(function(elem){
-						if (elem.id === state.id) {
-							elem.id = newState.id;
-							elem.state.id = newState.id;
-						}
-					});
-
-					// change redo caches
-					redoCaches.forEach(function(elem){
-						if (elem.id === state.id) {
-							elem.id = newState.id;
-							elem.state.id = newState.id;
-						}
-					});
-
-					state.id = toString(newState.id);
-				}
-			}
-
-			if (isNumeric(newState.index)) {
-				state.index = toNumber(newState.index);
-			}
-			if (isNumeric(newState.x)) {
-				state.x = toNumber(newState.x);
-			}
-			if (isNumeric(newState.y)) {
-				state.y = toNumber(newState.y);
-			}
-			if (isNumeric(newState.width)) {
-				state.width = toNumber(newState.width);
-			}
-			if (isNumeric(newState.height)) {
-				state.height = toNumber(newState.height);
-			}
-			if (isNumeric(newState.rotate)) {
-				state.rotate = toNumber(newState.rotate);
-			}
-			if (isNumeric(newState.rotateX)) {
-				state.rotateX = toNumber(newState.rotateX);
-			}
-			if (isNumeric(newState.rotateY)) {
-				state.rotateY = toNumber(newState.rotateY);
-			}
-			if (isNumeric(newState.opacity)) {
-				state.opacity = toNumber(newState.opacity);
-			}
-
-			if (isBoolean(newState.visible)) {
-				state.visible = toBoolean(newState.visible);
-
-				if (!state.visible) {
-					if (eventState.target) {
-						if (eventState.target === state.id) {
-							setFocusOut(state.id);
-						}
-					}
-				}
-			}
-			if (isBoolean(newState.editabled)) {
-				state.editabled = toBoolean(newState.editabled);
-			}
-			if (isBoolean(newState.focusabled)) {
-				state.focusabled = toBoolean(newState.focusabled);
-
-				if (!state.focusabled) {
-					if (eventState.target) {
-						if (eventState.target === state.id) {
-							setFocusOut(state.id);
-						}
-					}
-				}
-			}
-			if (isBoolean(newState.drawabled)) {
-				state.drawabled = toBoolean(newState.drawabled);
-			}
-
-			if (isNumeric(newState.cropTop)) {
-				if (toNumber(newState.cropTop) < 0) {
-					state.cropTop = 0;
-				} else if (toNumber(newState.cropTop) < state.height - (state.cropBottom + 10)) {
-					state.cropTop = toNumber(newState.cropTop);
-				}
-			}
-			if (isNumeric(newState.cropBottom)) {
-				if (toNumber(newState.cropBottom) < 0) {
-					state.cropBottom = 0;
-				} else if (toNumber(newState.cropBottom) < state.height - (state.cropTop + 10)) {
-					state.cropBottom = toNumber(newState.cropBottom);
-				}
-			}
-			if (isNumeric(newState.cropLeft)) {
-				if (toNumber(newState.cropLeft) < 0) {
-					state.cropLeft = 0;
-				} else if (toNumber(newState.cropLeft) < state.width - (state.cropRight + 10)) {
-					state.cropLeft = toNumber(newState.cropLeft);
-				}
-			}
-			if (isNumeric(newState.cropRight)) {
-				if (toNumber(newState.cropRight) < 0) {
-					state.cropRight = 0;
-				} else if (toNumber(newState.cropRight) < state.width - (state.cropLeft + 10)) {
-					state.cropRight = toNumber(newState.cropRight);
-				}
-			}
-
-			if (isNumeric(newState.scaleX)) {
-				if (
-					toNumber(newState.scaleX) === 1 ||
-					toNumber(newState.scaleX) === -1
-				) {
-					if (state.scaleX !== toNumber(newState.scaleX)) {
-						var tmp = state.cropLeft;
-						state.cropLeft = state.cropRight;
-						state.cropRight = tmp;
-					}
-					state.scaleX = toNumber(newState.scaleX);
-				}
-			}
-
-			if (isNumeric(newState.scaleY)) {
-				if (
-					toNumber(newState.scaleY) === 1 ||
-					toNumber(newState.scaleY) === -1
-				) {
-					if (state.scaleY !== toNumber(newState.scaleY)) {
-						var tmp = state.cropTop;
-						state.cropTop = state.cropBottom;
-						state.cropBottom = tmp;
-					}
-					state.scaleY = toNumber(newState.scaleY);
-				}
-			}
-
-			if (isBoolean(newState.lockAspectRatio)) {
-				if (
-					state.lockAspectRatio === false &&
-					toBoolean(newState.lockAspectRatio) === true
-				) {
-					var cw = state.width - (state.cropLeft + state.cropRight);
-					var ch = state.height - (state.cropTop + state.cropBottom);
-					var scaleCropTop = state.cropTop / ch;
-					var scaleCropBottom = state.cropBottom / ch;
-					var scaleCropLeft = state.cropLeft / cw;
-					var scaleCropRight = state.cropRight / cw;
-					var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
-					var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
-					var croppedOriginalAspectRatio = croppedOriginalWidth / croppedOriginalHeight;
-
-					if (cw > ch * croppedOriginalAspectRatio) {
-						ch = cw / croppedOriginalAspectRatio;
-					} else {
-						cw = ch * croppedOriginalAspectRatio;
-					}
-
-					state.cropTop = ch * scaleCropTop;
-					state.cropBottom = ch * scaleCropBottom;
-					state.cropLeft = cw * scaleCropLeft;
-					state.cropRight = cw * scaleCropRight;
-
-					state.width = cw + (cw * scaleCropLeft) + (cw * scaleCropRight);
-					state.height = ch + (ch * scaleCropTop) + (ch * scaleCropBottom);
-				}
-				
-				state.lockAspectRatio = toBoolean(newState.lockAspectRatio);
-			}
-
-			// set style
-			var index = state.index;
-			var width = state.width;
-			var height = state.height;
-			// var top = (state.y - (state.height * 0.5));
-			// var left = (state.x - (state.width * 0.5));
-			var opacity = state.opacity;
-			var croppedWidth = width - (state.cropLeft + state.cropRight);
-			var croppedHeight = height - (state.cropTop + state.cropBottom);
-			var croppedTop = state.y - (croppedHeight * 0.5);
-			var croppedLeft = state.x - (croppedWidth * 0.5);
-
-			var transform = "";
-			if (state.rotate !== 0) {
-				transform += "rotate(" + state.rotate + "deg)";
-			}
-			if (state.rotateX !== 0) {
-				transform += "rotateX(" + state.rotateX +  "deg)";
-			}
-			if (state.rotateY !== 0) {
-				transform += "rotateY(" + state.rotateY +  "deg)";
-			}
-			if (state.scaleX === -1) {
-				transform += "scaleX(" + state.scaleX + ")";
-			}
-			if (state.scaleY === -1) {
-				transform += "scaleY(" + state.scaleY + ")";
-			}
-
-			originWrapper.style.zIndex = index;
-			originWrapper.style.top = croppedTop + "px";
-			originWrapper.style.left = croppedLeft + "px";
-			originWrapper.style.width = croppedWidth + "px";
-			originWrapper.style.height = croppedHeight + "px";
-			originWrapper.style.transform = transform;
-
-			cloneWrapper.style.zIndex = index;
-			cloneWrapper.style.top = croppedTop + "px";
-			cloneWrapper.style.left = croppedLeft + "px";
-			cloneWrapper.style.width = croppedWidth + "px";
-			cloneWrapper.style.height = croppedHeight + "px";
-			cloneWrapper.style.transform = transform;
-
-			if (state.scaleX > 0) {
-				originImg.style.left = (-state.cropLeft) + "px";
-			} else {
-				originImg.style.left = (-state.cropRight) + "px";
-			}
-			if (state.scaleY > 0) {
-				originImg.style.top = (-state.cropTop) + "px";
-			} else {
-				originImg.style.top = (-state.cropBottom) + "px";
-			}
-			originImg.style.width = width + "px";
-			originImg.style.height = height + "px";
-			originImg.style.opacity = opacity;
-
-			if (state.scaleX > 0) {
-				cloneImg.style.left = (-state.cropLeft) + "px";
-			} else {
-				cloneImg.style.left = (-state.cropRight) + "px";
-			}
-			if (state.scaleY > 0) {
-				cloneImg.style.top = (-state.cropTop) + "px";
-			} else {
-				cloneImg.style.top = (-state.cropBottom) + "px";
-			}
-			cloneImg.style.width = width + "px";
-			cloneImg.style.height = height + "px";
-			cloneImg.style.opacity = opacity;
-			
-			if (!state.visible) {
-				if (eventState.target) {
-					if (eventState.target === state.id) {
-						setFocusOut(state.id);
-					}
-				}
-
-				if (!originWrapper.classList.contains("hidden")) {
-					originWrapper.classList.add("hidden");
-				}
-				if (!cloneWrapper.classList.contains("hidden")) {
-					cloneWrapper.classList.add("hidden");
-				}
-			} else {
-				if (originWrapper.classList.contains("hidden")) {
-					originWrapper.classList.remove("hidden");
-				}
-				if (cloneWrapper.classList.contains("hidden")) {
-					cloneWrapper.classList.remove("hidden");
-				}
-			}
-
-			if (!state.focusabled) {
-				if (eventState.target) {
-					if (eventState.target === state.id) {
-						setFocusOut(state.id);
-					}
-				}
-
-				if (!originWrapper.classList.contains("blurred")) {
-					originWrapper.classList.add("blurred");
-				}
-				if (!cloneWrapper.classList.contains("blurred")) {
-					cloneWrapper.classList.add("blurred");
-				}
-			} else {
-				if (originWrapper.classList.contains("blurred")) {
-					originWrapper.classList.remove("blurred");
-				}
-				if (cloneWrapper.classList.contains("blurred")) {
-					cloneWrapper.classList.remove("blurred");
-				}
-			}
-
-			return true;
-		}
-
-		function addClassToWrapper(id, cls) {
-			if (!id) {
-				return false;
-			}
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			if (!originWrapper.classList.contains(cls)) {
-				originWrapper.classList.add(cls);
-			}
-			if (!cloneWrapper.classList.contains(cls)) {
-				cloneWrapper.classList.add(cls);
-			}
-			return true;
-		}
-
-		function removeClassToWrapper(id, cls) {
-			if (!id) {
-				return false;
-			}
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			if (originWrapper.classList.contains(cls)) {
-				originWrapper.classList.remove(cls);
-			}
-			if (cloneWrapper.classList.contains(cls)) {
-				cloneWrapper.classList.remove(cls);
-			}
-
-			return true;
-		}
-
-		function addClassToHandle(handle, cls) {
-			var id = getId(handle.parentNode);
-			if (!id) {
-				return false;
-			}
-			var position;
-			var direction;
-			if (handle.classList.contains("canvaaas-inhandle")) {
-				position = ".canvaaas-inhandle";
-			} else if (handle.classList.contains("canvaaas-outhandle")) {
-				position = ".canvaaas-outhandle";
-			} else {
-				return false;
-			}
-			if (handle.classList.contains("canvaaas-handle-n")) {
-				direction = ".canvaaas-handle-n";
-			} else if (handle.classList.contains("canvaaas-handle-ne")) {
-				direction = ".canvaaas-handle-ne";
-			} else if (handle.classList.contains("canvaaas-handle-e")) {
-				direction = ".canvaaas-handle-e";
-			} else if (handle.classList.contains("canvaaas-handle-se")) {
-				direction = ".canvaaas-handle-se";
-			} else if (handle.classList.contains("canvaaas-handle-s")) {
-				direction = ".canvaaas-handle-s";
-			} else if (handle.classList.contains("canvaaas-handle-sw")) {
-				direction = ".canvaaas-handle-sw";
-			} else if (handle.classList.contains("canvaaas-handle-w")) {
-				direction = ".canvaaas-handle-w";
-			} else if (handle.classList.contains("canvaaas-handle-nw")) {
-				direction = ".canvaaas-handle-nw";
-			} else {
-				return false;
-			}
-
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			var originHandle = originWrapper.querySelector("div" + position + direction);
-			var cloneHandle = cloneWrapper.querySelector("div" + position + direction);
-			if (
-				!originHandle ||
-				!cloneHandle
-			) {
-				return false;
-			}
-
-			if (!originHandle.classList.contains(cls)) {
-				originHandle.classList.add(cls);
-			}
-			if (!cloneHandle.classList.contains(cls)) {
-				cloneHandle.classList.add(cls);
-			}
-			return true;
-		}
-
-		function removeClassToHandle(handle, cls) {
-			var id = getId(handle.parentNode);
-			if (!id) {
-				return false;
-			}
-			var position;
-			var direction;
-			if (handle.classList.contains("canvaaas-inhandle")) {
-				position = ".canvaaas-inhandle";
-			} else if (handle.classList.contains("canvaaas-outhandle")) {
-				position = ".canvaaas-outhandle";
-			} else {
-				return false;
-			}
-			if (handle.classList.contains("canvaaas-handle-n")) {
-				direction = ".canvaaas-handle-n";
-			} else if (handle.classList.contains("canvaaas-handle-ne")) {
-				direction = ".canvaaas-handle-ne";
-			} else if (handle.classList.contains("canvaaas-handle-e")) {
-				direction = ".canvaaas-handle-e";
-			} else if (handle.classList.contains("canvaaas-handle-se")) {
-				direction = ".canvaaas-handle-se";
-			} else if (handle.classList.contains("canvaaas-handle-s")) {
-				direction = ".canvaaas-handle-s";
-			} else if (handle.classList.contains("canvaaas-handle-sw")) {
-				direction = ".canvaaas-handle-sw";
-			} else if (handle.classList.contains("canvaaas-handle-w")) {
-				direction = ".canvaaas-handle-w";
-			} else if (handle.classList.contains("canvaaas-handle-nw")) {
-				direction = ".canvaaas-handle-nw";
-			} else {
-				return false;
-			}
-
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			if (
-				!originWrapper ||
-				!cloneWrapper
-			) {
-				return false;
-			}
-
-			var originHandle = originWrapper.querySelector("div" + position + direction);
-			var cloneHandle = cloneWrapper.querySelector("div" + position + direction);
-			if (
-				!originHandle ||
-				!cloneHandle
-			) {
-				return false;
-			}
-
-			if (originHandle.classList.contains(cls)) {
-				originHandle.classList.remove(cls);
-			}
-			if (cloneHandle.classList.contains(cls)) {
-				cloneHandle.classList.remove(cls);
-			}
-			return true;
-		}
-
-		function exportConfig() {
-			var tmp = {};
-			for(var key in config) {
-				if (config.hasOwnProperty(key)) {
-					if (isFunction(config[key])) {
-						tmp[key] = true;
-					} else {
-						tmp[key] = config[key];
-					}
-				}
-			}
-			return tmp;
-		}
-
-		function exportHandleState() {
-			var tmp = {};
-			copyObject(tmp, handleState);
-			return tmp;
-		}
-
-		function exportCanvasState() {
-			var tmp = {};
-			tmp.filename = canvasState.filename;
-			tmp.dataType = canvasState.dataType;
-			tmp.mimeType = canvasState.mimeType;
-			tmp.quality = canvasState.quality;
-			tmp.width = canvasState.originalWidth;
-			tmp.height = canvasState.originalHeight;
-			tmp.editabled = canvasState.editabled;
-			tmp.focusabled = canvasState.focusabled;
-			tmp.background = canvasState.background;
-			tmp.checker = canvasState.checker;
-			tmp.overlay = canvasState.overlay;
-
-			var ar = getAspectRatio(tmp.width, tmp.height);
-			tmp.aspectRatio = "" + ar[0] + ":" + ar[1];
-
-			tmp.element = canvasObject;
-
-			return tmp;
-		}
-
-		function importImageState(state) {
-			var tmp = {};
-
-			if (isString(state.id)) {
-				tmp.id = toString(state.id);
-			}
-			if (isNumeric(state.index)) {
-				tmp.index = toNumber(state.index);
-			}
-			if (isNumeric(state.x)) {
-				tmp.x = toNumber(state.x) * (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.y)) {
-				tmp.y = toNumber(state.y) * (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.width)) {
-				tmp.width = toNumber(state.width) * (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.height)) {
-				tmp.height = toNumber(state.height) * (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.cropTop)) {
-				tmp.cropTop = toNumber(state.cropTop) * (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.cropBottom)) {
-				tmp.cropBottom = toNumber(state.cropBottom) * (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.cropLeft)) {
-				tmp.cropLeft = toNumber(state.cropLeft) * (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.cropRight)) {
-				tmp.cropRight = toNumber(state.cropRight) * (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.rotate)) {
-				tmp.rotate = toNumber(state.rotate);
-			}
-			if (isNumeric(state.scaleX)) {
-				tmp.scaleX = toNumber(state.scaleX);
-			}
-			if (isNumeric(state.scaleY)) {
-				tmp.scaleY = toNumber(state.scaleY);
-			}
-			if (isNumeric(state.opacity)) {
-				tmp.opacity = toNumber(state.opacity);
-			}
-			if (isBoolean(state.lockAspectRatio)) {
-				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
-			}
-			if (isBoolean(state.visible)) {
-				tmp.visible = toBoolean(state.visible);
-			}
-			if (isBoolean(state.editabled)) {
-				tmp.editabled = toBoolean(state.editabled);
-			}
-			if (isBoolean(state.focusabled)) {
-				tmp.focusabled = toBoolean(state.focusabled);
-			}
-			if (isBoolean(state.drawabled)) {
-				tmp.drawabled = toBoolean(state.drawabled);
-			}
-
-			return tmp;
-		}
-
-		function exportImageState(id) {
-			var state = getState(id);
-			var originWrapper = getOriginWrapper(id);
-			var cloneWrapper = getCloneWrapper(id);
-			var tmp = {};
-
-			if (isString(state.id)) {
-				tmp.id = toString(state.id);
-			}
-			if (isString(state.src)) {
-				tmp.src = toString(state.src);
-			}
-			if (isNumeric(state.index)) {
-				tmp.index = toNumber(state.index);
-			}
-			if (isNumeric(state.x)) {
-				tmp.x = toNumber(state.x) / (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.y)) {
-				tmp.y = toNumber(state.y) / (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.width)) {
-				tmp.width = toNumber(state.width) / (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.height)) {
-				tmp.height = toNumber(state.height) / (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.cropLeft)) {
-				tmp.cropLeft = toNumber(state.cropLeft) / (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.cropRight)) {
-				tmp.cropRight = toNumber(state.cropRight) / (canvasState.width / canvasState.originalWidth);
-			}
-			if (isNumeric(state.cropTop)) {
-				tmp.cropTop = toNumber(state.cropTop) / (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.cropBottom)) {
-				tmp.cropBottom = toNumber(state.cropBottom) / (canvasState.height / canvasState.originalHeight);
-			}
-			if (isNumeric(state.originalWidth)) {
-				tmp.originalWidth = toNumber(state.originalWidth);
-			}
-			if (isNumeric(state.originalHeight)) {
-				tmp.originalHeight = toNumber(state.originalHeight);
-			}
-			if (isNumeric(state.rotate)) {
-				tmp.rotate = toNumber(state.rotate);
-			}
-			if (isNumeric(state.scaleX)) {
-				tmp.scaleX = toNumber(state.scaleX);
-			}
-			if (isNumeric(state.scaleY)) {
-				tmp.scaleY = toNumber(state.scaleY);
-			}
-			if (isNumeric(state.opacity)) {
-				tmp.opacity = toNumber(state.opacity);
-			}
-			if (isBoolean(state.lockAspectRatio)) {
-				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
-			}
-			if (isBoolean(state.visible)) {
-				tmp.visible = toBoolean(state.visible);
-			}
-			if (isBoolean(state.editabled)) {
-				tmp.editabled = toBoolean(state.editabled);
-			}
-			if (isBoolean(state.focusabled)) {
-				tmp.focusabled = toBoolean(state.focusabled);
-			}
-			if (isBoolean(state.drawabled)) {
-				tmp.drawabled = toBoolean(state.drawabled);
-			}
-
-			var originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
-			var aspectRatio = getAspectRatio(tmp.width, tmp.height);
-
-			tmp.originalAspectRatio = "" + originalAspectRatio[0] + ":" + originalAspectRatio[1];
-			tmp.aspectRatio = "" + aspectRatio[0] + ":" + aspectRatio[1];
-			tmp.left = tmp.x - (0.5 * tmp.width);
-			tmp.top = tmp.y - (0.5 * tmp.height);
-
-			tmp.elements = [originWrapper, cloneWrapper];
-
-			return tmp;
-		}
-
-		function parseState(state) {
-			var tmp = {};
-			if (isString(state.id)) {
-				tmp.id = toString(state.id);
-			}
-			if (isString(state.url)) {
-				tmp.src = toString(state.url);
-			}
-			if (isString(state.path)) {
-				tmp.src = toString(state.path);
-			}
-			if (isString(state.src)) {
-				tmp.src = toString(state.src);
-			}
-			if (isNumeric(state.x)) {
-				tmp.x = toNumber(state.x);
-			}
-			if (isNumeric(state.y)) {
-				tmp.y = toNumber(state.y);
-			}
-			if (isNumeric(state.width)) {
-				tmp.width = toNumber(state.width);
-			}
-			if (isNumeric(state.height)) {
-				tmp.height = toNumber(state.height);
-			}
-			if (isNumeric(state.index)) {
-				tmp.index = toNumber(state.index);
-			}
-			if (isNumeric(state.rotate)) {
-				tmp.rotate = toNumber(state.rotate);
-			}
-			if (isNumeric(state.scaleX)) {
-				tmp.scaleX = toNumber(state.scaleX);
-			}
-			if (isNumeric(state.scaleY)) {
-				tmp.scaleY = toNumber(state.scaleY);
-			}
-			if (isNumeric(state.opacity)) {
-				tmp.opacity = toNumber(state.opacity);
-			}
-			if (isBoolean(state.lockAspectRatio)) {
-				tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
-			}
-			if (isBoolean(state.visible)) {
-				tmp.visible = toBoolean(state.visible);
-			}
-			if (isBoolean(state.editabled)) {
-				tmp.editabled = toBoolean(state.editabled);
-			}
-			if (isBoolean(state.focusabled)) {
-				tmp.focusabled = toBoolean(state.focusabled);
-			}
-			if (isBoolean(state.drawabled)) {
-				tmp.drawabled = toBoolean(state.drawabled);
-			}
-			if (isNumeric(state.cropTop)) {
-				tmp.cropTop = toNumber(state.cropTop);
-			}
-			if (isNumeric(state.cropBottom)) {
-				tmp.cropBottom = toNumber(state.cropBottom);
-			}
-			if (isNumeric(state.cropLeft)) {
-				tmp.cropLeft = toNumber(state.cropLeft);
-			}
-			if (isNumeric(state.cropRight)) {
-				tmp.cropRight = toNumber(state.cropRight);
-			}
-			return tmp;
-		}
-
-		function getDataset(elem) {
-			var datasetKeys = [
-				"_id",
-				"id",
-				"src",
-				"url",
-				"path",
-				"index",
-				"x",
-				"y",
-				"width",
-				"height",
-				"rotate",
-				"scalex",
-				"scaley",
-				"scale-x",
-				"scale-y",
-				"opacity",
-				"lockaspectratio",
-				"lock-aspect-ratio",
-				"visible",
-				"focusabled",
-				"editabled",
-				"drawabled",
-				"croptop",
-				"cropbottom",
-				"cropleft",
-				"cropright",
-				"crop-top",
-				"crop-bottom",
-				"crop-right",
-				"crop-left",
-			];
-
-			var stateKeys = {
-				"_id": "id",
-				"id": "id",
-				"src": "src",
-				"url": "src",
-				"path": "src",
-				"index": "index",
-				"x": "x",
-				"y": "y",
-				"width": "width",
-				"height": "height",
-				"rotate": "rotate",
-				"scale-x": "scaleX",
-				"scale-y": "scaleY",
-				"scalex": "scaleX",
-				"scaley": "scaleY",
-				"opacity": "opacity",
-				"lock-aspect-ratio": "lockAspectRatio",
-				"lockaspectratio": "lockAspectRatio",
-				"visible": "visible",
-				"focusabled": "focusabled",
-				"editabled": "editabled",
-				"drawabled": "drawabled",
-				"croptop": "cropTop",
-				"cropbottom": "cropBottom",
-				"cropleft": "cropLeft",
-				"cropright": "cropRight",
-				"crop-top": "cropTop",
-				"crop-bottom": "cropBottom",
-				"crop-left": "cropLeft",
-				"crop-right": "cropRight",
-			}
-
-			var attr = {};
-			for (var i = 0; i < datasetKeys.length; i++) {
-				var v = elem.getAttribute("data-" + datasetKeys[i]);
-				if (
-					v !== undefined &&
-					v !== null &&
-					v !== ""
-				) {
-					attr[stateKeys[datasetKeys[i]]] = v;
-				}
-			}
-
-			return parseState(attr);
-		}
-
-		function isEditable(id) {
-			if (!id) {
-				return false;
-			}
-			if (!canvasState.editabled) {
-				return false;
-			}
-			var state = getState(id);
-			if (!state) {
-				return false;
-			}
-			if (!state.editabled) {
-				return false;
-			}
-			return true;
-		}
-
-		function isFocusable(id) {
-			if (!id) {
-				return false;
-			}
-			if (!canvasState.focusabled) {
-				return false;
-			}
-			var state = getState(id);
-			if (!state) {
-				return false;
-			}
-			if (!state.focusabled) {
-				return false;
-			}
-			return true;
-		}
-
-		function isExist(id) {
-			var exists = imageStates.find(function(elem){
-				if (elem.id === id) {
-					return elem;
-				}
-			});
-
-			if (!exists) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-
-		function whereIsContainer(e) {
-			if (!containerObject) {
-				return false;
-			}
-			var cont = containerObject.getBoundingClientRect();
-			containerState.left = cont.left;
-			containerState.rop = cont.top;
-
-			return true;
-		}
-
-		function chkTarget(e) {
-			if (!eventState.target) {
-				return false;
-			}
-			if (!isExist(eventState.target)) {
-				eventState.target = undefined;
-				return false;
-			}
-			return true;
-		}
-
-		function getTarget(e) {
+		
+		function getTargetId(e) {
 			try {
 				var tmp = e.target;
 				var found;
-				for(var i = 0; i < 3; i++) {
+				var id;
+				for(var i = 0; i < 4; i++) {
 					if (!found) {
 						if (tmp.classList.contains("canvaaas-wrapper")) {
 							found = tmp;
@@ -2642,72 +1988,925 @@
 						}
 					}
 				}
+				if (!found) {
+					return false;
+				}
+				id = getId(found);
+				return id;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
 
+		function getId(obj) {
+			try {
+				var id;
+				if (!obj) {
+					return false;
+				}
+				if (!obj.id) {
+					return false;
+				}
+				if (obj.id.indexOf(_originId) > -1) {
+					id = obj.id.replace(_originId, "");
+				} else if (obj.id.indexOf(_cloneId) > -1) {
+					id = obj.id.replace(_cloneId, "");
+				}
+				return id;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getImageState(id) {
+			try {
+				var found;
+				if (!id) {
+					return false;
+				}
+				for (var i = 0; i < imageStates.length; i++) {
+					if (id === imageStates[i].id) {
+						found = imageStates[i];
+					}
+				}
+				return found;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setImageState(id, newState) {
+			try {
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var state;
+				var oldId;
+				var newId;
+				var newScaleX;
+				var oldScaleX;
+				var newScaleY;
+				var oldScaleY;
+				var newLAR;
+				var oldLAR;
+				var tmp;
+
+				if (!id) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+				if (!isObject(newState)) {
+					return false;
+				}
+				for (var i = 0; i < imageStates.length; i++) {
+					if (imageStates[i].id === id) {
+						state = imageStates[i];
+					}
+				}
+				if (!state) {
+					return false;
+				}
+
+				// id change
+				if (isString(newState.id)) {
+					oldId = state.id;
+					newId = toString(newState.id);
+					if (!isExist(newId)) {
+						// change undo caches
+						for (var i = 0; i < undoCaches.length; i++) {
+							if (undoCaches[i].id === oldId) {
+								undoCaches[i].id = newId;
+								undoCaches[i].state.id = newId;
+							}
+						}
+						// change redo caches
+						for (var i = 0; i < redoCaches.length; i++) {
+							if (redoCaches[i].id === oldId) {
+								redoCaches[i].id = newId;
+								redoCaches[i].state.id = newId;
+							}
+						}
+						// change element id
+						origin.id = _originId + newId;
+						clone.id = _cloneId + newId;
+						// change state
+						state.id = newId;
+					}
+				}
+
+				if (isNumeric(newState.index)) {
+					state.index = toNumber(newState.index);
+				}
+				if (isNumeric(newState.x)) {
+					state.x = toNumber(newState.x);
+				}
+				if (isNumeric(newState.y)) {
+					state.y = toNumber(newState.y);
+				}
+				if (isNumeric(newState.width)) {
+					state.width = toNumber(newState.width);
+				}
+				if (isNumeric(newState.height)) {
+					state.height = toNumber(newState.height);
+				}
+				if (isNumeric(newState.rotate)) {
+					state.rotate = toNumber(newState.rotate);
+				}
+				if (isNumeric(newState.rotateX)) {
+					state.rotateX = toNumber(newState.rotateX);
+				}
+				if (isNumeric(newState.rotateY)) {
+					state.rotateY = toNumber(newState.rotateY);
+				}
+				if (isNumeric(newState.opacity)) {
+					tmp = toNumber(newState.opacity);
+					if (tmp > 1) {
+						state.opacity = 1;
+					} else if (tmp < 0) {
+						state.opacity = 0;
+					} else {
+						state.opacity = tmp;
+					}
+				}
+				if (isBoolean(newState.visible)) {
+					state.visible = toBoolean(newState.visible);
+				}
+				if (isBoolean(newState.clickable)) {
+					state.clickable = toBoolean(newState.clickable);
+				}
+				if (isBoolean(newState.editable)) {
+					state.editable = toBoolean(newState.editable);
+				}
+				if (isBoolean(newState.drawable)) {
+					state.drawable = toBoolean(newState.drawable);
+				}
+
+				if (isNumeric(newState.cropTop)) {
+					tmp = toNumber(newState.cropTop);
+					if (tmp < 0) {
+						state.cropTop = 0;
+					} else if (tmp < state.height - (state.cropBottom + 10)) {
+						state.cropTop = tmp;
+					}
+				}
+				if (isNumeric(newState.cropBottom)) {
+					tmp = toNumber(newState.cropBottom);
+					if (tmp < 0) {
+						state.cropBottom = 0;
+					} else if (tmp < state.height - (state.cropTop + 10)) {
+						state.cropBottom = tmp;
+					}
+				}
+				if (isNumeric(newState.cropLeft)) {
+					tmp = toNumber(newState.cropLeft);
+					if (tmp < 0) {
+						state.cropLeft = 0;
+					} else if (tmp < state.width - (state.cropRight + 10)) {
+						state.cropLeft = tmp;
+					}
+				}
+				if (isNumeric(newState.cropRight)) {
+					tmp = toNumber(newState.cropRight);
+					if (tmp < 0) {
+						state.cropRight = 0;
+					} else if (tmp < state.width - (state.cropLeft + 10)) {
+						state.cropRight = tmp;
+					}
+				}
+
+				if (isNumeric(newState.scaleX)) {
+					newScaleX = toNumber(newState.scaleX);
+					oldScaleX = state.scaleX;
+					if (newScaleX === 1 || newScaleX === -1) {
+						if (newScaleX !== oldScaleX) {
+							tmp = state.cropLeft;
+							state.cropLeft = state.cropRight;
+							state.cropRight = tmp;
+							state.scaleX = newScaleX;
+						}
+					}
+				}
+
+				if (isNumeric(newState.scaleY)) {
+					newScaleY = toNumber(newState.scaleY);
+					oldScaleY = state.scaleY;
+					if (newScaleY === 1 || newScaleY === -1) {
+						if (newScaleY !== oldScaleY) {
+							tmp = state.cropTop;
+							state.cropTop = state.cropBottom;
+							state.cropBottom = tmp;
+							state.scaleY = newScaleY;
+						}
+					}
+				}
+
+				if (isBoolean(newState.lockAspectRatio)) {
+					newLAR = toBoolean(newState.lockAspectRatio);
+					oldLAR = state.lockAspectRatio;
+					if (newLAR !== oldLAR && newLAR === true) {
+
+						// 
+						// 조정
+						// 
+						
+						var cw = state.width - (state.cropLeft + state.cropRight);
+						var ch = state.height - (state.cropTop + state.cropBottom);
+						var scaleCropTop = state.cropTop / ch;
+						var scaleCropBottom = state.cropBottom / ch;
+						var scaleCropLeft = state.cropLeft / cw;
+						var scaleCropRight = state.cropRight / cw;
+						var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
+						var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
+						var croppedOriginalAspectRatio = croppedOriginalWidth / croppedOriginalHeight;
+
+						if (cw > ch * croppedOriginalAspectRatio) {
+							ch = cw / croppedOriginalAspectRatio;
+						} else {
+							cw = ch * croppedOriginalAspectRatio;
+						}
+
+						state.cropTop = ch * scaleCropTop;
+						state.cropBottom = ch * scaleCropBottom;
+						state.cropLeft = cw * scaleCropLeft;
+						state.cropRight = cw * scaleCropRight;
+
+						state.width = cw + (cw * scaleCropLeft) + (cw * scaleCropRight);
+						state.height = ch + (ch * scaleCropTop) + (ch * scaleCropBottom);
+					}
+					
+					state.lockAspectRatio = newLAR;
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setImage(id) {
+			try {
+				var state;
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var originImg;
+				var cloneImg;
+				var croppedW;
+				var croppedH;
+				var croppedT;
+				var croppedL;
+				var transform = "";
+
+				if (!id) {
+					return false;
+				}
+				for (var i = 0; i < imageStates.length; i++) {
+					if (imageStates[i].id === id) {
+						state = imageStates[i];
+					}
+				}
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+
+				originImg = origin.querySelector("img");
+				cloneImg = clone.querySelector("img");
+
+				if (!originImg) {
+					return false;
+				}
+				if (!cloneImg) {
+					return false;
+				}
+
+				croppedW = state.width - (state.cropLeft + state.cropRight);
+				croppedH = state.height - (state.cropTop + state.cropBottom);
+				croppedT = state.y - (croppedH * 0.5);
+				croppedL = state.x - (croppedW * 0.5);
+
+				if (state.rotate !== 0) {
+					transform += "rotate(" + state.rotate + "deg)";
+				}
+				if (state.rotateX !== 0) {
+					transform += "rotateX(" + state.rotateX +  "deg)";
+				}
+				if (state.rotateY !== 0) {
+					transform += "rotateY(" + state.rotateY +  "deg)";
+				}
+				if (state.scaleX === -1) {
+					transform += "scaleX(" + state.scaleX + ")";
+				}
+				if (state.scaleY === -1) {
+					transform += "scaleY(" + state.scaleY + ")";
+				}
+
+				origin.style.zIndex = state.index;
+				origin.style.top = croppedT + "px";
+				origin.style.left = croppedL + "px";
+				origin.style.width = croppedW + "px";
+				origin.style.height = croppedH + "px";
+				origin.style.transform = transform;
+
+				clone.style.zIndex = state.index;
+				clone.style.top = croppedT + "px";
+				clone.style.left = croppedL + "px";
+				clone.style.width = croppedW + "px";
+				clone.style.height = croppedH + "px";
+				clone.style.transform = transform;
+
+				if (state.scaleX > 0) {
+					originImg.style.left = (-state.cropLeft) + "px";
+				} else {
+					originImg.style.left = (-state.cropRight) + "px";
+				}
+				if (state.scaleY > 0) {
+					originImg.style.top = (-state.cropTop) + "px";
+				} else {
+					originImg.style.top = (-state.cropBottom) + "px";
+				}
+				originImg.style.width = state.width + "px";
+				originImg.style.height = state.height + "px";
+				originImg.style.opacity = state.opacity;
+
+				if (state.scaleX > 0) {
+					cloneImg.style.left = (-state.cropLeft) + "px";
+				} else {
+					cloneImg.style.left = (-state.cropRight) + "px";
+				}
+				if (state.scaleY > 0) {
+					cloneImg.style.top = (-state.cropTop) + "px";
+				} else {
+					cloneImg.style.top = (-state.cropBottom) + "px";
+				}
+				cloneImg.style.width = state.width + "px";
+				cloneImg.style.height = state.height + "px";
+				cloneImg.style.opacity = state.opacity;
+				
+				if (!state.visible) {
+					if (!origin.classList.contains("hidden")) {
+						origin.classList.add("hidden");
+					}
+					if (!clone.classList.contains("hidden")) {
+						clone.classList.add("hidden");
+					}
+				} else {
+					if (origin.classList.contains("hidden")) {
+						origin.classList.remove("hidden");
+					}
+					if (clone.classList.contains("hidden")) {
+						clone.classList.remove("hidden");
+					}
+				}
+
+				if (!state.clickable) {
+					if (!origin.classList.contains("unclickable")) {
+						origin.classList.add("unclickable");
+					}
+					if (!clone.classList.contains("unclickable")) {
+						clone.classList.add("unclickable");
+					}
+				} else {
+					if (origin.classList.contains("unclickable")) {
+						origin.classList.remove("unclickable");
+					}
+					if (clone.classList.contains("unclickable")) {
+						clone.classList.remove("unclickable");
+					}
+				}
+
+				if (!state.editable) {
+					if (!origin.classList.contains("uneditable")) {
+						origin.classList.add("uneditable");
+					}
+					if (!clone.classList.contains("uneditable")) {
+						clone.classList.add("uneditable");
+					}
+				} else {
+					if (origin.classList.contains("uneditable")) {
+						origin.classList.remove("uneditable");
+					}
+					if (clone.classList.contains("uneditable")) {
+						clone.classList.remove("uneditable");
+					}
+				}
+
+				if (!state.drawable) {
+					if (!origin.classList.contains("undrawable")) {
+						origin.classList.add("undrawable");
+					}
+					if (!clone.classList.contains("undrawable")) {
+						clone.classList.add("undrawable");
+					}
+				} else {
+					if (origin.classList.contains("undrawable")) {
+						origin.classList.remove("undrawable");
+					}
+					if (clone.classList.contains("undrawable")) {
+						clone.classList.remove("undrawable");
+					}
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setCanvasState(newState) {
+			try {
+				var tmp;
+
+				if (!isObject(newState)) {
+					return false;
+				}
+				if (isString(newState.filename)) {
+					tmp = toString(newState.filename);
+					if (!isEmpty(tmp)) {
+						canvasState.filename = tmp.trim();
+					}
+				}
+				if (isString(newState.mimetype)) {
+					tmp = toString(newState.mimetype);
+					if (isMimetype(tmp)) {
+						canvasState.mimetype = tmp;
+					}
+				}
+				if (isNumeric(newState.quality)) {
+					tmp = toNumber(newState.quality);
+					if (tmp > 1) {
+						canvasState.quality = 1;
+					} else if (tmp < 0) {
+						canvasState.quality = 0;
+					} else {
+						canvasState.quality = tmp;
+					}
+				}
+				if (isString(newState.background)) {
+					tmp = toString(newState.background);
+					if (isColor(tmp)) {
+						canvasState.background = tmp;
+					} else if (
+						["alpha","unset","transparent","none"].indexOf(tmp) > -1
+					) {
+						canvasState.background = "transparent";
+					}
+				}
+				if (isBoolean(newState.overlay)) {
+					canvasState.overlay = toBoolean(newState.overlay);
+				}
+				if (isBoolean(newState.checker)) {
+					canvasState.checker = toBoolean(newState.checker);
+				}
+				if (isBoolean(newState.grid)) {
+					canvasState.grid = toBoolean(newState.grid);
+				}
+				if (isBoolean(newState.pivot)) {
+					canvasState.pivot = toBoolean(newState.pivot);
+				}
+				if (isBoolean(newState.clickable)) {
+					canvasState.clickable = toBoolean(newState.clickable);
+				}
+				if (isBoolean(newState.editable)) {
+					canvasState.editable = toBoolean(newState.editable);
+				}
+				if (isNumeric(newState.width)) {
+					canvasState.originalWidth = toNumber(newState.width);
+				}
+				if (isNumeric(newState.height)) {
+					canvasState.originalHeight = toNumber(newState.height);
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setCanvas() {
+			try {
+				var initialized = canvasState.originalWidth && canvasState.originalHeight;
+				var grids = containerElement.querySelectorAll("div.canvaaas-grid");
+				var pivots = containerElement.querySelectorAll("div.canvaaas-pivot");
+				var fittedSizes;
+
+				if (!containerElement) {
+					return false;
+				}
+				if (!canvasElement) {
+					return false;
+				}
+				if (!mirrorElement) {
+					return false;
+				}
+				if (!backgroundElement) {
+					return false;
+				}
+				if (!checkerElement) {
+					return false;
+				}
+				if (!initialized) {
+					return false;
+				}
+
+				// calculate max sizes in container
+				fittedSizes = getFittedSizes({
+					width: canvasState.originalWidth,
+					height: canvasState.originalHeight,
+					maxWidth: containerState.width,
+					maxHeight: containerState.height,
+					minWidth: 0,
+					minHeight: 0
+				});
+	
+				// set styles
+				canvasState.width = fittedSizes[0];
+				canvasState.height = fittedSizes[1];
+				canvasState.left = 0.5 * (containerState.width - fittedSizes[0]);
+				canvasState.top = 0.5 * (containerState.height - fittedSizes[1]);
+	
+				canvasElement.style.width = canvasState.width + "px";
+				canvasElement.style.height = canvasState.height + "px";
+				canvasElement.style.left = canvasState.left + "px";
+				canvasElement.style.top = canvasState.top + "px";
+	
+				mirrorElement.style.width = canvasState.width + "px";
+				mirrorElement.style.height = canvasState.height + "px";
+				mirrorElement.style.left = canvasState.left + "px";
+				mirrorElement.style.top = canvasState.top + "px";
+	
+				backgroundElement.style.width = canvasState.width + "px";
+				backgroundElement.style.height = canvasState.height + "px";
+				backgroundElement.style.left = canvasState.left + "px";
+				backgroundElement.style.top = canvasState.top + "px";
+				backgroundElement.style.background = canvasState.background || "transparent";
+	
+				checkerElement.style.width = canvasState.width + "px";
+				checkerElement.style.height = canvasState.height + "px";
+				checkerElement.style.left = canvasState.left + "px";
+				checkerElement.style.top = canvasState.top + "px";
+	
+				// set class names
+				if (!canvasState.checker) {
+					if (!checkerElement.classList.contains("hidden")) {
+						checkerElement.classList.add("hidden");
+					}
+				} else {
+					if (checkerElement.classList.contains("hidden")) {
+						checkerElement.classList.remove("hidden");
+					}
+				}
+	
+				if (!canvasState.overlay) {
+					if (!mirrorElement.classList.contains("hidden")) {
+						mirrorElement.classList.add("hidden");
+					}
+				} else {
+					if (mirrorElement.classList.contains("hidden")) {
+						mirrorElement.classList.remove("hidden");
+					}
+				}
+
+				for (var i = 0; i < grids.length; i++) {
+					if (!canvasState.grid) {
+						if (!grids[i].classList.contains("hidden")) {
+							grids[i].classList.add("hidden");
+						}
+					} else {
+						if (grids[i].classList.contains("hidden")) {
+							grids[i].classList.remove("hidden");
+						}
+					}
+				}
+
+				for (var i = 0; i < pivots.length; i++) {
+					if (!canvasState.pivot) {
+						if (!pivots[i].classList.contains("hidden")) {
+							pivots[i].classList.add("hidden");
+						}
+					} else {
+						if (pivots[i].classList.contains("hidden")) {
+							pivots[i].classList.remove("hidden");
+						}
+					}
+				}
+	
+				if (!canvasState.clickable) {
+					if (!canvasElement.classList.contains("unclickable")) {
+						canvasElement.classList.add("unclickable");
+					}
+					if (!mirrorElement.classList.contains("unclickable")) {
+						mirrorElement.classList.add("unclickable");
+					}
+				} else {
+					if (canvasElement.classList.contains("unclickable")) {
+						canvasElement.classList.remove("unclickable");
+					}
+					if (mirrorElement.classList.contains("unclickable")) {
+						mirrorElement.classList.remove("unclickable");
+					}
+				}
+
+				if (!canvasState.editable) {
+					if (!canvasElement.classList.contains("uneditable")) {
+						canvasElement.classList.add("uneditable");
+					}
+					if (!mirrorElement.classList.contains("uneditable")) {
+						mirrorElement.classList.add("uneditable");
+					}
+				} else {
+					if (canvasElement.classList.contains("uneditable")) {
+						canvasElement.classList.remove("uneditable");
+					}
+					if (mirrorElement.classList.contains("uneditable")) {
+						mirrorElement.classList.remove("uneditable");
+					}
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+		
+		function clearCanvas() {
+			try {
+				// clear images
+				for (var i = imageStates.length - 1; i >= 0; i--) {
+					removeImage(imageStates[i].id);
+				}
+
+				// clear canvas state
+				canvasState = {};
+				copyObject(canvasState, defaultCanvasState);
+
+				canvasElement.style.width = "";
+				canvasElement.style.height = "";
+				canvasElement.style.left = "";
+				canvasElement.style.top = "";
+
+				mirrorElement.style.width = "";
+				mirrorElement.style.height = "";
+				mirrorElement.style.left = "";
+				mirrorElement.style.top = "";
+
+				backgroundElement.style.width = "";
+				backgroundElement.style.height = "";
+				backgroundElement.style.left = "";
+				backgroundElement.style.top = "";
+				backgroundElement.style.background = "";
+
+				checkerElement.style.width = "";
+				checkerElement.style.height = "";
+				checkerElement.style.left = "";
+				checkerElement.style.top = "";
+
+				// clear class names
+				if (canvasElement.classList.contains("unclickable")) {
+					canvasElement.classList.remove("unclickable");
+				}
+				if (mirrorElement.classList.contains("unclickable")) {
+					mirrorElement.classList.remove("unclickable");
+				}
+				if (canvasElement.classList.contains("uneditable")) {
+					canvasElement.classList.remove("uneditable");
+				}
+				if (mirrorElement.classList.contains("uneditable")) {
+					mirrorElement.classList.remove("uneditable");
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}			
+		}
+
+		function setHandleState(obj) {
+			try {
+				for (var i = 0; i < Object.keys(obj).length; i++) {
+					var k = Object.keys(obj)[i];
+					if (_directions.indexOf(k) > -1) {						
+						handleState[k] = obj[k];
+					}
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setHandle(id) {
+			try {
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var originHandles = origin.querySelectorAll("div.canvaaas-handle");
+				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
+
+				// clear event
+				for (var i = 0; i < originHandles.length; i++) {
+					var d = getDirection(originHandles[i]);
+					if (handleEvents[d]) {
+						originHandles[i].removeEventListener("mousedown", handleEvents[d], false);
+						originHandles[i].removeEventListener("touchstart", handleEvents[d], false);
+					} else {
+						if (originHandles[i].classList.contains("hidden")) {
+							originHandles[i].classList.remove("hidden");
+						}
+					}
+				}
+				// clear event
+				for (var i = 0; i < cloneHandles.length; i++) {
+					var d = getDirection(cloneHandles[i]);
+					if (handleEvents[d]) {
+						cloneHandles[i].removeEventListener("mousedown", handleEvents[d], false);
+						cloneHandles[i].removeEventListener("touchstart", handleEvents[d], false);
+					} else {
+						if (cloneHandles[i].classList.contains("hidden")) {
+							cloneHandles[i].classList.remove("hidden");
+						}
+					}
+				}
+				// clear event container
+				handleEvents = {};
+				// set event container
+				for (var i = 0; i < _directions.length; i++) {
+					if (handleState[_directions[i]]) {
+						if (handleState[_directions[i]] === "resize") {
+							handleEvents[_directions[i]] = handlers.startResize;
+						} else if (handleState[_directions[i]] === "crop") {
+							handleEvents[_directions[i]] = handlers.startCrop;
+						} else if (handleState[_directions[i]] === "rotate") {
+							handleEvents[_directions[i]] = handlers.startRotate;
+						} else if (handleState[_directions[i]] === "flip") {
+							handleEvents[_directions[i]] = handlers.startFlip;
+						}
+					}
+				}
+				// add event
+				for (var i = 0; i < originHandles.length; i++) {
+					var d = getDirection(originHandles[i]);
+					if (handleEvents[d]) {
+						originHandles[i].addEventListener("mousedown", handleEvents[d], false);
+						originHandles[i].addEventListener("touchstart", handleEvents[d], false);
+					} else {
+						if (!originHandles[i].classList.contains("hidden")) {
+							originHandles[i].classList.add("hidden");
+						}
+					}
+				}
+				// add event
+				for (var i = 0; i < cloneHandles.length; i++) {
+					var d = getDirection(cloneHandles[i]);
+					if (handleEvents[d]) {
+						cloneHandles[i].addEventListener("mousedown", handleEvents[d], false);
+						cloneHandles[i].addEventListener("touchstart", handleEvents[d], false);
+					} else {
+						if (!cloneHandles[i].classList.contains("hidden")) {
+							cloneHandles[i].classList.add("hidden");
+						}
+					}
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function addClassToImage(id, cls) {
+			try {
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+				if (!origin.classList.contains(cls)) {
+					origin.classList.add(cls);
+				}
+				if (!clone.classList.contains(cls)) {
+					clone.classList.add(cls);
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function removeClassToImage(id, cls) {
+			try {
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+				if (origin.classList.contains(cls)) {
+					origin.classList.remove(cls);
+				}
+				if (clone.classList.contains(cls)) {
+					clone.classList.remove(cls);
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function addClassToHandle(handle, cls) {
+			try {
+				var id;
+				var origin;
+				var clone;
+				var originHandles;
+				var cloneHandles;
+				var originHandle;
+				var cloneHandle;
+				var clsName;
+				var found;
+				var nextNode = handle;
+
+				if (!handle) {
+					return false;
+				}
+
+				for (var i = 0; i < 3; i++) {
+					if (!found) {
+						if (nextNode.classList.contains("canvaaas-wrapper")) {
+							found = nextNode;
+						} else {
+							if (nextNode.parentNode) {
+								var tmp = nextNode.parentNode;
+								nextNode = tmp;
+							}
+						}
+					}
+				}
+				
 				if (!found) {
 					return false;
 				}
 
-				var id = getId(found);
-				if (!id) {
-					return false;
-				} else {
-					return id;
-				}
-			} catch(err) {
-				console.log(err);
-				return false;
-			}
-		}
+				id = getId(found);
+				origin = document.getElementById(_originId + id);
+				clone = document.getElementById(_cloneId + id);
+				clsName = handle.className;
 
-		function setFocusIn(id) {
-			var exists = isExist(id);
-			if (!exists) {
-				return false;
-			}
-			try {
-				var originWrapper = getOriginWrapper(id);
-				var cloneWrapper = getCloneWrapper(id);
-				if (
-					!originWrapper ||
-					!cloneWrapper
-				) {
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
 					return false;
 				}
 
-				if (!canvasObject.classList.contains("focusing")) {
-					canvasObject.classList.add("focusing");
-				}
-				if (!mirrorObject.classList.contains("focusing")) {
-					mirrorObject.classList.add("focusing");
-				}
+				originHandles = origin.querySelectorAll("div.canvaaas-handle");
+				cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
 
-				if (!originWrapper.classList.contains("focusing")) {
-					originWrapper.classList.add("focusing");
-				}
-				if (!cloneWrapper.classList.contains("focusing")) {
-					cloneWrapper.classList.add("focusing");
+				for (var i = 0; i < originHandles.length; i++) {
+					if (originHandles[i].className === clsName) {
+						originHandle = originHandles[i];
+					}
 				}
 
-				originWrapper.removeEventListener("mousedown", handlers.focusIn, false);
-
-				originWrapper.addEventListener("mousedown", handlers.startMove, false);
-				originWrapper.addEventListener("touchstart", handlers.startMove, false);
-				originWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
-
-				cloneWrapper.removeEventListener("mousedown", handlers.focusIn, false);
-
-				cloneWrapper.addEventListener("mousedown", handlers.startMove, false);
-				cloneWrapper.addEventListener("touchstart", handlers.startMove, false);
-				cloneWrapper.addEventListener("wheel", handlers.startWheelZoom, false);
-
-				document.addEventListener("mousedown", handlers.focusOut, false);
-				document.addEventListener("touchstart", handlers.focusOut, false);
-
-				eventState.target = id;
-
-				if (config.focus) {
-					config.focus(null, exportImageState(id));
+				for (var i = 0; i < cloneHandles.length; i++) {
+					if (cloneHandles[i].className === clsName) {
+						cloneHandle = cloneHandles[i];
+					}
 				}
+
+				if (!originHandle.classList.contains(cls)) {
+					originHandle.classList.add(cls);
+				}
+				if (!cloneHandle.classList.contains(cls)) {
+					cloneHandle.classList.add(cls);
+				}
+
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -2715,442 +2914,1000 @@
 			}
 		}
 
-		function setFocusOut(id) {
-			var exists = isExist(id);
-			if (!exists) {
-				return false;
-			}
+		function removeClassToHandle(handle, cls) {
 			try {
-				var originWrapper = getOriginWrapper(id);
-				var cloneWrapper = getCloneWrapper(id);
-				if (
-					!originWrapper ||
-					!cloneWrapper
-				) {
+				var id;
+				var origin;
+				var clone;
+				var originHandles;
+				var cloneHandles;
+				var originHandle;
+				var cloneHandle;
+				var clsName;
+				var found;
+				var nextNode = handle;
+
+				if (!handle) {
 					return false;
 				}
 
-				if (canvasObject.classList.contains("focusing")) {
-					canvasObject.classList.remove("focusing");
+				for (var i = 0; i < 3; i++) {
+					if (!found) {
+						if (nextNode.classList.contains("canvaaas-wrapper")) {
+							found = nextNode;
+						} else {
+							if (nextNode.parentNode) {
+								var tmp = nextNode.parentNode;
+								nextNode = tmp;
+							}
+						}
+					}
 				}
-				if (mirrorObject.classList.contains("focusing")) {
-					mirrorObject.classList.remove("focusing");
+				
+				if (!found) {
+					return false;
 				}
 
-				if (originWrapper.classList.contains("focusing")) {
-					originWrapper.classList.remove("focusing");
+				id = getId(found);
+				origin = document.getElementById(_originId + id);
+				clone = document.getElementById(_cloneId + id);
+				clsName = handle.className;
+
+				if (!origin) {
+					return false;
 				}
-				if (cloneWrapper.classList.contains("focusing")) {
-					cloneWrapper.classList.remove("focusing");
+				if (!clone) {
+					return false;
 				}
 
-				originWrapper.addEventListener("mousedown", handlers.focusIn, false);
+				originHandles = origin.querySelectorAll("div.canvaaas-handle");
+				cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
 
-				originWrapper.removeEventListener("mousedown", handlers.startMove, false);
-				originWrapper.removeEventListener("touchstart", handlers.startMove, false);
-				originWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
-
-				cloneWrapper.addEventListener("mousedown", handlers.focusIn, false);
-
-				cloneWrapper.removeEventListener("mousedown", handlers.startMove, false);
-				cloneWrapper.removeEventListener("touchstart", handlers.startMove, false);
-				cloneWrapper.removeEventListener("wheel", handlers.startWheelZoom, false);
-
-				document.removeEventListener("mousedown", handlers.focusOut, false);
-				document.removeEventListener("touchstart", handlers.focusOut, false);
-
-				eventState.target = undefined;
-
-				if (config.focus) {
-					config.focus(null, null);
+				for (var i = 0; i < originHandles.length; i++) {
+					if (originHandles[i].className === clsName) {
+						originHandle = originHandles[i];
+					}
 				}
+
+				for (var i = 0; i < cloneHandles.length; i++) {
+					if (cloneHandles[i].className === clsName) {
+						cloneHandle = cloneHandles[i];
+					}
+				}
+
+				if (originHandle.classList.contains(cls)) {
+					originHandle.classList.remove(cls);
+				}
+				if (cloneHandle.classList.contains(cls)) {
+					cloneHandle.classList.remove(cls);
+				}
+
 				return true;
 			} catch(err) {
 				console.log(err);
 				return false;
 			}
+		}
+
+		function exportConfig() {
+			try {
+				var tmp = {};
+				for (var i = 0; i < Object.keys(config).length; i++) {
+					var k = Object.keys(config)[i];
+					if (isFunction(config[k])) {
+						tmp[k] = true;
+					} else {
+						tmp[k] = config[k];
+					}
+				}
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function exportHandleState() {
+			try {
+				var tmp = {};
+				for (var i = 0; i < Object.keys(handleState).length; i++) {
+					var k = Object.keys(handleState)[i];
+					tmp[k] = handleState[k];
+				}
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function exportCanvasState() {
+			try {
+				var tmp = {};
+				var aspectRatio = getAspectRatio(canvasState.originalWidth, canvasState.originalHeight);
+	
+				tmp.filename = canvasState.filename;
+				tmp.mimetype = canvasState.mimetype;
+				tmp.quality = canvasState.quality;
+				tmp.background = canvasState.background;
+				tmp.overlay = canvasState.overlay;
+				tmp.checker = canvasState.checker;
+				tmp.grid = canvasState.grid;
+				tmp.pivot = canvasState.pivot;
+				tmp.clickable = canvasState.clickable;
+				tmp.editable = canvasState.editable;
+				tmp.width = canvasState.originalWidth;
+				tmp.height = canvasState.originalHeight;
+				tmp.aspectRatio = "" + aspectRatio[0] + ":" + aspectRatio[1];
+	
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function exportImageState(id) {
+			try {
+				var tmp = {};
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var scaleRatioX = canvasState.width / canvasState.originalWidth;
+				var scaleRatioY = canvasState.height / canvasState.originalHeight;
+				var originalAspectRatio;
+				var croppedAspectRatio;
+				var aspectRatio;
+
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+
+				tmp.id = state.id;
+				tmp.src = state.src;
+				tmp.index = state.index;
+				tmp.x = state.x / scaleRatioX;
+				tmp.y = state.y / scaleRatioY;
+				tmp.originalWidth = state.originalWidth;
+				tmp.originalHeight = state.originalHeight;
+				tmp.width = state.width / scaleRatioX;
+				tmp.height = state.height / scaleRatioY;
+				tmp.cropTop = state.cropTop / scaleRatioY;
+				tmp.cropBottom = state.cropBottom / scaleRatioY;
+				tmp.cropLeft = state.cropLeft / scaleRatioX;
+				tmp.cropRight = state.cropRight / scaleRatioX;
+				tmp.croppedWidth = (state.width - (state.cropLeft + state.cropRight)) / scaleRatioX;
+				tmp.croppedHeight = (state.height - (state.cropTop + state.cropBottom)) / scaleRatioY;
+				tmp.rotate = state.rotate;
+				tmp.scaleX = state.scaleX;
+				tmp.scaleY = state.scaleY;
+				tmp.flipX = state.scaleY < 0;
+				tmp.flipY = state.scaleX < 0;
+				tmp.opacity = state.opacity;
+				tmp.lockAspectRatio = state.lockAspectRatio;
+				tmp.visible = state.visible;
+				tmp.clickable = state.clickable;
+				tmp.editable = state.editable;
+				tmp.drawable = state.drawable;
+
+				originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
+				croppedAspectRatio = getAspectRatio(tmp.croppedWidth, tmp.croppedHeight);
+				aspectRatio = getAspectRatio(tmp.width, tmp.height);
+
+				tmp.originalAspectRatio = "" + originalAspectRatio[0] + ":" + originalAspectRatio[1];
+				tmp.croppedAspectRatio = "" + croppedAspectRatio[0] + ":" + croppedAspectRatio[1];
+				tmp.aspectRatio = "" + aspectRatio[0] + ":" + aspectRatio[1];
+				tmp.left = tmp.x - (0.5 * tmp.width);
+				tmp.top = tmp.y - (0.5 * tmp.height);
+
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function importImageState(state) {
+			try {
+				var tmp = {};
+				var scaleRatioX = canvasState.width / canvasState.originalWidth;
+				var scaleRatioY = canvasState.height / canvasState.originalHeight;
+
+				if (!state) {
+					return false;
+				}
+
+				if (isString(state._id)) {
+					tmp.id = toString(state._id);
+				}
+				if (isString(state.id)) {
+					tmp.id = toString(state.id);
+				}
+				if (isString(state.url)) {
+					tmp.src = toString(state.url);
+				}
+				if (isString(state.path)) {
+					tmp.src = toString(state.path);
+				}
+				if (isString(state.src)) {
+					tmp.src = toString(state.src);
+				}
+				if (isNumeric(state.index)) {
+					tmp.index = toNumber(state.index);
+				}
+				if (isNumeric(state.x)) {
+					tmp.x = toNumber(state.x) * scaleRatioX;
+				}
+				if (isNumeric(state.y)) {
+					tmp.y = toNumber(state.y) * scaleRatioY;
+				}
+				if (isNumeric(state.width)) {
+					tmp.width = toNumber(state.width) * scaleRatioX;
+				}
+				if (isNumeric(state.height)) {
+					tmp.height = toNumber(state.height) * scaleRatioY;
+				}
+				if (isNumeric(state.cropTop)) {
+					tmp.cropTop = toNumber(state.cropTop) * scaleRatioY;
+				}
+				if (isNumeric(state.cropBottom)) {
+					tmp.cropBottom = toNumber(state.cropBottom) * scaleRatioY;
+				}
+				if (isNumeric(state.cropLeft)) {
+					tmp.cropLeft = toNumber(state.cropLeft) * scaleRatioX;
+				}
+				if (isNumeric(state.cropRight)) {
+					tmp.cropRight = toNumber(state.cropRight) * scaleRatioX;
+				}
+				if (isNumeric(state.rotate)) {
+					tmp.rotate = toNumber(state.rotate);
+				}
+				if (isNumeric(state.scaleX)) {
+					tmp.scaleX = toNumber(state.scaleX);
+				}
+				if (isNumeric(state.scaleY)) {
+					tmp.scaleY = toNumber(state.scaleY);
+				}
+				if (isNumeric(state.opacity)) {
+					tmp.opacity = toNumber(state.opacity);
+				}
+				if (isBoolean(state.lockAspectRatio)) {
+					tmp.lockAspectRatio = toBoolean(state.lockAspectRatio);
+				}
+				if (isBoolean(state.visible)) {
+					tmp.visible = toBoolean(state.visible);
+				}
+				if (isBoolean(state.clickable)) {
+					tmp.clickable = toBoolean(state.clickable);
+				}
+				if (isBoolean(state.editable)) {
+					tmp.editable = toBoolean(state.editable);
+				}
+				if (isBoolean(state.drawable)) {
+					tmp.drawable = toBoolean(state.drawable);
+				}
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getDataset(elem) {
+			try {
+				var tmp = {};
+				var datasetKeys = [
+					"id",
+					"src",
+					"url",
+					"path",
+					"index",
+					"x",
+					"y",
+					"width",
+					"height",
+					"rotate",
+					"scale-x",
+					"scale-y",
+					"opacity",
+					"lock-aspect-ratio",
+					"visible",
+					"clickable",
+					"editable",
+					"drawable",,
+					"crop-top",
+					"crop-bottom",
+					"crop-right",
+					"crop-left",
+				];
+
+				for (var i = 0; i < datasetKeys.length; i++) {
+					var v = elem.getAttribute("data-" + datasetKeys[i]);
+					var k = datasetKeys[i];
+					if (v !== undefined && v !== null && v !== "") {
+						for (var j = 0; j < 2; j++) {
+							if (k.indexOf("-") > 0) {
+								var idx = k.indexOf("-");
+								var newKey = k.slice(0, idx) + k.slice(idx + 1, idx + 2).toUpperCase() + k.slice(idx + 2);
+								k = newKey;
+							}
+						}
+						tmp[k] = v;
+					}
+				}
+
+				return tmp;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function chkContainerCoordinates() {
+			try {
+				if (!containerElement) {
+					return false;
+				}
+				var cont = containerElement.getBoundingClientRect();
+				containerState.left = cont.left;
+				containerState.top = cont.top;
+	
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+			
 		}
 
 		function saveUndo(id, keepRedo) {
-			var state = getState(id);
-			var tmpState = {};
-			copyObject(tmpState, state);
+			try {
+				var state = getImageState(id);
+				var copiedState = {};
+				var newCache = {};
 
-			var tmp = {};
-			tmp.id = id;
-			tmp.state = tmpState;
-			tmp.updatedAt = Date.now();
-
-			undoCaches.push(tmp);
-
-			if (undoCaches.length > config.cacheLevels) {
-				undoCaches.shift();
+				copyObject(copiedState, state);
+	
+				newCache.id = copiedState.id;
+				newCache.state = copiedState;
+				newCache.updatedAt = Date.now();
+	
+				undoCaches.push(newCache);
+	
+				if (undoCaches.length > config.cacheLevels) {
+					undoCaches.shift();
+				}
+				if (!keepRedo) {
+					redoCaches = [];
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
 			}
-
-			if (!keepRedo) {
-				redoCaches = [];
-			}
-			return true;
 		}
 
 		function saveRedo(id) {
-			var state = getState(id);
-			var tmpState = {};
-			copyObject(tmpState, state);
+			try {
+				var state = getImageState(id);
+				var copiedState = {};
+				var newCache = {};
 
-			var tmp = {};
-			tmp.id = id;
-			tmp.state = tmpState;
-			tmp.updatedAt = Date.now();
-
-			redoCaches.push(tmp);
-
-			return true;
+				copyObject(copiedState, state);
+	
+				newCache.id = copiedState.id;
+				newCache.state = copiedState;
+				newCache.updatedAt = Date.now();
+	
+				redoCaches.push(newCache);
+	
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
 		}
 
 		function callUndo() {
-			if (undoCaches.length < 1) {
+			try {
+				var recent;
+
+				if (undoCaches.length < 1) {
+					return false;
+				}
+
+				recent = undoCaches.pop();
+
+				saveRedo(recent.id);
+
+				setImageState(recent.id, recent.state);
+				setImage(recent.id);
+
+				return true;
+			} catch(err) {
+				console.log(err);
 				return false;
 			}
-
-			var recent = undoCaches.pop();
-
-			saveRedo(recent.id);
-
-			// save state
-			setState(recent.id, recent.state);
-
-			return recent.id;
 		}
 
 		function callRedo() {
-			if (redoCaches.length < 1) {
+			try {
+				var recent;
+
+				if (redoCaches.length < 1) {
+					return false;
+				}
+	
+				recent = redoCaches.pop();
+	
+				// keep redo
+				saveUndo(recent.id, true);
+	
+				setImageState(recent.id, recent.state);
+				setImage(recent.id);
+	
+				return true;
+			} catch(err) {
+				console.log(err);
 				return false;
 			}
-
-			var recent = redoCaches.pop();
-
-			saveUndo(recent.id, true);
-
-			// save state
-			setState(recent.id, recent.state);
-
-			return recent.id;
 		}
 
 		// asynchronous
-		function drawCanvas(drawState, canvState, imgStates, cb) {
-			var canvas = document.createElement("canvas");
-			var ctx = canvas.getContext("2d");
+		function drawCanvas(options, canvState, imgStates, cb) {
+			try {
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				var canvasSizes;
+				var filename = canvasState.filename || "untitled";
+				var mimetype = canvasState.mimetype || "image/png";
+				var quality = canvasState.quality || 0.92;
+				var background = canvasState.background || "#FFFFFF";
+				var maxWidth = canvState.width;
+				var maxHeight = canvState.height;
+				var scaleRatioX = 1;
+				var scaleRatioY = 1;
+				var convertedImgStates = [];
+				var result = {};
+				var index;
+				var count;
+				var tmp;
 
-			var drawSizes = getContainedSizes(
-				canvState.width,
-				canvState.height,
-				drawState.width,
-				drawState.height,
-			);
-
-			var maxWidth = config.maxDrawWidth;
-			var maxHeight = config.maxDrawHeight;
-			if (isMobile()) {
-				maxWidth = config.maxDrawWidthOnMobile;
-				maxHeight = config.maxDrawHeightOnMobile;
-			};
-			if (isIos()) {
-				maxWidth = 4096;
-				maxHeight = 4096;
-			};
-			var canvasSizes = getFittedSizes({
-				width: drawSizes[0],
-				height: drawSizes[1],
-				maxWidth: maxWidth,
-				maxHeight: maxHeight,
-				minWidth: 0,
-				minHeight: 0
-			});
-
-			var options = {
-				filename: canvState.filename,
-				mimeType: canvState.mimeType,
-				dataType: canvState.dataType,
-				quality: canvState.quality,
-				background: canvState.background,
-				width: Math.floor(canvasSizes[0]),
-				height: Math.floor(canvasSizes[1]),
-				numberOfImages: imgStates.length,
-			};
-
-			canvas.width = options.width;
-			canvas.height = options.height;
-
-			ctx.fillStyle = options.background;
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			ctx.save();
-
-			// fix canvas resized
-			var scaleRatioX = canvasSizes[0] / canvState.width;
-			var scaleRatioY = canvasSizes[1] / canvState.height;
-
-			var convertedStates = [];
-			imgStates.forEach(function(elem){
-				var tmp = {};
-				copyObject(tmp, elem);
-				tmp.cropTop *= scaleRatioY;
-				tmp.cropBottom *= scaleRatioY;
-				tmp.cropLeft *= scaleRatioX;
-				tmp.cropRight *= scaleRatioX;
-				tmp.x *= scaleRatioX;
-				tmp.y *= scaleRatioY;
-				tmp.width *= scaleRatioX;
-				tmp.height *= scaleRatioY;
-				convertedStates.push(tmp);
-			});
-
-			var index = convertedStates.length;
-			var count = 0;
-
-			recursiveFunc();
-
-			function recursiveFunc() {
-				if (count < index) {
-					// recursive
-					drawImage(canvas, convertedStates[count], function(err) {
-						if (err) {
-							console.log(err);
+				if (isObject(options)) {
+					if (isString(options.filename)) {
+						tmp = toString(options.filename);
+						if (!isEmpty(tmp)) {
+							filename = tmp;
 						}
-						count++;
-						recursiveFunc();
-					});
-				} else {
-					// end
-					var dataURL = canvas.toDataURL(options.mimeType, options.quality);
-					var data;
-					if (options.dataType === "url") {
-						data = dataURL;
-					} else if (options.dataType === "file") {
-						data = dataURLtoFile(dataURL, options.filename);
-					} else {
-						data = dataURL;
 					}
-
-					return cb(null, data, options);
+					if (isString(options.mimetype)) {
+						tmp = toString(options.mimetype);
+						if (isMimetype(tmp)) {
+							mimetype = tmp;
+						}
+					}
+					if (isNumeric(options.quality)) {
+						tmp = toNumber(options.quality);
+						if (tmp > 1) {
+							quality = 1;
+						} else if (tmp < 0) {
+							quality = 0;
+						} else {
+							quality = tmp;
+						}
+					}
+					if (isString(options.background)) {
+						tmp = toString(options.background);
+						if (isColor(tmp)) {
+							background = tmp;
+						}
+					}
+					if (isNumeric(options.width)) {
+						tmp = toNumber(options.width)
+						maxWidth = tmp;
+					}
+					if (isNumeric(options.height)) {
+						tmp = toNumber(options.height)
+						maxHeight = tmp;
+					}
 				}
+
+				canvasSizes = getContainedSizes(
+					canvState.width,
+					canvState.height,
+					maxWidth,
+					maxHeight
+				);
+				
+				// fix canvas resized
+				scaleRatioX = canvasSizes[0] / canvState.width;
+				scaleRatioY = canvasSizes[1] / canvState.height;
+
+				for (var i = 0; i < imgStates.length; i++) {
+					try {
+						var obj = {};
+						var chk = true;
+
+						if (isString(imgStates[i].src)) {
+							tmp = toString(imgStates[i].src)
+							obj.src = tmp;
+						} else if (isString(imgStates[i].path)) {
+							tmp = toString(imgStates[i].path)
+							obj.src = tmp;
+						} else if (isString(imgStates[i].url)) {
+							tmp = toString(imgStates[i].url)
+							obj.src = tmp;
+						} else {
+							chk = false;
+						}
+						if (isNumeric(imgStates[i].x)) {
+							tmp = toNumber(imgStates[i].x);
+							obj.x = tmp * scaleRatioX;
+						} else {
+							chk = false;
+						}
+						if (isNumeric(imgStates[i].y)) {
+							tmp = toNumber(imgStates[i].y);
+							obj.y = tmp * scaleRatioY;
+						} else {
+							chk = false;
+						}
+						if (isNumeric(imgStates[i].width)) {
+							tmp = toNumber(imgStates[i].width);
+							obj.width = tmp * scaleRatioX;
+						} else {
+							chk = false;
+						}
+						if (isNumeric(imgStates[i].height)) {
+							tmp = toNumber(imgStates[i].height);
+							obj.height = tmp * scaleRatioY;
+						} else {
+							chk = false;
+						}
+						if (isNumeric(imgStates[i].rotate)) {
+							tmp = toNumber(imgStates[i].rotate);
+							obj.rotate = tmp;
+						} else {
+							obj.rotate = 0;
+						}
+						if (isNumeric(imgStates[i].scaleX)) {
+							tmp = toNumber(imgStates[i].scaleX);
+							if (tmp === 1) {
+								obj.scaleX = 1;
+							} else if (tmp === -1) {
+								obj.scaleX = -1;
+							} else {
+								obj.scaleX = 1;
+							}
+						} else {
+							obj.scaleX = 1;
+						}
+						if (isNumeric(imgStates[i].scaleY)) {
+							tmp = toNumber(imgStates[i].scaleY);
+							if (tmp === 1) {
+								obj.scaleY = 1;
+							} else if (tmp === -1) {
+								obj.scaleY = -1;
+							} else {
+								obj.scaleY = 1;
+							}
+						} else {
+							obj.scaleY = 1;
+						}
+						if (isNumeric(imgStates[i].opacity)) {
+							tmp = toNumber(imgStates[i].opacity);
+							if (tmp > 1) {
+								obj.opacity = 1;
+							} else if (tmp < 0) {
+								obj.opacity = 0;
+							} else {
+								obj.opacity = tmp;
+							}
+						} else {
+							obj.opacity = 1;
+						}
+						if (isNumeric(imgStates[i].cropTop)) {
+							tmp = toNumber(imgStates[i].cropTop);
+							obj.cropTop = tmp * scaleRatioY;
+						} else {
+							obj.cropTop = 0;
+						}
+						if (isNumeric(imgStates[i].cropBottom)) {
+							tmp = toNumber(imgStates[i].cropBottom);
+							obj.cropBottom = tmp * scaleRatioY;
+						} else {
+							obj.cropBottom = 0;
+						}
+						if (isNumeric(imgStates[i].cropLeft)) {
+							tmp = toNumber(imgStates[i].cropLeft);
+							obj.cropLeft = tmp * scaleRatioX;
+						} else {
+							obj.cropLeft = 0;
+						}
+						if (isNumeric(imgStates[i].cropRight)) {
+							tmp = toNumber(imgStates[i].cropRight);
+							obj.cropRight = tmp * scaleRatioX;
+						} else {
+							obj.cropRight = 0;
+						}
+
+						if (chk) {
+							convertedImgStates.push(obj);
+						}
+					} catch(err) {
+						console.log(err);
+					}
+				}
+
+				result.filename = filename;
+				result.mimetype = mimetype;
+				result.quality = quality;
+				result.background = background;
+				result.width = canvasSizes[0];
+				result.height = canvasSizes[1];
+				result.numberOfImages = convertedImgStates.length;
+
+				canvas.width = result.width;
+				canvas.height = result.height;
+
+				ctx.fillStyle = result.background;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.save();
+
+				index = convertedImgStates.length;
+				count = 0;
+
+				recursiveFunc();
+
+				function recursiveFunc() {
+					if (count < index) {
+						drawImage(canvas, convertedImgStates[count], function(err) {
+							if (err) {
+								console.log(err);
+							}
+							count++;
+							recursiveFunc();
+						});
+					} else {
+						var base64 = canvas.toDataURL(result.mimetype, result.quality);
+	
+						return cb(null, base64, result);
+					}
+				}
+			} catch(err) {
+				return cb(err);
 			}
 		}
 
 		// asynchronous
-		function drawImage(mainCanvas, imgState, cb) {
+		function drawImage(canv, options, cb) {
 			var newImage = new Image();
-			newImage.src = imgState.src;
 			newImage.onerror = function(err) {
 				return cb(err);
 			}
 			newImage.onload = function(e) {
-				// create canvas
-				var canvasA = document.createElement("canvas");
-				var canvasB = document.createElement("canvas");
-				var canvasC = document.createElement("canvas");
-				var ctxA = canvasA.getContext("2d");
-				var ctxB = canvasB.getContext("2d");
-				var ctxC = canvasC.getContext("2d");
+				var ctx = canv.getContext("2d");
+				var axisX = options.x;
+				var axisY = options.y;
+				var width = options.width;
+				var height = options.height;
+				var rotate = options.rotate;
+				var scaleX = options.scaleX;
+				var scaleY = options.scaleY;
+				var opacity = options.opacity;
+				var cropTop = options.cropTop;
+				var cropBottom = options.cropBottom;
+				var cropLeft = options.cropLeft;
+				var cropRight = options.cropRight;
+				var scaleRatioX;
+				var scaleRatioY;
+				var resizedCanvas;
+				var rotatedCanvas;
+				var croppedCanvas;
+				var sx;
+				var sy;
+				var sw;
+				var sh;
+				var dx;
+				var dy;
+				var dw;
+				var dh;
 
-				// canvasA - resize
-				// calculate resized sizes
-				var maxWidth = config.maxDrawWidth;
-				var maxHeight = config.maxDrawHeight;
-				if (isMobile()) {
-					maxWidth = config.maxDrawWidthOnMobile;
-					maxHeight = config.maxDrawHeightOnMobile;
-				}
-				if (isIos()) {
-					maxWidth = 4096;
-					maxHeight = 4096;
-				}
-				var resizedSizes = getFittedSizes({
-					width: imgState.width,
-					height: imgState.height,
-					maxWidth: maxWidth,
-					maxHeight: maxHeight,
-					minWidth: 0,
-					minHeight: 0
+				resizedCanvas = getResizedCanvas(newImage, {
+					width: width,
+					height: height,
+					maxWidth: _maxWidth,
+					maxHeight: _maxHeight,
 				});
 
-				var scaleRatioX = resizedSizes[0] / imgState.width;
-				var scaleRatioY = resizedSizes[1] / imgState.height;
+				scaleRatioX = resizedCanvas.width / width;
+				scaleRatioY = resizedCanvas.height / height;
 
-				// set canvas sizes
-				canvasA.width = Math.floor(resizedSizes[0]);
-				canvasA.height = Math.floor(resizedSizes[1]);
-
-				// set canvas options
-				ctxA.save();
-				ctxA.fillStyle = "transparent";
-				ctxA.imageSmoothingQuality = "low";
-				ctxA.imageSmoothingEnabled = false;
-				ctxA.fillRect(0, 0, canvasA.width, canvasA.height);
-
-				ctxA.drawImage(
-					newImage,
-					0, 0,
-					canvasA.width, canvasA.height
-				);
-
-				// canvasB - crop
-				var cropTop = imgState.cropTop * scaleRatioY;
-				var cropBottom = imgState.cropBottom * scaleRatioY;
-				var cropLeft = imgState.cropLeft * scaleRatioX;
-				var cropRight = imgState.cropRight * scaleRatioX;
-				if (imgState.scaleX < 0) {
-					var tmp = cropLeft;
-					cropLeft = cropRight;
-					cropRight = tmp;
-				}
-				if (imgState.scaleY < 0) {
-					var tmp = cropTop;
-					cropTop = cropBottom;
-					cropBottom = tmp;
-				}
-				var croppedTop = cropTop;
-				var croppedLeft = cropLeft;
-				var croppedWidth = canvasA.width - (cropLeft + cropRight);
-				var croppedHeight = canvasA.height - (cropTop + cropBottom);
-
-				// set canvas sizes
-				canvasB.width = Math.floor(croppedWidth);
-				canvasB.height = Math.floor(croppedHeight);
-
-				// set canvas options
-				ctxB.save();
-				ctxB.fillStyle = "transparent";
-				ctxB.imageSmoothingQuality = "low";
-				ctxB.imageSmoothingEnabled = false;
-				ctxB.fillRect(0, 0, canvasB.width, canvasB.height);
-
-				ctxB.drawImage(
-					canvasA,
-					Math.floor(croppedLeft), Math.floor(croppedTop),
-					Math.floor(croppedWidth), Math.floor(croppedHeight),
-					0, 0,
-					canvasB.width, canvasB.height
-				);
-
-				// clear canvas A
-				ctxA.restore();
-
-				// canvasC - rotate, flip, opacity
-				var rotatedSizesA = getRotatedSizes(
-					canvasB.width,
-					canvasB.height,
-					imgState.rotate
-				);
-
-				var rotatedSizesB = getFittedSizes({
-					width: rotatedSizesA[0],
-					height: rotatedSizesA[1],
-					maxWidth: maxWidth,
-					maxHeight: maxHeight,
-					minWidth: 0,
-					minHeight: 0
+				croppedCanvas = getCroppedCanvas(resizedCanvas, {
+					cropTop: cropTop,
+					cropBottom: cropBottom,
+					cropLeft: cropLeft,
+					cropRight: cropRight,
+					scaleX: scaleX,
+					scaleY: scaleY,
 				});
 
-				// set canvas sizes
-				canvasC.width = Math.floor(rotatedSizesB[0]);
-				canvasC.height = Math.floor(rotatedSizesB[1]);
+				rotatedCanvas = getRotatedCanvas(croppedCanvas, {
+					maxWidth: _maxWidth,
+					maxHeight: _maxHeight,
+					rotate: rotate,
+					scaleX: scaleX,
+					scaleY: scaleY,
+					opacity: opacity
+				});
 
-				ctxC.globalAlpha = imgState.opacity;
-				ctxC.fillStyle = "transparent";
-				ctxC.imageSmoothingQuality = "low";
-				ctxC.imageSmoothingEnabled = false;
-				ctxC.fillRect(0, 0, canvasC.width, canvasC.height);
-				ctxC.translate(Math.floor(canvasC.width * 0.5), Math.floor(canvasC.height * 0.5));
-				ctxC.rotate(imgState.rotate * (Math.PI / 180));
-				ctxC.scale(imgState.scaleX, imgState.scaleY);
-
-				ctxC.drawImage(
-					canvasB,
-					0, 0,
-					canvasB.width, canvasB.height,
-					-Math.floor(canvasB.width * 0.5), -Math.floor(canvasB.height * 0.5),
-					Math.floor(canvasB.width), Math.floor(canvasB.height)
-				);
-
-				// clear canvas B
-				ctxB.restore();
-
-				// calculate rotated size
-				var dx = (imgState.x - (canvasC.width / scaleRatioX * 0.5));
-				var dy = (imgState.y - (canvasC.height / scaleRatioY * 0.5));
-				var dw = canvasC.width / scaleRatioX;
-				var dh = canvasC.height / scaleRatioY;
+				// calculate coordinate
+				sx = 0;
+				sy = 0;
+				sw = Math.floor(rotatedCanvas.width);
+				sh = Math.floor(rotatedCanvas.height);
+				dx = Math.floor(axisX - (rotatedCanvas.width / scaleRatioX * 0.5));
+				dy = Math.floor(axisY - (rotatedCanvas.height / scaleRatioY * 0.5));
+				dw = Math.floor(rotatedCanvas.width / scaleRatioX);
+				dh = Math.floor(rotatedCanvas.height / scaleRatioY);
 
 				// draw to main canvas
-				mainCanvas.getContext("2d").drawImage(
-					canvasC,
-					0, 0,
-					canvasC.width, canvasC.height,
-					Math.floor(dx), Math.floor(dy),
-					Math.floor(dw), Math.floor(dh)
+				ctx.drawImage(
+					rotatedCanvas,
+					sx, sy,
+					sw, sh,
+					dx, dy,
+					dw, dh
 				);
 
 				if (cb) {
 					cb(null, true);
 				}
+				return false;
+			}
+			newImage.src = options.src;
+		}
+
+		function getResizedCanvas(img, options) {
+			try {
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				var width = options.width;
+				var height = options.height;
+				var maxWidth = options.maxWidth;
+				var maxHeight = options.maxHeight;
+				var dx;
+				var dy;
+				var dw;
+				var dh;
+
+				var fittedSizes = getFittedSizes({
+					width: width,
+					height: height,
+					maxWidth: maxWidth,
+					maxHeight: maxHeight,
+					minWidth: _minWidth,
+					minHeight: _minHeight
+				});
+	
+				canvas.width = Math.floor(fittedSizes[0]);
+				canvas.height = Math.floor(fittedSizes[1]);
+	
+				ctx.save();
+				ctx.fillStyle = "transparent";
+				ctx.imageSmoothingQuality = "low";
+				ctx.imageSmoothingEnabled = false;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+				dx = 0;
+				dy = 0;
+				dw = Math.floor(canvas.width);
+				dh = Math.floor(canvas.height);
+	
+				ctx.drawImage(
+					img,
+					dx, dy,
+					dw, dh
+				);
+	
+				return canvas;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getCroppedCanvas(canv, options) {
+			try {
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				var cropTop = options.cropTop;
+				var cropBottom = options.cropBottom;
+				var cropLeft = options.cropLeft;
+				var cropRight = options.cropRight;
+				var scaleX = options.scaleX;
+				var scaleY = options.scaleY;
+				var width = canv.width - (cropLeft + cropRight);
+				var height = canv.height - (cropTop + cropBottom);
+				var tmp;
+				var sx;
+				var sy;
+				var sw;
+				var sh;
+				var dx;
+				var dy;
+				var dw;
+				var dh;
+	
+				if (scaleX < 0) {
+					tmp = cropLeft;
+					cropLeft = cropRight;
+					cropRight = tmp;
+				}
+				if (scaleY < 0) {
+					tmp = cropTop;
+					cropTop = cropBottom;
+					cropBottom = tmp;
+				}
+	
+				canvas.width = Math.floor(width);
+				canvas.height = Math.floor(height);
+	
+				ctx.save();
+				ctx.fillStyle = "transparent";
+				ctx.imageSmoothingQuality = "low";
+				ctx.imageSmoothingEnabled = false;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+	
+				sx = Math.floor(cropTop);
+				sy = Math.floor(cropLeft);
+				sw = Math.floor(canvas.width);
+				sh = Math.floor(canvas.height);
+				dx = 0;
+				dy = 0;
+				dw = Math.floor(canvas.width);
+				dh = Math.floor(canvas.height);
+	
+				ctx.drawImage(
+					canv,
+					sx, sy,
+					sw, sh,
+					dx, dy,
+					dw, dh
+				);
+	
+				return canvas;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getRotatedCanvas(canv, options) {
+			try {
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				var maxWidth = options.maxWidth;
+				var maxHeight = options.maxHeight;
+				var opacity = options.opacity;
+				var rotate = options.rotate;
+				var scaleX = options.scaleX;
+				var scaleY = options.scaleY;
+				var width = canv.width;
+				var height = canv.height;
+				var sx;
+				var sy;
+				var sw;
+				var sh;
+				var dx;
+				var dy;
+				var dw;
+				var dh;
+
+				var rotatedSizes = getRotatedSizes(
+					width,
+					height,
+					rotate
+				);
+	
+				var fittedSizes = getFittedSizes({
+					width: rotatedSizes[0],
+					height: rotatedSizes[1],
+					maxWidth: maxWidth,
+					maxHeight: maxHeight,
+					minWidth: 0,
+					minHeight: 0
+				});
+	
+				// set canvas sizes
+				canvas.width = Math.floor(fittedSizes[0]);
+				canvas.height = Math.floor(fittedSizes[1]);
+	
+				// set canvas options
+				ctx.save();
+				ctx.globalAlpha = opacity;
+				ctx.fillStyle = "transparent";
+				ctx.imageSmoothingQuality = "low";
+				ctx.imageSmoothingEnabled = false;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.translate(Math.floor(canvas.width * 0.5), Math.floor(canvas.height * 0.5));
+				ctx.rotate(rotate * (Math.PI / 180));
+				ctx.scale(scaleX, scaleY);
+
+				sx = 0;
+				sy = 0;
+				sw = Math.floor(width);
+				sh = Math.floor(height);
+				dx = -Math.floor(width * 0.5);
+				dy = -Math.floor(height * 0.5);
+				dw = Math.floor(width);
+				dh = Math.floor(height);
+	
+				ctx.drawImage(
+					canv,
+					sx, sy,
+					sw, sh,
+					dx, dy,
+					dw, dh
+				);
+	
+				return canvas;
+			} catch(err) {
+				console.log(err);
+				return false;
 			}
 		}
 
 		// asynchronous
 		function renderImage(file, exportedState, cb) {
+			var initialized = canvasState.originalWidth && canvasState.originalHeight;
 			var newImage = new Image();
 			var src;
-			var ext;
 
 			try {
 				// check file or url
 				if (isObject(file)) {
 					// file
-					try {
-						src = URL.createObjectURL(file);
-					} catch(err) {
+					src = URL.createObjectURL(file);
+					// check mimetype
+					if (config.allowedMimeTypes.indexOf(file.type) < 0) {
 						if (cb) {
-							cb("File not found");
+							cb("File not allowed");
 						}
 						return false;
 					}
 				} else if (isString(file)) {
 					// url
 					src = file;
+					// check mimetype
+					if (config.allowedMimeTypes.indexOf(getMimetype(file)) < 0) {
+						if (cb) {
+							cb("File not allowed");
+						}
+						return false;
+					}
 				} else {
 					if (cb) {
 						cb("File not found");
 					}
 					return false;
 				}
-
-				// check mimeType
-				ext = getExtension(file);
-				if (!ext) {
-					if (cb) {
-						cb("Extension not found");
-					}
-					return false;
-				}
-				if (config.allowedExtensionsForUpload.indexOf(ext.toLowerCase()) < 0) {
-					if (cb) {
-						cb("Extension not allowed");
-					}
-					return false;
-				}
 			} catch(err) {
+				console.log(err);
 				if (cb) {
-					cb("Type error");
+					cb("File not Allowed");
 				}
 				return false;
 			}
 
-			// start to load
-			newImage.src = src;
-
 			newImage.onerror = function(err) {
+				console.log(err);
 				if (cb) {
 					cb("Image load failed");
 				}
@@ -3158,129 +3915,164 @@
 			}
 
 			newImage.onload = function(e) {
-				// check canvas
-				if (
-					!canvasState.originalWidth ||
-					!canvasState.originalHeight
-				) {
+				var state = generateImageState(newImage);
+				var newOrigin = document.createElement("div");
+				var newClone = document.createElement("div");
+				var additionalState = {};
+				var originGrids;
+				var cloneGrids;
+				var originPivots;
+				var clonePivots;
+
+				// check canvas has been initialized
+				if (!initialized) {
 					canvasState.originalWidth = newImage.width;
 					canvasState.originalHeight = newImage.height;
-					initCanvas();
+					setCanvas();
 				}
 
-				var state = defaultImageState(newImage);
-
 				// create origin element
-				var newOrigin = document.createElement("div");
 				newOrigin.classList.add("canvaaas-wrapper");
-				newOrigin.id = originId + state.id;
-				newOrigin.innerHTML = imageTemplate;
-				var newOriginImage = newOrigin.querySelector("div.canvaaas-image");
-				newOriginImage.querySelector("img").src = newImage.src;
+				newOrigin.id = _originId + state.id;
+				newOrigin.innerHTML = _imageTemplate;
+				newOrigin.querySelector("img").src = newImage.src;
 
 				// create clone element
-				var newClone = document.createElement("div");
 				newClone.classList.add("canvaaas-wrapper");
-				newClone.id = cloneId + state.id;
-				newClone.innerHTML = imageTemplate;
-				var newCloneImage = newClone.querySelector("div.canvaaas-image");
-				newCloneImage.querySelector("img").src = newImage.src;
+				newClone.id = _cloneId + state.id;
+				newClone.innerHTML = _imageTemplate;
+				newClone.querySelector("img").src = newImage.src;
 
 				// set events
-				newOriginImage.addEventListener("mousedown", handlers.focusIn, false);
-				newOriginImage.addEventListener("touchstart", handlers.focusIn, false);
+				newOrigin.addEventListener("contextmenu", handlers.rightClick, false);
+				newOrigin.addEventListener("mousedown", handlers.startMove, false);
+				newOrigin.addEventListener("touchstart", handlers.startMove, false);
+				newOrigin.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				newCloneImage.addEventListener("mousedown", handlers.focusIn, false);
-				newCloneImage.addEventListener("touchstart", handlers.focusIn, false);
+				newClone.addEventListener("contextmenu", handlers.rightClick, false);
+				newClone.addEventListener("mousedown", handlers.startMove, false);
+				newClone.addEventListener("touchstart", handlers.startMove, false);
+				newClone.addEventListener("wheel", handlers.startWheelZoom, false);
 
-				newOrigin.querySelectorAll("div.canvaaas-inhandle").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.route, false);
-					elem.addEventListener("touchstart", handlers.route, false);
-				});
-				newOrigin.querySelectorAll("div.canvaaas-outhandle").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.route, false);
-					elem.addEventListener("touchstart", handlers.route, false);
-				});
-
-				newClone.querySelectorAll("div.canvaaas-inhandle").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.route, false);
-					elem.addEventListener("touchstart", handlers.route, false);
-				});
-				newClone.querySelectorAll("div.canvaaas-outhandle").forEach(function(elem){
-					elem.addEventListener("mousedown", handlers.route, false);
-					elem.addEventListener("touchstart", handlers.route, false);
-				});
-
-				canvasObject.appendChild(newOrigin);
-				mirrorObject.appendChild(newClone);
+				canvasElement.appendChild(newOrigin);
+				mirrorElement.appendChild(newClone);
 
 				imageStates.push(state);
 
-				var newState;
-				if (isObject(exportedState)) {
-					newState = importImageState(exportedState);
-				} else {
-					newState = {};
+				originGrids = canvasElement.querySelectorAll("div.canvaaas-grid");
+				cloneGrids = mirrorElement.querySelectorAll("div.canvaaas-grid");
+				originPivots = canvasElement.querySelectorAll("div.canvaaas-pivot");
+				clonePivots = mirrorElement.querySelectorAll("div.canvaaas-pivot");
+
+				// set grids
+				for (var i = 0; i < originGrids.length; i++) {
+					if (!canvasState.grid) {
+						if (!originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < cloneGrids.length; i++) {
+					if (!canvasState.grid) {
+						if (!cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.remove("hidden");
+						}
+					}
 				}
 
-				// save state
-				setState(state.id, newState);
+				// set pivots
+				for (var i = 0; i < originPivots.length; i++) {
+					if (!canvasState.pivot) {
+						if (!originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.add("hidden");
+						}
+					} else {
+						if (originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < clonePivots.length; i++) {
+					if (!canvasState.pivot) {
+						if (!clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.add("hidden");
+						}
+					} else {
+						if (clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.remove("hidden");
+						}
+					}
+				}
+
+				// add events to handle
+				setHandle(state.id);
+
+				// save image state
+				if (isObject(exportedState)) {
+					additionalState = importImageState(exportedState);
+				}
+				setImageState(state.id, additionalState);
+				setImage(state.id);
 
 				if (cb) {
 					cb(null, state.id);
 				}
 			}
+
+			// start loading
+			newImage.src = src;
 		}
 
 		function removeImage(id) {
 			try {
-				if (!isExist(id)) {
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var src = origin.querySelector("img").src;
+
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
 					return false;
 				}
 
-				// check focus
-				if (eventState.target) {
-					if (eventState.target === id) {
-						setFocusOut(id);
+				// remove element
+				origin.parentNode.removeChild(origin);
+				clone.parentNode.removeChild(clone);
+
+				// remove image state
+				for (var i = 0; i < imageStates.length; i++) {
+					if (imageStates[i].id === id) {
+						imageStates.splice(i, 1);
 					}
 				}
 
-				var originWrapper = getOriginWrapper(id);
-				var cloneWrapper = getCloneWrapper(id);
-				var state = getState(id);
-				var src = originWrapper.querySelector("img").src;
-
-				var seq = imageStates.findIndex(function(elem){
-					if (elem.id === state.id) {
-						return elem;
-					}
-				});
-
-				originWrapper.parentNode.removeChild(originWrapper);
-				cloneWrapper.parentNode.removeChild(cloneWrapper);
-
 				// fix error
-				setTimeout(function(){
-					imageStates.splice(seq, 1);
-				}, 128);
+				// setTimeout(function(){}, 128);
 
 				// clear caches
-				var filterdUC = undoCaches.filter(function(elem){
-					if (elem.id === id) {
-						return false;
+				for (var i = undoCaches.length - 1; i >= 0; i--) {
+					if (undoCaches[i].id === id) {
+						undoCaches.splice(i, 1);
 					}
-					return true;
-				});
-
-				var filterdRC = redoCaches.filter(function(elem){
-					if (elem.id === id) {
-						return false;
+				}
+				for (var i = redoCaches.length - 1; i >= 0; i--) {
+					if (redoCaches[i].id === id) {
+						redoCaches.splice(i, 1);
 					}
-					return true;
-				});
-
-				undoCaches = filterdUC;
-				redoCaches = filterdRC;
+				}
 
 				URL.revokeObjectURL(src);
 
@@ -3291,277 +4083,152 @@
 			}
 		}
 
-		function initContainer() {
-			// reset canvas size
-			containerObject.style.width = "";
-			containerObject.style.height = "";
+		function setContainer() {
+			try {
+				var aspectRatio = config.containerAspectRatio;
+				var width;
+				var height;
+				var fittedSizes;
+				var scrollBarWidth;
 
-			var viewportSizes = getViewportSizes();
-			var aspectRatio = config.containerAspectRatio;
-			var width = containerObject.offsetWidth;
-			var height = containerObject.offsetWidth / aspectRatio;
+				if (!containerElement) {
+					return false;
+				}
 
-			var sizes = getFittedSizes({
-				width: width,
-				height: height,
-				maxWidth: viewportSizes[0] * config.maxContainerWidth,
-				maxHeight: viewportSizes[1] * config.maxContainerHeight,
-				minWidth: 0,
-				minHeight: 0
-			});
+				// reset container size
+				containerElement.style.width = "";
+				containerElement.style.height = "";
 
-			containerState.width = sizes[0];
-			containerState.height = sizes[1];
-			containerState.left = containerObject.getBoundingClientRect().left;
-			containerState.top = containerObject.getBoundingClientRect().top;
+				width = containerElement.offsetWidth;
+				height = containerElement.offsetWidth / aspectRatio;
 
-			containerObject.style.width = containerState.width + "px";
-			containerObject.style.height = containerState.height + "px";
+				fittedSizes = getFittedSizes({
+					width: width,
+					height: height,
+					maxWidth: config.maxContainerWidth || 8388607,
+					maxHeight: config.maxContainerHeight || 8388607,
+					minWidth: 0,
+					minHeight: 0
+				});
 
-			if (hasScrollbar()) {
-				var sbw = getScrollbarWidth();
+				containerState.width = fittedSizes[0];
+				containerState.height = fittedSizes[1];
+				containerState.left = containerElement.getBoundingClientRect().left;
+				containerState.top = containerElement.getBoundingClientRect().top;
 
-				containerState.width -= sbw;
-				containerState.height = containerState.width / aspectRatio;
+				containerElement.style.width = containerState.width + "px";
+				containerElement.style.height = containerState.height + "px";
 
-				containerObject.style.width = containerState.width + "px";
-				containerObject.style.height = containerState.height + "px";
+				if (hasScrollbar()) {
+					scrollBarWidth = getScrollbarWidth();
+
+					containerState.width -= scrollBarWidth;
+					containerState.height = containerState.width / aspectRatio;
+
+					containerElement.style.width = containerState.width + "px";
+					containerElement.style.height = containerState.height + "px";
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
 			}
-
-			return true;
-		}
-
-		function initCanvas() {
-			var sizes = getFittedSizes({
-				width: canvasState.originalWidth,
-				height: canvasState.originalHeight,
-				maxWidth: containerState.width,
-				maxHeight: containerState.height,
-				minWidth: 0,
-				minHeight: 0
-			});
-
-			// set styles
-			canvasState.width = sizes[0];
-			canvasState.height = sizes[1];
-			canvasState.left = 0.5 * (containerState.width - sizes[0]);
-			canvasState.top = 0.5 * (containerState.height - sizes[1]);
-
-			canvasObject.style.width = canvasState.width + "px";
-			canvasObject.style.height = canvasState.height + "px";
-			canvasObject.style.left = canvasState.left + "px";
-			canvasObject.style.top = canvasState.top + "px";
-
-			mirrorObject.style.width = canvasState.width + "px";
-			mirrorObject.style.height = canvasState.height + "px";
-			mirrorObject.style.left = canvasState.left + "px";
-			mirrorObject.style.top = canvasState.top + "px";
-
-			backgroundObject.style.width = canvasState.width + "px";
-			backgroundObject.style.height = canvasState.height + "px";
-			backgroundObject.style.left = canvasState.left + "px";
-			backgroundObject.style.top = canvasState.top + "px";
-			backgroundObject.style.background = canvasState.background;
-
-			checkerObject.style.width = canvasState.width + "px";
-			checkerObject.style.height = canvasState.height + "px";
-			checkerObject.style.left = canvasState.left + "px";
-			checkerObject.style.top = canvasState.top + "px";
-
-			// set class names
-			if (!canvasState.checker) {
-				if (!checkerObject.classList.contains("hidden")) {
-					checkerObject.classList.add("hidden");
-				}
-			} else {
-				if (checkerObject.classList.contains("hidden")) {
-					checkerObject.classList.remove("hidden");
-				}
-			}
-
-			if (!canvasState.overlay) {
-				if (!mirrorObject.classList.contains("hidden")) {
-					mirrorObject.classList.add("hidden");
-				}
-			} else {
-				if (mirrorObject.classList.contains("hidden")) {
-					mirrorObject.classList.remove("hidden");
-				}
-			}
-
-			if (!canvasState.focusabled) {
-				if (eventState.target) {
-					setFocusOut(eventState.target);
-				}
-			}
-
-			return true;
-		}
-
-		function clearCanvas() {
-			// clear canvas state
-			canvasState = {};
-			copyObject(canvasState, defaultCanvasState);
-
-			canvasObject.style.width = "";
-			canvasObject.style.height = "";
-			canvasObject.style.left = "";
-			canvasObject.style.top = "";
-
-			mirrorObject.style.width = "";
-			mirrorObject.style.height = "";
-			mirrorObject.style.left = "";
-			mirrorObject.style.top = "";
-
-			if (!canvasState.overlay) {
-				if (!mirrorObject.classList.contains("hidden")) {
-					mirrorObject.classList.add("hidden");
-				}
-			} else {
-				if (mirrorObject.classList.contains("hidden")) {
-					mirrorObject.classList.remove("hidden");
-				}
-			}
-
-			backgroundObject.style.width = "";
-			backgroundObject.style.height = "";
-			backgroundObject.style.left = "";
-			backgroundObject.style.top = "";
-			backgroundObject.style.background = "";
-
-			checkerObject.style.width = "";
-			checkerObject.style.height = "";
-			checkerObject.style.left = "";
-			checkerObject.style.top = "";
-
-			if (!canvasState.checker) {
-				if (!checkerObject.classList.contains("hidden")) {
-					checkerObject.classList.add("hidden");
-				}
-			} else {
-				if (checkerObject.classList.contains("hidden")) {
-					checkerObject.classList.remove("hidden");
-				}
-			}
-
-			return true;
-		}
-
-		function setHandleState(obj) {
-			if (isObject(obj.inside)) {
-				for(var key in obj.inside) {
-					if (
-						obj.inside.hasOwnProperty(key) &&
-						handleState.inside.hasOwnProperty(key)
-					) {
-						handleState["inside"][key] = obj["inside"][key];
-					}
-				}
-			}
-
-			if (isObject(obj.outside)) {
-				for(var key in obj.outside) {
-					if (
-						obj.outside.hasOwnProperty(key) &&
-						handleState.outside.hasOwnProperty(key)
-					) {
-						handleState["outside"][key] = obj["outside"][key];
-					}
-				}
-			}
-
-			return true;
-		}
-
-		function unsetHandleState() {
-			handleState = {};
-			copyObject(handleState, defaultHandleState);
-
-			return true;
 		}
 
 		function getContainedSizes(srcW, srcH, areaW, areaH) {
-			var aspectRatio = srcW / srcH;
+			try {
+				var aspectRatio = srcW / srcH;
 
-			if (areaH * aspectRatio > areaW) {
-				return [areaW, areaW / aspectRatio];
-			} else {
-				return [areaH * aspectRatio, areaH];
+				if (areaH * aspectRatio > areaW) {
+					return [areaW, areaW / aspectRatio];
+				} else {
+					return [areaH * aspectRatio, areaH];
+				}
+			} catch(err) {
+				console.log(err);
+				return false;
 			}
 		}
 
 		function getCoveredSizes(srcW, srcH, areaW, areaH) {
-			var aspectRatio = srcW / srcH;
+			try {
+				var aspectRatio = srcW / srcH;
 
-			if (areaH * aspectRatio < areaW) {
-				return [
-					areaW,
-					areaW / aspectRatio
-				];
-			} else {
-				return [
-					areaH * aspectRatio,
-					areaH
-				];
+				if (areaH * aspectRatio < areaW) {
+					return [
+						areaW,
+						areaW / aspectRatio
+					];
+				} else {
+					return [
+						areaH * aspectRatio,
+						areaH
+					];
+				}
+			} catch(err) {
+				console.log(err);
+				return false;
 			}
 		}
 
 		function getFittedSizes(options) {
-			var fooMax = getContainedSizes(
-				options.width,
-				options.height,
-				options.maxWidth,
-				options.maxHeight
-			);
-
-			var fooMin = getCoveredSizes(
-				options.width,
-				options.height,
-				options.minWidth,
-				options.minHeight
-			);
-
-			return [
-				Math.min(fooMax[0], Math.max(fooMin[0], options.width)),
-				Math.min(fooMax[1], Math.max(fooMin[1], options.height))
-			];
+			try {
+				var fooMax = getContainedSizes(
+					options.width,
+					options.height,
+					options.maxWidth,
+					options.maxHeight
+				);
+	
+				var fooMin = getCoveredSizes(
+					options.width,
+					options.height,
+					options.minWidth,
+					options.minHeight
+				);
+	
+				return [
+					Math.min(fooMax[0], Math.max(fooMin[0], options.width)),
+					Math.min(fooMax[1], Math.max(fooMin[1], options.height))
+				];
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
 		}
 
 		function getRotatedSizes(w, h, d) {
-			if (
-				w === undefined ||
-				h === undefined ||
-				d === undefined
-			) {
+			try {
+				var radians = d * Math.PI / 180;
+				var sinFraction = Math.sin(radians);
+				var cosFraction = Math.cos(radians);
+
+				if (sinFraction < 0) {
+					sinFraction = -sinFraction;
+				}
+
+				if (cosFraction < 0) {
+					cosFraction = -cosFraction;
+				}
+
+				return [
+					(w * cosFraction) + (h * sinFraction),
+					(w * sinFraction) + (h * cosFraction)
+				];
+			} catch(err) {
+				console.log(err);
 				return false;
 			}
-
-			var radians = d * Math.PI / 180;
-			var sinFraction = Math.sin(radians);
-			var cosFraction = Math.cos(radians);
-
-			if (sinFraction < 0) {
-				sinFraction = -sinFraction;
-			}
-
-			if (cosFraction < 0) {
-				cosFraction = -cosFraction;
-			}
-
-			return [
-				(w * cosFraction) + (h * sinFraction),
-				(w * sinFraction) + (h * cosFraction)
-			];
 		}
 
-		function getDiagonal(width, height) {
-			return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) );
+		function getDiagonal(w, h) {
+			return Math.sqrt( Math.pow(w, 2) + Math.pow(h, 2) );
 		}
 
-		function getAspectRatio(width, height, limited) {
-			var val = width / height;
+		function getAspectRatio(w, h, limited) {
+			var val = w / h;
 			var lim = limited || 50;
-
 			var lower = [0, 1];
 			var upper = [1, 0];
 
@@ -3591,165 +4258,24 @@
 		}
 
 		function getDirection(handle) {
-			if (handle.classList.contains("canvaaas-handle-n")) {
-				return "n";
-			} else if (handle.classList.contains("canvaaas-handle-ne")) {
-				return "ne";
-			} else if (handle.classList.contains("canvaaas-handle-e")) {
-				return "e";
-			} else if (handle.classList.contains("canvaaas-handle-se")) {
-				return "se";
-			} else if (handle.classList.contains("canvaaas-handle-s")) {
-				return "s";
-			} else if (handle.classList.contains("canvaaas-handle-sw")) {
-				return "sw";
-			} else if (handle.classList.contains("canvaaas-handle-w")) {
-				return "w";
-			} else if (handle.classList.contains("canvaaas-handle-nw")) {
-				return "nw";
-			} else {
+			try {
+				var found;
+
+				if (!handle) {
+					return false;
+				}
+
+				for (var i = 0; i < _directions.length; i++) {
+					if (handle.classList.contains("canvaaas-direction-" + _directions[i])) {
+						found = _directions[i];
+					}
+				}
+				
+				return found;
+			} catch(err) {
+				console.log(err);
 				return false;
 			}
-		}
-
-		function getFlippedDirection(handle, scaleX, scaleY) {
-			var direction = getDirection(handle);
-			var flipX;
-			var flipY;
-			if (scaleX > 0 || scaleX === false) {
-				flipX = false;
-			} else if (scaleX < 0 || scaleX === true) {
-				flipX = true;
-			}
-			if (scaleY > 0 || scaleY === false) {
-				flipY = false;
-			} else if (scaleY < 0 || scaleY === true) {
-				flipY = true;
-			}
-
-			var north = ["n", "N", "north", "North", "NORTH"];
-			var south = ["s", "S", "south", "South", "SOUTH"];
-			var east = ["e", "E", "east", "East", "EAST"];
-			var west = ["w", "W", "west", "West", "WEST"];
-			var northEast = ["ne", "NE", "north-east", "North-East", "NORTH-EAST"];
-			var northWest = ["nw", "NW", "north-west", "North-West", "NORTH-WEST"];
-			var southEast = ["se", "SE", "south-east", "South-East", "SOUTH-EAST"];
-			var southWest = ["sw", "SW", "south-west", "South-West", "SOUTH-WEST"];
-
-			var radians;
-			if (north.indexOf(direction) > -1) {
-				radians = 0;
-			} else if (northEast.indexOf(direction) > -1) {
-				radians = 45;
-			} else if (east.indexOf(direction) > -1) {
-				radians = 90;
-			} else if (southEast.indexOf(direction) > -1) {
-				radians = 135;
-			} else if (south.indexOf(direction) > -1) {
-				radians = 180;
-			} else if (southWest.indexOf(direction) > -1) {
-				radians = 225;
-			} else if (west.indexOf(direction) > -1) {
-				radians = 270;
-			} else if (northWest.indexOf(direction) > -1) {
-				radians = 315;
-			}
-
-			if (flipX === false && flipY === false) {
-				if (radians === 0) {
-					return "n";
-				} else if (radians === 45) {
-					return "ne";
-				} else if (radians === 90) {
-					return "e";
-				} else if (radians === 135) {
-					return "se";
-				} else if (radians === 180) {
-					return "s";
-				} else if (radians === 225) {
-					return "sw";
-				} else if (radians === 270) {
-					return "w";
-				} else if (radians === 315) {
-					return "nw";
-				} else {
-					return false;
-				}
-			} else if (flipX === true && flipY === false) {
-				if (radians === 0) {
-					return "n";
-				} else if (radians === 45) {
-					return "nw";
-				} else if (radians === 90) {
-					return "w";
-				} else if (radians === 135) {
-					return "sw";
-				} else if (radians === 180) {
-					return "s";
-				} else if (radians === 225) {
-					return "se";
-				} else if (radians === 270) {
-					return "e";
-				} else if (radians === 315) {
-					return "ne";
-				}
-			} else if (flipX === false && flipY === true) {
-				if (radians === 0) {
-					return "s";
-				} else if (radians === 45) {
-					return "se";
-				} else if (radians === 90) {
-					return "e";
-				} else if (radians === 135) {
-					return "ne";
-				} else if (radians === 180) {
-					return "n";
-				} else if (radians === 225) {
-					return "nw";
-				} else if (radians === 270) {
-					return "w";
-				} else if (radians === 315) {
-					return "sw";
-				} else {
-					return false;
-				}
-			} else if (flipX === true && flipY === true) {
-				if (radians === 0) {
-					return "s";
-				} else if (radians === 45) {
-					return "sw";
-				} else if (radians === 90) {
-					return "w";
-				} else if (radians === 135) {
-					return "nw";
-				} else if (radians === 180) {
-					return "n";
-				} else if (radians === 225) {
-					return "ne";
-				} else if (radians === 270) {
-					return "e";
-				} else if (radians === 315) {
-					return "se";
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
-
-		function dataURLtoFile(dataurl, filename) {
-			var arr = dataurl.split(','),
-				mime = arr[0].match(/:(.*?);/)[1],
-				bstr = atob(arr[1]),
-				n = bstr.length,
-				u8arr = new Uint8Array(n);
-
-			while(n--){
-				u8arr[n] = bstr.charCodeAt(n);
-			}
-
-			return new File([u8arr], filename, {type:mime});
 		}
 
 		function getShortId() {
@@ -3758,6 +4284,150 @@
 			firstPart = ("000" + firstPart.toString(36)).slice(-3);
 			secondPart = ("000" + secondPart.toString(36)).slice(-3);
 			return firstPart + secondPart;
+		}
+
+		function getMaximumCanvas() {
+			try {
+				var w = [1, 4096, 8192, 16384, 32767, 65535, 4194303, 8388607];
+				var h = [1, 4096, 8192, 16384, 32767, 65535, 4194303, 8388607];
+				var a = [1, 4096, 8192, 10836, 11180, 11402, 14188, 16384, 32767, 65535];
+				// var maxW = w[w.length - 1];
+				// var maxH = h[h.length - 1];
+				var maxA = a[a.length - 1];
+	
+				// for (var i = 0; i < w.length; i++) {
+				// 	if (w[i] <= maxW) {
+				// 		var res = testCanvas(1, w[i]);
+				// 		console.log(res);
+				// 		if (!res.status) {
+				// 			maxW = w[i];
+				// 		}
+				// 	}
+				// }
+	
+				// for (var i = 0; i < h.length; i++) {
+				// 	if (h[i] <= maxH) {
+				// 		var res = testCanvas(1, h[i]);
+				// 		console.log(res);
+				// 		if (!res.status) {
+				// 			maxH = h[i];
+				// 		}
+				// 	}
+				// }
+	
+				for (var i = 0; i < a.length; i++) {
+					if (a[i] <= maxA) {
+						var res = testCanvas(a[i], a[i]);
+						// console.log(res);
+						if (!res.status) {
+							maxA = a[i - 1];
+						}
+					}
+				}
+	
+				_maxWidth = maxA;
+				_maxHeight = maxA;
+				// _maxArea = maxW;
+	
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function testCanvas(w, h) {
+			try {
+				var start = Date.now();
+				var width = w;
+				var height = h;
+				var status;
+				var drawCanvas = document.createElement("canvas");
+				var drawCtx = drawCanvas.getContext("2d");
+				var testCanvas = document.createElement("canvas");
+				var testCtx = testCanvas.getContext("2d");
+
+				drawCanvas.width = width;
+				drawCanvas.height = height;
+
+				testCanvas.width = 1;
+				testCanvas.height = 1;
+
+				drawCtx.fillStyle = "#123123";
+				drawCtx.fillRect(width - 1, height - 1, 1, 1);
+
+				testCtx.drawImage(drawCanvas, width - 1, height - 1, 1, 1, 0, 0, 1, 1);
+
+				status = testCtx.getImageData(0, 0, 1, 1).data[3] !== 0;
+
+				// var end = Date.now();
+				// console.log("getImageData", end - start);
+				// alert(data[0]+","+data[1]+","+data[2]+","+data[3]);
+
+				return {
+					width: width,
+					height: height,
+					status: status,
+					responseTime: Date.now() - start
+				}
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		// test
+		function setCookie(k, v) {
+			document.cookie = k + '=' + v;
+		}
+
+		// test
+		function getCookie(k) {
+			var cookies = document.cookie.split(';');
+			var found;
+			for(var i = 0; i < cookies.length; i++) {
+				var arr = cookies[i].split("=");
+				if (arr[0] === k) {
+					found = arr[1];
+					break;
+				}
+			}
+			return found;
+		}
+
+		function isExist(id) {
+			try {
+				var candidate;
+				var found = false;
+
+				if (isString(id)) {
+
+					candidate = toString(id);
+				} else {
+					return false;
+				}
+				for (var i = 0; i < imageStates.length; i++) {
+					if (imageStates[i].id === candidate) {
+						found = true;
+					}
+				}
+				return found
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function isEmpty(candidate) {
+			if (typeof(candidate) === "string") {
+				return candidate.trim() === true;
+			} else if (Array.isArray(candidate)) {
+				return candidate.length > 0;
+			} else if (typeof(candidate) === "object" && candidate !== null) {
+				return Object.keys(candidate).length === 0 && candidate.constructor === Object;
+			} else {
+				return false;
+			}
 		}
 
 		function isBoolean(b) {
@@ -3841,16 +4511,7 @@
 			return check;
 		}
 
-		function isDataType(str) {
-			var chk = false;
-			try {
-				return ["url", "file"].indexOf(str.toLowerCase()) > -1;
-			} catch (err) {
-				return false;
-			}
-		}
-
-		function isMimeType(str) {
+		function isMimetype(str) {
 			var pattern = new RegExp("(application|audio|font|example|image|message|model|multipart|text|video|x-(?:[0-9A-Za-z!#$%&'*+.^_`|~-]+))/([0-9A-Za-z!#$%&'*+.^_`|~-]+)((?:[ \t]*;[ \t]*[0-9A-Za-z!#$%&'*+.^_`|~-]+=(?:[0-9A-Za-z!#$%&'*+.^_`|~-]+|\"(?:[^\"\\\\]|\\.)*\"))*)");
 			return str.match(pattern);
 		}
@@ -3861,15 +4522,7 @@
 		}
 
 		function toBoolean(b) {
-			if (typeof(b) === "boolean") {
-				return b;
-			} else if (typeof(b) === "string") {
-				return b === "true";
-			} else if (typeof(b) === "number") {
-				return b === 1;
-			} else {
-				return undefined;
-			}
+			return b === true || b === "true" || b === 1;
 		}
 
 		function toNumber(n) {
@@ -3893,10 +4546,8 @@
 			if (typeof window.innerWidth === 'number') {
 				return window.innerWidth > document.documentElement.clientWidth;
 			}
-
 			// rootElem for quirksmode
 			var rootElem = document.documentElement || document.body;
-
 			// Check overflow style property on body for fauxscrollbars
 			var overflowStyle;
 
@@ -3932,30 +4583,177 @@
 		}
 
 		function getViewportSizes() {
-			var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
-			var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
-			return [w, h]
+			try {
+				var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+				var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+				return [w, h];
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
 		}
 
-		function getExtension(data) {
+		function getMimetype(str) {
 			try {
-				if (isObject(data)) {
-					if (data.type) {
-						return data.type.split("/").pop();
-					} else {
+				var ext = str.split('.').pop().toLowerCase();
+				switch(ext) {
+					case "html":
+					case "htm":
+					case "shtml":
+						return "text/html";
+					case "css":
+						return "text/css";
+					case "xml":
+						return "text/xml";
+					case "gif":
+						return "image/gif";
+					case "jpeg":
+					case "jpg":
+						return "image/jpeg";
+					case "js":
+						return "application/x-javascript";
+					case "atom":
+						return "application/atom+xml";
+					case "rss":
+						return "application/rss+xml";
+					case "mml":
+						return "text/mathml";
+					case "txt":
+						return "text/plain";
+					case "jad":
+						return "text/vnd.sun.j2me.app-descriptor";
+					case "wml":
+						return "text/vnd.wap.wml";
+					case "htc":
+						return "text/x-component";
+					case "png":
+						return "image/png";
+					case "tif":
+					case "tiff":
+						return "image/tiff";
+					case "wbmp":
+						return "image/vnd.wap.wbmp";
+					case "ico":
+						return "image/x-icon";
+					case "jng":
+						return "image/x-jng";
+					case "bmp":
+						return "image/x-ms-bmp";
+					case "svg":
+						return "image/svg+xml";
+					case "webp":
+						return "image/webp";
+					case "jar":
+					case "war":
+					case "ear":
+						return "application/java-archive";
+					case "hqx":
+						return "application/mac-binhex40";
+					case "doc":
+						return "application/msword";
+					case "pdf":
+						return "application/pdf";
+					case "ps":
+					case "eps":
+					case "ai":
+						return "application/postscript";
+					case "rtf":
+						return "application/rtf";
+					case "xls":
+						return "vnd.ms-excel";
+					case "ppt":
+						return "application/vnd.ms-powerpoint";
+					case "wmlc":
+						return "application/vnd.wap.wmlc";
+					case "kml":
+						return "application/vnd.google-earth.kml+xml";
+					case "kmz":
+						return "application/vnd.google-earth.kmz";
+					case "7z":
+						return "application/x-7z-compressed";
+					case "cco":
+						return "application/x-cocoa";
+					case "jardiff":
+						return "application/x-java-archive-diff";
+					case "jnlp":
+						return "application/x-java-jnlp-file";
+					case "run":
+						return "application/x-makeself";
+					case "pl":
+					case "pm":
+						return "application/x-perl";
+					case "prc":
+					case "pdb":
+						return "application/x-pilot";
+					case "rar":
+						return "application/x-rar-compressed";
+					case "rpm":
+						return "application/x-redhat-package-manager";
+					case "sea":
+						return "application/x-sea";
+					case "swf":
+						return "application/x-shockwave-flash";
+					case "sit":
+						return "application/x-stuffit";
+					case "tcl":
+					case "tk":
+						return "application/x-tcl";
+					case "der":
+					case "pem":
+					case "crt":
+						return "application/x-x509-ca-cert";
+					case "xpi":
+						return "application/x-xpinstall";
+					case "xhtml":
+						return "application/xhtml+xml";
+					case "zip":
+						return "application/zip";
+					case "bin":
+					case "exe":
+					case "dll":
+					case "deb":
+					case "dmg":
+					case "eot":
+					case "iso":
+					case "img":
+					case "msi":
+					case "msp":
+					case "msm":
+						return "application/octet-stream";
+					case "mid":
+					case "midi":
+					case "kar":
+						return "audio/midi";
+					case "audio/mpeg":
+						return "audio/mpeg";
+					case "ogg":
+						return "audio/ogg";
+					case "ra":
+						return "audio/x-realaudio";
+					case "3gpp":
+					case "3gp":
+						return "video/3gpp";
+					case "mpeg":
+					case "mpg":
+						return "video/mpeg";
+					case "mov":
+						return "video/quicktime";
+					case "flv":
+						return "video/x-flv";
+					case "mng":
+						return "video/x-mng";
+					case "asx":
+					case "asf":
+						return "video/x-ms-asf";
+					case "wmv":
+						return "video/x-ms-wmv";
+					case "avi":
+						return "video/x-msvideo";
+					case "m4v":
+					case "mp4":
+						return "video/mp4";
+					default:
 						return false;
-					}
-				} else if (isString(data)) {
-					if (
-						data.trim !== "" &&
-						data.indexOf(".") > -1
-					) {
-						return data.split('.').pop();
-					} else {
-						return false;
-					}
-				} else {
-					return false;
 				}
 			} catch (err) {
 				console.log(err);
@@ -3963,107 +4761,173 @@
 			}
 		}
 
-		function getFilename(str) {
-			if (!str) {
-				return false;
-			}
-			return str.replace(/^.*[\\\/]/, '');
-
-			// deprecated
-			// return str.substring(url.lastIndexOf('/')+1);
-		}
-
-		function copyObject(destiObj, srcObj) {
+		function getExtension(str) {
 			try {
-				Object.keys(srcObj).forEach(function(key){
-					destiObj[key] = srcObj[key];
-				});
+				return str.split('.').pop().toLowerCase();
 			} catch(err) {
 				console.log(err);
 				return false;
 			}
-			return true;
 		}
 
-		//
-		// methods end
-		//
+		function getFilename(str) {
+			try {
+				return str.replace(/^.*[\\\/]/, '');
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function copyObject(destiObj, srcObj) {
+			try {
+				for (var i = 0; i < Object.keys(srcObj).length; i++) {
+					var k = Object.keys(srcObj)[i];
+					destiObj[k] = srcObj[k];
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function debugCanvas(base64, options) {
+			try {
+				var image = new Image();
+				image.src = base64;
+				image.style.display = "block";
+				image.style.position = 'absolute';
+				image.style.top = '50%';
+				image.style.left = '50%';
+				image.style.transform = 'translate(-50%, -50%)';
+				image.style.width = '256px';
+				image.style.height = '256px';
+				image.style.objectFit = "contain";
+				image.style.objectPosition = "50% 50%";
+				image.style.border = "2px dashed #FFFFFF";
+
+				var newTab = window.open(base64);
+				newTab.document.write(image.outerHTML);
+				newTab.document.body.style.backgroundColor = '#000000';
+				newTab.document.body.style.padding = '24px';
+				newTab.document.body.style.position = 'relative';
+
+				window.URL.revokeObjectURL(base64);
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
 
 		//
 		// exports start
 		//
 
 		myObject.init = function(target, cb) {
-			if (!isObject(target)) {
-				if (cb) {
-					cb("Element not found");
+			try {
+				if (!target) {
+					if (cb) {
+						cb("Argument `target` not found");
+					}
+					return false;
 				}
+				if (!isElement(target)) {
+					if (cb) {
+						cb("Argument `target` is not HTML element");
+					}
+					return false;
+				}
+	
+				// set template
+				target.innerHTML = _containerTemplate;
+	
+				// set elements
+				containerElement = target.querySelector("div.canvaaas-container");
+				canvasElement = target.querySelector("div.canvaaas-canvas");
+				mirrorElement = target.querySelector("div.canvaaas-mirror");
+				backgroundElement = target.querySelector("div.canvaaas-background");
+				checkerElement = target.querySelector("div.canvaaas-checker");
+	
+				// set container
+				setContainer();
+
+				// set events
+				windowResizeEvent = handlers.resizeWindow;
+				// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
+				window.addEventListener("resize", windowResizeEvent, false);
+				// windowScrollEvent = handlers.scrollWindow;
+				// windowScrollEvent = handlers.debounce( handlers.scrollWindow, 300 );
+				// window.addEventListener("resize", windowScrollEvent, false);
+
+
+				// drag and drop upload event
+				canvasElement.addEventListener('dragenter', handlers.stopEvents, false);
+				canvasElement.addEventListener('dragleave', handlers.stopEvents, false);
+				canvasElement.addEventListener('dragover', handlers.stopEvents, false);
+				canvasElement.addEventListener('drop', handlers.stopEvents, false);
+				canvasElement.addEventListener('drop', handlers.drop, false);
+				// callback
+				if (cb) {
+					cb(null, exportConfig());
+				}
+				return exportConfig();
+			} catch(err) {
+				cb(err);
 				return false;
 			}
-
-			// set template
-			target.innerHTML = conatinerTemplate;
-
-			// set element
-			containerObject = target.querySelector("div.canvaaas-container");
-			canvasObject = target.querySelector("div.canvaaas-canvas");
-			mirrorObject = target.querySelector("div.canvaaas-mirror");
-			backgroundObject = target.querySelector("div.canvaaas-background");
-			checkerObject = target.querySelector("div.canvaaas-checker");
-
-			// set container
-			initContainer();
-
-			// set events
-			viewportResizeEvent = handlers.resizeViewport;
-			// viewportResizeEvent = handlers.debounce( handlers.resizeViewport, 300 );
-
-			window.addEventListener("resize", viewportResizeEvent, false);
-
-			containerObject.addEventListener('dragenter', handlers.stopEvents, false);
-			containerObject.addEventListener('dragleave', handlers.stopEvents, false);
-			containerObject.addEventListener('dragover', handlers.stopEvents, false);
-			containerObject.addEventListener('drop', handlers.drop, false);
-
-			if (cb) {
-				cb(null, exportConfig());
-			}
-			return exportConfig();
 		}
 
 		myObject.destroy = function(cb){
-			window.removeEventListener("resize", viewportResizeEvent, false);
+			try {
+				// remove event
+				window.removeEventListener("resize", windowResizeEvent, false);
+				window.removeEventListener("resize", windowScrollEvent, false);
+				// remove container element
+				containerElement.parentNode.removeChild(containerElement);
 
-			containerObject.parentNode.removeChild(containerObject);
+				// clear states
+				config = {};
+				eventState = {};
+				containerState = {};
+				canvasState = {};
+				handleState = {};
+				imageStates = [];
+				undoCaches = [];
+				redoCaches = [];
+				
+				// clear elements
+				containerElement = undefined;
+				canvasElement = undefined;
+				mirrorElement = undefined;
+				backgroundElement = undefined;
+				checkerElement = undefined;
 
-			config = {};
-			eventState = {};
-			containerState = {};
-			canvasState = {};
-			handleState = {};
-			imageStates = [];
-			undoCaches = [];
-			redoCaches = [];
+				// clear events
+				windowResizeEvent = undefined;
+				windowScrollEvent = undefined;
+				handleEvents = {};
 
-			containerObject = undefined;
-			canvasObject = undefined;
-			mirrorObject = undefined;
-			backgroundObject = undefined;
-			checkerObject = undefined;
+				// reset ID
+				_originId = "canvaaas-" + getShortId() + "-";
+				_cloneId = "canvaaas-" + getShortId() + "-";
 
-			viewportResizeEvent = undefined;
+				// reset default states
+				copyObject(config, defaultConfig);
+				copyObject(canvasState, defaultCanvasState);
+				copyObject(handleState, defaultHandleState);
 
-			originId = "canvaaas-o";
-			cloneId = "canvaaas-c";
-
-			copyObject(config, defaultConfig);
-			copyObject(canvasState, defaultCanvasState);
-			copyObject(handleState, defaultHandleState);
-
-			if (cb) {
-				cb(null, true);
+				// callback
+				if (cb) {
+					cb(null, true);
+				}
+				return true;
+			} catch(err) {
+				if (cb) {
+					cb(err);
+				}
+				return false;
 			}
-			return true;
 		}
 
 		// asynchronous
@@ -4077,7 +4941,6 @@
 				}
 				return false;
 			}
-
 			if (!isObject(imageFiles)) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -4087,7 +4950,6 @@
 				}
 				return false;
 			}
-
 			if (imageFiles.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -4100,8 +4962,7 @@
 
 			var index = imageFiles.length;
 			var count = 0;
-			var result = [];
-			var status = [];
+			var states = [];
 
 			eventState.onUpload = true;
 
@@ -4114,35 +4975,27 @@
 							if (config.upload) {
 								config.upload(err);
 							}
-							status.push({
-								message: err,
-								status: false
-							});
 						} else {
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							status.push({
-								message: null,
-								status: true
-							});
-							result.push(exportImageState(res))
+							states.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					eventState.onUpload = false;
-
+					// callback
 					if (cb) {
-						cb(null, result, status);
+						cb(null, states);
 					}
 				}
 			}
 		}
 
 		// asynchronous
-		myObject.uploadUrls = function(imageURLs, cb) {
+		myObject.uploadUrls = function(imageUrls, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -4152,8 +5005,16 @@
 				}
 				return false;
 			}
-
-			if (!isArray(imageURLs)) {
+			if (!isArray(imageUrls)) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
+				}
+				return false;
+			}
+			if (imageUrls.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
 				}
@@ -4163,20 +5024,9 @@
 				return false;
 			}
 
-			if (imageURLs.length < 1) {
-				if (config.upload) {
-					config.upload("File not found");
-				}
-				if (cb) {
-					cb("File not found");
-				}
-				return false;
-			}
-
-			var index = imageURLs.length;
+			var index = imageUrls.length;
 			var count = 0;
-			var result = [];
-			var status = [];
+			var states = [];
 
 			eventState.onUpload = true;
 
@@ -4184,33 +5034,25 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(imageURLs[count], null, function(err, res) {
+					renderImage(imageUrls[count], null, function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
 							}
-							status.push({
-								message: err,
-								status: false
-							});
 						} else {
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							status.push({
-								message: null,
-								status: true
-							});
-							result.push(exportImageState(res))
+							states.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					eventState.onUpload = false;
-
+					// callback
 					if (cb) {
-						cb(null, result, status);
+						cb(null, states);
 					}
 				}
 			}
@@ -4227,7 +5069,6 @@
 				}
 				return false;
 			}
-
 			if (!isArray(exportedStates)) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -4237,7 +5078,6 @@
 				}
 				return false;
 			}
-
 			if (exportedStates.length < 1) {
 				if (config.upload) {
 					config.upload("File not found");
@@ -4250,8 +5090,7 @@
 
 			var index = exportedStates.length;
 			var count = 0;
-			var result = [];
-			var status = [];
+			var states = [];
 
 			eventState.onUpload = true;
 
@@ -4259,65 +5098,41 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var parsedState = parseState(exportedStates[count]);
-					if (!parsedState) {
+					var importedState = importImageState(exportedStates[count]);
+					if (!importedState) {
 						if (config.upload) {
 							config.upload("State not found");
 						}
-						status.push({
-							message: "State not found",
-							status: false
-						});
 						count++;
 						recursiveFunc();
 						return false;
 					}
-					if (!parsedState.src) {
-						if (config.upload) {
-							config.upload("URL not found");
-						}
-						status.push({
-							message: "URL not found",
-							status: false
-						});
-						count++;
-						recursiveFunc();
-						return false;
-					}
-					renderImage(parsedState.src, parsedState, function(err, res) {
+					renderImage(importedState.src, importedState, function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
 							}
-							status.push({
-								message: err,
-								status: false
-							});
 						} else {
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							status.push({
-								message: null,
-								status: true
-							});
-							result.push(exportImageState(res))
+							states.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					eventState.onUpload = false;
-
+					// callback
 					if (cb) {
-						cb(null, result, status);
+						cb(null, states);
 					}
 				}
 			}
 		}
 
 		// asynchronous
-		myObject.uploadElements = function(targets, cb) {
+		myObject.uploadElements = function(imgElements, cb) {
 			if (eventState.onUpload) {
 				if (config.upload) {
 					config.upload("Already in progress");
@@ -4327,7 +5142,7 @@
 				}
 				return false;
 			}
-			if (!isArray(targets)) {
+			if (!isArray(imgElements)) {
 				if (config.upload) {
 					config.upload("Argument is not array");
 				}
@@ -4337,10 +5152,9 @@
 				return false;
 			}
 
-			var index = targets.length;
+			var index = imgElements.length;
 			var count = 0;
-			var result = [];
-			var status = [];
+			var states = [];
 
 			eventState.onUpload = true;
 
@@ -4348,95 +5162,66 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					if (!isElement(targets[count])) {
+					if (!isElement(imgElements[count])) {
 						if (config.upload) {
 							config.upload("Target is not DOM Object");
 						}
-						status.push({
-							message: "Target is not DOM Object",
-							status: false
-						});
 						count++;
 						recursiveFunc();
 						return false;
 					}
-					var state = getDataset(targets[count]);
-					var src;
-					if (!targets[count].src) {
-						if (!state.src) {
-							if (config.upload) {
-								config.upload("URL not found");
-							}
-							status.push({
-								message: "URL not found",
-								status: false
-							});
-							count++;
-							recursiveFunc();
-							return false;
-						}
-						src = state.src;
-					} else {
-						src = targets[count].src;
-					}
-					renderImage(src, state, function(err, res) {
+					var attrs = getDataset(imgElements[count]);
+					var importedState = importImageState(attrs);
+					var src = imgElements[count].src || importedState.src;
+					renderImage(src, importedState, function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
 							}
-							status.push({
-								message: err,
-								status: false
-							});
 						} else {
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							status.push({
-								message: null,
-								status: true
-							});
-							result.push(exportImageState(res))
+							states.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					eventState.onUpload = false;
-
+					// callback
 					if (cb) {
-						cb(null, result, status);
+						cb(null, states);
 					}
 				}
 			}
 		}
 
 		//
-		// image
+		// edit image
 		//
 
-		myObject.findOne = function(query, cb){
+		myObject.find = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
-					cb("Argument is not obejct");
+					cb("Argument is not object");
 				}
 				return false;
 			}
 
 			var founds = [];
-			imageStates.forEach(function(elem){
+			for(var i = 0; i < imageStates.length; i++) {
 				var isMatch = true;
-				for(var key in query) {
-					if (query.hasOwnProperty(key)) {
-						if (elem[key] !== query[key]) {
-							isMatch = false;
-						}
+				for(var j = 0; j < Object.keys(query).length; j++) {
+					var k = Object.keys(query)[j];
+					if (imageStates[i][k] !== query[k]) {
+						isMatch = false;
 					}
 				}
-				if (isMatch === true) {
-					founds.push(exportImageState(elem.id));
+				if (isMatch) {
+					founds.push(exportImageState(imageStates[i].id));
 				}
-			});
+			}
 
 			if (founds.length < 1) {
 				if (cb) {
@@ -4444,50 +5229,7 @@
 				}
 				return false;
 			}
-
-			if (founds.length > 1) {
-				if (cb) {
-					cb("Image found more than one");
-				}
-				return false;
-			}
-
-			if (cb) {
-				cb(null, founds[0]);
-			}
-			return founds[0];
-		}
-
-		myObject.findMany = function(query, cb){
-			if (!isObject(query)) {
-				if (cb) {
-					cb("Argument is not obejct");
-				}
-				return false;
-			}
-
-			var founds = [];
-			imageStates.forEach(function(elem){
-				var isMatch = true;
-				for(var key in query) {
-					if (query.hasOwnProperty(key)) {
-						if (elem[key] !== query[key]) {
-							isMatch = false;
-						}
-					}
-				}
-				if (isMatch === true) {
-					founds.push(exportImageState(elem.id));
-				}
-			});
-
-			if (founds.length < 1) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
+			// callback
 			if (cb) {
 				cb(null, founds);
 			}
@@ -4504,7 +5246,6 @@
 				}
 				return false;
 			}
-
 			if (!isObject(newState)) {
 				if (config.edit) {
 					config.edit("Argument is not object");
@@ -4515,20 +5256,30 @@
 				return false;
 			}
 
-			if (!isEditable(id) && !newState.editabled) {
+			var state = getImageState(id);
+			var updates = importImageState(newState);
+
+			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Image is not editabled");
+					config.edit("You are not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Image is not editabled");
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
 				}
 				return false;
 			}
 
-			var updates = importImageState(newState);
-
-			if (updates.id) {
-				if (isExist(updates.id)) {
+			if (isString(updates.id)) {
+				if (isExist(toString(updates.id))) {
 					if (config.edit) {
 						config.edit("ID duplicated");
 					}
@@ -4538,15 +5289,16 @@
 					return false;
 				}
 			} else {
-				updates.id = id;
+				updates.id = id
 			}
-
+			
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, updates);
-
+			// save image state
+			setImageState(id, updates);
+			// set image style
+			setImage(updates.id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(updates.id));
 			}
@@ -4566,17 +5318,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -4587,16 +5328,36 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				x: state.x + toNumber(n)
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4616,17 +5377,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -4637,16 +5387,36 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				y: state.y + toNumber(n)
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4666,17 +5436,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -4687,14 +5446,32 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var state = getImageState(id);
 			var ratio = toNumber(n);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				width: state.width * (1 + ratio),
 				height: state.height * (1 + ratio),
 				cropTop: state.cropTop * (1 + ratio),
@@ -4702,7 +5479,9 @@
 				cropLeft: state.cropLeft * (1 + ratio),
 				cropRight: state.cropRight * (1 + ratio),
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4723,17 +5502,7 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			var state = getState(id);
+			var state = getImageState(id);
 			var axisX = 0.5 * canvasState.width;
 			var axisY = 0.5 * canvasState.height;
 			var croppedWidth = state.width - (state.cropLeft + state.cropRight);
@@ -4756,15 +5525,32 @@
 			var cropBottom = fittedSizes[1] * scaleCropBottom;
 			var cropLeft = fittedSizes[0] * scaleCropLeft;
 			var cropRight = fittedSizes[0] * scaleCropRight;
-
 			var width = fittedSizes[0] + cropLeft + cropRight;
 			var height = fittedSizes[1] + cropTop + cropBottom;
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				x: axisX,
 				y: axisY,
 				width: width,
@@ -4777,7 +5563,9 @@
 				cropLeft: cropLeft,
 				cropRight: cropRight,
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4798,17 +5586,7 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			var state = getState(id);
+			var state = getImageState(id);
 			var axisX = 0.5 * canvasState.width;
 			var axisY = 0.5 * canvasState.height;
 			var croppedWidth = state.width - (state.cropLeft + state.cropRight);
@@ -4831,15 +5609,32 @@
 			var cropBottom = fittedSizes[1] * scaleCropBottom;
 			var cropLeft = fittedSizes[0] * scaleCropLeft;
 			var cropRight = fittedSizes[0] * scaleCropRight;
-
 			var width = fittedSizes[0] + cropLeft + cropRight;
 			var height = fittedSizes[1] + cropTop + cropBottom;
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				x: axisX,
 				y: axisY,
 				width: width,
@@ -4852,7 +5647,9 @@
 				cropLeft: cropLeft,
 				cropRight: cropRight,
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4872,17 +5669,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -4893,16 +5679,36 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				rotate: state.rotate + toNumber(n)
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4923,26 +5729,36 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Image is not editabled");
+					config.edit("Not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Image is not editabled");
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
 				}
 				return false;
 			}
 
-			var state = getState(id);
-
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				scaleY: state.scaleY * -1
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -4963,26 +5779,36 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Image is not editabled");
+					config.edit("Not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Image is not editabled");
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
 				}
 				return false;
 			}
 
-			var state = getState(id);
-
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				scaleX: state.scaleX * -1
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -5002,17 +5828,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -5023,238 +5838,36 @@
 				return false;
 			}
 
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				opacity: toNumber(n)
 			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.cropTop = function(id, n, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(n)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var scaleRatio = canvasState.height / canvasState.originalHeight;
-
-			var cropTop = state.cropTop + (toNumber(n) * scaleRatio);
-			if (cropTop < 0) {
-				cropTop = 0;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				cropTop: cropTop
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.cropBottom = function(id, n, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(n)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var scaleRatio = canvasState.height / canvasState.originalHeight;
-
-			var cropBottom = state.cropBottom + (toNumber(n) * scaleRatio);
-			if (cropBottom < 0) {
-				cropBottom = 0;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				cropBottom: cropBottom
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.cropLeft = function(id, n, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(n)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
-
-			var cropLeft = state.cropLeft + (toNumber(n) * scaleRatio);
-			if (cropLeft < 0) {
-				cropLeft = 0;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				cropLeft: cropLeft
-			});
-
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
-			if (cb) {
-				cb(null, exportImageState(id));
-			}
-			return exportImageState(id);
-		}
-
-		myObject.cropRight = function(id, n, cb) {
-			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			if (!isNumeric(n)) {
-				if (config.edit) {
-					config.edit("Argument is not numeric");
-				}
-				if (cb) {
-					cb("Argument is not numeric");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-			var scaleRatio = canvasState.width / canvasState.originalWidth;
-
-			var cropRight = state.cropRight + (toNumber(n) * scaleRatio);
-			if (cropRight < 0) {
-				cropRight = 0;
-			}
-
-			// save cache
-			saveUndo(id);
-
-			// save state
-			setState(id, {
-				cropRight: cropRight
-			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -5274,17 +5887,6 @@
 				}
 				return false;
 			}
-
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
 			if (!isNumeric(n)) {
 				if (config.edit) {
 					config.edit("Argument is not numeric");
@@ -5295,13 +5897,37 @@
 				return false;
 			}
 
-			var state = getState(id);
+			var state = getImageState(id);
 
-			// save state
-			setState(id, {
-				index: state.index + toNumber(n)
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+
+			// save image state
+			setImageState(id, {
+				index: toNumber(n)
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
 			}
@@ -5311,7 +5937,7 @@
 			return exportImageState(id);
 		}
 
-		myObject.focusIn = function(id, cb) {
+		myObject.lockAspectRatio = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
 					config.edit("Image not found");
@@ -5322,47 +5948,153 @@
 				return false;
 			}
 
-			if (!isFocusable(id)) {
-				if (config.edit) {
-					config.edit("Image is not focusable");
-				}
-				if (cb) {
-					cb("Image is not focusable");
-				}
-				return false;
+			var state = getImageState(id);
+			var b = state.lockAspectRatio === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				lockAspectRatio: state.lockAspectRatio === false
+			});
+			// set image style
+			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
 			}
-
-			var state = getState(id);
-
-			if (eventState.target) {
-				setFocusOut(eventState.target);
-			}
-
-			setFocusIn(id);
-			
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
 			return exportImageState(id);
 		}
 
-		myObject.focusOut = function(cb) {
-			if (!eventState.target) {
+		myObject.visible = function(id, cb) {
+			if (!isExist(id)) {
 				if (config.edit) {
-					config.edit("Did not found focused image");
+					config.edit("Image not found");
 				}
 				if (cb) {
-					cb("Did not found focused image");
+					cb("Image not found");
 				}
 				return false;
 			}
 
-			setFocusOut(eventState.target);
+			var state = getImageState(id);
+			var b = state.visible === false;
 
-			if (cb) {
-				cb(null, null);
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				visible: b
+			});
+			// set image style
+			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
 			}
-			return true;
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.clickable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var b = state.clickable === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				clickable: b
+			});
+			// set image style
+			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.editable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var b = state.editable === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				editable: b
+			});
+			// set image style
+			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.drawable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var b = state.drawable === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				drawable: b
+			});
+			// set image style
+			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
 		}
 
 		myObject.reset = function(id, cb) {
@@ -5376,18 +6108,7 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
-				if (config.edit) {
-					config.edit("Image is not editabled");
-				}
-				if (cb) {
-					cb("Image is not editabled");
-				}
-				return false;
-			}
-
-			var state = getState(id);
-
+			var state = getImageState(id);
 			var fittedSizes = getContainedSizes(
 				state.originalWidth,
 				state.originalHeight,
@@ -5397,9 +6118,8 @@
 
 			// save cache
 			saveUndo(id);
-
-			// save state
-			setState(id, {
+			// save image state
+			setImageState(id, {
 				width: fittedSizes[0],
 				height: fittedSizes[1],
 				x: canvasState.width * 0.5,
@@ -5412,15 +6132,17 @@
 				opacity: 1,
 				lockAspectRatio: config.lockAspectRatioAfterRender || false,
 				visible: true,
-				focusabled: true,
+				clickable: true,
 				editabled: true,
-				drawabled: true,
+				drawable: true,
 				cropTop: 0,
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
 			});
-
+			// set image style
+			setImage(id);
+			// callback
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
@@ -5435,24 +6157,36 @@
 				return false;
 			}
 
-			if (!isEditable(id)) {
+			var state = getImageState(id);
+			var tmp = exportImageState(id);
+
+			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Image is not editabled");
+					config.edit("Not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Image is not editabled");
+					cb("Not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("Not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("Not allowed to edit this image by image settings");
 				}
 				return false;
 			}
 
-			var tmp = exportImageState(id);
+
 			var res = removeImage(id);
 			if (!res) {
 				if (config.remove) {
-					config.remove("Could not remove image");
+					config.remove("Failed to remove image");
 				}
 				if (cb) {
-					cb("Could not remove image");
+					cb("Failed to remove image");
 				}
 				return false;
 			} else {
@@ -5471,13 +6205,6 @@
 		//
 
 		myObject.config = function(newConfig, cb) {
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
 			if (!isObject(newConfig)) {
 				if (cb) {
 					cb("Argument is not object");
@@ -5485,45 +6212,21 @@
 				return false;
 			}
 
-			var tmpConfig = {};
-
 			// set config
-			copyObject(tmpConfig, config);
 			copyObject(config, newConfig);
 
-			// check cache
+			// check cache level
 			if (undoCaches.length > config.cacheLevels) {
-				var diff = undoCaches.length - config.cacheLevels;
-				undoCaches.splice(undoCaches.length - diff, diff);
+				undoCaches.splice(-config.cacheLevels);
 				redoCaches = [];
 			}
 
-			// check drag and drop
-			if (
-				tmpConfig.dragAndDrop === true &&
-				config.dragAndDrop === false
-			) {
-				containerObject.removeEventListener('dragenter', handlers.stopEvents, false);
-				containerObject.removeEventListener('dragleave', handlers.stopEvents, false);
-				containerObject.removeEventListener('dragover', handlers.stopEvents, false);
-				containerObject.removeEventListener('drop', handlers.drop, false);
-			} else if (
-				tmpConfig.dragAndDrop === false &&
-				config.dragAndDrop === true
-			) {
-				containerObject.addEventListener('dragenter', handlers.stopEvents, false);
-				containerObject.addEventListener('dragleave', handlers.stopEvents, false);
-				containerObject.addEventListener('dragover', handlers.stopEvents, false);
-				containerObject.addEventListener('drop', handlers.drop, false);
-			}
-
 			// check container
-			initContainer();
-			if (
-				canvasState.originalWidth &&
-				canvasState.originalHeight
-			) {
-				initCanvas();
+			setContainer();
+			
+			var initialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (initialized) {
+				setCanvas();
 			}
 
 			if (cb) {
@@ -5537,38 +6240,16 @@
 		//
 
 		myObject.handle = function(obj, cb) {
-			// obj = {
-			// 	inside: {
-			// 		n: "resize", // resize, crop
-			// 		ne: "resize", // resize, crop
-			// 		e: "resize", // resize, crop
-			// 		se: "resize", // resize, crop
-			// 		s: "resize", // resize, crop
-			// 		sw: "resize", // resize, crop
-			// 		w: "resize", // resize, crop
-			// 		nw: "resize" // resize, crop
-			// 	},
-			// 	outside: {
-			// 		n: "rotate", // rotate, flip, crop, resize
-			// 		ne: "flip", // flip, crop, resize
-			// 		e: "flip", // rotate, flip, crop, resize
-			// 		se: "flip", // flip, crop, resize
-			// 		s: "flip", // rotate, flip, crop, resize
-			// 		sw: "flip", // flip, crop, resize
-			// 		w: "flip", // rotate, flip, crop, resize
-			// 		nw: "flip" // flip, crop, resize
-			// 	}
-			// }
-			
 			if (!isObject(obj)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `obj` is not object");
 				}
 				return false;
 			}
 
 			setHandleState(obj);
 
+			// callback
 			if (cb) {
 				cb(null, exportHandleState());
 			}
@@ -5580,113 +6261,55 @@
 		//
 
 		myObject.new = function(options, cb) {
-			// options = {
-			// 	width: number, (required)
-			// 	height: number, (required)
-			// 	filename: string, (optional, default 'untitled')
-			//  quality: number, (optional, default '0.92')
-			//  mimeType: string, (optional, default 'image/png')
-			//  dataType: string, (optional, default 'url')
-			// 	overlay: boolean, (optional, default 'false')
-			// 	checker: boolean, (optional, default 'true')
-			// 	editabled: boolean, (optional, default 'true')
-			// 	focusabled: boolean, (optional, default 'true')
-			// 	background: string, (optional, default '#FFFFFF')
-			// }
-
-			if (
-				!containerState.width ||
-				!containerState.height
-			) {
+			var containerInitialized = containerState.width && containerState.height;
+			var canvaInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!containerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
 				return false;
 			}
-
-			if (
-				canvasState.originalWidth ||
-				canvasState.originalHeight
-			) {
+			if (canvaInitialized) {
 				if (cb) {
 					cb("Canvas already initialized");
 				}
 				return false;
 			}
-
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `options` is not object");
 				}
 				return false;
 			}
-
-			if (
-				!isNumeric(options.width) ||
-				!isNumeric(options.height)
-			) {
+			if (!options.width === undefined) {
 				if (cb) {
-					cb("Argument is not allowed");
+					cb("Argument `options.width` is required");
+				}
+				return false;
+			}
+			if (!options.height === undefined) {
+				if (cb) {
+					cb("Argument `options.height` is required");
+				}
+				return false;
+			}
+			if (!isNumeric(options.width)) {
+				if (cb) {
+					cb("Argument `options.width` is not numeric");
+				}
+				return false;
+			}
+			if (!isNumeric(options.height)) {
+				if (cb) {
+					cb("Argument `options.height` is not numeric");
 				}
 				return false;
 			}
 
-			canvasState.originalWidth = toNumber(options.width);
-			canvasState.originalHeight = toNumber(options.height);
+			setCanvasState(options);
+			setCanvas();
 
-			if (isString(options.filename)) {
-				if (toString(options.filename).trim() === "") {
-					options.filename = "untitled";
-				}
-				canvasState.filename = toString(options.filename);
-			}
-			if (isString(options.mimeType)) {
-				if (isMimeType(toString(options.mimeType))) {
-					canvasState.mimeType = toString(options.mimeType);
-				}
-			}
-			if (isString(options.dataType)) {
-				if (isDataType(toString(options.dataType))) {
-					canvasState.dataType = toString(options.dataType);
-				}
-			}
-			if (isNumeric(options.quality)) {
-				if (toNumber(options.quality) > 1) {
-					canvasState.quality = 1;
-				} else if (toNumber(options.quality) < 0) {
-					canvasState.quality = 0;
-				} else {
-					canvasState.quality = toNumber(options.quality);
-				}
-			}
-			if (isBoolean(options.checker)) {
-				canvasState.checker = toBoolean(options.checker);
-			}
-			if (isBoolean(options.overlay)) {
-				canvasState.overlay = toBoolean(options.overlay);
-			}
-			if (isBoolean(options.editabled)) {
-				canvasState.editabled = toBoolean(options.editabled);
-			}
-			if (isBoolean(options.focusabled)) {
-				canvasState.focusabled = toBoolean(options.focusabled);
-			}
-			if (isString(options.background)) {
-				var colour = toString(options.background).toLowerCase().trim();
-				if (
-					colour === "alpha" ||
-					colour === "transparent" ||
-					colour === "none" ||
-					colour === "unset"
-				) {
-					canvasState.background = "transparent";
-				} else if (isColor(colour)) {
-					canvasState.background = colour;
-				}
-			}
-
-			initCanvas();
-
+			// callback
 			if (cb) {
 				cb(null, exportCanvasState());
 			}
@@ -5694,137 +6317,60 @@
 		}
 
 		myObject.close = function(cb) {
-			if (
-				!canvasState.originalWidth ||
-				!canvasState.originalHeight
-			) {
+			try {
+				var initialized = canvasState.originalWidth && canvasState.originalHeight;
+				if (!initialized) {
+					if (cb) {
+						cb("Canvas has been not initialized");
+					}
+					return false;
+				}
+	
+				eventState = {};
+				undoCaches = [];
+				redoCaches = [];
+
+				clearCanvas();
+				// callback
 				if (cb) {
-					cb("Canvas has been not initialized");
+					cb(null, exportCanvasState());
+				}
+				return exportCanvasState();
+			} catch(err) {
+				if (cb) {
+					cb(err);
 				}
 				return false;
 			}
-
-			if (eventState.target) {
-				setFocusOut(eventState.target);
-			}
-
-			eventState = {};
-			undoCaches = [];
-			redoCaches = [];
-
-			imageStates.forEach(function(elem){
-				removeImage(elem.id);
-			});
-
-			clearCanvas();
-
-			if (cb) {
-				cb(null, exportCanvasState());
-			}
-			return exportCanvasState();
 		}
 
 		myObject.canvas = function(options, cb) {
-			// options = {
-			// 	width: number, (required)
-			// 	height: number, (required)
-			// 	filename: string, (optional, default 'untitled')
-			//  quality: number, (optional, default '0.92')
-			//  mimeType: string, (optional, default 'image/png')
-			//  dataType: string, (optional, default 'url')
-			// 	overlay: boolean, (optional, default 'false')
-			// 	checker: boolean, (optional, default 'true')
-			// 	editabled: boolean, (optional, default 'true')
-			// 	focusabled: boolean, (optional, default 'true')
-			// 	background: string, (optional, default '#FFFFFF')
-			// }
-
-			if (
-				!containerState.width ||
-				!containerState.height
-			) {
+			var containerInitialized = containerState.width && containerState.height;
+			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!containerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
 				return false;
 			}
-
-			if (
-				!canvasState.originalWidth ||
-				!canvasState.originalHeight
-			) {
+			if (!canvasInitialized) {
 				if (cb) {
 					cb("Canvas has been not initialized");
 				}
 				return false;
 			}
-
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `options` is not object");
 				}
 				return false;
 			}
 
-			if (isString(options.filename)) {
-				if (toString(options.filename).trim() === "") {
-					options.filename = "untitled";
-				}
-				canvasState.filename = toString(options.filename);
-			}
-			if (isString(options.mimeType)) {
-				if (isMimeType(toString(options.mimeType))) {
-					canvasState.mimeType = toString(options.mimeType);
-				}
-			}
-			if (isString(options.dataType)) {
-				if (isDataType(toString(options.dataType))) {
-					canvasState.dataType = toString(options.dataType);
-				}
-			}
-			if (isNumeric(options.quality)) {
-				if (toNumber(options.quality) > 1) {
-					canvasState.quality = 1;
-				} else if (toNumber(options.quality) < 0) {
-					canvasState.quality = 0;
-				} else {
-					canvasState.quality = toNumber(options.quality);
-				}
-			}
-			if (isNumeric(options.width)) {
-				canvasState.originalWidth = toNumber(options.width);
-			}
-			if (isNumeric(options.height)) {
-				canvasState.originalHeight = toNumber(options.height);
-			}
-			if (isBoolean(options.checker)) {
-				canvasState.checker = toBoolean(options.checker);
-			}
-			if (isBoolean(options.overlay)) {
-				canvasState.overlay = toBoolean(options.overlay);
-			}
-			if (isBoolean(options.editabled)) {
-				canvasState.editabled = toBoolean(options.editabled);
-			}
-			if (isBoolean(options.focusabled)) {
-				canvasState.focusabled = toBoolean(options.focusabled);
-			}
-			if (isString(options.background)) {
-				var colour = toString(options.background).toLowerCase().trim();
-				if (
-					colour === "alpha" ||
-					colour === "transparent" ||
-					colour === "none" ||
-					colour === "unset"
-				) {
-					canvasState.background = "transparent";
-				} else if (isColor(colour)) {
-					canvasState.background = colour;
-				}
-			}
+			setCanvasState(options);
 
-			initCanvas();
+			setCanvas();
 
+			// callback
 			if (cb) {
 				cb(null, exportCanvasState());
 			}
@@ -5835,255 +6381,160 @@
 		// draw
 		//
 
-		myObject.draw = function(options, cb){
-			// options = {
-			// 	filename: string, (optional, default 'getCanvas().filename')
-			// 	dataType: string 'url' or 'file', (optional, default 'getCanvas().dataType')
-			// 	mimeType: string, (optional, default 'getCanvas().mimeType')
-			// 	width(or drawWidth): number, (optional, default 'getCanvas().width')
-			// 	height(or drawHeight): number, (optional, default 'getCanvas().height')
-			// 	background: string, (optional, default 'getCanvas().background')
-			// 	quality: number, (optional, default 'getCanvas().quality')
-			// }
+		
 
+		/*
+			options = {
+				filename(optional)
+				mimetype(optional)
+				quality(optional)
+				background(optional)
+				width(optional)
+				height(optional)
+			}
+		*/
+		myObject.draw = function(options, cb){
+			try {
+				var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+				if (eventState.onDraw) {
+					if (cb) {
+						cb("Already in progress");
+					}
+					return false;
+				}
+				if (!canvasInitialized) {
+					if (cb) {
+						cb("Canvas has been not initialized");
+					}
+					return false;
+				}
+	
+				var canvState = exportCanvasState();
+				var convertedImageStates = [];
+	
+				for (var i = 0; i < imageStates.length; i++) {
+					if (imageStates[i].drawable) {
+						convertedImageStates.push(exportImageState(imageStates[i].id));
+					}
+				}
+	
+				convertedImageStates.sort(function(a, b){
+					if (a.index > b.index) {
+						return 1;
+					}
+					if (a.index < b.index) {
+						return -1;
+					}
+					return 0;
+				});
+	
+				eventState.onDraw = true;
+	
+				drawCanvas(options, canvState, convertedImageStates, function(err, base64, result){
+					if (err) {
+						if (cb) {
+							cb(err);
+						}
+					} else {
+						if (cb) {
+							cb(null, base64, result);
+						}
+					}
+
+					debugCanvas(base64);
+
+					eventState.onDraw = false;
+					return false;
+				});
+			} catch(err) {
+				if (cb) {
+					cb(err);
+				}
+				return false;
+			}
+		}
+
+		/*
+			options = {
+				filename(optional)
+				mimetype(optional)
+				quality(optional)
+				background(optional)
+				width(optional)
+				height(optional)
+			}
+			exportedCanvas = {
+				width(required)
+				height(required)
+			}
+		*/
+		myObject.drawTo = function(options, exportedCanvas, exportedStates, cb){
+			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 			if (eventState.onDraw === true) {
 				if (cb) {
 					cb("Already in progress");
 				}
 				return false;
 			}
-
-			var canvState = exportCanvasState();
-			var drawState = {};
-
-			drawState.width = canvasState.originalWidth;
-			drawState.height = canvasState.originalHeight;
-
-			if (isObject(options)) {
-				if (isString(options.filename)) {
-					canvState.filename = toString(options.filename);
-				}
-				if (isString(options.mimeType)) {
-					canvState.mimeType = toString(options.mimeType);
-				}
-				if (isString(options.dataType)) {
-					if (options.dataType.toLowerCase() === "url") {
-						canvState.dataType = "url";
-					} else if (options.dataType.toLowerCase() === "file") {
-						canvState.dataType = "file";
-					}
-				}
-				if (isNumeric(options.quality)) {
-					canvState.quality = toNumber(options.quality);
-				}
-				if (isString(options.background)) {
-					canvState.background = toString(options.background);
-				}
-				if (isNumeric(options.width)) {
-					drawState.width = toNumber(options.width);
-				} else if (isNumeric(options.drawWidth)) {
-					drawState.width = toNumber(options.drawWidth);
-				}
-				if (isNumeric(options.height)) {
-					drawState.height = toNumber(options.height);
-				} else if (isNumeric(options.drawHeight)) {
-					drawState.height = toNumber(options.drawHeight);
-				}
-			}
-
-			var imgStates = [];
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawabled === true) {
-					imgStates.push(exportImageState(imageStates[i].id));
-				}
-			}
-
-			imgStates.sort(function(a, b){
-				if (a.index > b.index) {
-					return 1;
-				}
-				if (a.index < b.index) {
-					return -1;
-				}
-				return 0;
-			});
-
-			eventState.onDraw = true;
-
-			drawCanvas(drawState, canvState, imgStates, function(err, res, result){
-				if (err) {
-					console.log(err);
-					if (cb) {
-						cb(err);
-					}
-				} else {
-					if (cb) {
-						cb(null, res, result);
-					}
-				}
-				eventState.onDraw = false;
-			});
-		}
-
-		myObject.drawTo = function(options, states, cb){
-			// options = {
-			// 	filename: string, (optional, default 'getCanvas().filename')
-			// 	dataType: string 'url' or 'file', (optional, default 'getCanvas().dataType')
-			// 	mimeType: string, (optional, default 'getCanvas().mimeType')
-			// 	width: number, (required)
-			// 	drawWidth: number, (optional, default 'width')
-			// 	height: number, (required)
-			// 	drawHeight: number, (optional, default 'height')
-			// 	background: string, (optional, default 'getCanvas().background')
-			// 	quality: number, (optional, default 'getCanvas().quality')
-			// }
-
-			// states = [{
-			// 	src(required),
-			// 	index(required),
-			// 	x(required),
-			// 	y(required),
-			// 	width(required),
-			// 	height(required),
-			// 	rotate(optional),
-			// 	scaleX(optinal),
-			// 	scaleY(optinal),
-			// 	opacity(optional),
-			// 	cropTop(optional),
-			// 	cropBottom(optional),
-			// 	cropLeft(optional),
-			// 	cropRight(optional),
-			// }]
-
-			if (eventState.onDraw === true) {
+			if (!canvasInitialized) {
 				if (cb) {
-					cb("Already in progress");
+					cb("Canvas has been not initialized");
 				}
 				return false;
 			}
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `options` is not object");
 				}
 				return false;
 			}
-			if (!isArray(states)) {
+			if (!isObject(exportedCanvas)) {
 				if (cb) {
-					cb("Argument is not array");
+					cb("Argument `exportedCanvas` is not object");
 				}
 				return false;
 			}
-
-			var canvState = {};
-			var drawState = {};
-
-			copyObject(canvState, defaultCanvasState);
-
-			if (isString(options.filename)) {
-				canvState.filename = toString(options.filename);
-			}
-			if (isString(options.mimeType)) {
-				canvState.mimeType = toString(options.mimeType);
-			}
-			if (isString(options.dataType)) {
-				if (options.dataType.toLowerCase() === "url") {
-					canvState.dataType = "url";
-				} else if (options.dataType.toLowerCase() === "file") {
-					canvState.dataType = "file";
-				}
-			}
-			if (isNumeric(options.quality)) {
-				canvState.quality = toNumber(options.quality);
-			}
-			if (isString(options.background)) {
-				canvState.background = toString(options.background);
-			}
-			if (isNumeric(options.width)) {
-				canvState.width = toNumber(options.width);
-			} else {
+			if (!isArray(exportedStates)) {
 				if (cb) {
-					cb("Argument error");
+					cb("Argument `exportedStates` is not array");
 				}
 				return false;
 			}
-			if (isNumeric(options.height)) {
-				canvState.height = toNumber(options.height);
-			} else {
+			if (!exportedCanvas.width === undefined) {
 				if (cb) {
-					cb("Argument error");
+					cb("Argument `exportedCanvas.width` is required");
 				}
 				return false;
 			}
-			if (isNumeric(options.width)) {
-				drawState.width = toNumber(options.width);
-			} else if (isNumeric(options.drawWidth)) {
-				drawState.width = toNumber(options.drawWidth);
-			} else {
+			if (!exportedCanvas.height === undefined) {
 				if (cb) {
-					cb("Argument error");
+					cb("Argument `exportedCanvas.height` is required");
 				}
 				return false;
 			}
-			if (isNumeric(options.height)) {
-				drawState.height = toNumber(options.height);
-			} else if (isNumeric(options.drawHeight)) {
-				drawState.height = toNumber(options.drawHeight);
-			} else {
+			if (!isNumeric(exportedCanvas.width)) {
 				if (cb) {
-					cb("Argument error");
+					cb("Argument `exportedCanvas.width` is not numeric");
+				}
+				return false;
+			}
+			if (!isNumeric(exportedCanvas.height)) {
+				if (cb) {
+					cb("Argument `exportedCanvas.height` is not numeric");
 				}
 				return false;
 			}
 
-			var imgStates = [];
-			for (var i = 0; i < states.length; i++) {
-				var tmp = {};
-				copyObject(tmp, states[i]);
-				if (!tmp.src) {
-					if (tmp.url) {
-						tmp.src = tmp.url;
-					} else if (tmp.path) {
-						tmp.src = tmp.path;
-					}
-				}
-				if (tmp.rotate === undefined) {
-					tmp.rotate = 0;
-				}
-				if (tmp.scaleX === undefined) {
-					tmp.scaleX = 1;
-				}
-				if (tmp.scaleY === undefined) {
-					tmp.scaleY = 1;
-				}
-				if (tmp.opacity === undefined) {
-					tmp.opacity = 1;
-				}
-				if (tmp.cropTop === undefined) {
-					tmp.cropTop = 0;
-				}
-				if (tmp.cropBottom === undefined) {
-					tmp.cropBottom = 0;
-				}
-				if (tmp.cropLeft === undefined) {
-					tmp.cropLeft = 0;
-				}
-				if (tmp.cropRight === undefined) {
-					tmp.cropRight = 0;
-				}
+			var canvState = exportedCanvas;
+			var convertedImageStates = [];
 
-				if (
-					tmp.src !== undefined ||
-					tmp.index !== undefined ||
-					tmp.x !== undefined ||
-					tmp.y !== undefined ||
-					tmp.width !== undefined ||
-					tmp.height !== undefined
-				) {
-					imgStates.push(tmp);
+			for (var i = 0; i < imageStates.length; i++) {
+				if (imageStates[i].drawable) {
+					convertedImageStates.push(exportImageState(imageStates[i].id));
 				}
 			}
 
-			imgStates.sort(function(a, b){
+			convertedImageStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6095,18 +6546,18 @@
 
 			eventState.onDraw = true;
 
-			drawCanvas(drawState, canvState, imgStates, function(err, res, result){
+			drawCanvas(options, canvState, convertedImageStates, function(err, base64, result){
 				if (err) {
-					console.log(err);
 					if (cb) {
 						cb(err);
 					}
 				} else {
 					if (cb) {
-						cb(null, res, result);
+						cb(null, base64, result);
 					}
 				}
 				eventState.onDraw = false;
+				return false;
 			});
 		}
 
@@ -6128,7 +6579,7 @@
 			return exportImageState(eventState.target);
 		}
 
-		myObject.getConfig = function(cb){
+		myObject.exportConfig = function(cb){
 			if (cb) {
 				cb(null, exportConfig());
 			}
@@ -6198,7 +6649,7 @@
 			}
 
 			var states = [];
-			var state = getState(id);
+			var state = getImageState(id);
 
 			imageStates.forEach(function(elem){
 				states.push(elem);
@@ -6251,7 +6702,7 @@
 			}
 
 			var states = [];
-			var state = getState(id);
+			var state = getImageState(id);
 
 			imageStates.forEach(function(elem){
 				states.push(elem);
@@ -6318,6 +6769,28 @@
 			}
 			return tmp;
 		}
+
+		// 
+		// utils
+		// 
+
+		myObject.getViewport = function(cb){
+			var sizes = getViewportSizes();
+			if (cb) {
+				cb(null, {
+					width: sizes[0],
+					height: sizes[1],
+				});
+			}
+			return {
+				width: sizes[0],
+				height: sizes[1],
+			};
+		}
+
+		// 
+		// export
+		// 
 
 		myObject.export = myObject.getImages;
 
@@ -6449,6 +6922,10 @@
 			return exportImageState(id);
 		}
 
+		myObject.debug = function(base64){
+			debugCanvas(base64);
+		}
+
 		//
 		// exports end
 		//
@@ -6465,4 +6942,9 @@
 		window.canvaaas = canvaaas();
 	}
 
+	if (!String.prototype.trim) {
+		String.prototype.trim = function () {
+			return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+		};
+	}
 })(window);
