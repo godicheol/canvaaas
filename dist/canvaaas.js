@@ -40,15 +40,15 @@
 
 			lockAspectRatioAfterRender: false, // boolean
 
-			doubleClick: undefined, // function, callback
-
-			longPress: undefined, // function, callback
-
+			click: undefined, // function, callback
+			
 			rightClick: undefined, // function, callback
 
-			hover: undefined, // function, callback
+			doubleClick: undefined, // function, callback
 
-			click: undefined, // function, callback
+			longClick: undefined, // function, callback
+
+			hover: undefined, // function, callback
 
 			upload: undefined, // function, callback
 
@@ -244,8 +244,8 @@
 			"se-e",
 		];
 
-		var _maxWidth;
-		var _maxHeight;
+		var _maxWidth = 4096;
+		var _maxHeight = 4096;
 		var _minWidth = 1;
 		var _minHeight = 1;
 		var _originId = "canvaaas-" + getShortId() + "-";
@@ -4288,46 +4288,30 @@
 
 		function getMaximumCanvas() {
 			try {
-				var w = [1, 4096, 8192, 16384, 32767, 65535, 4194303, 8388607];
-				var h = [1, 4096, 8192, 16384, 32767, 65535, 4194303, 8388607];
-				var a = [1, 4096, 8192, 10836, 11180, 11402, 14188, 16384, 32767, 65535];
-				// var maxW = w[w.length - 1];
-				// var maxH = h[h.length - 1];
-				var maxA = a[a.length - 1];
-	
-				// for (var i = 0; i < w.length; i++) {
-				// 	if (w[i] <= maxW) {
-				// 		var res = testCanvas(1, w[i]);
-				// 		console.log(res);
-				// 		if (!res.status) {
-				// 			maxW = w[i];
-				// 		}
-				// 	}
-				// }
-	
-				// for (var i = 0; i < h.length; i++) {
-				// 	if (h[i] <= maxH) {
-				// 		var res = testCanvas(1, h[i]);
-				// 		console.log(res);
-				// 		if (!res.status) {
-				// 			maxH = h[i];
-				// 		}
-				// 	}
-				// }
+				var w = [8388607, 4194303, 65535, 32767, 16384, 8192, 4096, 1];
+				var h = [8388607, 4194303, 65535, 32767, 16384, 8192, 4096, 1];
+				var a = [65535, 32767, 16384, 14188, 11402, 11180, 10836, 8192, 4096, 1];
+				var maxLength;
+				var responseTime = 0;
 	
 				for (var i = 0; i < a.length; i++) {
-					if (a[i] <= maxA) {
+					if (!maxLength) {
 						var res = testCanvas(a[i], a[i]);
-						// console.log(res);
-						if (!res.status) {
-							maxA = a[i - 1];
+						if (res.status) {
+							maxLength = a[i];
 						}
+						responseTime += res.responseTime;
 					}
 				}
+
+				if (!maxLength) {
+					return false;
+				}
 	
-				_maxWidth = maxA;
-				_maxHeight = maxA;
-				// _maxArea = maxW;
+				_maxWidth = maxLength;
+				_maxHeight = maxLength;
+
+				// console.log("Response time: " + responseTime + " ms");
 	
 				return true;
 			} catch(err) {
@@ -4792,7 +4776,7 @@
 			}
 		}
 
-		function debugCanvas(base64, options) {
+		function debugCanvas(base64) {
 			try {
 				var image = new Image();
 				image.src = base64;
@@ -4856,9 +4840,10 @@
 				windowResizeEvent = handlers.resizeWindow;
 				// windowResizeEvent = handlers.debounce( handlers.resizeWindow, 300 );
 				window.addEventListener("resize", windowResizeEvent, false);
+
 				// windowScrollEvent = handlers.scrollWindow;
 				// windowScrollEvent = handlers.debounce( handlers.scrollWindow, 300 );
-				// window.addEventListener("resize", windowScrollEvent, false);
+				// window.addEventListener("scroll", windowScrollEvent, false);
 
 
 				// drag and drop upload event
@@ -4882,7 +4867,8 @@
 			try {
 				// remove event
 				window.removeEventListener("resize", windowResizeEvent, false);
-				window.removeEventListener("resize", windowScrollEvent, false);
+				// window.removeEventListener("scroll", windowScrollEvent, false);
+
 				// remove container element
 				containerElement.parentNode.removeChild(containerElement);
 
@@ -4943,10 +4929,10 @@
 			}
 			if (!isObject(imageFiles)) {
 				if (config.upload) {
-					config.upload("File not found");
+					config.upload("Argument `imageFiles` is not object");
 				}
 				if (cb) {
-					cb("File not found");
+					cb("Argument `imageFiles` is not object");
 				}
 				return false;
 			}
@@ -5007,10 +4993,10 @@
 			}
 			if (!isArray(imageUrls)) {
 				if (config.upload) {
-					config.upload("File not found");
+					config.upload("Argument `imageUrls` is not array");
 				}
 				if (cb) {
-					cb("File not found");
+					cb("Argument `imageUrls` is not array");
 				}
 				return false;
 			}
@@ -5071,10 +5057,10 @@
 			}
 			if (!isArray(exportedStates)) {
 				if (config.upload) {
-					config.upload("File not found");
+					config.upload("Argument `exportedStates` is not array");
 				}
 				if (cb) {
-					cb("File not found");
+					cb("Argument `exportedStates` is not array");
 				}
 				return false;
 			}
@@ -5144,10 +5130,19 @@
 			}
 			if (!isArray(imgElements)) {
 				if (config.upload) {
-					config.upload("Argument is not array");
+					config.upload("Argument `imgElements` is not array");
 				}
 				if (cb) {
-					cb("Argument is not array");
+					cb("Argument `imgElements` is not array");
+				}
+				return false;
+			}
+			if (imgElements.length < 1) {
+				if (config.upload) {
+					config.upload("File not found");
+				}
+				if (cb) {
+					cb("File not found");
 				}
 				return false;
 			}
@@ -5164,7 +5159,7 @@
 				if (count < index) {
 					if (!isElement(imgElements[count])) {
 						if (config.upload) {
-							config.upload("Target is not DOM Object");
+							config.upload("Argument is not DOM Object");
 						}
 						count++;
 						recursiveFunc();
@@ -5204,7 +5199,7 @@
 		myObject.find = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `query` is not object");
 				}
 				return false;
 			}
@@ -5219,7 +5214,9 @@
 					}
 				}
 				if (isMatch) {
-					founds.push(exportImageState(imageStates[i].id));
+					founds.push(
+						exportImageState(imageStates[i].id)
+					);
 				}
 			}
 
@@ -5248,10 +5245,10 @@
 			}
 			if (!isObject(newState)) {
 				if (config.edit) {
-					config.edit("Argument is not object");
+					config.edit("Argument `newState` is not object");
 				}
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `newState` is not object");
 				}
 				return false;
 			}
@@ -5320,10 +5317,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5379,10 +5376,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5438,10 +5435,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5614,19 +5611,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -5671,10 +5668,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5683,19 +5680,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -5733,19 +5730,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -5783,19 +5780,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -5830,10 +5827,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5842,19 +5839,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -5901,19 +5898,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -6162,19 +6159,19 @@
 
 			if (!canvasState.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by canvas settings");
+					config.edit("This image not allowed to edit this image by canvas settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by canvas settings");
+					cb("This image not allowed to edit this image by canvas settings");
 				}
 				return false;
 			}
 			if (!state.editable) {
 				if (config.edit) {
-					config.edit("Not allowed to edit this image by image settings");
+					config.edit("This image not allowed to edit this image by image settings");
 				}
 				if (cb) {
-					cb("Not allowed to edit this image by image settings");
+					cb("This image not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -6207,7 +6204,7 @@
 		myObject.config = function(newConfig, cb) {
 			if (!isObject(newConfig)) {
 				if (cb) {
-					cb("Argument is not object");
+					cb("Argument `newConfig` is not object");
 				}
 				return false;
 			}
@@ -6239,15 +6236,15 @@
 		// handle
 		//
 
-		myObject.handle = function(obj, cb) {
-			if (!isObject(obj)) {
+		myObject.handle = function(newHandle, cb) {
+			if (!isObject(newHandle)) {
 				if (cb) {
-					cb("Argument `obj` is not object");
+					cb("Argument `newHandle` is not object");
 				}
 				return false;
 			}
 
-			setHandleState(obj);
+			setHandleState(newHandle);
 
 			// callback
 			if (cb) {
@@ -6331,6 +6328,7 @@
 				redoCaches = [];
 
 				clearCanvas();
+
 				// callback
 				if (cb) {
 					cb(null, exportCanvasState());
@@ -6344,6 +6342,20 @@
 			}
 		}
 
+		/*
+			options = {
+				filename: "untitled", // string, without extension
+				mimetype: "image/png", // string
+				quality: 0.92, // number, 0 ~ 1
+				background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
+				overlay: true, // boolean
+				checker: true, // boolean
+				grid: true, // boolean
+				pivot: true, // boolean
+				clickable: true, // boolean
+				editable: true, // boolean
+			}
+		*/
 		myObject.canvas = function(options, cb) {
 			var containerInitialized = containerState.width && containerState.height;
 			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
@@ -6381,8 +6393,6 @@
 		// draw
 		//
 
-		
-
 		/*
 			options = {
 				filename(optional)
@@ -6414,7 +6424,9 @@
 	
 				for (var i = 0; i < imageStates.length; i++) {
 					if (imageStates[i].drawable) {
-						convertedImageStates.push(exportImageState(imageStates[i].id));
+						convertedImageStates.push(
+							exportImageState(imageStates[i].id)
+						);
 					}
 				}
 	
@@ -6463,22 +6475,35 @@
 				width(optional)
 				height(optional)
 			}
-			exportedCanvas = {
+			exportedCanvasSizes = {
 				width(required)
 				height(required)
 			}
+			exportedImageStates = {
+				src(required)
+				index(required)
+				x(required)
+				y(required)
+				width(required)
+				height(required)
+				rotate(optional)
+				scaleX(optional)
+				scaleY(optional)
+				opacity(optional)
+				cropTop(optional)
+				cropBottom(optional)
+				cropLeft(optional)
+				cropRight(optional)
+				drawable(optional)
+			}
 		*/
-		myObject.drawTo = function(options, exportedCanvas, exportedStates, cb){
-			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+		myObject.drawTo = function(options, exportedCanvasSizes, exportedImageStates, cb){
+			var canvState = {};
+			var convertedImageStates = [];
+
 			if (eventState.onDraw === true) {
 				if (cb) {
 					cb("Already in progress");
-				}
-				return false;
-			}
-			if (!canvasInitialized) {
-				if (cb) {
-					cb("Canvas has been not initialized");
 				}
 				return false;
 			}
@@ -6488,49 +6513,53 @@
 				}
 				return false;
 			}
-			if (!isObject(exportedCanvas)) {
+			if (!isObject(exportedCanvasSizes)) {
 				if (cb) {
-					cb("Argument `exportedCanvas` is not object");
+					cb("Argument `exportedCanvasSizes` is not object");
 				}
 				return false;
 			}
-			if (!isArray(exportedStates)) {
+			if (!isArray(exportedImageStates)) {
 				if (cb) {
-					cb("Argument `exportedStates` is not array");
+					cb("Argument `exportedImageStates` is not array");
 				}
 				return false;
 			}
-			if (!exportedCanvas.width === undefined) {
+			if (!exportedCanvasSizes.width) {
 				if (cb) {
-					cb("Argument `exportedCanvas.width` is required");
+					cb("Argument `exportedCanvasSizes.width` is required");
 				}
 				return false;
 			}
-			if (!exportedCanvas.height === undefined) {
+			if (!exportedCanvasSizes.height) {
 				if (cb) {
-					cb("Argument `exportedCanvas.height` is required");
+					cb("Argument `exportedCanvasSizes.height` is required");
 				}
 				return false;
 			}
-			if (!isNumeric(exportedCanvas.width)) {
+			if (!isNumeric(exportedCanvasSizes.width)) {
 				if (cb) {
-					cb("Argument `exportedCanvas.width` is not numeric");
+					cb("Argument `exportedCanvasSizes.width` is not numeric");
 				}
 				return false;
+			} else {
+				canvState.width = toNumber(exportedCanvasSizes.width);
 			}
-			if (!isNumeric(exportedCanvas.height)) {
+			if (!isNumeric(exportedCanvasSizes.height)) {
 				if (cb) {
-					cb("Argument `exportedCanvas.height` is not numeric");
+					cb("Argument `exportedCanvasSizes.height` is not numeric");
 				}
 				return false;
+			} else {
+				canvState.height = toNumber(exportedCanvasSizes.height);
 			}
 
-			var canvState = exportedCanvas;
-			var convertedImageStates = [];
-
-			for (var i = 0; i < imageStates.length; i++) {
-				if (imageStates[i].drawable) {
-					convertedImageStates.push(exportImageState(imageStates[i].id));
+			for (var i = 0; i < exportedImageStates.length; i++) {
+				if (
+					(exportedImageStates[i].drawable === undefined || exportedImageStates[i].drawable === true) &&
+					exportedImageStates[i].index
+				) {
+					convertedImageStates.push(exportedImageStates[i])
 				}
 			}
 
@@ -6565,21 +6594,7 @@
 		// get data
 		//
 
-		myObject.this = function(cb){
-			if (!eventState.target) {
-				if (cb) {
-					cb("Target not found");
-				}
-				return false;
-			}
-
-			if (cb) {
-				cb(null, exportImageState(eventState.target));
-			}
-			return exportImageState(eventState.target);
-		}
-
-		myObject.exportConfig = function(cb){
+		myObject.getConfig = function(cb){
 			if (cb) {
 				cb(null, exportConfig());
 			}
@@ -6607,18 +6622,19 @@
 				return false;
 			}
 			if (cb) {
-				cb(null, exportImageState(id));
+				cb(null, exportImageState(toString(id)));
 			}
-			return exportImageState(id);
+			return exportImageState(toString(id));
 		}
 
 		myObject.getImages = function(cb){
-			var states = [];
-			imageStates.forEach(function(elem){
-				states.push(exportImageState(elem.id));
-			});
+			var arr = [];
 
-			var sorted = states.sort(function(a, b){
+			for(var i = 0; i < imageStates.length; i++) {
+				arr.push(exportImageState(imageStates[i].id));
+			}
+
+			arr.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6629,9 +6645,9 @@
 			});
 
 			if (cb) {
-				cb(null, sorted);
+				cb(null, arr);
 			}
-			return sorted;
+			return arr;
 		}
 
 		myObject.getPreviousImage = function(id, cb){
@@ -6792,7 +6808,37 @@
 		// export
 		// 
 
-		myObject.export = myObject.getImages;
+		myObject.export = function(imageIds, cb) {
+			if (!isArray(imageIds)) {
+				if (cb) {
+					cb("Argument `imageIds` is not array");
+				}
+				return false;
+			}
+
+			var arr = [];
+
+			for(var i = 0; i < imageStates.length; i++) {
+				if (imageIds.indexOf(imageStates[i].id) > -1) {
+					arr.push(exportImageState(imageStates[i].id));
+				}
+			}
+
+			arr.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
+			if (cb) {
+				cb(null, arr);
+			}
+			return arr;
+		};
 
 		myObject.import = function(exportedStates, cb){
 			if (!canvasState.editabled) {
