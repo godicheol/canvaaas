@@ -1937,8 +1937,6 @@
 						}
 					}
 
-					console.log(direction)
-	
 					radians = state.rotate * Math.PI / 180;
 					cosFraction = Math.cos(radians);
 					sinFraction = Math.sin(radians);
@@ -3698,12 +3696,10 @@
 						}
 					}
 					if (isNumeric(options.width)) {
-						tmp = toNumber(options.width)
-						maxWidth = tmp;
+						maxWidth = toNumber(options.width);
 					}
 					if (isNumeric(options.height)) {
-						tmp = toNumber(options.height)
-						maxHeight = tmp;
+						maxHeight = toNumber(options.height);
 					}
 				}
 
@@ -3724,44 +3720,36 @@
 						var chk = true;
 
 						if (isString(imgStates[i].src)) {
-							tmp = toString(imgStates[i].src)
-							obj.src = tmp;
+							obj.src = toString(imgStates[i].src);
 						} else if (isString(imgStates[i].path)) {
-							tmp = toString(imgStates[i].path)
-							obj.src = tmp;
+							obj.src = toString(imgStates[i].path);
 						} else if (isString(imgStates[i].url)) {
-							tmp = toString(imgStates[i].url)
-							obj.src = tmp;
+							obj.src = toString(imgStates[i].url);
 						} else {
 							chk = false;
 						}
 						if (isNumeric(imgStates[i].x)) {
-							tmp = toNumber(imgStates[i].x);
-							obj.x = tmp * scaleRatioX;
+							obj.x = toNumber(imgStates[i].x) * scaleRatioX;
 						} else {
 							chk = false;
 						}
 						if (isNumeric(imgStates[i].y)) {
-							tmp = toNumber(imgStates[i].y);
-							obj.y = tmp * scaleRatioY;
+							obj.y = toNumber(imgStates[i].y) * scaleRatioY;
 						} else {
 							chk = false;
 						}
 						if (isNumeric(imgStates[i].width)) {
-							tmp = toNumber(imgStates[i].width);
-							obj.width = tmp * scaleRatioX;
+							obj.width = toNumber(imgStates[i].width) * scaleRatioX;
 						} else {
 							chk = false;
 						}
 						if (isNumeric(imgStates[i].height)) {
-							tmp = toNumber(imgStates[i].height);
-							obj.height = tmp * scaleRatioY;
+							obj.height = toNumber(imgStates[i].height) * scaleRatioY;
 						} else {
 							chk = false;
 						}
 						if (isNumeric(imgStates[i].rotate)) {
-							tmp = toNumber(imgStates[i].rotate);
-							obj.rotate = tmp;
+							obj.rotate = toNumber(imgStates[i].rotate);
 						} else {
 							obj.rotate = 0;
 						}
@@ -3802,26 +3790,22 @@
 							obj.opacity = 1;
 						}
 						if (isNumeric(imgStates[i].cropTop)) {
-							tmp = toNumber(imgStates[i].cropTop);
-							obj.cropTop = tmp * scaleRatioY;
+							obj.cropTop = toNumber(imgStates[i].cropTop) * scaleRatioY;
 						} else {
 							obj.cropTop = 0;
 						}
 						if (isNumeric(imgStates[i].cropBottom)) {
-							tmp = toNumber(imgStates[i].cropBottom);
-							obj.cropBottom = tmp * scaleRatioY;
+							obj.cropBottom = toNumber(imgStates[i].cropBottom) * scaleRatioY;
 						} else {
 							obj.cropBottom = 0;
 						}
 						if (isNumeric(imgStates[i].cropLeft)) {
-							tmp = toNumber(imgStates[i].cropLeft);
-							obj.cropLeft = tmp * scaleRatioX;
+							obj.cropLeft = toNumber(imgStates[i].cropLeft) * scaleRatioX;
 						} else {
 							obj.cropLeft = 0;
 						}
 						if (isNumeric(imgStates[i].cropRight)) {
-							tmp = toNumber(imgStates[i].cropRight);
-							obj.cropRight = tmp * scaleRatioX;
+							obj.cropRight = toNumber(imgStates[i].cropRight) * scaleRatioX;
 						} else {
 							obj.cropRight = 0;
 						}
@@ -3917,6 +3901,11 @@
 
 				scaleRatioX = resizedCanvas.width / width;
 				scaleRatioY = resizedCanvas.height / height;
+
+				cropTop *= scaleRatioY;
+				cropBottom *= scaleRatioY;
+				cropLeft *= scaleRatioX;
+				cropRight *= scaleRatioX;
 
 				croppedCanvas = getCroppedCanvas(resizedCanvas, {
 					cropTop: cropTop,
@@ -4022,8 +4011,8 @@
 				var cropRight = options.cropRight;
 				var scaleX = options.scaleX;
 				var scaleY = options.scaleY;
-				var width = canv.width - (cropLeft + cropRight);
-				var height = canv.height - (cropTop + cropBottom);
+				var croppedWidth;
+				var croppedHeight;
 				var tmp;
 				var sx;
 				var sy;
@@ -4034,28 +4023,31 @@
 				var dw;
 				var dh;
 	
-				if (scaleX < 0) {
+				if (scaleX === -1) {
 					tmp = cropLeft;
 					cropLeft = cropRight;
 					cropRight = tmp;
 				}
-				if (scaleY < 0) {
+				if (scaleY === -1) {
 					tmp = cropTop;
 					cropTop = cropBottom;
 					cropBottom = tmp;
 				}
 	
-				canvas.width = Math.floor(width);
-				canvas.height = Math.floor(height);
-	
+				var croppedWidth = canv.width - (cropLeft + cropRight);
+				var croppedHeight = canv.height - (cropTop + cropBottom);
+
+				canvas.width = Math.floor(croppedWidth);
+				canvas.height = Math.floor(croppedHeight);
+
 				ctx.save();
 				ctx.fillStyle = "transparent";
 				ctx.imageSmoothingQuality = "low";
 				ctx.imageSmoothingEnabled = false;
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
 	
-				sx = Math.floor(cropTop);
-				sy = Math.floor(cropLeft);
+				sx = Math.floor(cropLeft);
+				sy = Math.floor(cropTop);
 				sw = Math.floor(canvas.width);
 				sh = Math.floor(canvas.height);
 				dx = 0;
@@ -4543,7 +4535,8 @@
 				_maxWidth = maxLength;
 				_maxHeight = maxLength;
 
-				console.log("Response time: " + responseTime + " ms");
+				console.log("Response time: " + responseTime + "ms");
+				console.log("Max Area: " + _maxWidth + " x " + _maxHeight + "px");
 	
 				return true;
 			} catch(err) {
