@@ -415,6 +415,143 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
+/* ruler */
+.canvaaas-rulers{
+	position: absolute;
+	z-index: 5;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+
+.canvaaas-ruler.canvaaas-direction-n{
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	width: 100%;
+	height: auto;
+}
+.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-major{
+	display: block;
+	position: absolute;
+	bottom: 0;
+	width: 0;
+	height: 9px;
+	border-left: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-minor{
+	display: block;
+	position: absolute;
+	bottom: 0;
+	width: 0;
+	height: 6px;
+	border-left: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-value{
+	position: absolute;
+	left: 0;
+	top: -6px;
+	font-size: 10px;
+	transform: translateX(-50%);
+}
+
+.canvaaas-ruler.canvaaas-direction-s{
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	height: auto;
+}
+.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-major{
+	display: block;
+	position: absolute;
+	top: 0;
+	width: 0;
+	height: 9px;
+	border-left: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-minor{
+	display: block;
+	position: absolute;
+	top: 0;
+	width: 0;
+	height: 6px;
+	border-left: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-value{
+	position: absolute;
+	left: 0;
+	bottom: -9px;
+	font-size: 10px;
+	transform: translateX(-50%);
+}
+
+.canvaaas-ruler.canvaaas-direction-e{
+	position: absolute;
+	top: 0;
+	left: 100%;
+	width: auto;
+	height: 100%;
+}
+.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-major{
+	display: block;
+	position: absolute;
+	left: 100%;
+	width: 9px;
+	height: 0;
+	border-top: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-minor{
+	display: block;
+	position: absolute;
+	left: 100%;
+	width: 6px;
+	height: 0;
+	border-top: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-value{
+	position: absolute;
+	left: 14px;
+	top: 0;
+	font-size: 10px;
+	transform: translateY(-50%);
+}
+
+.canvaaas-ruler.canvaaas-direction-w{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: auto;
+	height: 100%;
+}
+.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-major{
+	display: block;
+	position: absolute;
+	right: 0;
+	width: 9px;
+	height: 0;
+	border-top: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-minor{
+	display: block;
+	position: absolute;
+	right: 0;
+	width: 6px;
+	height: 0;
+	border-top: 1px solid #000000;
+}
+.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-value{
+	position: absolute;
+	right: 14px;
+	top: 0;
+	font-size: 10px;
+	transform: translateY(-50%);
+}
+
 /* editing */
 .canvaaas-handle.editing .canvaaas-handle-square{
 	background-color: #000000;
@@ -427,6 +564,11 @@
 }
 
 /* unclickabled */
+.canvaaas-canvas.unclickable .canvaaas-image,
+.canvaaas-mirror.unclickable .canvaaas-image{
+	pointer-events: none;
+	cursor: default;
+}
 .canvaaas-image.unclickable{
 	pointer-events: none;
 	cursor: default;

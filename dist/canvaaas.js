@@ -48,6 +48,7 @@
 			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
 			overlay: true, // boolean
 			checker: true, // boolean
+			ruler: true, // boolean
 			clickable: true, // boolean
 			editable: true, // boolean
 		};
@@ -66,7 +67,7 @@
 			"ne-ne": "crop",
 			"e-e": "flip",
 			"se-se": "crop",
-			"s-s": "flip",
+			"s-s": "click",
 			"sw-sw": "crop",
 			"w-w": "click",
 			"nw-nw": "crop"
@@ -82,6 +83,8 @@
 				canvasState.width * config.imageScaleAfterRender,
 				canvasState.height * config.imageScaleAfterRender
 			);
+			var handleState = {};
+			copyObject(handleState, defaultHandleState);
 
 			for(var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].index < config.maxIndexAfterRender) {
@@ -116,14 +119,22 @@
 				clickable: true,
 				editable: true,
 				drawable: true,
-				grid: config.showGridAfterRender || false,
-				pivot: config.showPivotAfterRender || false,
+				grid: undefined,
+				pivot: undefined,
+				handle: {},
+				handleEvents: {}
 			}
 		};
 
 		var _containerTemplate = "";
 		_containerTemplate += "<div class='canvaaas-container'>";
 		_containerTemplate += "<div class='canvaaas-mirror'></div>";
+		_containerTemplate += "<div class='canvaaas-rulers'>";
+		_containerTemplate += "<div class='canvaaas-ruler canvaaas-direction-n'></div>";
+		_containerTemplate += "<div class='canvaaas-ruler canvaaas-direction-s'></div>";
+		_containerTemplate += "<div class='canvaaas-ruler canvaaas-direction-e'></div>";
+		_containerTemplate += "<div class='canvaaas-ruler canvaaas-direction-w'></div>";
+		_containerTemplate += "</div>";
 		_containerTemplate += "<div class='canvaaas-background'></div>";
 		_containerTemplate += "<div class='canvaaas-checker'></div>";
 		_containerTemplate += "<div class='canvaaas-canvas'></div>";
@@ -197,6 +208,7 @@
 		var redoCaches = [];
 		var containerElement;
 		var canvasElement;
+		var rulerElement;
 		var mirrorElement;
 		var backgroundElement;
 		var checkerElement;
@@ -2252,6 +2264,11 @@
 				} else {
 					return false;
 				}
+				if (!isObject(newState)) {
+					return false;
+				}
+
+				var state = getImageState(cadidate);
 				var origin = document.getElementById(_originId + cadidate);
 				var clone = document.getElementById(_cloneId + cadidate);
 				var state;
@@ -2265,21 +2282,13 @@
 				var oldLAR;
 				var tmp;
 
+				if (!state) {
+					return false;
+				}
 				if (!origin) {
 					return false;
 				}
 				if (!clone) {
-					return false;
-				}
-				if (!isObject(newState)) {
-					return false;
-				}
-				for (var i = 0; i < imageStates.length; i++) {
-					if (imageStates[i].id === cadidate) {
-						state = imageStates[i];
-					}
-				}
-				if (!state) {
 					return false;
 				}
 
@@ -2380,13 +2389,6 @@
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
 				}
-				if (isBoolean(newState.pivot)) {
-					state.pivot = toBoolean(newState.pivot);
-				}
-				if (isBoolean(newState.grid)) {
-					state.grid = toBoolean(newState.grid);
-				}
-
 				if (isNumeric(newState.cropTop)) {
 					tmp = toNumber(newState.cropTop);
 					if (tmp < 0) {
@@ -2437,9 +2439,8 @@
 				}
 
 				if (isBoolean(newState.lockAspectRatio)) {
-					newLAR = toBoolean(newState.lockAspectRatio);
 					oldLAR = state.lockAspectRatio;
-
+					newLAR = toBoolean(newState.lockAspectRatio);
 					if (newLAR !== oldLAR && newLAR === true) {
 						var croppedWidth = state.width - (state.cropLeft + state.cropRight);
 						var croppedHeight = state.height - (state.cropTop + state.cropBottom);
@@ -2479,10 +2480,6 @@
 			try {
 				var origin = document.getElementById(_originId + state.id);
 				var clone = document.getElementById(_cloneId + state.id);
-				var originPivots = origin.querySelectorAll("div.canvaaas-pivot");
-				var clonePivots = clone.querySelectorAll("div.canvaaas-pivot");
-				var originGrids = origin.querySelectorAll("div.canvaaas-grid");
-				var cloneGrids = clone.querySelectorAll("div.canvaaas-grid");
 				var originImg;
 				var cloneImg;
 				var croppedW;
@@ -2634,54 +2631,6 @@
 						clone.classList.remove("undrawable");
 					}
 				}
-	
-				// set grids
-				for (var i = 0; i < originGrids.length; i++) {
-					if (!state.grid) {
-						if (!originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.remove("hidden");
-						}
-					}
-				}
-				for (var i = 0; i < cloneGrids.length; i++) {
-					if (!state.grid) {
-						if (!cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.remove("hidden");
-						}
-					}
-				}
-
-				// set pivots
-				for (var i = 0; i < originPivots.length; i++) {
-					if (!state.pivot) {
-						if (!originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.add("hidden");
-						}
-					} else {
-						if (originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.remove("hidden");
-						}
-					}
-				}
-				for (var i = 0; i < clonePivots.length; i++) {
-					if (!state.pivot) {
-						if (!clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.add("hidden");
-						}
-					} else {
-						if (clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.remove("hidden");
-						}
-					}
-				}
 
 				return true;
 			} catch(err) {
@@ -2696,6 +2645,12 @@
 
 				if (!isObject(newState)) {
 					return false;
+				}
+				if (isNumeric(newState.width)) {
+					canvasState.originalWidth = toNumber(newState.width);
+				}
+				if (isNumeric(newState.height)) {
+					canvasState.originalHeight = toNumber(newState.height);
 				}
 				if (isString(newState.filename)) {
 					tmp = toString(newState.filename);
@@ -2741,11 +2696,8 @@
 				if (isBoolean(newState.editable)) {
 					canvasState.editable = toBoolean(newState.editable);
 				}
-				if (isNumeric(newState.width)) {
-					canvasState.originalWidth = toNumber(newState.width);
-				}
-				if (isNumeric(newState.height)) {
-					canvasState.originalHeight = toNumber(newState.height);
+				if (isBoolean(newState.ruler)) {
+					canvasState.ruler = toBoolean(newState.ruler);
 				}
 
 				return true;
@@ -2773,6 +2725,9 @@
 					return false;
 				}
 				if (!checkerElement) {
+					return false;
+				}
+				if (!rulerElement) {
 					return false;
 				}
 				if (!initialized) {
@@ -2815,6 +2770,11 @@
 				checkerElement.style.height = canvasState.height + "px";
 				checkerElement.style.left = canvasState.left + "px";
 				checkerElement.style.top = canvasState.top + "px";
+
+				rulerElement.style.width = canvasState.width + "px";
+				rulerElement.style.height = canvasState.height + "px";
+				rulerElement.style.left = canvasState.left + "px";
+				rulerElement.style.top = canvasState.top + "px";
 	
 				// set class names
 				if (!canvasState.checker) {
@@ -2869,15 +2829,19 @@
 					}
 				}
 
+				drawRuler();
+
 				return true;
 			} catch(err) {
 				console.log(err);
 				return false;
 			}
 		}
-		
+
 		function clearCanvas() {
 			try {
+				var rulers = rulerElement.querySelectorAll("div.canvaaas-ruler");
+
 				// clear images
 				for (var i = imageStates.length - 1; i >= 0; i--) {
 					removeImage(imageStates[i].id);
@@ -2908,6 +2872,16 @@
 				checkerElement.style.left = "";
 				checkerElement.style.top = "";
 
+				rulerElement.style.width = "";
+				rulerElement.style.height = "";
+				rulerElement.style.left = "";
+				rulerElement.style.top = "";
+
+				// clear ruler
+				for (var i = 0; i < rulers.length; i++) {
+					rulers[i].innerHTML = "";
+				}
+
 				// clear class names
 				if (canvasElement.classList.contains("unclickable")) {
 					canvasElement.classList.remove("unclickable");
@@ -2929,12 +2903,68 @@
 			}			
 		}
 
-		function setHandleState(obj) {
+		function drawRuler() {
 			try {
-				for (var i = 0; i < Object.keys(obj).length; i++) {
-					var k = Object.keys(obj)[i];
-					if (_directions.indexOf(k) > -1) {						
-						handleState[k] = obj[k];
+				var rulers = rulerElement.querySelectorAll("div.canvaaas-ruler");
+				var length;
+				var count;
+				var start;
+				var step;
+				var absLength;
+				var absStep;
+				var graduation;
+
+				for (var i = 0; i < rulers.length; i++) {
+					var d = getDirection(rulers[i]);
+
+					// clear
+					rulers[i].innerHTML = "";
+
+					if (canvasState.ruler) {
+						// init
+						start = 0;
+						count = Math.round((canvasState.width / 10) / 5) * 5;
+						if (d === "n" || d === "s") {
+							step = canvasState.width / count;
+							absStep = canvasState.originalWidth / count;
+							for (var j = 0; j < count + 1; j++) {
+								graduation = "";
+								length = step * j;
+								absLength = Math.round(absStep * j);
+								if (j % 5 === 0) {
+									if (j === count) {
+										graduation += "<div class='canvaaas-graduation-major' style='left:"+(length-1)+"px;'>";
+									} else {
+										graduation += "<div class='canvaaas-graduation-major' style='left:"+length+"px;'>";
+									}
+									graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
+								} else {
+									graduation += "<div class='canvaaas-graduation-minor' style='left:"+length+"px;'>";
+								}
+								graduation += "</div>";
+								rulers[i].innerHTML += graduation;
+							}
+						} else if (d === "e" || d === "w") {
+							step = canvasState.height / count;
+							absStep = canvasState.originalHeight / count;
+							for (var j = 0; j < count + 1; j++) {
+								graduation = "";
+								length = step * j;
+								absLength = Math.round(absStep * j);
+								if (j % 5 === 0) {
+									if (j === count) {
+										graduation += "<div class='canvaaas-graduation-major' style='top:"+(length-1)+"px;'>";
+									} else {
+										graduation += "<div class='canvaaas-graduation-major' style='top:"+length+"px;'>";
+									}
+									graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
+								} else {
+									graduation += "<div class='canvaaas-graduation-minor' style='top:"+length+"px;'>";
+								}
+								graduation += "</div>";
+								rulers[i].innerHTML += graduation;
+							}
+						}
 					}
 				}
 				return true;
@@ -2942,9 +2972,10 @@
 				console.log(err);
 				return false;
 			}
+				
 		}
 
-		function setHandle(id) {
+		function setHandleState(id, obj) {
 			try {
 				var candidate;
 				if (isString(id)) {
@@ -2952,71 +2983,102 @@
 				} else {
 					return false;
 				}
-				var origin = document.getElementById(_originId + candidate);
-				var clone = document.getElementById(_cloneId + candidate);
+
+				var state = getImageState(candidate);
+				if (!state) {
+					return false;
+				}
+
+				for (var i = 0; i < Object.keys(obj).length; i++) {
+					var k = Object.keys(obj)[i];
+					if (_directions.indexOf(k) > -1) {						
+						state["handle"][k] = obj[k];
+					}
+				}
+
+				return setHandle(state);
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setHandle(state) {
+			try {
+				var origin = document.getElementById(_originId + state.id);
+				var clone = document.getElementById(_cloneId + state.id);
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+
 				var originHandles = origin.querySelectorAll("div.canvaaas-handle");
 				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
 
 				// clear event
 				for (var i = 0; i < originHandles.length; i++) {
 					var d = getDirection(originHandles[i]);
-					if (handleEvents[d]) {
-						originHandles[i].removeEventListener("mousedown", handleEvents[d], false);
-						originHandles[i].removeEventListener("touchstart", handleEvents[d], false);
+					if (state["handleEvents"][d]) {
+						originHandles[i].removeEventListener("mousedown", state["handleEvents"][d], false);
+						originHandles[i].removeEventListener("touchstart", state["handleEvents"][d], false);
 					} else {
 						if (originHandles[i].classList.contains("hidden")) {
 							originHandles[i].classList.remove("hidden");
 						}
 					}
 				}
-				// clear event
 				for (var i = 0; i < cloneHandles.length; i++) {
 					var d = getDirection(cloneHandles[i]);
-					if (handleEvents[d]) {
-						cloneHandles[i].removeEventListener("mousedown", handleEvents[d], false);
-						cloneHandles[i].removeEventListener("touchstart", handleEvents[d], false);
+					if (state["handleEvents"][d]) {
+						cloneHandles[i].removeEventListener("mousedown", state["handleEvents"][d], false);
+						cloneHandles[i].removeEventListener("touchstart", state["handleEvents"][d], false);
 					} else {
 						if (cloneHandles[i].classList.contains("hidden")) {
 							cloneHandles[i].classList.remove("hidden");
 						}
 					}
 				}
+
 				// clear event container
-				handleEvents = {};
+				state.handleEvents = {};
+				
 				// set event container
 				for (var i = 0; i < _directions.length; i++) {
-					if (handleState[_directions[i]]) {
-						if (handleState[_directions[i]] === "resize") {
-							handleEvents[_directions[i]] = handlers.startResize;
-						} else if (handleState[_directions[i]] === "crop") {
-							handleEvents[_directions[i]] = handlers.startCrop;
-						} else if (handleState[_directions[i]] === "rotate") {
-							handleEvents[_directions[i]] = handlers.startRotate;
-						} else if (handleState[_directions[i]] === "flip") {
-							handleEvents[_directions[i]] = handlers.startFlip;
-						} else if (handleState[_directions[i]] === "click") {
-							handleEvents[_directions[i]] = handlers.startClick;
+					var d = _directions[i];
+					if (state["handle"][d]) {
+						if (state["handle"][d] === "resize") {
+							state["handleEvents"][d] = handlers.startResize;
+						} else if (state["handle"][d] === "crop") {
+							state["handleEvents"][d] = handlers.startCrop;
+						} else if (state["handle"][d] === "rotate") {
+							state["handleEvents"][d] = handlers.startRotate;
+						} else if (state["handle"][d] === "flip") {
+							state["handleEvents"][d] = handlers.startFlip;
+						} else if (state["handle"][d] === "click") {
+							state["handleEvents"][d] = handlers.startClick;
 						}
 					}
 				}
+
 				// add event
 				for (var i = 0; i < originHandles.length; i++) {
 					var d = getDirection(originHandles[i]);
-					if (handleEvents[d]) {
-						originHandles[i].addEventListener("mousedown", handleEvents[d], false);
-						originHandles[i].addEventListener("touchstart", handleEvents[d], false);
+					if (state["handleEvents"][d]) {
+						originHandles[i].addEventListener("mousedown", state["handleEvents"][d], false);
+						originHandles[i].addEventListener("touchstart", state["handleEvents"][d], false);
 					} else {
 						if (!originHandles[i].classList.contains("hidden")) {
 							originHandles[i].classList.add("hidden");
 						}
 					}
 				}
-				// add event
 				for (var i = 0; i < cloneHandles.length; i++) {
 					var d = getDirection(cloneHandles[i]);
-					if (handleEvents[d]) {
-						cloneHandles[i].addEventListener("mousedown", handleEvents[d], false);
-						cloneHandles[i].addEventListener("touchstart", handleEvents[d], false);
+					if (state["handleEvents"][d]) {
+						cloneHandles[i].addEventListener("mousedown", state["handleEvents"][d], false);
+						cloneHandles[i].addEventListener("touchstart", state["handleEvents"][d], false);
 					} else {
 						if (!cloneHandles[i].classList.contains("hidden")) {
 							cloneHandles[i].classList.add("hidden");
@@ -3024,6 +3086,113 @@
 					}
 				}
 
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setGrid(id, newGrid) {
+			try {
+
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+
+				var originGrids = origin.querySelectorAll("div.canvaaas-grid");
+				var cloneGrids = clone.querySelectorAll("div.canvaaas-grid");
+
+				if (isBoolean(newGrid)) {
+					state.grid = toBoolean(newGrid);
+				}
+	
+				// set grids
+				for (var i = 0; i < originGrids.length; i++) {
+					if (!state.grid) {
+						if (!originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < cloneGrids.length; i++) {
+					if (!state.grid) {
+						if (!cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.remove("hidden");
+						}
+					}
+				}	
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function setPivot(id, newPivot) {
+			try {
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+
+				var originPivots = origin.querySelectorAll("div.canvaaas-pivot");
+				var clonePivots = clone.querySelectorAll("div.canvaaas-pivot");
+
+				if (isBoolean(newPivot)) {
+					state.pivot = toBoolean(newPivot);
+				}
+
+				// set pivots
+				for (var i = 0; i < originPivots.length; i++) {
+					if (!state.pivot) {
+						if (!originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.add("hidden");
+						}
+					} else {
+						if (originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < clonePivots.length; i++) {
+					if (!state.pivot) {
+						if (!clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.add("hidden");
+						}
+					} else {
+						if (clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.remove("hidden");
+						}
+					}
+				}
+	
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -3269,12 +3438,23 @@
 			}
 		}
 
-		function exportHandleState() {
+		function exportHandleState(id) {
 			try {
+				var candidate;
+				if (isString(id)) {
+					candidate = toString(id);
+				} else {
+					return false;
+				}
+				var state = getImageState(candidate);
+				if (!state) {
+					return false;
+				}
+
 				var tmp = {};
-				for (var i = 0; i < Object.keys(handleState).length; i++) {
-					var k = Object.keys(handleState)[i];
-					tmp[k] = handleState[k];
+				for (var i = 0; i < Object.keys(state.handle).length; i++) {
+					var k = Object.keys(state.handle)[i];
+					tmp[k] = state["handle"][k];
 				}
 				return tmp;
 			} catch(err) {
@@ -3357,6 +3537,8 @@
 				tmp.drawable = state.drawable;
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
+				tmp.handle = state.handle;
+				// tmp.handleEvents = state.handleEvents;
 
 				originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
 				croppedAspectRatio = getAspectRatio(tmp.croppedWidth, tmp.croppedHeight);
@@ -3384,7 +3566,6 @@
 				if (!state) {
 					return false;
 				}
-
 				if (isString(state._id)) {
 					tmp.id = toString(state._id);
 				}
@@ -3454,12 +3635,22 @@
 				if (isBoolean(state.drawable)) {
 					tmp.drawable = toBoolean(state.drawable);
 				}
-				if (isBoolean(state.pivot)) {
-					tmp.pivot = toBoolean(state.pivot);
-				}
-				if (isBoolean(state.grid)) {
-					tmp.grid = toBoolean(state.grid);
-				}
+
+				// canvaaas.pivot()
+				// if (isBoolean(state.pivot)) {
+				// 	tmp.pivot = toBoolean(state.pivot);
+				// }
+
+				// canvaaas.grid()
+				// if (isBoolean(state.grid)) {
+				// 	tmp.grid = toBoolean(state.grid);
+				// }
+
+				// canvaaas.handle()
+				// if (isObject(state.handle)) {
+				// 	tmp.handle = toBoolean(state.handle);
+				// }
+
 				return tmp;
 			} catch(err) {
 				console.log(err);
@@ -3492,9 +3683,7 @@
 					"visible",
 					"clickable",
 					"editable",
-					"drawable",,
-					"pivot",
-					"grid",
+					"drawable",
 				];
 
 				for (var i = 0; i < datasetKeys.length; i++) {
@@ -4240,8 +4429,14 @@
 
 				imageStates.push(state);
 
+				// set grid
+				setGrid(state.id, config.showGridAfterRender);
+
+				// set pivot
+				setPivot(state.id, config.showPivotAfterRender);
+
 				// add events to handle
-				setHandle(state.id);
+				setHandleState(state.id, handleState);
 
 				// save image state
 				if (isObject(exportedState)) {
@@ -4484,14 +4679,14 @@
 			}
 		}
 
-		function getDirection(handle) {
+		function getDirection(elem) {
 			try {
 				var found;
-				if (!handle) {
+				if (!elem) {
 					return false;
 				}
 				for (var i = 0; i < _directions.length; i++) {
-					if (handle.classList.contains("canvaaas-direction-" + _directions[i])) {
+					if (elem.classList.contains("canvaaas-direction-" + _directions[i])) {
 						found = _directions[i];
 					}
 				}
@@ -5056,6 +5251,7 @@
 				mirrorElement = target.querySelector("div.canvaaas-mirror");
 				backgroundElement = target.querySelector("div.canvaaas-background");
 				checkerElement = target.querySelector("div.canvaaas-checker");
+				rulerElement = target.querySelector("div.canvaaas-rulers");
 	
 				// set container
 				setContainer();
@@ -5068,7 +5264,6 @@
 				// windowScrollEvent = handlers.scrollWindow;
 				// windowScrollEvent = handlers.debounce( handlers.scrollWindow, 300 );
 				// window.addEventListener("scroll", windowScrollEvent, false);
-
 
 				// drag and drop upload event
 				canvasElement.addEventListener('dragenter', handlers.stopEvents, false);
@@ -6429,10 +6624,9 @@
 
 			// save cache
 			saveUndo(id);
-			// save image state
-			setImageState(id, {
-				pivot: b
-			});
+			
+			setPivot(id, b);
+
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6459,10 +6653,9 @@
 
 			// save cache
 			saveUndo(id);
-			// save image state
-			setImageState(id, {
-				grid: b
-			});
+
+			setGrid(id, b);
+
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6576,6 +6769,48 @@
 			}
 		}
 
+		myObject.handle = function(id, newHandle, cb) {
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (!isObject(newHandle)) {
+				if (cb) {
+					cb("Argument `newHandle` is not object");
+				}
+				return false;
+			}
+
+			setHandleState(id, newHandle);
+
+			// callback
+			if (cb) {
+				cb(null, exportHandleState(id));
+			}
+			return exportHandleState(id);
+		}
+
+		myObject.handleAll = function(newHandle, cb) {
+			if (!isObject(newHandle)) {
+				if (cb) {
+					cb("Argument `newHandle` is not object");
+				}
+				return false;
+			}
+
+			for (var i = 0; i < imageStates.length; i++) {
+				setHandleState(imageStates[i].id, newHandle);
+			}
+
+			// callback
+			if (cb) {
+				cb(null, true);
+			}
+			return true;
+		}
+
 		//
 		// config
 		//
@@ -6609,27 +6844,6 @@
 				cb(null, exportConfig());
 			}
 			return exportConfig();
-		}
-
-		//
-		// handle
-		//
-
-		myObject.handle = function(newHandle, cb) {
-			if (!isObject(newHandle)) {
-				if (cb) {
-					cb("Argument `newHandle` is not object");
-				}
-				return false;
-			}
-
-			setHandleState(newHandle);
-
-			// callback
-			if (cb) {
-				cb(null, exportHandleState());
-			}
-			return exportHandleState();
 		}
 
 		//
@@ -6976,6 +7190,19 @@
 				cb(null, exportConfig());
 			}
 			return exportConfig();
+		}
+
+		myObject.getLimit = function(cb){
+			var tmp = {
+				maxWidth: _maxWidth,
+				maxHeight: _maxHeight,
+				minWidth: _minWidth,
+				minHeight: _minHeight,
+			};
+			if (cb) {
+				cb(null, tmp);
+			}
+			return tmp;
 		}
 
 		myObject.getCanvas = function(cb){
