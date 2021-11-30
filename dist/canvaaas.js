@@ -9,8 +9,7 @@
 		var myObject = {};
 
 		var defaultConfig = {
-
-			allowedMimeTypes: [
+			allowedMimeTypesForUpload: [
 				"image/bmp",
 				"image/x-ms-bmp",
 				"image/jpg",
@@ -23,38 +22,23 @@
 				"image/tif",
 				"image/webp",
 			], // array of allowed mimetypes
-
 			cacheLevels: 999, // number
-
-			containerAspectRatio: 1 / 1, // number, width / height
-
-			maxContainerWidth: undefined, // number, px
-
-			maxContainerHeight: undefined, // number, px
-
+			aspectRatioOfContainer: 1 / 1, // number, width / height
+			maxWidthOfContainer: undefined, // number, px
+			maxHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
-
 			maxIndexAfterRender: 1000, // number
-
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-
 			lockAspectRatioAfterRender: false, // boolean
-
-			click: undefined, // function, callback
-			
-			rightClick: undefined, // function, callback
-
-			doubleClick: undefined, // function, callback
-
-			longClick: undefined, // function, callback
-
-			hover: undefined, // function, callback
-
-			upload: undefined, // function, callback
-
-			edit: undefined, // function, callback
-
-			remove: undefined, // function, callback
+			showGridAfterRender: true, // boolean
+			showPivotAfterRender: true, // boolean
+			click: undefined, // function(err, res)
+			rightClick: undefined, // function(err, res, next)
+			doubleClick: undefined, // function(err, res)
+			clickHandle: undefined, // function(err, res, direction)
+			upload: undefined, // function(err, res)
+			edit: undefined, // function(err, res)
+			remove: undefined, // function(err, res)
 		};
 
 		var defaultCanvasState = {
@@ -64,8 +48,6 @@
 			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
 			overlay: true, // boolean
 			checker: true, // boolean
-			grid: true, // boolean
-			pivot: true, // boolean
 			clickable: true, // boolean
 			editable: true, // boolean
 		};
@@ -80,36 +62,20 @@
 			"sw": "resize",
 			"w": "resize",
 			"nw": "resize",
-			"n-nw": "rotate",
 			"n-n": "rotate",
-			"n-ne": "rotate",
-			"ne-n": "crop",
 			"ne-ne": "crop",
-			"ne-e": "crop",
-			"e-ne": "flip",
 			"e-e": "flip",
-			"e-se": "flip",
-			"se-s": "crop",
 			"se-se": "crop",
-			"se-e": "crop",
-			"s-sw": "flip",
 			"s-s": "flip",
-			"s-se": "flip",
-			"sw-s": "crop",
 			"sw-sw": "crop",
-			"sw-w": "crop",
-			"w-nw": "flip",
-			"w-w": "flip",
-			"w-sw": "flip",
-			"nw-n": "crop",
-			"nw-nw": "crop",
-			"nw-w": "crop",
+			"w-w": "click",
+			"nw-nw": "crop"
 		};
 
 		// generate default state of image
 		var generateImageState = function(newImage) {
 			var id = getShortId();
-			var lastIndex = config.startIndexAfterRender;
+			var lastIndex = config.startIndexAfterRender - 1;
 			var fittedSizes = getContainedSizes(
 				newImage.width,
 				newImage.height,
@@ -145,11 +111,13 @@
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
-				lockAspectRatio: config.lockAspectRatioAfterRender,
+				lockAspectRatio: config.lockAspectRatioAfterRender || false,
 				visible: true,
 				clickable: true,
 				editable: true,
 				drawable: true,
+				grid: config.showGridAfterRender || false,
+				pivot: config.showPivotAfterRender || false,
 			}
 		};
 
@@ -162,7 +130,7 @@
 		_containerTemplate += "</div>";
 
 		var _imageTemplate = "";
-		_imageTemplate += "<div class='canvaaas-image'><img></div>";
+		_imageTemplate += "<div class='canvaaas-content'><img></div>";
 		_imageTemplate += "<div class='canvaaas-overlay'></div>";
 		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
 		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
@@ -184,30 +152,14 @@
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-nw'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-n'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-ne'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-ne'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-e'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-se'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-sw'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-s'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-se'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-nw'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-w'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-sw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-n'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-ne'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-e'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-n'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-nw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-w'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-s'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-se'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-e'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-s'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-sw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-w'><div class='canvaaas-handle-square'></div></div>";
 
 		var _directions = [
 			"n",
@@ -218,30 +170,14 @@
 			"ne",
 			"sw",
 			"se",
-			"n-nw",
 			"n-n",
-			"n-ne",
-			"s-sw",
 			"s-s",
-			"s-se",
-			"e-ne",
 			"e-e",
-			"e-se",
-			"w-nw",
 			"w-w",
-			"w-sw",
-			"nw-n",
 			"nw-nw",
-			"nw-w",
-			"ne-n",
 			"ne-ne",
-			"ne-e",
-			"sw-s",
 			"sw-sw",
-			"sw-w",
-			"se-s",
 			"se-se",
-			"se-e",
 		];
 
 		var _maxWidth = 4096;
@@ -333,10 +269,112 @@
 				}				
 			},
 
+			// deprecated
+			startHover: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					var id = getTargetId(e);
+					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
+
+					if (!isTarget) {
+						return false;
+					}
+
+					if (config.hover) {
+						config.hover(null, exportImageState(id));
+					}
+
+					// add events
+					document.addEventListener("mousemove", handlers.onHover, false);
+					document.addEventListener("mouseup", handlers.endHover, false);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			// deprecated
+			onHover: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					var id = getTargetId(e);
+					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
+					var tmp = exportImageState(id);
+					var mouseX;
+					var mouseY;
+					if (!chkContainerCoordinates()) {
+						return false;
+					}
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else {
+						return false;
+					}
+					
+					tmp.canvasTop = containerState.top;
+					tmp.canvasLeft = containerState.left;
+					tmp.mouseTop = mouseX;
+					tmp.mouseLeft = mouseY;
+
+					if (!isTarget) {
+						return false;	
+					}
+					if (config.hover) {
+						config.hover(null, tmp);
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			// deprecated
+			endHover: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
+
+					if (!isTarget) {
+						return false;
+					}
+
+					if (config.hover) {
+						config.hover(null, null);
+					}
+
+					// remove events
+					document.addEventListener("mousemove", handlers.onHover, false);
+					document.addEventListener("mouseup", handlers.endHover, false);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
 			click: function(e) {
 				try {
 					e.preventDefault();
 					e.stopPropagation();
+
+					var id = getTargetId(e);
+					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
+
+					if (!isExist(id)) {
+						return false;
+					}
+					if (!isTarget) {
+						return false;
+					}
+					if (config.click) {
+						config.click(null, exportImageState(id));
+					}
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -347,16 +385,187 @@
 				try {
 					e.preventDefault();
 					e.stopPropagation();
+
+					var id = getTargetId(e);
+					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
+
+					if (!isExist(id)) {
+						return false;
+					}
+					if (!isTarget) {
+						return false;
+					}
+					if (config.doubleClick) {
+						config.doubleClick(null, exportImageState(id));
+					}
 				} catch(err) {
 					console.log(err);
 					return false;
 				}
 			},
 
-			longClick: function(e) {
+			rightClick: function(e) {
+				try {
+					var id = getTargetId(e);
+					var rightClick = e.button === 2 || e.ctrlKey;
+					var endFunc = function() {
+						eventState.onMenu = false;
+					}
+
+					if (!rightClick) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (config.rightClick) {
+
+						eventState.onMenu = true;
+
+						config.rightClick(null, exportImageState(id), endFunc);
+						return false;
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			// for handle
+			startClick: function(e) {
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var handle = e.target;
+					var direction = getDirection(e.target);
+					var mouseX;
+					var mouseY;
+
+					// fix opened menu
+					if (eventState.onMenu) {
+						return false;
+					}
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					// if (!canvasState.editable) {
+					// 	return false;
+					// }
+					// if (!state.editable) {
+					// 	return false;
+					// }
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX;
+						mouseY = e.touches[0].clientY;
+					} else {
+						return false;
+					}
+
+					// save event state
+					eventState.onClick = true;
+					eventState.target = id;
+					eventState.handle = handle;
+					eventState.direction = direction;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+					eventState.click = true;
+
+					// add class
+					addClassToImage(eventState.target, "editing");
+					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onClick, false);
+					document.addEventListener("mouseup", handlers.endClick, false);
+
+					document.addEventListener("touchmove", handlers.onClick, false);
+					document.addEventListener("touchend", handlers.endClick, false);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			onClick: function(e) {
+				try {
+					if (!eventState.onClick) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					var mouseX;
+					var mouseY;
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - eventState.mouseX;
+						mouseY = e.clientY - eventState.mouseY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - eventState.mouseX;
+						mouseY = e.touches[0].clientY - eventState.mouseY;
+					} else {
+						return false;
+					}
+
+					if (Math.abs(mouseX) > 12) {
+						eventState.click = false;
+					} else if (Math.abs(mouseY) > 12) {
+						eventState.click = false;
+					}
+
+					if (!eventState.click) {
+						// remove class
+						removeClassToImage(eventState.target, "editing");
+						removeClassToHandle(eventState.handle, "editing");
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			endClick: function(e) {
 				try {
 					e.preventDefault();
 					e.stopPropagation();
+
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
+
+					// remove events
+					document.removeEventListener("mousemove", handlers.onClick, false);
+					document.removeEventListener("mouseup", handlers.endClick, false);
+
+					document.removeEventListener("touchmove", handlers.onClick, false);
+					document.removeEventListener("touchend", handlers.endClick, false);
+
+					// callback
+					if (eventState.click) {
+						if (config.clickHandle) {
+							config.clickHandle(null, exportImageState(eventState.target), eventState.direction);
+						}
+					}
+
+					// clear event state
+					eventState.onClick = false;
+					eventState.target = undefined;
+					eventState.handle = undefined;
+					eventState.click = false;
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -383,60 +592,13 @@
 				}
 			},
 
-			longTouch: function(e) {
-				try {
-					e.preventDefault();
-					e.stopPropagation();
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-
-			rightClick: function(e) {
-				try {
-					if (e.button !== 2) {
-						return false;
-					}
-
-					e.preventDefault();
-					e.stopPropagation();
-
-					// var id = getTargetId(e);
-					// var state = getImageState(id);
-
-					if (config.rightClick) {
-
-						eventState.onMenu = true;
-
-						config.rightClick(e, {
-							end: function() {
-								eventState.onMenu = false;
-							},
-						});
-						return false;
-					}
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-
-			hover: function(e) {
-				try {
-					console.log(e.target);
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-
 			startMove: function(e) {
 				try {
 					var id = getTargetId(e);
 					var state = getImageState(id);
 					var mouseX;
 					var mouseY;
+					var rightClick = e.button === 2 || e.ctrlKey;
 
 					// fix osx wheeling
 					if (eventState.onZoom) {
@@ -447,7 +609,7 @@
 						return false;
 					}
 					// fix right click
-					if (e.button === 2) {
+					if (rightClick) {
 						return false;
 					}
 					if (!state) {
@@ -469,7 +631,6 @@
 					if (!state.editable) {
 						return false;
 					}
-					// save mouse coordinates
 					if (typeof(e.touches) === "undefined") {
 						// desktop
 						mouseX = e.clientX;
@@ -549,8 +710,6 @@
 						x: eventState.x + mouseX,
 						y: eventState.y + mouseY,
 					});
-					// set image style
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -597,6 +756,10 @@
 
 					// fix osx wheeling
 					if (eventState.onZoom) {
+						return false;
+					}
+					// fix opened menu
+					if (eventState.onMenu) {
 						return false;
 					}
 					if (!state) {
@@ -693,6 +856,8 @@
 					var aspectRatio = croppedOW / croppedOH;
 					var diffX;
 					var diffY;
+					var scaleX = state.scaleX;
+					var scaleY = state.scaleY;
 					var radians = state.rotate * Math.PI / 180;;
 					var cosFraction = Math.cos(radians);
 					var sinFraction = Math.sin(radians);
@@ -715,18 +880,39 @@
 
 					diffX = (mouseX * cosFraction) + (mouseY * sinFraction);
 					diffY = (mouseY * cosFraction) - (mouseX * sinFraction);
-
 					width = croppedW;
 					height = croppedH;
 
-					if (direction === "n") {
+					// fix direction
+					if (scaleX === -1) {
+						if (direction.indexOf("e") > -1) {
+							direction = direction.replace(/e/gi, "w");
+						} else if (direction.indexOf("w") > -1) {
+							direction = direction.replace(/w/gi, "e");
+						}
+					}
+					if (scaleY === -1) {
+						if (direction.indexOf("n") > -1) {
+							direction = direction.replace(/n/gi, "s");
+						} else if (direction.indexOf("s") > -1) {
+							direction = direction.replace(/s/gi, "n");
+						}
+					}
+
+					if (
+						direction === "n" ||
+						direction === "n-n"
+					) {
 						height -= diffY;
 						if (onShiftKey) {
 							width = height * aspectRatio;
 						}
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
-					} else if (direction === "ne") {
+					} else if (
+						direction === "ne" ||
+						direction === "ne-ne"
+					) {
 						width += diffX;
 						height -= diffY;
 						if (onShiftKey) {
@@ -742,14 +928,20 @@
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
-					} else if (direction === "e") {
+					} else if (
+						direction === "e" ||
+						direction === "e-e"
+					) {
 						width += diffX;
 						if (onShiftKey) {
 							height = width / aspectRatio;
 						}
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
-					} else if (direction === "se") {
+					} else if (
+						direction === "se" ||
+						direction === "se-se"
+					) {
 						width += diffX;
 						height += diffY;
 						if (onShiftKey) {
@@ -765,14 +957,20 @@
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
-					} else if (direction === "s") {
+					} else if (
+						direction === "s" ||
+						direction === "se-se"
+					) {
 						height += diffY;
 						if (onShiftKey) {
 							width = height * aspectRatio;
 						}
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
-					} else if (direction === "sw") {
+					} else if (
+						direction === "sw" ||
+						direction === "sw-sw"
+					) {
 						width -= diffX;
 						height += diffY;
 						if (onShiftKey) {
@@ -788,14 +986,20 @@
 						axisY += 0.5 * diffX * sinFraction;
 						axisX -= 0.5 * diffY * sinFraction;
 						axisY += 0.5 * diffY * cosFraction;
-					} else if (direction === "w") {
+					} else if (
+						direction === "w" ||
+						direction === "w-w"
+					) {
 						width -= diffX;
 						if (onShiftKey) {
 							height = width / aspectRatio;
 						}
 						axisX += 0.5 * diffX * cosFraction;
 						axisY += 0.5 * diffX * sinFraction;
-					} else if (direction === "nw") {
+					} else if (
+						direction === "nw" ||
+						direction === "nw-nw"
+					) {
 						width -= diffX;
 						height -= diffY;
 						if (onShiftKey) {
@@ -819,7 +1023,6 @@
 					cropBottom = height * scaleCropBottom;
 					cropLeft = width * scaleCropLeft;
 					cropRight = width * scaleCropRight;
-
 					width += cropLeft + cropRight;
 					height += cropTop + cropBottom;
 
@@ -841,8 +1044,6 @@
 						cropLeft: cropLeft,
 						cropRight: cropRight
 					});
-					// set image style
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -889,6 +1090,9 @@
 						return false;
 					}
 					if (eventState.onRotate) {
+						return false;
+					}
+					if (eventState.onClick) {
 						return false;
 					}
 					if (eventState.onMenu) {
@@ -964,7 +1168,6 @@
 						cropLeft: cropLeft,
 						cropRight: cropRight
 					});
-					setImage(state.id);
 
 					eventState.wheeling = setTimeout(function() {
 						// remove timer
@@ -1078,7 +1281,6 @@
 						cropLeft: cropLeft,
 						cropRight: cropRight,
 					});
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1116,9 +1318,6 @@
 
 			startRotate: function(e) {
 				try {
-					e.preventDefault();
-					e.stopPropagation();
-
 					var id = getTargetId(e);
 					var state = getImageState(id);
 					var handle = e.target;
@@ -1132,16 +1331,28 @@
 					if (!canvasState.clickable) {
 						return false;
 					}
+					if (!state.clickable) {
+						return false;
+					}
+					// fix opened menu
+					if (eventState.onMenu) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					// fix container offset
+					if (!chkContainerCoordinates()) {
+						return false;
+					}
 					if (!canvasState.editable) {
 						return false;
 					}
 					if (!state.editable) {
 						return false;
-					}
-					// fix container offset
-					if (!chkContainerCoordinates()) {
-						return false;
-					}
+					}					
+					
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX - (containerState.left + canvasState.left);
 						mouseY = e.clientY - (containerState.top + canvasState.top);
@@ -1221,8 +1432,6 @@
 					setImageState(eventState.target, {
 						rotate: deg
 					});
-					// set image style
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1281,6 +1490,10 @@
 						return false;
 					}
 					if (!state.clickable) {
+						return false;
+					}
+					// fix opened menu
+					if (eventState.onMenu) {
 						return false;
 					}
 
@@ -1410,11 +1623,7 @@
 	
 					if (
 						direction === "n" ||
-						direction === "n-nw" ||
-						direction === "n-n" ||
-						direction === "n-ne" ||
-						direction === "nw-n" ||
-						direction === "ne-n"
+						direction === "n-n"
 					) {
 						degY = distanceMoved * (180 / maxDiagonal);
 	
@@ -1434,11 +1643,7 @@
 						}
 					} else if (
 						direction === "e" ||
-						direction === "e-ne" ||
-						direction === "e-e" ||
-						direction === "e-se" ||
-						direction === "ne-e" ||
-						direction === "se-e"
+						direction === "e-e"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 	
@@ -1458,11 +1663,7 @@
 						}
 					} else if (
 						direction === "s" ||
-						direction === "s-sw" ||
-						direction === "s-s" ||
-						direction === "s-se" ||
-						direction === "se-s" ||
-						direction === "sw-s"
+						direction === "s-s"
 					) {
 						degY = distanceMoved * (180 / maxDiagonal);
 	
@@ -1482,11 +1683,7 @@
 						}
 					} else if (
 						direction === "w" ||
-						direction === "w-nw" ||
-						direction === "w-w" ||
-						direction === "w-sw" ||
-						direction === "nw-w" ||
-						direction === "sw-w"
+						direction === "w-w"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 	
@@ -1529,8 +1726,6 @@
 						rotateX: degY,
 						rotateY: degX
 					});
-					// set image style
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1562,8 +1757,6 @@
 						scaleX: scaleX,
 						scaleY: scaleY,
 					});
-					// set image style
-					setImage(eventState.target);
 
 					// accelerate function
 					(function(){
@@ -1625,6 +1818,10 @@
 						return false;
 					}
 					if (!state.clickable) {
+						return false;
+					}
+					// fix opened menu
+					if (eventState.onMenu) {
 						return false;
 					}
 
@@ -1701,6 +1898,8 @@
 					var cropBottom = eventState.cropBottom;
 					var cropLeft = eventState.cropLeft;
 					var cropRight = eventState.cropRight;
+					var scaleX = state.scaleX;
+					var scaleY = state.scaleY;
 					var diffX;
 					var diffY;
 					var radians;
@@ -1721,6 +1920,24 @@
 					} else {
 						return false;
 					}
+
+					// fix direction
+					if (scaleX === -1) {
+						if (direction.indexOf("e") > -1) {
+							direction = direction.replace(/e/gi, "w");
+						} else if (direction.indexOf("w") > -1) {
+							direction = direction.replace(/w/gi, "e");
+						}
+					}
+					if (scaleY === -1) {
+						if (direction.indexOf("n") > -1) {
+							direction = direction.replace(/n/gi, "s");
+						} else if (direction.indexOf("s") > -1) {
+							direction = direction.replace(/s/gi, "n");
+						}
+					}
+
+					console.log(direction)
 	
 					radians = state.rotate * Math.PI / 180;
 					cosFraction = Math.cos(radians);
@@ -1730,9 +1947,7 @@
 	
 					if (
 						direction === "n" ||
-						direction === "n-n" ||
-						direction === "ne-n" ||
-						direction === "nw-n"
+						direction === "n-n"
 					) {
 						if (-diffY > cropTop) {
 							diffY = -cropTop;
@@ -1758,9 +1973,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "e" ||
-						direction === "e-e" ||
-						direction === "ne-e" ||
-						direction === "se-e"
+						direction === "e-e"
 					) {
 						if (diffX > cropRight) {
 							diffX = cropRight;
@@ -1786,9 +1999,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "s" ||
-						direction === "s-s" ||
-						direction === "se-s" ||
-						direction === "sw-s"
+						direction === "s-s"
 					) {
 						if (diffY > cropBottom) {
 							diffY = cropBottom;
@@ -1814,9 +2025,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "w" ||
-						direction === "w-w" ||
-						direction === "nw-w" ||
-						direction === "sw-w"
+						direction === "w-w"
 					) {
 						if (-diffX > cropLeft) {
 							diffX = -cropLeft;
@@ -1862,8 +2071,6 @@
 						cropLeft: cropLeft,
 						cropRight: cropRight
 					});
-					// set image style
-					setImage(eventState.target);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1916,13 +2123,13 @@
 					e.preventDefault();
 					e.stopPropagation();
 	
+					var initialized = canvasState.originalWidth && canvasState.originalHeight;
 					var oldWidth = containerState.width;
 					var oldHeight = containerState.height;
 					var newWidth;
 					var newHeight;
 					var scaleRatioX;
 					var scaleRatioY;
-					var initialized = canvasState.originalWidth && canvasState.originalHeight;
 
 					setContainer();
 	
@@ -1947,8 +2154,6 @@
 								cropLeft: state.cropLeft * scaleRatioX,
 								cropRight: state.cropRight * scaleRatioX
 							});
-							// set image style
-							setImage(state.id);
 						}
 					}
 				} catch(err) {
@@ -1979,7 +2184,7 @@
 				var id;
 				for(var i = 0; i < 4; i++) {
 					if (!found) {
-						if (tmp.classList.contains("canvaaas-wrapper")) {
+						if (tmp.classList.contains("canvaaas-image")) {
 							found = tmp;
 						} else {
 							if (tmp.parentNode) {
@@ -2022,12 +2227,15 @@
 
 		function getImageState(id) {
 			try {
-				var found;
-				if (!id) {
+				var candidate;
+				if (isString(id)) {
+					candidate = toString(id);
+				} else {
 					return false;
 				}
+				var found;
 				for (var i = 0; i < imageStates.length; i++) {
-					if (id === imageStates[i].id) {
+					if (candidate === imageStates[i].id) {
 						found = imageStates[i];
 					}
 				}
@@ -2040,8 +2248,14 @@
 
 		function setImageState(id, newState) {
 			try {
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				var cadidate;
+				if (isString(id)) {
+					cadidate = toString(id);
+				} else {
+					return false;
+				}
+				var origin = document.getElementById(_originId + cadidate);
+				var clone = document.getElementById(_cloneId + cadidate);
 				var state;
 				var oldId;
 				var newId;
@@ -2053,9 +2267,6 @@
 				var oldLAR;
 				var tmp;
 
-				if (!id) {
-					return false;
-				}
 				if (!origin) {
 					return false;
 				}
@@ -2066,7 +2277,7 @@
 					return false;
 				}
 				for (var i = 0; i < imageStates.length; i++) {
-					if (imageStates[i].id === id) {
+					if (imageStates[i].id === cadidate) {
 						state = imageStates[i];
 					}
 				}
@@ -2074,11 +2285,35 @@
 					return false;
 				}
 
+				if (isNumeric(newState.scaleX)) {
+					oldScaleX = state.scaleX;
+					newScaleX = toNumber(newState.scaleX);
+					if (
+						newScaleX !== 1 &&
+						newScaleX !== -1
+					) {
+						newScaleX = oldScaleX
+					}
+					state.scaleX = newScaleX;
+				}
+
+				if (isNumeric(newState.scaleY)) {
+					oldScaleY = state.scaleY;
+					newScaleY = toNumber(newState.scaleY);
+					if (
+						newScaleY !== 1 &&
+						newScaleY !== -1
+					) {
+						newScaleY = oldScaleY
+					}
+					state.scaleY = newScaleY;
+				}
+
 				// id change
 				if (isString(newState.id)) {
 					oldId = state.id;
 					newId = toString(newState.id);
-					if (!isExist(newId)) {
+					if (!isExist(tmp)) {
 						// change undo caches
 						for (var i = 0; i < undoCaches.length; i++) {
 							if (undoCaches[i].id === oldId) {
@@ -2147,6 +2382,12 @@
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
 				}
+				if (isBoolean(newState.pivot)) {
+					state.pivot = toBoolean(newState.pivot);
+				}
+				if (isBoolean(newState.grid)) {
+					state.grid = toBoolean(newState.grid);
+				}
 
 				if (isNumeric(newState.cropTop)) {
 					tmp = toNumber(newState.cropTop);
@@ -2181,81 +2422,69 @@
 					}
 				}
 
-				if (isNumeric(newState.scaleX)) {
-					newScaleX = toNumber(newState.scaleX);
-					oldScaleX = state.scaleX;
-					if (newScaleX === 1 || newScaleX === -1) {
-						if (newScaleX !== oldScaleX) {
-							tmp = state.cropLeft;
-							state.cropLeft = state.cropRight;
-							state.cropRight = tmp;
-							state.scaleX = newScaleX;
-						}
-					}
+				// fix flipped Y
+				if (newScaleX !== oldScaleX) {
+					// crop
+					tmp = state.cropLeft;
+					state.cropLeft = state.cropRight;
+					state.cropRight = tmp;
 				}
 
-				if (isNumeric(newState.scaleY)) {
-					newScaleY = toNumber(newState.scaleY);
-					oldScaleY = state.scaleY;
-					if (newScaleY === 1 || newScaleY === -1) {
-						if (newScaleY !== oldScaleY) {
-							tmp = state.cropTop;
-							state.cropTop = state.cropBottom;
-							state.cropBottom = tmp;
-							state.scaleY = newScaleY;
-						}
-					}
+				// fix flipped X
+				if (newScaleY !== oldScaleY) {
+					// crop
+					tmp = state.cropTop;
+					state.cropTop = state.cropBottom;
+					state.cropBottom = tmp;
 				}
 
 				if (isBoolean(newState.lockAspectRatio)) {
 					newLAR = toBoolean(newState.lockAspectRatio);
 					oldLAR = state.lockAspectRatio;
-					if (newLAR !== oldLAR && newLAR === true) {
 
-						// 
-						// 조정
-						// 
-						
-						var cw = state.width - (state.cropLeft + state.cropRight);
-						var ch = state.height - (state.cropTop + state.cropBottom);
-						var scaleCropTop = state.cropTop / ch;
-						var scaleCropBottom = state.cropBottom / ch;
-						var scaleCropLeft = state.cropLeft / cw;
-						var scaleCropRight = state.cropRight / cw;
+					if (newLAR !== oldLAR && newLAR === true) {
+						var croppedWidth = state.width - (state.cropLeft + state.cropRight);
+						var croppedHeight = state.height - (state.cropTop + state.cropBottom);
+						var scaleCropTop = state.cropTop / croppedHeight;
+						var scaleCropBottom = state.cropBottom / croppedHeight;
+						var scaleCropLeft = state.cropLeft / croppedWidth;
+						var scaleCropRight = state.cropRight / croppedWidth;
 						var croppedOriginalWidth = state.originalWidth - ((state.cropLeft + state.cropRight) / (state.width / state.originalWidth));
 						var croppedOriginalHeight = state.originalHeight - ((state.cropTop + state.cropBottom) / (state.height / state.originalHeight));
 						var croppedOriginalAspectRatio = croppedOriginalWidth / croppedOriginalHeight;
 
-						if (cw > ch * croppedOriginalAspectRatio) {
-							ch = cw / croppedOriginalAspectRatio;
+						if (croppedWidth > croppedHeight * croppedOriginalAspectRatio) {
+							croppedHeight = croppedWidth / croppedOriginalAspectRatio;
 						} else {
-							cw = ch * croppedOriginalAspectRatio;
+							croppedWidth = croppedHeight * croppedOriginalAspectRatio;
 						}
 
-						state.cropTop = ch * scaleCropTop;
-						state.cropBottom = ch * scaleCropBottom;
-						state.cropLeft = cw * scaleCropLeft;
-						state.cropRight = cw * scaleCropRight;
-
-						state.width = cw + (cw * scaleCropLeft) + (cw * scaleCropRight);
-						state.height = ch + (ch * scaleCropTop) + (ch * scaleCropBottom);
+						state.cropTop = croppedHeight * scaleCropTop;
+						state.cropBottom = croppedHeight * scaleCropBottom;
+						state.cropLeft = croppedWidth * scaleCropLeft;
+						state.cropRight = croppedWidth * scaleCropRight;
+						state.width = croppedWidth + (croppedWidth * scaleCropLeft) + (croppedWidth * scaleCropRight);
+						state.height = croppedHeight + (croppedHeight * scaleCropTop) + (croppedHeight * scaleCropBottom);
 					}
 					
 					state.lockAspectRatio = newLAR;
 				}
 
-				return true;
+				return setImage(state);
 			} catch(err) {
 				console.log(err);
 				return false;
 			}
 		}
 
-		function setImage(id) {
+		function setImage(state) {
 			try {
-				var state;
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				var origin = document.getElementById(_originId + state.id);
+				var clone = document.getElementById(_cloneId + state.id);
+				var originPivots = origin.querySelectorAll("div.canvaaas-pivot");
+				var clonePivots = clone.querySelectorAll("div.canvaaas-pivot");
+				var originGrids = origin.querySelectorAll("div.canvaaas-grid");
+				var cloneGrids = clone.querySelectorAll("div.canvaaas-grid");
 				var originImg;
 				var cloneImg;
 				var croppedW;
@@ -2264,17 +2493,6 @@
 				var croppedL;
 				var transform = "";
 
-				if (!id) {
-					return false;
-				}
-				for (var i = 0; i < imageStates.length; i++) {
-					if (imageStates[i].id === id) {
-						state = imageStates[i];
-					}
-				}
-				if (!state) {
-					return false;
-				}
 				if (!origin) {
 					return false;
 				}
@@ -2418,6 +2636,54 @@
 						clone.classList.remove("undrawable");
 					}
 				}
+	
+				// set grids
+				for (var i = 0; i < originGrids.length; i++) {
+					if (!state.grid) {
+						if (!originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (originGrids[i].classList.contains("hidden")) {
+							originGrids[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < cloneGrids.length; i++) {
+					if (!state.grid) {
+						if (!cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.add("hidden");
+						}
+					} else {
+						if (cloneGrids[i].classList.contains("hidden")) {
+							cloneGrids[i].classList.remove("hidden");
+						}
+					}
+				}
+
+				// set pivots
+				for (var i = 0; i < originPivots.length; i++) {
+					if (!state.pivot) {
+						if (!originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.add("hidden");
+						}
+					} else {
+						if (originPivots[i].classList.contains("hidden")) {
+							originPivots[i].classList.remove("hidden");
+						}
+					}
+				}
+				for (var i = 0; i < clonePivots.length; i++) {
+					if (!state.pivot) {
+						if (!clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.add("hidden");
+						}
+					} else {
+						if (clonePivots[i].classList.contains("hidden")) {
+							clonePivots[i].classList.remove("hidden");
+						}
+					}
+				}
 
 				return true;
 			} catch(err) {
@@ -2471,12 +2737,6 @@
 				if (isBoolean(newState.checker)) {
 					canvasState.checker = toBoolean(newState.checker);
 				}
-				if (isBoolean(newState.grid)) {
-					canvasState.grid = toBoolean(newState.grid);
-				}
-				if (isBoolean(newState.pivot)) {
-					canvasState.pivot = toBoolean(newState.pivot);
-				}
 				if (isBoolean(newState.clickable)) {
 					canvasState.clickable = toBoolean(newState.clickable);
 				}
@@ -2500,8 +2760,6 @@
 		function setCanvas() {
 			try {
 				var initialized = canvasState.originalWidth && canvasState.originalHeight;
-				var grids = containerElement.querySelectorAll("div.canvaaas-grid");
-				var pivots = containerElement.querySelectorAll("div.canvaaas-pivot");
 				var fittedSizes;
 
 				if (!containerElement) {
@@ -2578,30 +2836,6 @@
 				} else {
 					if (mirrorElement.classList.contains("hidden")) {
 						mirrorElement.classList.remove("hidden");
-					}
-				}
-
-				for (var i = 0; i < grids.length; i++) {
-					if (!canvasState.grid) {
-						if (!grids[i].classList.contains("hidden")) {
-							grids[i].classList.add("hidden");
-						}
-					} else {
-						if (grids[i].classList.contains("hidden")) {
-							grids[i].classList.remove("hidden");
-						}
-					}
-				}
-
-				for (var i = 0; i < pivots.length; i++) {
-					if (!canvasState.pivot) {
-						if (!pivots[i].classList.contains("hidden")) {
-							pivots[i].classList.add("hidden");
-						}
-					} else {
-						if (pivots[i].classList.contains("hidden")) {
-							pivots[i].classList.remove("hidden");
-						}
 					}
 				}
 	
@@ -2714,8 +2948,14 @@
 
 		function setHandle(id) {
 			try {
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				var candidate;
+				if (isString(id)) {
+					candidate = toString(id);
+				} else {
+					return false;
+				}
+				var origin = document.getElementById(_originId + candidate);
+				var clone = document.getElementById(_cloneId + candidate);
 				var originHandles = origin.querySelectorAll("div.canvaaas-handle");
 				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
 
@@ -2756,6 +2996,8 @@
 							handleEvents[_directions[i]] = handlers.startRotate;
 						} else if (handleState[_directions[i]] === "flip") {
 							handleEvents[_directions[i]] = handlers.startFlip;
+						} else if (handleState[_directions[i]] === "click") {
+							handleEvents[_directions[i]] = handlers.startClick;
 						}
 					}
 				}
@@ -2793,20 +3035,31 @@
 
 		function addClassToImage(id, cls) {
 			try {
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-
+				var candidate;
+				var clsName;
+				if (isString(id)) {
+					candidate = toString(id);
+				} else {
+					return false;
+				}
+				if (isString(cls)) {
+					clsName = toString(cls);
+				} else {
+					return false;
+				}
+				var origin = document.getElementById(_originId + candidate);
+				var clone = document.getElementById(_cloneId + candidate);
 				if (!origin) {
 					return false;
 				}
 				if (!clone) {
 					return false;
 				}
-				if (!origin.classList.contains(cls)) {
-					origin.classList.add(cls);
+				if (!origin.classList.contains(clsName)) {
+					origin.classList.add(clsName);
 				}
-				if (!clone.classList.contains(cls)) {
-					clone.classList.add(cls);
+				if (!clone.classList.contains(clsName)) {
+					clone.classList.add(clsName);
 				}
 				return true;
 			} catch(err) {
@@ -2817,20 +3070,31 @@
 
 		function removeClassToImage(id, cls) {
 			try {
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-
+				var candidate;
+				var clsName;
+				if (isString(id)) {
+					candidate = toString(id);
+				} else {
+					return false;
+				}
+				if (isString(cls)) {
+					clsName = toString(cls);
+				} else {
+					return false;
+				}
+				var origin = document.getElementById(_originId + candidate);
+				var clone = document.getElementById(_cloneId + candidate);
 				if (!origin) {
 					return false;
 				}
 				if (!clone) {
 					return false;
 				}
-				if (origin.classList.contains(cls)) {
-					origin.classList.remove(cls);
+				if (origin.classList.contains(clsName)) {
+					origin.classList.remove(clsName);
 				}
-				if (clone.classList.contains(cls)) {
-					clone.classList.remove(cls);
+				if (clone.classList.contains(clsName)) {
+					clone.classList.remove(clsName);
 				}
 				return true;
 			} catch(err) {
@@ -2858,7 +3122,7 @@
 
 				for (var i = 0; i < 3; i++) {
 					if (!found) {
-						if (nextNode.classList.contains("canvaaas-wrapper")) {
+						if (nextNode.classList.contains("canvaaas-image")) {
 							found = nextNode;
 						} else {
 							if (nextNode.parentNode) {
@@ -2933,7 +3197,7 @@
 
 				for (var i = 0; i < 3; i++) {
 					if (!found) {
-						if (nextNode.classList.contains("canvaaas-wrapper")) {
+						if (nextNode.classList.contains("canvaaas-image")) {
 							found = nextNode;
 						} else {
 							if (nextNode.parentNode) {
@@ -3032,8 +3296,6 @@
 				tmp.background = canvasState.background;
 				tmp.overlay = canvasState.overlay;
 				tmp.checker = canvasState.checker;
-				tmp.grid = canvasState.grid;
-				tmp.pivot = canvasState.pivot;
 				tmp.clickable = canvasState.clickable;
 				tmp.editable = canvasState.editable;
 				tmp.width = canvasState.originalWidth;
@@ -3095,6 +3357,8 @@
 				tmp.clickable = state.clickable;
 				tmp.editable = state.editable;
 				tmp.drawable = state.drawable;
+				tmp.pivot = state.pivot;
+				tmp.grid = state.grid;
 
 				originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
 				croppedAspectRatio = getAspectRatio(tmp.croppedWidth, tmp.croppedHeight);
@@ -3192,6 +3456,12 @@
 				if (isBoolean(state.drawable)) {
 					tmp.drawable = toBoolean(state.drawable);
 				}
+				if (isBoolean(state.pivot)) {
+					tmp.pivot = toBoolean(state.pivot);
+				}
+				if (isBoolean(state.grid)) {
+					tmp.grid = toBoolean(state.grid);
+				}
 				return tmp;
 			} catch(err) {
 				console.log(err);
@@ -3216,15 +3486,17 @@
 					"scale-x",
 					"scale-y",
 					"opacity",
+					"crop-top",
+					"crop-bottom",
+					"crop-right",
+					"crop-left",
 					"lock-aspect-ratio",
 					"visible",
 					"clickable",
 					"editable",
 					"drawable",,
-					"crop-top",
-					"crop-bottom",
-					"crop-right",
-					"crop-left",
+					"pivot",
+					"grid",
 				];
 
 				for (var i = 0; i < datasetKeys.length; i++) {
@@ -3262,20 +3534,25 @@
 			} catch(err) {
 				console.log(err);
 				return false;
-			}
-			
+			}	
 		}
 
 		function saveUndo(id, keepRedo) {
 			try {
 				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
 				var copiedState = {};
 				var newCache = {};
+				var originCls = origin.className;
+				var cloneCls = clone.className;
 
 				copyObject(copiedState, state);
 	
 				newCache.id = copiedState.id;
 				newCache.state = copiedState;
+				newCache.originClassNames = originCls;
+				newCache.cloneClassNames = cloneCls;
 				newCache.updatedAt = Date.now();
 	
 				undoCaches.push(newCache);
@@ -3296,13 +3573,19 @@
 		function saveRedo(id) {
 			try {
 				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
 				var copiedState = {};
 				var newCache = {};
+				var originCls = origin.className;
+				var cloneCls = clone.className;
 
 				copyObject(copiedState, state);
 	
 				newCache.id = copiedState.id;
 				newCache.state = copiedState;
+				newCache.originClassNames = originCls;
+				newCache.cloneClassNames = cloneCls;
 				newCache.updatedAt = Date.now();
 	
 				redoCaches.push(newCache);
@@ -3316,18 +3599,21 @@
 
 		function callUndo() {
 			try {
-				var recent;
-
 				if (undoCaches.length < 1) {
 					return false;
 				}
 
-				recent = undoCaches.pop();
+				var recent = undoCaches.pop();
+				var id = recent.id;
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
 
-				saveRedo(recent.id);
+				saveRedo(id);
 
-				setImageState(recent.id, recent.state);
-				setImage(recent.id);
+				setImageState(id, recent.state);
+
+				origin.className = recent.originClassNames;
+				clone.className = recent.cloneClassNames;
 
 				return true;
 			} catch(err) {
@@ -3338,20 +3624,23 @@
 
 		function callRedo() {
 			try {
-				var recent;
-
 				if (redoCaches.length < 1) {
 					return false;
 				}
 	
-				recent = redoCaches.pop();
-	
+				var recent = redoCaches.pop();
+				var id = recent.id;
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+
 				// keep redo
-				saveUndo(recent.id, true);
+				saveUndo(id, true);
 	
-				setImageState(recent.id, recent.state);
-				setImage(recent.id);
-	
+				setImageState(id, recent.state);
+
+				origin.className = recent.originClassNames;
+				clone.className = recent.cloneClassNames;
+
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -3876,7 +4165,7 @@
 					// file
 					src = URL.createObjectURL(file);
 					// check mimetype
-					if (config.allowedMimeTypes.indexOf(file.type) < 0) {
+					if (config.allowedMimeTypesForUpload.indexOf(file.type) < 0) {
 						if (cb) {
 							cb("File not allowed");
 						}
@@ -3886,7 +4175,7 @@
 					// url
 					src = file;
 					// check mimetype
-					if (config.allowedMimeTypes.indexOf(getMimetype(file)) < 0) {
+					if (config.allowedMimeTypesForUpload.indexOf(getMimetype(file)) < 0) {
 						if (cb) {
 							cb("File not allowed");
 						}
@@ -3905,7 +4194,6 @@
 				}
 				return false;
 			}
-
 			newImage.onerror = function(err) {
 				console.log(err);
 				if (cb) {
@@ -3913,18 +4201,13 @@
 				}
 				return false;
 			}
-
 			newImage.onload = function(e) {
 				var state = generateImageState(newImage);
 				var newOrigin = document.createElement("div");
 				var newClone = document.createElement("div");
 				var additionalState = {};
-				var originGrids;
-				var cloneGrids;
-				var originPivots;
-				var clonePivots;
 
-				// check canvas has been initialized
+				// initialize canvas
 				if (!initialized) {
 					canvasState.originalWidth = newImage.width;
 					canvasState.originalHeight = newImage.height;
@@ -3932,24 +4215,30 @@
 				}
 
 				// create origin element
-				newOrigin.classList.add("canvaaas-wrapper");
+				newOrigin.classList.add("canvaaas-image");
 				newOrigin.id = _originId + state.id;
 				newOrigin.innerHTML = _imageTemplate;
 				newOrigin.querySelector("img").src = newImage.src;
 
 				// create clone element
-				newClone.classList.add("canvaaas-wrapper");
+				newClone.classList.add("canvaaas-image");
 				newClone.id = _cloneId + state.id;
 				newClone.innerHTML = _imageTemplate;
 				newClone.querySelector("img").src = newImage.src;
 
 				// set events
 				newOrigin.addEventListener("contextmenu", handlers.rightClick, false);
+				newOrigin.addEventListener("dblclick", handlers.doubleClick, false);
+				newOrigin.addEventListener("click", handlers.click, false);
+				// newOrigin.addEventListener("mouseover", handlers.startHover, false);
 				newOrigin.addEventListener("mousedown", handlers.startMove, false);
 				newOrigin.addEventListener("touchstart", handlers.startMove, false);
 				newOrigin.addEventListener("wheel", handlers.startWheelZoom, false);
 
 				newClone.addEventListener("contextmenu", handlers.rightClick, false);
+				newClone.addEventListener("dblclick", handlers.doubleClick, false);
+				newClone.addEventListener("click", handlers.click, false);
+				// newClone.addEventListener("mouseover", handlers.startHover, false);
 				newClone.addEventListener("mousedown", handlers.startMove, false);
 				newClone.addEventListener("touchstart", handlers.startMove, false);
 				newClone.addEventListener("wheel", handlers.startWheelZoom, false);
@@ -3959,59 +4248,6 @@
 
 				imageStates.push(state);
 
-				originGrids = canvasElement.querySelectorAll("div.canvaaas-grid");
-				cloneGrids = mirrorElement.querySelectorAll("div.canvaaas-grid");
-				originPivots = canvasElement.querySelectorAll("div.canvaaas-pivot");
-				clonePivots = mirrorElement.querySelectorAll("div.canvaaas-pivot");
-
-				// set grids
-				for (var i = 0; i < originGrids.length; i++) {
-					if (!canvasState.grid) {
-						if (!originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.remove("hidden");
-						}
-					}
-				}
-				for (var i = 0; i < cloneGrids.length; i++) {
-					if (!canvasState.grid) {
-						if (!cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.remove("hidden");
-						}
-					}
-				}
-
-				// set pivots
-				for (var i = 0; i < originPivots.length; i++) {
-					if (!canvasState.pivot) {
-						if (!originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.add("hidden");
-						}
-					} else {
-						if (originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.remove("hidden");
-						}
-					}
-				}
-				for (var i = 0; i < clonePivots.length; i++) {
-					if (!canvasState.pivot) {
-						if (!clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.add("hidden");
-						}
-					} else {
-						if (clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.remove("hidden");
-						}
-					}
-				}
-
 				// add events to handle
 				setHandle(state.id);
 
@@ -4020,7 +4256,6 @@
 					additionalState = importImageState(exportedState);
 				}
 				setImageState(state.id, additionalState);
-				setImage(state.id);
 
 				if (cb) {
 					cb(null, state.id);
@@ -4085,7 +4320,7 @@
 
 		function setContainer() {
 			try {
-				var aspectRatio = config.containerAspectRatio;
+				var aspectRatio = config.aspectRatioOfContainer;
 				var width;
 				var height;
 				var fittedSizes;
@@ -4105,8 +4340,8 @@
 				fittedSizes = getFittedSizes({
 					width: width,
 					height: height,
-					maxWidth: config.maxContainerWidth || 8388607,
-					maxHeight: config.maxContainerHeight || 8388607,
+					maxWidth: config.maxWidthOfContainer || 8388607,
+					maxHeight: config.maxHeightOfContainer || 8388607,
 					minWidth: 0,
 					minHeight: 0
 				});
@@ -4260,17 +4495,14 @@
 		function getDirection(handle) {
 			try {
 				var found;
-
 				if (!handle) {
 					return false;
 				}
-
 				for (var i = 0; i < _directions.length; i++) {
 					if (handle.classList.contains("canvaaas-direction-" + _directions[i])) {
 						found = _directions[i];
 					}
 				}
-				
 				return found;
 			} catch(err) {
 				console.log(err);
@@ -4311,7 +4543,7 @@
 				_maxWidth = maxLength;
 				_maxHeight = maxLength;
 
-				// console.log("Response time: " + responseTime + " ms");
+				console.log("Response time: " + responseTime + " ms");
 	
 				return true;
 			} catch(err) {
@@ -4385,7 +4617,6 @@
 				var found = false;
 
 				if (isString(id)) {
-
 					candidate = toString(id);
 				} else {
 					return false;
@@ -4948,7 +5179,7 @@
 
 			var index = imageFiles.length;
 			var count = 0;
-			var states = [];
+			var result = [];
 
 			eventState.onUpload = true;
 
@@ -4965,7 +5196,7 @@
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							states.push(exportImageState(res))
+							result.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
@@ -4974,7 +5205,7 @@
 					eventState.onUpload = false;
 					// callback
 					if (cb) {
-						cb(null, states);
+						cb(null, result);
 					}
 				}
 			}
@@ -5012,7 +5243,7 @@
 
 			var index = imageUrls.length;
 			var count = 0;
-			var states = [];
+			var result = [];
 
 			eventState.onUpload = true;
 
@@ -5029,7 +5260,7 @@
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							states.push(exportImageState(res))
+							result.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
@@ -5038,7 +5269,7 @@
 					eventState.onUpload = false;
 					// callback
 					if (cb) {
-						cb(null, states);
+						cb(null, result);
 					}
 				}
 			}
@@ -5076,7 +5307,7 @@
 
 			var index = exportedStates.length;
 			var count = 0;
-			var states = [];
+			var result = [];
 
 			eventState.onUpload = true;
 
@@ -5102,7 +5333,7 @@
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							states.push(exportImageState(res))
+							result.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
@@ -5111,7 +5342,7 @@
 					eventState.onUpload = false;
 					// callback
 					if (cb) {
-						cb(null, states);
+						cb(null, result);
 					}
 				}
 			}
@@ -5149,7 +5380,7 @@
 
 			var index = imgElements.length;
 			var count = 0;
-			var states = [];
+			var result = [];
 
 			eventState.onUpload = true;
 
@@ -5177,7 +5408,7 @@
 							if (config.upload) {
 								config.upload(null, exportImageState(res));
 							}
-							states.push(exportImageState(res))
+							result.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
@@ -5186,7 +5417,7 @@
 					eventState.onUpload = false;
 					// callback
 					if (cb) {
-						cb(null, states);
+						cb(null, result);
 					}
 				}
 			}
@@ -5209,9 +5440,21 @@
 				var isMatch = true;
 				for(var j = 0; j < Object.keys(query).length; j++) {
 					var k = Object.keys(query)[j];
-					if (imageStates[i][k] !== query[k]) {
-						isMatch = false;
-					}
+					if (imageStates[i][k] !== undefined) {
+						if (typeof(imageStates[i][k]) === "number") {
+							if (imageStates[i][k] !== toNumber(query[k])) {
+								isMatch = false;
+							}
+						} else if (typeof(imageStates[i][k]) === "string") {
+							if (imageStates[i][k] !== toString(query[k])) {
+								isMatch = false;
+							}
+						} else if (typeof(imageStates[i][k]) === "boolean") {
+							if (imageStates[i][k] !== toBoolean(query[k])) {
+								isMatch = false;
+							}
+						}
+					}	
 				}
 				if (isMatch) {
 					founds.push(
@@ -5233,6 +5476,121 @@
 			return founds;
 		}
 
+		// test
+		myObject.addClass = function(id, cls, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (!isString(cls)) {
+				if (config.edit) {
+					config.edit("Argument `cls` is not string");
+				}
+				if (cb) {
+					cb("Argument `cls` is not string");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+
+			var res = addClassToImage(id, cls);
+			if (!res) {
+				if (config.edit) {
+					config.edit("Unknown error occurred");
+				}
+				if (cb) {
+					cb("Unknown error occurred");
+				}
+				return false;
+			}
+
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		// test
+		myObject.removeClass = function(id, cls, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (!isString(cls)) {
+				if (config.edit) {
+					config.edit("Argument `cls` is not string");
+				}
+				if (cb) {
+					cb("Argument `cls` is not string");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+
+			var res = removeClassToImage(id, cls);
+			if (!res) {
+				if (config.edit) {
+					config.edit("Unknown error occurred");
+				}
+				if (cb) {
+					cb("Unknown error occurred");
+				}
+				return false;
+			}
+
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		/*
+			newState = {
+				id
+				index
+				width
+				height
+				x
+				y
+				rotate
+				scaleX
+				scaleY
+				opacity
+				cropTop
+				cropBottom
+				cropLeft
+				cropRight
+				lockAspectRatio
+				visible
+				clickable
+				editable
+				drawable
+				grid
+				pivot
+			}
+		*/
 		myObject.state = function(id, newState, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -5293,8 +5651,6 @@
 			saveUndo(id);
 			// save image state
 			setImageState(id, updates);
-			// set image style
-			setImage(updates.id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(updates.id));
@@ -5352,8 +5708,6 @@
 			setImageState(id, {
 				x: state.x + toNumber(n)
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5411,8 +5765,6 @@
 			setImageState(id, {
 				y: state.y + toNumber(n)
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5469,15 +5821,13 @@
 			saveUndo(id);
 			// save image state
 			setImageState(id, {
-				width: state.width * (1 + ratio),
-				height: state.height * (1 + ratio),
-				cropTop: state.cropTop * (1 + ratio),
-				cropBottom: state.cropBottom * (1 + ratio),
-				cropLeft: state.cropLeft * (1 + ratio),
-				cropRight: state.cropRight * (1 + ratio),
+				width: state.width * ratio,
+				height: state.height * ratio,
+				cropTop: state.cropTop * ratio,
+				cropBottom: state.cropBottom * ratio,
+				cropLeft: state.cropLeft * ratio,
+				cropRight: state.cropRight * ratio,
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5560,8 +5910,6 @@
 				cropLeft: cropLeft,
 				cropRight: cropRight,
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5644,8 +5992,6 @@
 				cropLeft: cropLeft,
 				cropRight: cropRight,
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5703,8 +6049,6 @@
 			setImageState(id, {
 				rotate: state.rotate + toNumber(n)
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5753,8 +6097,6 @@
 			setImageState(id, {
 				scaleY: state.scaleY * -1
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5803,8 +6145,6 @@
 			setImageState(id, {
 				scaleX: state.scaleX * -1
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5862,8 +6202,6 @@
 			setImageState(id, {
 				opacity: toNumber(n)
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5886,10 +6224,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument is not numeric");
+					config.edit("Argument `n` is not numeric");
 				}
 				if (cb) {
-					cb("Argument is not numeric");
+					cb("Argument `n` is not numeric");
 				}
 				return false;
 			}
@@ -5920,10 +6258,8 @@
 
 			// save image state
 			setImageState(id, {
-				index: toNumber(n)
+				index: state.index + toNumber(n)
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5954,8 +6290,6 @@
 			setImageState(id, {
 				lockAspectRatio: state.lockAspectRatio === false
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -5986,8 +6320,6 @@
 			setImageState(id, {
 				visible: b
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6018,8 +6350,6 @@
 			setImageState(id, {
 				clickable: b
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6050,8 +6380,6 @@
 			setImageState(id, {
 				editable: b
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6082,8 +6410,66 @@
 			setImageState(id, {
 				drawable: b
 			});
-			// set image style
-			setImage(id);
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.pivot = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var b = state.pivot === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				pivot: b
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.grid = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var b = state.grid === false;
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				grid: b
+			});
 			// callback
 			if (config.edit) {
 				config.edit(null, exportImageState(id));
@@ -6136,9 +6522,9 @@
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
+				grid: config.showGridAfterRender || false,
+				pivot: config.showPivotAfterRender || false,
 			});
-			// set image style
-			setImage(id);
 			// callback
 			if (cb) {
 				cb(null, exportImageState(id));
@@ -6350,8 +6736,6 @@
 				background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
 				overlay: true, // boolean
 				checker: true, // boolean
-				grid: true, // boolean
-				pivot: true, // boolean
 				clickable: true, // boolean
 				editable: true, // boolean
 			}
@@ -6609,12 +6993,6 @@
 		}
 
 		myObject.getImage = function(id, cb){
-			if (!isString(id)) {
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
@@ -6622,9 +7000,9 @@
 				return false;
 			}
 			if (cb) {
-				cb(null, exportImageState(toString(id)));
+				cb(null, exportImageState(id));
 			}
-			return exportImageState(toString(id));
+			return exportImageState(id);
 		}
 
 		myObject.getImages = function(cb){
@@ -6651,12 +7029,6 @@
 		}
 
 		myObject.getPreviousImage = function(id, cb){
-			if (!isString(id)) {
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
@@ -6664,14 +7036,14 @@
 				return false;
 			}
 
-			var states = [];
 			var state = getImageState(id);
+			var sortedStates = [];
 
-			imageStates.forEach(function(elem){
-				states.push(elem);
-			});
+			for(var i = 0; i < imageStates.length; i++) {
+				sortedStates.push(imageStates[i]);
+			}
 
-			var sorted = states.sort(function(a, b){
+			sortedStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6682,10 +7054,10 @@
 			});
 
 			var found;
-			for (var i = 0; i < sorted.length; i++) {
-				if (sorted[i].id === id) {
-					if (sorted[i - 1]) {
-						found = exportImageState(sorted[i - 1].id);
+			for (var i = 0; i < sortedStates.length; i++) {
+				if (sortedStates[i].id === id) {
+					if (sortedStates[i - 1]) {
+						found = exportImageState(sortedStates[i - 1].id);
 					}
 				}
 			}
@@ -6704,12 +7076,6 @@
 		}
 
 		myObject.getNextImage = function(id, cb){
-			if (!isString(id)) {
-				if (cb) {
-					cb("Argument is not string");
-				}
-				return false;
-			}
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
@@ -6717,14 +7083,14 @@
 				return false;
 			}
 
-			var states = [];
 			var state = getImageState(id);
+			var sortedStates = [];
 
-			imageStates.forEach(function(elem){
-				states.push(elem);
-			});
+			for(var i = 0; i < imageStates.length; i++) {
+				sortedStates.push(imageStates[i]);
+			}
 
-			var sorted = states.sort(function(a, b){
+			sortedStates.sort(function(a, b){
 				if (a.index > b.index) {
 					return 1;
 				}
@@ -6735,10 +7101,10 @@
 			});
 
 			var found;
-			for (var i = 0; i < sorted.length; i++) {
-				if (sorted[i].id === id) {
-					if (sorted[i + 1]) {
-						found = exportImageState(sorted[i + 1].id);
+			for (var i = 0; i < sortedStates.length; i++) {
+				if (sortedStates[i].id === id) {
+					if (sortedStates[i - 1]) {
+						found = exportImageState(sortedStates[i + 1].id);
 					}
 				}
 			}
@@ -6787,7 +7153,7 @@
 		}
 
 		// 
-		// utils
+		// utility
 		// 
 
 		myObject.getViewport = function(cb){
@@ -6841,37 +7207,51 @@
 		};
 
 		myObject.import = function(exportedStates, cb){
-			if (!canvasState.editabled) {
+			if (eventState.onUpload) {
+				if (config.upload) {
+					config.upload("Already in progress");
+				}
 				if (cb) {
-					cb("Canvas has been uneditabled");
+					cb("Already in progress");
 				}
 				return false;
 			}
-
 			if (!isArray(exportedStates)) {
 				if (cb) {
-					cb("Argument is not array");
+					cb("Argument `exportedStates` is not array");
 				}
 				return false;
 			}
 
-			var chkObj = true;
-			exportedStates.forEach(function(elem){
-				if (!isObject(elem)) {
-					chkObj = false;
+			var filterdStates = [];
+			for(var i = 0; i < exportedStates.length; i++) {
+				var candidate = exportedStates[i];
+				if (!isObject(candidate)) {
+					continue;
 				}
+				if (
+					!candidate.src &&
+					!candidate.url &&
+					!candidate.path &&
+					!candidate.index
+				) {
+					continue;
+				}
+				filterdStates.push(candidate);
+			}
+			filterdStates.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
 			});
-			if (chkObj === false) {
-				if (cb) {
-					cb("Argument is not object");
-				}
-				return false;
-			}
 
-			var index = exportedStates.length;
+			var index = filterdStates.length;
 			var count = 0;
 			var result = [];
-			var status = [];
 
 			eventState.onUpload = true;
 
@@ -6879,27 +7259,25 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					renderImage(exportedStates[count].src, exportedStates[count], function(err, res) {
+					renderImage(filterdStates[count].src, filterdStates[count], function(err, res) {
 						if (err) {
-							status.push({
-								message: err,
-								status: false
-							});
+							if (config.upload) {
+								config.upload(err);
+							}
 						} else {
-							status.push({
-								message: null,
-								status: true
-							});
-							result.push(exportImageState(res));
+							if (config.upload) {
+								config.upload(null, exportImageState(res));
+							}
+							result.push(exportImageState(res))
 						}
 						count++;
 						recursiveFunc();
 					});
 				} else {
 					eventState.onUpload = false;
-
+					// callback
 					if (cb) {
-						cb(null, result, status);
+						cb(null, result);
 					}
 					return false;
 				}
@@ -6911,27 +7289,14 @@
 		//
 
 		myObject.undo = function(cb){
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Canvas has been uneditabled");
-				}
-				return false;
-			}
-
 			if (undoCaches.length < 1) {
 				if (cb) {
-					cb("Cache not found");
+					cb("Cache is empty");
 				}
 				return false;
-			}
-
-			if (eventState.target) {
-				setFocusOut(eventState.target);
 			}
 
 			var id = callUndo();
-
-			setFocusIn(id);
 
 			if (cb) {
 				cb(null, exportImageState(id));
@@ -6940,13 +7305,6 @@
 		}
 
 		myObject.redo = function(cb){
-			if (!canvasState.editabled) {
-				if (cb) {
-					cb("Editing has been disabled");
-				}
-				return false;
-			}
-
 			if (redoCaches.length < 1) {
 				if (cb) {
 					cb("Cache is empty");
@@ -6954,13 +7312,7 @@
 				return false;
 			}
 
-			if (eventState.target) {
-				setFocusOut(eventState.target);
-			}
-
 			var id = callRedo();
-
-			setFocusIn(id);
 
 			if (cb) {
 				cb(null, exportImageState(id));

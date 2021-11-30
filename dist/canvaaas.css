@@ -107,8 +107,8 @@
 	display: none;
 }
 
-/* wrapper */
-.canvaaas-wrapper{
+/* image */
+.canvaaas-image{
 	display: block;
 	position: absolute;
 	transform-origin: center center;
@@ -120,16 +120,16 @@
 	user-select: none;
 	cursor: move;
 }
-.canvaaas-wrapper.hidden{
+.canvaaas-image.hidden{
 	visibility: hidden;
 	pointer-events: none;
 }
-/* .canvaaas-wrapper.unclickable{
+/* .canvaaas-image.unclickable{
 	pointer-events: none;
 } */
 
-/* image */
-.canvaaas-image{
+/* <img> wrapper */
+.canvaaas-content{
 	display: block;
 	position: absolute;
 	top: 0;
@@ -138,11 +138,11 @@
 	right: 0;
 	overflow: hidden;
 }
-.canvaaas-image.hidden{
+.canvaaas-content.hidden{
 	visibility: hidden;
 }
 
-.canvaaas-image img{
+.canvaaas-content img{
 	display: block;
 	position: absolute;
 	-webkit-touch-callout: none;
@@ -374,38 +374,13 @@
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-n-nw{
-	top: -36px;
-	left: 25%;
-	transform: translateX(-50%) translateY(-50%);
-}
 .canvaaas-handle.canvaaas-direction-n-n{
 	top: -36px;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-n-ne{
-	top: -36px;
-	left: 75%;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-ne-n{
-	top: -36px;
-	right: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
 .canvaaas-handle.canvaaas-direction-ne-ne{
 	top: -36px;
-	right: -72px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-ne-e{
-	top: 0;
-	right: -72px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-e-ne{
-	top: 25%;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
@@ -414,29 +389,9 @@
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-e-se{
-	top: 75%;
-	right: -72px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-se-s{
-	bottom: -72px;
-	right: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
 .canvaaas-handle.canvaaas-direction-se-se{
 	bottom: -72px;
 	right: -72px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-se-e{
-	bottom: -36px;
-	right: -72px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-s-sw{
-	bottom: -72px;
-	left: 25%;
 	transform: translateX(-50%) translateY(-50%);
 }
 .canvaaas-handle.canvaaas-direction-s-s{
@@ -444,28 +399,8 @@
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-s-se{
-	bottom: -72px;
-	left: 75%;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-sw-s{
-	bottom: -72px;
-	left: 0;
-	transform: translateX(-50%) translateY(-50%);
-}
 .canvaaas-handle.canvaaas-direction-sw-sw{
 	bottom: -72px;
-	left: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-sw-w{
-	bottom: -36px;
-	left: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-w-nw{
-	top: 25%;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
@@ -474,23 +409,8 @@
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-w-sw{
-	top: 75%;
-	left: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-nw-n{
-	top: -36px;
-	left: 0;
-	transform: translateX(-50%) translateY(-50%);
-}
 .canvaaas-handle.canvaaas-direction-nw-nw{
 	top: -36px;
-	left: -36px;
-	transform: translateX(-50%) translateY(-50%);
-}
-.canvaaas-handle.canvaaas-direction-nw-w{
-	top: 0;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
@@ -499,11 +419,17 @@
 .canvaaas-handle.editing .canvaaas-handle-square{
 	background-color: #000000;
 }
-.canvaaas-mirror .canvaaas-wrapper.editing .canvaaas-overlay{
+.canvaaas-mirror .canvaaas-image.editing .canvaaas-overlay{
 	opacity: 0.8;
 }
-.canvaaas-canvas .canvaaas-wrapper.editing .canvaaas-overlay{
+.canvaaas-canvas .canvaaas-image.editing .canvaaas-overlay{
 	display: block;
+}
+
+/* unclickabled */
+.canvaaas-image.unclickable{
+	pointer-events: none;
+	cursor: default;
 }
 
 /* mobile */
