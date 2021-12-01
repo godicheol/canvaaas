@@ -202,6 +202,21 @@
 </script>
 ```
 
+## Save image with filter
+
+```html
+<script>
+  canvaaas.draw({
+    filter: function(red, green, blue, alpha) {
+      var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722; // grayscale
+      return [luma, luma, luma, alpha];
+    }
+  }, function(err, file, result){
+    // Your code
+  });
+</script>
+```
+
 ## Save image from JSON data
 
 ```html

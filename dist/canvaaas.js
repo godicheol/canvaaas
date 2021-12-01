@@ -231,7 +231,15 @@
 		copyObject(handleState, defaultHandleState);
 
 		// get limited canvas sizes
-		getMaximumCanvas();
+		var __max = getMaximumCanvas();
+		console.log("canvaaas response time: " + __max.responseTime + " ms");
+		console.log("canvaaas max area: " + __max.maxWidth + " x " + __max.maxHeight + " px");
+		if (__max.maxWidth) {
+			_maxWidth = __max.maxWidth;
+		}
+		if (__max.maxHeight) {
+			_maxHeight = __max.maxHeight;
+		}
 
 		//
 		// event handlers start
@@ -2428,7 +2436,6 @@
 					state.cropTop = state.cropBottom;
 					state.cropBottom = tmp;
 				}
-
 				if (isBoolean(newState.lockAspectRatio)) {
 					oldLAR = state.lockAspectRatio;
 					newLAR = toBoolean(newState.lockAspectRatio);
@@ -2459,15 +2466,12 @@
 					
 					state.lockAspectRatio = newLAR;
 				}
-
 				if (isBoolean(newState.pivot)) {
 					state.pivot = toBoolean(newState.pivot);
 				}
-
 				if (isBoolean(newState.grid)) {
 					state.grid = toBoolean(newState.grid);
 				}
-
 				if (isObject(newState.handle)) {
 					for (var i = 0; i < Object.keys(newState.handle).length; i++) {
 						var k = Object.keys(newState.handle)[i];
@@ -2696,6 +2700,7 @@
 					}
 				}
 
+				// set handle
 				var res = setHandle(state);
 				return res;
 			} catch(err) {
@@ -3010,14 +3015,18 @@
 							length = step * j;
 							absLength = Math.round(absStep * j);
 							if (j % 5 === 0) {
-								if (j === count) {
-									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length-1)+"px;'>";
+								if (j === 0) {
+									// first
+									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length - 1)+"px;'>";
+								} else if (j === count) {
+									// last
+									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length)+"px;'>";
 								} else {
-									graduation += "<div class='canvaaas-graduation-major' style='left:"+length+"px;'>";
+									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length)+"px;'>";
 								}
 								graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
 							} else {
-								graduation += "<div class='canvaaas-graduation-minor' style='left:"+length+"px;'>";
+								graduation += "<div class='canvaaas-graduation-minor' style='left:"+(length)+"px;'>";
 							}
 							graduation += "</div>";
 							rulers[i].innerHTML += graduation;
@@ -3030,14 +3039,18 @@
 							length = step * j;
 							absLength = Math.round(absStep * j);
 							if (j % 5 === 0) {
-								if (j === count) {
-									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length-1)+"px;'>";
+								if (j === 0) {
+									// first
+									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length - 1)+"px;'>";
+								} else if (j === count) {
+									// last
+									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length)+"px;'>";
 								} else {
-									graduation += "<div class='canvaaas-graduation-major' style='top:"+length+"px;'>";
+									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length)+"px;'>";
 								}
 								graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
 							} else {
-								graduation += "<div class='canvaaas-graduation-minor' style='top:"+length+"px;'>";
+								graduation += "<div class='canvaaas-graduation-minor' style='top:"+(length)+"px;'>";
 							}
 							graduation += "</div>";
 							rulers[i].innerHTML += graduation;
@@ -3496,8 +3509,8 @@
 				tmp.drawable = state.drawable;
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
-				tmp.handle = state.handle;
 				tmp.filter = state.filter;
+				tmp.handle = state.handle;
 				// tmp.handleEvents = state.handleEvents;
 
 				originalAspectRatio = getAspectRatio(tmp.originalWidth, tmp.originalHeight);
@@ -3801,6 +3814,7 @@
 				var background = canvasState.background || "#FFFFFF";
 				var maxWidth = canvState.width;
 				var maxHeight = canvState.height;
+				var filter;
 				var scaleRatioX = 1;
 				var scaleRatioY = 1;
 				var convertedImgStates = [];
@@ -3843,6 +3857,9 @@
 					}
 					if (isNumeric(options.height)) {
 						maxHeight = toNumber(options.height);
+					}
+					if (isFunction(options.filter)) {
+						filter = options.filter;
 					}
 				}
 
@@ -3996,6 +4013,16 @@
 							recursiveFunc();
 						});
 					} else {
+
+						// apply filter
+						if (filter) {
+							var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+							var filteredImageData = getFilteredImageData(imageData, filter);
+
+							ctx.clearRect(0, 0, canvas.width, canvas.height);
+							ctx.putImageData(filteredImageData, 0, 0);
+						}
+
 						var base64 = canvas.toDataURL(result.mimetype, result.quality);
 	
 						return cb(null, base64, result);
@@ -4349,6 +4376,11 @@
 			if (!cloneImg) {
 				return false;
 			}
+			if (!filterFunc) {
+				originImg.src = cloneImg.src;
+				state.filter = undefined;
+				cb(null, true);
+			}
 
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
@@ -4372,7 +4404,7 @@
 				var base64 = canvas.toDataURL('image/jpeg', 0.92);
 
 				originImg.src = base64;
-				cloneImg.src = base64;
+				// cloneImg.src = base64;
 
 				state.filter = filterFunc;
 
@@ -4772,11 +4804,12 @@
 	
 				_maxWidth = maxLength;
 				_maxHeight = maxLength;
-
-				console.log("Response time: " + responseTime + "ms");
-				console.log("Max Area: " + _maxWidth + " x " + _maxHeight + "px");
 	
-				return true;
+				return {
+					maxWidth: maxLength,
+					maxHeight: maxLength,
+					responseTime: responseTime
+				};
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -4806,10 +4839,6 @@
 				testCtx.drawImage(drawCanvas, width - 1, height - 1, 1, 1, 0, 0, 1, 1);
 
 				status = testCtx.getImageData(0, 0, 1, 1).data[3] !== 0;
-
-				// var end = Date.now();
-				// console.log("getImageData", end - start);
-				// alert(data[0]+","+data[1]+","+data[2]+","+data[3]);
 
 				return {
 					width: width,
@@ -6843,43 +6872,6 @@
 			}
 		}
 
-		myObject.filter = function(id, newFunction, cb) {
-			if (!isExist(id)) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-			if (!isFunction(newFunction)) {
-				if (cb) {
-					cb("Argument `newFunction` is not function");
-				}
-				return false;
-			}
-
-			var state = getImageState(id);
-
-			if (state.filter) {
-				if (cb) {
-					cb("This image already applied filter");
-				}
-				return false;
-			}
-
-			applyFilter(id, newFunction, function(err, res) {
-				if (err) {
-					if (cb) {
-						cb(err);
-					}
-					return false;
-				}
-				if (cb) {
-					cb(null, true);
-				}
-				return true;
-			});
-		}
-
 		myObject.handleAll = function(newHandle, cb) {
 			if (!isObject(newHandle)) {
 				if (cb) {
@@ -6906,6 +6898,57 @@
 				cb(null, true);
 			}
 			return true;
+		}
+
+		// 
+		// filter (test)
+		// 
+
+		myObject.filter = function(id, newFunction, cb) {
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (
+				!isFunction(newFunction) &&
+				newFunction !== null &&
+				newFunction !== false
+			) {
+				if (cb) {
+					cb("Argument `newFunction` is not function or null or false");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (isFunction(newFunction) && state.filter) {
+				if (cb) {
+					cb("This image already applied filter");
+				}
+				return false;
+			}
+
+			applyFilter(state.id, newFunction, function(err, res) {
+				if (err) {
+					if (config.edit) {
+						config.edit(err);
+					}
+					if (cb) {
+						cb(err);
+					}
+					return false;
+				}
+				if (config.edit) {
+					config.edit(null, exportImageState(id));
+				}
+				if (cb) {
+					cb(null, exportImageState(id));
+				}
+				return exportImageState(id);
+			})
 		}
 
 		//
@@ -7089,6 +7132,7 @@
 				background(optional)
 				width(optional)
 				height(optional)
+				filter(optional)(function)
 			}
 		*/
 		myObject.draw = function(options, cb){
@@ -7160,6 +7204,7 @@
 				background(optional)
 				width(optional)
 				height(optional)
+				filter(optional)(function)
 			}
 			exportedCanvasSizes = {
 				width(required)
