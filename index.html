@@ -5,7 +5,7 @@
 	<title>canvaaas.js</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<!-- ! -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel='stylesheet' href='./dist/canvaaas.css' />
@@ -13,1874 +13,1876 @@
 	<!-- ! -->
 
 	<style>
-		html,
-		body,
-		div {
+		@font-face {
+			font-family: 'Material Icons';
+			font-style: normal;
+			font-weight: 400;
+			src: url(https://example.com/MaterialIcons-Regular.eot); /* For IE6-8 */
+			src: local('Material Icons'),
+			local('MaterialIcons-Regular'),
+			url(https://example.com/MaterialIcons-Regular.woff2) format('woff2'),
+			url(https://example.com/MaterialIcons-Regular.woff) format('woff'),
+			url(https://example.com/MaterialIcons-Regular.ttf) format('truetype');
+		}
+
+		.material-icons {
+			font-family: 'Material Icons';
+			font-weight: normal;
+			font-style: normal;
+			font-size: 24px;  /* Preferred icon size */
+			display: inline-block;
+			line-height: 1;
+			text-transform: none;
+			letter-spacing: normal;
+			word-wrap: normal;
+			white-space: nowrap;
+			direction: ltr;
+
+			/* Support for all WebKit browsers. */
+			-webkit-font-smoothing: antialiased;
+			/* Support for Safari and Chrome. */
+			text-rendering: optimizeLegibility;
+
+			/* Support for Firefox. */
+			-moz-osx-font-smoothing: grayscale;
+
+			/* Support for IE. */
+			font-feature-settings: 'liga';
+		}
+
+		/* Rules for sizing the icon. */
+		.material-icons.md-18 { font-size: 18px; }
+		.material-icons.md-24 { font-size: 24px; }
+		.material-icons.md-36 { font-size: 36px; }
+		.material-icons.md-48 { font-size: 48px; }
+
+		/* Rules for using icons as black on a light background. */
+		.material-icons.md-dark { color: rgba(0, 0, 0, 0.54); }
+		.material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
+
+		/* Rules for using icons as white on a dark background. */
+		.material-icons.md-light { color: rgba(255, 255, 255, 1); }
+		.material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
+		html, body, div {
 			margin: 0;
 			padding: 0;
+			font-family: Arial, Helvetica, sans-serif;
 		}
-
-		#myContainer {
-			margin-top: 27px;
-			padding: 24px;
-			overflow: hidden;
-			/*background-color: #000;*/
-		}
-
-		#myImage,
-		#myImage2,
-		#myImage3,
-		#myCanvas,
-		#myCanvas2{
-			/*color: #FFF;*/
-			/*background-color: #000;*/
-			/*border-top: 1px solid black;*/
-			font-size: 0.8rem;
-			padding: 3px 24px;
-		}
-
-		#myShortCut {
-			text-align: right;
-			font-size: 0.8rem;
-			padding: 3px 24px;
-		}
-
-		#myCanvas.hidden,
-		#myImage.hidden {
-			display: none;
-		}
-
-		#myCanvas-filename {
-			float: left;
-		}
-
-		#myCanvas-editabled,
-		#myCanvas-focusabled,
-		#myCanvas-checker,
-		#myCanvas-overlay {
-			float: right;
-			margin-left: 6px;
-		}
-
-		#myCanvas-backgroundColor {
-			width: 1rem;
-			height: 1rem;
-			margin-right: 6px;
-			outline: 1px solid black;
-			float: right;
-		}
-
-		#myCanvas-state {
-			float: right;
-		}
-
-		#myImage-id {
-			float: left;
-		}
-
-		#myImage-state,
-		#myImage-crop {
-			float: right;
-		}
-		#myImage-editabled,
-		#myImage-focusabled,
-		#myImage-drawabled,
-		#myImage-lockAspectRatio,
-		#myImage-visible {
-			float: right;
-			margin-left: 6px;
-		}
-		input[type='file'] {
-			display: none;
-		}
-
-		label,
-		button {
-			font-family: arial;
-			padding: 3px 6px;
-			font-size: 14px;
-			border: 1px solid #777;
-			border-radius: 2px;
-			background-color: #e7e7e7;
-			cursor: pointer;
-		}
-
-		label:hover,
-		button:hover {
-			background-color: #c7c7c7;
-		}
-
-		label:active,
-		button:active {
-			background-color: #e7e7e7;
-		}
-
-		.header {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			font-size: 0;
-			font-family: sans-serif;
-			/*border-bottom: 1px solid black;*/
-		}
-
-		.header-hidden {
-			display: none;
-		}
-
-		.header-tab {
+		html, body{
 			position: relative;
-			display: inline-block;
-			vertical-align: top;
-			width: auto;
+			width: 100%;
+			height: 100%;
+			/* overflow: hidden; */
 		}
 
-		.header-subject {
-			display: block;
-			color: inherit;
-			text-decoration: none;
-			font-size: 0.8rem;
-			font-weight: 700;
-			padding: 6px 12px;
-			cursor: default;
+		/* container for init */
+		#target{
+			padding: 36px;
+			overflow: hidden;
 		}
 
-		.header-tab:hover .header-subject {
-			background-color: #e7e7e7;
-		}
-
-		.header-list {
-			position: absolute;
-			list-style: none;
-			min-width: 200px;
-			margin: 0 6px;
-			padding: 6px 6px;
-			background-color: #171717;
-			max-height: 500px;
-			z-index: 999;
-			overflow-y: auto;
-		}
-
-		.header-list.hidden {
-			display: none;
-		}
-
-		.header-list a,
-		.header-list label {
-			display: block;
-			color: #e7e7e7;
-			text-decoration: none;
-			padding: 6px 6px;
-			margin: 0px;
-			cursor: default;
-			background-color: rgba(0, 0, 0, 0);
-			border: 0;
-			border-radius: 0;
-			font-size: 0.8rem;
-		}
-
-		.header-list a:hover,
-		.header-list label:hover {
-			background-color: #373737;
-		}
-
-		.header-list li.rule {
-			margin: 6px;
-			border-top: 1px solid #575757;
-			color: #e7e7e7;
-		}
-
-		#myPreview {
+		/* header */
+		.header{
 			position: fixed;
 			top: 0;
+			left: 0;
+			width: 100%;
+			height: 24px;
+			font-size: 0;
+			color: #FFFFFF;
+			background-color: rgba(0, 0, 0, 0.9);
+			z-index: 1000;
+		}
+		.header a,
+		.header input,
+		.header button,
+		.header label{
+			color: inherit;
+		}
+		.header a.disabled,
+		.header input.disable,
+		.header button.disable,
+		.header label.disable{
+			pointer-events: none;
+			color: #777777;
+			cursor: default;
+		}
+		.header a.disabled:hover,
+		.header input.disable:hover,
+		.header button.disable:hover,
+		.header label.disable:hover{
+			text-decoration: none;
+		}
+		.header .tab{
+			position: relative;
+			display: inline-block;
+			max-width: 16.6666%;
+			width: 128px;
+			height: 24px;
+			text-align: center;
+		}
+		.header .title{
+			font-size: 0.8rem;
+			height: 24px;
+		}
+		.header .title:hover{
+			background-color: #474747;
+			cursor: pointer;
+		}
+		.header .title span{
+			line-height: 24px;
+		}
+		.header .list{
+			position: absolute;
+			top: calc(100% + 5px);
+			left: 5px;
+			width: 192px;
+			max-height: 524px;
+			overflow-y: scroll;
+			padding: 3px 9px;
+			text-align: initial;
+			background-color: rgba(0, 0, 0, 0.7);
+		}
+		.header .tab:nth-last-child(2) .list{
+			left: auto;
+			right: 5px;
+		}
+		.header .tab:nth-last-child(1) .list{
+			left: auto;
+			right: 5px;
+		}
+		.header .list a,
+		.header .list label{
+			display: block;
+			width: 100%;
+			font-size: inherit;
+			font-family: inherit;
+			text-decoration: none;
+			cursor: pointer;
+			padding: 6px 3px;
+		}
+		.header .list a:hover,
+		.header .list label:hover{
+			text-decoration: underline;
+		}
+		.header .row{
+			font-size: 0.8rem;
+			/* padding: 6px 3px; */
+		}
+		.header .row.rule{
+			border-bottom: 1px solid #777777;
+			padding-bottom: 3px;
+			margin-bottom: 3px;
+		}
+
+		/* footer */
+		.footer{
+			position: fixed;
 			bottom: 0;
 			left: 0;
-			right: 0;
-			z-index: 1111;
-			background-color: #000;
+			width: 100%;
+			height: auto;
+			font-size: 0;
+			color: #FFFFFF;
+			background-color: rgba(0, 0, 0, 0.9);
+			z-index: 1000;
+		}
+		.footer a,
+		.footer input,
+		.footer button,
+		.footer label{
+			color: inherit;
+		}
+		.footer-left{
+			height: 24px;
+			padding-left: 8px;
+			float: left;
+			font-size: 0.8rem;
+		}
+		.footer-right{
+			height: 24px;
+			float: right;
+			padding-right: 8px;
+			font-size: 0.8rem;
+		}
+		.footer-left,
+		.footer-right{
+			line-height: 24px;
+		}
+		.footer-right{
+			white-space: nowrap;
+			word-break: break-all;
 		}
 
-		#myPreview.hidden {
-			display: none;
+		/* custom for uneditable handle */
+		.canvaaas-image.uneditable{
+			cursor: not-allowed;
+		}
+		.canvaaas-image.uneditable .canvaaas-grid{
+			border-color: red !important;
+		}
+		.canvaaas-image.disabled .canvaaas-border{
+			border-color: red !important;
+		}
+		.canvaaas-image.uneditable .canvaaas-overlay{
+			display: block !important;
+			background-color: red !important;
+		}
+		.canvaaas-image.uneditable .canvaaas-handle{
+			cursor: not-allowed;
+		}
+		.canvaaas-image.uneditable .canvaaas-handle-square{
+			border-color: red !important;
 		}
 
-		#myPreview img {
-			border: 1px solid #ccc;
-		}
 	</style>
 </head>
 
-<body style="padding-top: 0; padding-bottom: 0;">
-
-	<div id="header" class="header">
-		<div class="header-hidden">
-			<input id="uploadSingle" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*">
-			<input id="uploadMultiple" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
+<body>
+	<div style="height: 24px;"></div>
+	<!-- header start -->
+	<div class="header">
+		<div class="tab">
+			<div class="title">
+				<span>canvaaas.js</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						alert('Create by godicheol@gmail.com')
+					">About this</a>
+				</div>
+				<div class="row">
+					<a href="https://github.com/godicheol/canvaaas">Github</a>
+				</div>
+			</div>
 		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">canvaaas.js</a>
-			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="alert('Created by godicheol@gmail.com')">About canvaaas.js</a>
-				</li>
-				<li><a href="https://github.com/godicheol/canvaaas">Back to Github</a></li>
-			</ul>
-		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">File</a>
-			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.new({
-						width: window.prompt('Type Width', '1800'),
-						height: window.prompt('Type Height', '1200'),
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.new()', res);
-					})
-				">New</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.close(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.close()', res);
-					})
-				">Close</a></li>
-				<li class="rule"></li>
-				<li><label for="uploadMultiple">Upload from files</label></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadUrls([
-						window.prompt('Type image URL(URL`s are case sensitive in github.io)', './img/1.png')
-					], function(err, res, status) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.uploadUrls()', res, status);
-					})
-				">Upload from URLs</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadStates(exportedStates, function(err, res, status) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.uploadStates()', res, status);
-					})
-				">Upload from states</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.uploadElements([
-						document.getElementById('image-1'),
-						document.getElementById('image-2')
-					], function(err, res, status) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.uploadElements()', res, status);
-					})
-				">Upload from elements</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						dataType: 'url'
-					}, function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.draw()', result);
-						preview(res);
-					})
-				">Preview</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'thumbnail',
-						mimeType: 'image/png',
-						dataType: 'url',
-						drawWidth: 256,
-						drawHeight: 256,
-						quality: 0.5,
-						background: '#000000',
-					}, function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.draw()', result);
-						preview(res);
-					});
-				">Preview to<br />256 x 256 px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.draw({
-						filename: 'large',
-						mimeType: 'image/png',
-						dataType: 'url',
-						drawWidth: 5120,
-						drawHeight: 5120,
-						background: '#FFFFFF',
-					}, function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.draw()', result);
-						preview(res);
-					});
-				">Preview to<br />5120 x 5120 px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.drawTo({
-						filename: 'fromJSON',
-						quality: 0.92,
-						mimeType: 'image/png',
-						dataType: 'url',
-						background: '#FFFFFF',
-						width: 1800,
-						height: 1200,
-						drawWidth: 5120,
-						drawHeight: 5120
-					},
-					exportedStates2,
-					function(err, res, result){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.drawTo()', result);
-						preview(res);
-					})
-				">Preview from JSON</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.export(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.export()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Export</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.import(exportedStates2, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.import()', res);
-					})
-				">Import</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getConfig(function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getConfig()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get config data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getCanvas(function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getCanvas()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get canvas data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getImage(canvaaas.this().id, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getImage()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get image data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getImages(function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getImages()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get images data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getPreviousImage(canvaaas.this().id, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getPreviousImage()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get previous image data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getNextImage(canvaaas.this().id, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getNextImage()', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Get next image data</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getUndo(function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getUndo()', res);
-						alert(JSON.stringify(res.length, null, 2));
-					})
-				">Get number of undo caches</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.getRedo(function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('canvaaas.getRedo()', res);
-						alert(JSON.stringify(res.length, null, 2));
-					})
-				">Get number of redo caches</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.init(document.getElementById('myContainer'), function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.init()', res);
-						canvaaas.config(testConfig, function(err, res){
-							if (err) {
-								console.log(err);
-								return false;
-							}
-							console.log('canvaaas.config()', res);
+		<div class="tab">
+			<div class="title">
+				<span>File</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.new({
+							filename: window.prompt('Filename', 'untitled'),
+							mimetype: window.prompt('Mimetype', 'image/png'),
+							width: window.prompt('Width', '1800'),
+							height: window.prompt('Height', '1800'),
+							quality: window.prompt('Quality (e.g. 0 ~ 1)', '0.92'),
+							background: window.prompt('Background (e.g. #000000 ~ #FFFFFF)', 'transparent'),
+							checker: window.prompt('Checker (e.g. true, false)', 'true'),
+							overlay: window.prompt('Overlay (e.g. true, false)', 'true'),
+							ruler: window.prompt('Ruler (e.g. true, false)', 'false'),
 						})
-					})
-				">Init</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.destroy(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.destroy()', res);
-					})
-				">Destroy</a></li>
-			</ul>
-		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">Edit</a>
-			<ul class="header-list hidden">
-				<li><a id="undo" href="javascript:void(0)" onclick="
-					canvaaas.undo(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.undo()', res);
-						checkCaches();
-					})
-				">Undo</a></li>
-				<li><a id="redo" href="javascript:void(0)" onclick="
-					canvaaas.redo(function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.redo()', res);
-						checkCaches();
-					})
-				">Redo</a></li>
-				<!-- <li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findOne({
-						id: window.prompt('Type new ID'))
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('findOne callback', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Find One</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({
-						id: window.prompt('Type new ID'))
-					}, function(err, res){
-						if (err) {
-							alert(err);
-							return false;
-						}
-						console.log('findMany callback', res);
-						alert(JSON.stringify(res, null, 2));
-					})
-				">Find Many</a></li> -->
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						id: window.prompt('Type new ID')
-					})
-				">ID</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveY(canvaaas.this().id, -10)
-				">Move top +10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveY(canvaaas.this().id, 10)
-				">Move bottom +10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveX(canvaaas.this().id, -10)
-				">Move left +10px</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.moveX(canvaaas.this().id, 10)
-				">Move right +10px</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoom(canvaaas.this().id, 0.1)
-				">Zoom +0.1</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.zoom(canvaaas.this().id, -0.1)
-				">Zoom -0.1</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cover(canvaaas.this().id)
-				">Fit cover</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.contain(canvaaas.this().id)
-				">Fit contain</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.rotate(canvaaas.this().id, -45)
-				">Rotate left 45</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.rotate(canvaaas.this().id, 45)
-				">Rotate right 45</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						rotate: 0
-					})
-				">Rotate to 0</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipY(canvaaas.this().id)
-				">Flip horizontally</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.flipX(canvaaas.this().id)
-				">Flip vertically</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						scaleX: 1,
-						scaleY: 1,
-					})
-				">Flip reset</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.opacity(canvaaas.this().id, window.prompt('0 ~ 1', '0.5'))
-				">Opacity</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropTop(canvaaas.this().id, 10)
-				">Crop top +10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropTop(canvaaas.this().id, -10)
-				">Crop top -10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropBottom(canvaaas.this().id, 10)
-				">Crop bottom +10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropBottom(canvaaas.this().id, -10)
-				">Crop bottom -10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropLeft(canvaaas.this().id, 10)
-				">Crop left +10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropLeft(canvaaas.this().id, -10)
-				">Crop left -10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropRight(canvaaas.this().id, 10)
-				">Crop right +10</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.cropRight(canvaaas.this().id, -10)
-				">Crop right -10</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						index: window.prompt('Number', '5')
-					})
-				">Index to</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.index(canvaaas.this().id, 1)
-				">Index +1</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.index(canvaaas.this().id, -1)
-				">Index -1</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusIn(window.prompt('ID'))
-				">Focus in</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.focusOut()
-				">Focus out</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						lockAspectRatio: true
-					})
-				">Lock aspect ratio</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						lockAspectRatio: false
-					})
-				">Unlock aspect ratio</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({}, function(err, res) {
-						if (err) {
-							return false
-						}
-						res.forEach(function(elem){
-							canvaaas.state(elem.id, {
-								focusabled: true
+					">New</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.close()
+					">Close</a>
+				</div>
+				<div class="row">
+					<input id="uploadF" style="display: none;" type="file" accept="image/*" onchange="canvaaas.uploadFiles(this.files)" multiple>
+					<label for="uploadF">Upload files</label>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.uploadUrls([window.prompt('URL', './img/1.png')])"
+					>Upload URL</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.draw({
+							filename: 'large',
+							mimetype: 'image/jpeg'
+						}, function(err, res){
+							if (err) {return false;}
+							canvaaas.debug(res);
+						})
+					">Preview</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.draw({
+							filename: 'small',
+							mimetype: 'image/jpeg',
+							width: '256',
+							height: '256',
+							quality: 0.92,
+							background: '#272727'
+						}, function(err, res){
+							if (err) {return false;}
+							canvaaas.debug(res);
+						})
+					">Thumbnail</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.drawTo({
+							filename: 'small',
+							mimetype: 'image/jpeg',
+							width: '256',
+							height: '256',
+							quality: 0.92,
+							background: '#272727'
+						}, function(err, res){
+							if (err) {return false;}
+							canvaaas.debug(res);
+						})
+					">From JSON</a>
+				</div>
+				<div class="row">
+					<script>
+						function myExport() {
+							canvaaas.find({}, function(err, res){
+								if (err) {
+									alert(err);
+									return false;
+								}
+								var arr = [];
+								res.forEach(function(elem){
+									arr.push(elem.id);
+								})
+								canvaaas.export(arr, function(err, res){
+									if (err) {
+										alert(err);
+										return false;
+									}
+									console.log("canvaaas.export()", res)
+									alert(JSON.stringify(res, null, 2));
+								});
 							})
+						}
+ 					</script>
+					<a href="javascript:void(0)" onclick="myExport()">Export</a>
+				</div>
+				<div class="row rule">
+					<script>
+						var a1 = {};
+						var myImport = function() {
+							canvaaas.import()
+						}
+					</script>
+					<a class="disabled" href="javascript:void(0)" onclick="myImport()">Import()</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.init(document.getElementById('target'))
+					">Init</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.destroy(function(err, res){
+							if (err) {return false;}
+							canvaaas.config(defaultConfig);
 						})
-					})
-				">Lock aspect ratio all</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						focusabled: true
-					})
-				">Focusable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						focusabled: false
-					})
-				">Unfocusable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({}, function(err, res) {
-						if (err) {
-							return false
-						}
-						res.forEach(function(elem){
-							canvaaas.state(elem.id, {
-								focusabled: true
-							})
+					">Destroy</a>
+				</div>
+			</div>
+		</div>
+		<div class="tab">
+			<div class="title">
+				<span>Edit</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row">
+					<a id="myUndo" href="javascript:void(0)" onclick="
+						canvaaas.undo()
+					">Undo</a>
+				</div>
+				<div class="row rule">
+					<a id="myRedo" href="javascript:void(0)" onclick="
+						canvaaas.redo()
+					">Redo</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.state(selectedId, {
+							id: window.prompt('ID', selectedId)
+						}, function(err, res){
+							if (err) {return false;}
+							selectedId = res.id;
+							chkSelected();
 						})
-					})
-				">Focusable all</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						editabled: true
-					})
-				">Editable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						editabled: false
-					})
-				">Uneditable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({}, function(err, res) {
-						if (err) {
-							return false
-						}
-						res.forEach(function(elem){
-							canvaaas.state(elem.id, {
-								editabled: true
-							})
+					">ID</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.index(selectedId, 1)
+					">Index +1</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.index(selectedId, -1)
+					">Index -1</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.moveY(selectedId, -10)
+					">Move top 10</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.moveY(selectedId, 10)
+					">Move bottom 10</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.moveX(selectedId, -10)
+					">Move left 10</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.moveX(selectedId, 10)
+					">Move right 10</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.zoom(selectedId, 1.1)
+					">Zoom +0.1</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.zoom(selectedId, 0.9)
+					">Zoom -0.1</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cover(selectedId)
+					">Cover</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.contain(selectedId)
+					">Contain</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.flipX(selectedId)
+					">Flip X</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.flipY(selectedId)
+					">Flip Y</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.opacity(selectedId, 0.9)
+					">Opacity 0.9</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.opacity(selectedId, 0.5)
+					">Opacity 0.5</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.opacity(selectedId, 0.1)
+					">Opacity 0.1</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.lockAspectRatio(selectedId)
+					">Lock aspect ratio</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.visible(selectedId)
+					">Visible</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.clickable(selectedId)
+					">Clickable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.editable(selectedId)
+					">Editable</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.drawable(selectedId)
+					">Drawable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.pivot(selectedId)
+					">Pivot</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.grid(selectedId)
+					">Grids</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.reset(selectedId)
+					">Reset</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.remove(selectedId)
+					">Remove</a>
+				</div>
+				<div class="row">
+					<a class="" href="javascript:void(0)" onclick="
+						alert('You can only be applied in <script></script>')
+					">About filter</a>
+				</div>
+			</div>
+		</div>
+		<div class="tab">
+			<div class="title">
+				<span>Canvas</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							width: window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().width),
+							height: window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().height)
 						})
-					})
-				">Editable all</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						drawabled: true
-					})
-				">Drawable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						drawabled: false
-					})
-				">Undrawable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						visible: true
-					})
-				">Show</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.state(canvaaas.this().id, {
-						visible: false
-					})
-				">Hide</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({
-						visible: false
-					}, function(err, res) {
-						if (err) {
-							return false
-						}
-						res.forEach(function(elem){
-							canvaaas.state(elem.id, {
-								visible: true
-							})
+					">Resize</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							filename: window.prompt('Filename', canvaaas.getCanvas().filename)
 						})
-					})
-				">Show all</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.findMany({
-						visible: true
-					}, function(err, res) {
-						if (err) {
-							return false
-						}
-						res.forEach(function(elem){
-							canvaaas.state(elem.id, {
-								visible: false
-							})
+					">Filename</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							mimetype: window.prompt('Mimetype', canvaaas.getCanvas().mimetype)
 						})
-					})
-				">Hide all</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.reset(canvaaas.this().id)
-				">Reset</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.remove(canvaaas.this().id)
-				">Remove</a></li>
-			</ul>
+					">Mimetype</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							quality: window.prompt('Quality (e.g. 0 ~ 1)', canvaaas.getCanvas().quality)
+						})
+					">Quality</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							background: window.prompt('background (e.g. #272727)', canvaaas.getCanvas().background)
+						})
+					">background</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							clickable: canvaaas.getCanvas().clickable === false
+						})
+					">Clickable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							editable: canvaaas.getCanvas().editable === false
+						})
+					">Editable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							overlay: canvaaas.getCanvas().overlay === false
+						})
+					">Overlay</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							checker: canvaaas.getCanvas().checker === false
+						})
+					">Checker</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							ruler: canvaaas.getCanvas().ruler === false
+						})
+					">Ruler</a>
+				</div>
+			</div>
 		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">Canvas</a>
-			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						filename: window.prompt('Type filename', 'untitled')
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Filename</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						dataType: window.prompt('Type output data type (url of file)', 'url')
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Data type</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						mimeType: window.prompt('Type mime type', 'image/jpeg')
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Mime type</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						quality: window.prompt('Type quality (0 ~ 1)', '0.92')
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Quality</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						width: window.prompt('Type width', '1800'),
-						height: window.prompt('Type height', '1200'),
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Resize</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						editabled: true
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Editable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						editabled: false
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Uneditable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						focusabled: true
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Focusable</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						focusabled: false
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Unfocusable</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						background: window.prompt('e.g. #FFFFFF, alpha', '#000000')
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Set background</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						background: 'transparent'
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Unset background</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						overlay: true
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Show overlay</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						overlay: false
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Hide overlay</a></li>
-				<li class="rule"></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						checker: true
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Show checker</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.canvas({
-						checker: false
-					}, function(err, res){
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.canvas()', res);
-						writeCanvasData();
-					})
-				">Hide checker</a></li>
-			</ul>
+		<div class="tab">
+			<div class="title">
+				<span>View</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'resize',
+							'ne': 'resize',
+							'e': 'resize',
+							'se': 'resize',
+							's': 'resize',
+							'sw': 'resize',
+							'w': 'resize',
+							'nw': 'resize',
+							'n-n': 'rotate',
+							'ne-ne': 'crop',
+							'e-e': 'flip',
+							'se-se': 'crop',
+							's-s': 'click',
+							'sw-sw': 'crop',
+							'w-w': 'click',
+							'nw-nw': 'crop',
+						})
+					">Handle style default</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'resize',
+							'ne': 'resize',
+							'e': 'resize',
+							'se': 'resize',
+							's': 'resize',
+							'sw': 'resize',
+							'w': 'resize',
+							'nw': 'resize',
+							'n-n': 'rotate',
+							'ne-ne': null,
+							'e-e': 'flip',
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 1</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'crop',
+							'ne': 'crop',
+							'e': 'crop',
+							'se': 'crop',
+							's': 'crop',
+							'sw': 'crop',
+							'w': 'crop',
+							'nw': 'crop',
+							'n-n': 'rotate',
+							'ne-ne': null,
+							'e-e': 'flip',
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 2</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'resize',
+							'ne': 'resize',
+							'e': 'resize',
+							'se': 'resize',
+							's': 'resize',
+							'sw': 'resize',
+							'w': 'resize',
+							'nw': 'resize',
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 3</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'crop',
+							'ne': 'crop',
+							'e': 'crop',
+							'se': 'crop',
+							's': 'crop',
+							'sw': 'crop',
+							'w': 'crop',
+							'nw': 'crop',
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 4</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': null,
+							'ne': 'resize',
+							'e': null,
+							'se': 'resize',
+							's': null,
+							'sw': 'resize',
+							'w': null,
+							'nw': 'resize',
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 5</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': null,
+							'ne': 'crop',
+							'e': null,
+							'se': 'crop',
+							's': null,
+							'sw': 'crop',
+							'w': null,
+							'nw': 'crop',
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 6</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'resize',
+							'ne': null,
+							'e': 'resize',
+							'se': null,
+							's': 'resize',
+							'sw': null,
+							'w': 'resize',
+							'nw': null,
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 7</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'crop',
+							'ne': null,
+							'e': 'crop',
+							'se': null,
+							's': 'crop',
+							'sw': null,
+							'w': 'crop',
+							'nw': null,
+							'n-n': null,
+							'ne-ne': null,
+							'e-e': null,
+							'se-se': null,
+							's-s': null,
+							'sw-sw': null,
+							'w-w': null,
+							'nw-nw': null,
+						})
+					">Handle style 8</a>
+				</div>
+			</div>
 		</div>
-		<div class="header-tab">
-			<a href="javascript:void(0)" class="header-subject">View</a>
-			<ul class="header-list hidden">
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.handle({
-						inside: {
-							n: 'resize',
-							ne: 'resize',
-							e: 'resize',
-							se: 'resize',
-							s: 'resize',
-							sw: 'resize',
-							w: 'resize',
-							nw: 'resize',
-						},
-						outside: {
-							n: 'rotate',
-							ne: 'flip',
-							e: 'flip',
-							se: 'flip',
-							s: 'flip',
-							sw: 'flip',
-							w: 'flip',
-							nw: 'flip',
-						}
-					}, function(err, res) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.handle()', res);
-					})
-				">Handle Style default</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.handle({
-						inside: {
-							n: 'crop',
-							ne: 'crop',
-							e: 'crop',
-							se: 'crop',
-							s: 'crop',
-							sw: 'crop',
-							w: 'crop',
-							nw: 'crop',
-						},
-						outside: {
-							n: 'rotate',
-							e: 'flip',
-						}
-					}, function(err, res) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.handle()', res);
-					})
-				">Handle style crop mode</a></li>
-				<li><a href="javascript:void(0)" onclick="
-					canvaaas.handle({
-						inside: {
-							n: 'resize',
-							ne: 'resize',
-							e: 'resize',
-							se: 'resize',
-							s: 'resize',
-							sw: 'resize',
-							w: 'resize',
-							nw: 'resize',
-						},
-						outside: {
-							n: 'crop',
-							ne: 'crop',
-							e: 'crop',
-							se: 'crop',
-							s: 'crop',
-							sw: 'crop',
-							w: 'crop',
-							nw: 'crop',
-						}
-					}, function(err, res) {
-						if (err) {
-							console.log(err);
-							return false;
-						}
-						console.log('canvaaas.handle()', res);
-					})
-				">Handle style 3</a></li>
-			</ul>
-		</div>
-	</div>
-
-	<div id="myContainer"></div>
-
-	
-	<div id="myCanvas" class="">
-		<div id="myCanvas-filename"></div>
-		<div id="myCanvas-state"></div>
-		<div id="myCanvas-backgroundColor"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div id="myCanvas2" class="">
-		<div id="myCanvas-editabled"></div>
-		<div id="myCanvas-focusabled"></div>
-		<div id="myCanvas-overlay"></div>
-		<div id="myCanvas-checker"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div style="border-bottom: 1px solid #000;"></div>
-
-	<div id="myImage" class="">
-		<div id="myImage-id"></div>
-		<div id="myImage-state"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div id="myImage2" class="">
-		<div id="myImage-crop"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div id="myImage3" class="">
-		<div id="myImage-visible"></div>
-		<div id="myImage-editabled"></div>
-		<div id="myImage-focusabled"></div>
-		<div id="myImage-drawabled"></div>
-		<div id="myImage-lockAspectRatio"></div>
-		<div style="clear: both;"></div>
-	</div>
-
-	<div style="border-bottom: 1px solid #000;"></div>
-
-	<div id="myShortCut">
-		<div style="margin: 4px 0;">
-			Short cuts
-		</div>
-		<div style="margin: 4px 0;">
-			<a href="javascript:void(0)" onclick="
-				canvaaas.handle({
-					inside: {
-						n: 'resize',
-						ne: 'resize',
-						e: 'resize',
-						se: 'resize',
-						s: 'resize',
-						sw: 'resize',
-						w: 'resize',
-						nw: 'resize',
-					}
-				}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					console.log('canvaaas.handle()', res);
-				})
-			">Resize mode</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.handle({
-					inside: {
-						n: 'crop',
-						ne: 'crop',
-						e: 'crop',
-						se: 'crop',
-						s: 'crop',
-						sw: 'crop',
-						w: 'crop',
-						nw: 'crop',
-					}
-				}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					console.log('canvaaas.handle()', res);
-				})
-			">Crop mode</a>
-		</div>
-		<div style="margin: 4px 0;">
-			<a href="javascript:void(0)" onclick="
-				canvaaas.getPreviousImage(canvaaas.this().id, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					var a = canvaaas.this().index;
-					var b = res.index;
-
-					canvaaas.state(canvaaas.this().id, {
-						index: b
-					})
-
-					canvaaas.state(res.id, {
-						index: a
-					})
-				})
-			">Index down</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.getNextImage(canvaaas.this().id, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					var a = canvaaas.this().index;
-					var b = res.index;
-
-					canvaaas.state(canvaaas.this().id, {
-						index: b
-					})
-
-					canvaaas.state(res.id, {
-						index: a
-					})
-				})
-			">Index up</a>
-			/
-			<input type="range" value="1" min="0" max="1" step="0.01" oninput="
-				var v = this.value;
-				canvaaas.findMany({}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					res.forEach(function(elem){
-						canvaaas.state(elem.id, {
-							opacity: v
-						});
-					})
-				})
-			">
-			/
-			<input type="range" value="0" min="0" max="360" oninput="
-				var v = this.value;
-				canvaaas.findMany({}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					res.forEach(function(elem){
-						canvaaas.state(elem.id, {
-							rotate: v
-						});
-					})
-				})
-			">
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.findMany({}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					res.forEach(function(elem){
-						canvaaas.state(elem.id, {
-							visible: false
-						});
-					})
-				})
-			">Hide all</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.findMany({}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					res.forEach(function(elem){
-						canvaaas.state(elem.id, {
-							visible: true
-						});
-					})
-				})
-			">Show all</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.findMany({}, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					res.forEach(function(elem){
-						canvaaas.zoom(elem.id, 0.1);
-					})
-				})
-			">Zoom all</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.getPreviousImage(canvaaas.this().id, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					canvaaas.focusIn(res.id);
-				})
-			">Select previous</a>
-			/
-			<a href="javascript:void(0)" onclick="
-				canvaaas.getNextImage(canvaaas.this().id, function(err, res) {
-					if (err) {
-						console.log(err);
-						return false;
-					}
-					canvaaas.focusIn(res.id);
-				})
-			">Select next</a>
+		<div class="tab">
+			<div class="title">
+				<span>Console</span>
+			</div>
+			<div class="list" style="display: none;">
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({
+							id: window.prompt('id', 'id')
+						}, function(err, res){
+							if (err) {return false;}
+							alert(JSON.stringify(res, null, 2));
+						})
+					">Find for id</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({
+							index: window.prompt('index', '1')
+						}, function(err, res){
+							if (err) {return false;}
+							alert(JSON.stringify(res, null, 2));
+						})
+					">Find for index</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({
+							visible: window.prompt('visible (e.g. `true`, `false`)', 'true')
+						}, function(err, res){
+							if (err) {return false;}
+							alert(JSON.stringify(res, null, 2));
+						})
+					">Find for visible</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getConfig(function(err, res){
+							console.log('canvaaas.getConfig()', res);
+						})
+					">Get config data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getCanvas(function(err, res){
+							console.log('canvaaas.getCanvas()', res);
+						})
+					">Get canvas data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getImages(function(err, res){
+							console.log('canvaaas.getImages()', res);
+						})
+					">Get images data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getUndo(function(err, res){
+							console.log('canvaaas.getUndo()', res);
+						})
+					">Get undo data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getRedo(function(err, res){
+							console.log('canvaaas.getRedo()', res);
+						})
+					">Get redo data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getLimit(function(err, res){
+							console.log('canvaaas.getLimit()', res);
+						})
+					">Get limit data</a>
+				</div>
+			</div>
 		</div>
 	</div>
+	<!-- header end -->
 
-	<div id="myPreview" class="hidden"></div>
 
-	<div style="display: none;">
-		<!-- IMG with dataset -->
-		<img id="image-1" src="./img/1.png" data-id="1" data-src="./img/1.png" data-index="1" data-width="600"
-			data-height="600" data-x="399.07235621521335" data-y="808.7198515769946" data-rotate="17.46323891797897"
-			data-scale-x="1" data-scale-y="1" data-opacity="1" data-lock-aspect-ratio="false" data-focusabled="true"
-			data-editabled="true" data-drawabled="true">
+	<div id="target"></div>
 
-		<img id="image-2" data-src="./img/3.jpeg" data-width="948.4312600294483" data-height="632.2875066862982"
-			data-x="151.39146567717992" data-y="291.0946196660483">
+
+	<!-- controller -->
+	<div class="ctrl">
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="index"
+				data-value="1"
+				>
+				<span class="material-icons">
+					thumb_up
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="index"
+				data-value="-1"
+				>
+				<span class="material-icons">
+					thumb_down
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="crop"
+				data-value=""
+				>
+				<span class="material-icons">
+					crop
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="resize"
+				data-value=""
+				>
+				<span class="material-icons">
+					transform
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="moveY"
+				data-value="-10"
+				>
+				<span class="material-icons">expand_less</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="moveY"
+				data-value="10"
+				>
+				<span class="material-icons">expand_more</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="moveX"
+				data-value="-10"
+				>
+				<span class="material-icons">
+					navigate_before
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="moveX"
+				data-value="10"
+				>
+				<span class="material-icons">
+					navigate_next
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="zoom"
+				data-value="1.1"
+				>
+				<span class="material-icons">
+					zoom_in
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="zoom"
+				data-value="0.9"
+				>
+				<span class="material-icons">
+					zoom_out
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="cover"
+				data-value=""
+				>
+				<span class="material-icons">
+					open_in_full
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="contain"
+				data-value=""
+				>
+				<span class="material-icons">
+					open_in_full
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="rotate"
+				data-value="45"
+				>
+				<span class="material-icons">
+					rotate_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="rotate"
+				data-value="-45"
+				>
+				<span class="material-icons">
+					rotate_left
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="flipY"
+				data-value=""
+				>
+				<span class="material-icons">
+					flip
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="flipX"
+				data-value=""
+				>
+				<span class="material-icons" style="transform: rotate(90deg);">
+					flip
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="opacity"
+				data-value="0.1"
+				>
+				<span class="material-icons">
+					opacity
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="opacity"
+				data-value="-0.1"
+				>
+				<span class="material-icons">
+					invert_colors_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="lockAspectRatio"
+				data-value=""
+				>
+				<span class="material-icons">
+					aspect_ratio
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="visible"
+				data-value=""
+				>
+				<span class="material-icons">
+					visibility_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="clickable"
+				data-value=""
+				>
+				<span class="material-icons">
+					do_not_disturb_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="editable"
+				data-value=""
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="drawable"
+				data-value=""
+				>
+				<span class="material-icons">
+					file_download_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="remove"
+				data-value=""
+				>
+				<span class="material-icons">
+					delete
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="grid"
+				data-value=""
+				>
+				<span class="material-icons">
+					grid_3x3
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="pivot"
+				data-value=""
+				>
+				<span class="material-icons">
+					adjust
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-grayscale"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-sepia"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-negative"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-brightness"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-darkness"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class=""
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filter-contrast"
+				data-value=""
+				>
+				<span class="material-icons">
+					join_right
+				</span>
+			</a>
+		</div>
 	</div>
-
+	<style>
+		/* controller */
+		.ctrl{
+			position: absolute;
+			display: block;
+			top: 24px;
+			left: 0;
+			width: 72px;
+			max-height: calc(100% - 48px);
+			text-align: center;
+			z-index: 1000;
+		}
+		.ctrl .row{
+			display: inline-block;
+			float: left;
+		}
+		.ctrl .row a{
+			display: block;
+			padding: 4px;
+			font-size: initial;
+			color: #000000;
+		}
+		.ctrl .row a.selected{
+			background-color: #000000;
+			color: #FFFFFF;
+		}
+		@media only screen and (max-width: 768px) {
+			.ctrl{
+				top: auto;
+				bottom: 48px;
+				width: 100%;
+				overflow-y: auto;
+			}
+		}
+	</style>
 	<script>
-		var target = document.getElementById("myContainer");
+		var tool;
 
-		//
-		//
-		// MAIN START
-		//
-		//
+		function selectTool(self) {
+			var m = self.getAttribute("data-method");
+			var v = self.getAttribute("data-value");
 
-		// #1 init
-		canvaaas.init(target, function (err, res) {
-			if (err) {
-				console.log(err);
-				return false;
+			if (tool) {
+				cancelTool(tool);
 			}
 
-			checkCaches();
+			tool = self;
 
-			console.log("canvaaas.init() callback", res);
+			if (!self.classList.contains("selected")) {
+				self.classList.add("selected");
+			}
+		}
+
+		function cancelTool(self) {
+			if (self.classList.contains("selected")) {
+				self.classList.remove("selected");
+			}
+			tool = undefined;
+		}
+	</script>
+
+
+	<!-- footer start -->
+	<div class="footer">
+		<div class="footer-left">
+			<span id="myIndex">(Index)</span>
+			<span id="myId">ID</span>
+		</div>
+		<div class="footer-right">
+			<span id="myDrawable" style="color: #FFFFFF;">Drawable</span>
+			/
+			<span id="myEditable" style="color: #FFFFFF;">Editable</span>
+			/
+			<span id="myLockAspectRatio" style="color: #FFFFFF;">Lock Aspect Ratio</span>
+			/
+			<span id="myX">X</span>
+			/
+			<span id="myY">Y</span>
+			/
+			<span id="myWidth">Width</span>
+			/
+			<span id="myHeight">Height</span>
+			/
+			<span id="myRotate">Rotate</span>
+			/
+			<span id="myFlipX">FlipX</span>
+			/
+			<span id="myFlipY">FlipY</span>
+			/
+			<span id="myOpacity">Opacity</span>
+		</div>
+		<div style="clear: both"></div>
+	</div>
+	<!-- footer end -->
+
+
+	<script>
+
+		// 
+		// utils
+		// 
+
+		var viewportSizes = canvaaas.getViewport();
+		var selectedId;
+
+
+		// 
+		// main
+		// 
+
+		// #1 init
+		canvaaas.init(document.getElementById("target"), function(err, res){
+			if (err) {return false;}
+			console.log("canvaaas.init()", res);
 		});
 
 		// #2 config
-		canvaaas.config({
-			upload: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
+		var defaultConfig = {
+			allowedMimeTypesForUpload: [
+				"image/bmp",
+				"image/x-ms-bmp",
+				"image/jpg",
+				"image/jpeg",
+				"image/png",
+				"image/gif",
+				"image/svg",
+				"image/svg+xml",
+				"image/tiff",
+				"image/tif",
+				"image/webp",
+			], // array of allowed mimetypes
+			cacheLevels: 999, // number
+			aspectRatioOfContainer: 1 / 1, // number, width / height
+			maxWidthOfContainer: 500, // number, px
+			maxHeightOfContainer: 500, // number, px
+			startIndexAfterRender: 1, // number
+			maxIndexAfterRender: 1000, // number
+			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+			lockAspectRatioAfterRender: false, // boolean
+			showGridAfterRender: true, // boolean
+			showPivotAfterRender: true, // boolean
+			click: function(err, res) {
+				if (err) {return false;}
+				console.log("click", res);
+				selectedId = res.id;
+				chkSelected();
+
+				if (tool) {
+					var m = tool.getAttribute("data-method");
+					var v = tool.getAttribute("data-value");
+					var id = res.id;
+					switch(m) {
+						case "index":
+							canvaaas.index(id, v)
+							break;
+						case "moveX":
+							canvaaas.moveX(id, v)
+							break;
+						case "moveY":
+							canvaaas.moveY(id, v)
+							break;
+						case "zoom":
+							canvaaas.zoom(id, v)
+							break;
+						case "rotate":
+							canvaaas.rotate(id, v)
+							break;
+						case "flipX":
+							canvaaas.flipX(id)
+							break;
+						case "flipY":
+							canvaaas.flipY(id)
+							break;
+						case "opacity":
+							canvaaas.opacity(id, v)
+							break;
+						case "lockAspectRatio":
+							canvaaas.lockAspectRatio(id)
+							cancelTool(tool);
+							break;
+						case "visible":
+							canvaaas.visible(id)
+							cancelTool(tool);
+							break;
+						case "clickable":
+							canvaaas.clickable(id)
+							cancelTool(tool);
+							break;
+						case "editable":
+							canvaaas.editable(id)
+							cancelTool(tool);
+							break;
+						case "drawable":
+							canvaaas.drawable(id)
+							cancelTool(tool);
+							break;
+						case "reset":
+							canvaaas.reset(id)
+							cancelTool(tool);
+							break;
+						case "remove":
+							canvaaas.remove(id)
+							cancelTool(tool);
+							break;
+						case "grid":
+							canvaaas.grid(id)
+							cancelTool(tool);
+							break;
+						case "pivot":
+							canvaaas.pivot(id)
+							cancelTool(tool);
+							break;
+						case "cover":
+							canvaaas.cover(id)
+							cancelTool(tool);
+							break;
+						case "contain":
+							canvaaas.contain(id)
+							cancelTool(tool);
+							break;
+						case "resize":
+							canvaaas.handleAll({
+								'n': 'resize',
+								'ne': 'resize',
+								'e': 'resize',
+								'se': 'resize',
+								's': 'resize',
+								'sw': 'resize',
+								'w': 'resize',
+								'nw': 'resize',
+								"n-n": null,
+								"ne-ne": null,
+								"e-e": null,
+								"se-se": null,
+								"s-s": null,
+								"sw-sw": null,
+								"w-w": null,
+								"nw-nw": null,
+							});
+							cancelTool(tool);
+							break;
+						case "crop":
+							canvaaas.handleAll({
+								'n': 'crop',
+								'ne': 'crop',
+								'e': 'crop',
+								'se': 'crop',
+								's': 'crop',
+								'sw': 'crop',
+								'w': 'crop',
+								'nw': 'crop',
+								"n-n": null,
+								"ne-ne": null,
+								"e-e": null,
+								"se-se": null,
+								"s-s": null,
+								"sw-sw": null,
+								"w-w": null,
+								"nw-nw": null,
+							});
+							cancelTool(tool);
+							break;
+						case "filter-grayscale":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
+								return [luma, luma, luma, a];
+							})
+							cancelTool(tool);
+							break;
+						case "filter-sepia":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var tr = r *.393 + g *.769 + b *.189;
+								var tg = r *.349 + g *.686 + b *.168;
+								var tb = r *.272 + g *.534 + b *.131;
+								return [tr, tg, tb, a];
+							})
+							cancelTool(tool);
+							break;
+						case "filter-negative":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var tr = 255 - r;
+								var tg = 255 - g;
+								var tb = 255 - b;
+								return [tr, tg, tb, a];
+							})
+							cancelTool(tool);
+							break;
+						case "filter-brightness":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var tr = r - 40;
+								var tg = g - 40;
+								var tb = b - 40;
+								return [tr, tg, tb, a];
+							})
+							cancelTool(tool);
+							break;
+						case "filter-darkness":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var tr = r + 40;
+								var tg = g + 40;
+								var tb = b + 40;
+								return [tr, tg, tb, a];
+							})
+							cancelTool(tool);
+							break;
+						case "filter-contrast":
+							canvaaas.filter(id, function(r, g, b, a) {
+								var contrast = 10; // %
+								contrast *= 255 / 100;
+								var factor = (255 + contrast) / (255.01 - contrast);
+								var tr = factor * (r - 128) + 128;
+								var tg = factor * (g - 128) + 128;
+								var tb = factor * (b - 128) + 128;
+								return [tr, tg, tb, a];
+							})
+							cancelTool(tool);
+							break;
+					}
 				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.upload callback", res);
 			},
-			focus: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
+			doubleClick: function(err, res) {
+				if (err) {return false;}
+				canvaaas.rotate(res.id, 45);
+			},
+			rightClick: function(err, res, end) {
+				if (err) {return false;}
+				console.log("right click", res);
+				end(); // required
+			},
+			clickHandle: function(err, res, d) {
+				if (err) {return false;}
+				// example
+				if (d === "w-w") {
+					canvaaas.editable(res.id, function(err, res){
+						if (err) {return false;}
+						if (!res.editable) {
+							canvaaas.addClass(res.id, "disabled");
+						} else {
+							canvaaas.removeClass(res.id, "disabled");
+						}
+					});
+				} else if (d === "s-s") {
+					canvaaas.lockAspectRatio(res.id, function(err, res){
+						if (err) {return false;}
+					});
 				}
-
-				writeImageData(res);
-				checkCaches();
-
-				console.log("config.focus callback", res);
 			},
-			edit: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
+			edit: function(err, res) {
+				if (err) {return false;}
+				chkCache();
+				if (res.id === selectedId) {
+					chkSelected();
 				}
-
-				checkCaches();
-
-				console.log("config.edit callback", res);
 			},
-			remove: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
+			upload: function(err, res) {
+				if (err) {return false;}
+			},
+			remove: function(err, res) {
+				if (err) {return false;}
+				if (res.id === selectedId) {
+					selectedId = undefined;
+					chkSelected();
 				}
-
-				checkCaches();
-
-				console.log("config.remove callback", res);
 			},
-		}, function (err, res) {
-			if (err) {
-				console.log(err);
-				return false;
-			}
+		}
+		canvaaas.config(defaultConfig, function(err, res){
+			if (err) {return false;}
+			console.log("canvaaas.config()", res);
 		});
 
 		// #3 create canvas
 		canvaaas.new({
-			filename: "Test",
-			width: 1800, // number, px
-			height: 1200, // number, px
-			overlay: true,
-			checker: true
+			filename: "untitled", // string, without extension
+			mimetype: "image/png", // string
+			quality: 0.92, // number, 0 ~ 1
+			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
+			overlay: true, // boolean
+			checker: true, // boolean
+			clickable: true, // boolean
+			editable: true, // boolean
+			ruler: false, // boolean
+			width: 1200,
+			height: 1200,
 		}, function (err, res) {
-			if (err) {
-				console.log(err);
-				return false;
-			}
-			console.log("canvaaas.new() callback", res);
-			writeCanvasData();
+			if (err) {return false;}
+			console.log("canvaaas.new()", res);
 		});
 
-		// #3.1 handle style
-		// canvaaas.handle({
-		// 	inside: {
-		// 		ne: "crop",
-		// 		se: "crop",
-		// 		sw: "crop",
-		// 		nw: "crop",
-		// 	},
-		// 	outside: {
-		// 		n: "flip",
-		// 		e: "rotate",
-		// 	}
-		// }, function(err, res){
-		// 	if (err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// 	console.log("canvaaas.handle() callback", res);
-		// });
+		// 
+		// focus
+		// 
 
-		// execute after page load
-		setTimeout(function () {
 
-		}, 200);
 
-		//
-		//
-		// MAIN END
-		//
-		//
+		// 
+		// cache
+		// 
 
-		// example
-		// iOS chrome not supported (only large file?)
-		function myDownload(myData, filename) {
-			var myLink = document.createElement('a');
-			myLink.setAttribute('href', myData);
-			myLink.setAttribute('download', filename);
-			myLink.style.display = 'none';
-			document.body.appendChild(myLink);
-			myLink.click();
-			document.body.removeChild(myLink);
-			window.URL.revokeObjectURL(myData);
-		}
-
-		// example
-		// iOS safari not supported
-		function newTab(myData) {
-			var image = new Image();
-			image.src = myData;
-			image.style.position = 'absolute';
-			image.style.top = '50%';
-			image.style.left = '50%';
-			image.style.transform = 'translate(-50%, -50%)';
-			image.style.width = '100%';
-			image.style.height = 'auto';
-
-			var myNewTab = window.open('');
-			myNewTab.document.write(image.outerHTML);
-			myNewTab.document.body.style.backgroundColor = '#000000';
-			myNewTab.document.body.style.padding = '24px';
-			myNewTab.document.body.style.position = 'relative';
-
-			window.URL.revokeObjectURL(myData);
-		}
-
-		// example
-		function preview(myData) {
-			var myElem = document.getElementById("myPreview");
-
-			var image = new Image();
-			image.src = myData;
-			image.style.position = 'absolute';
-			image.style.top = '50%';
-			image.style.left = '50%';
-			image.style.transform = 'translate(-50%, -50%)';
-			image.style.width = '100%';
-			image.style.height = 'auto';
-
-			myElem.appendChild(image);
-
-			if (myElem.classList.contains("hidden")) {
-				myElem.classList.remove("hidden");
-			}
-
-			window.URL.revokeObjectURL(myData);
-		}
-
-		document.getElementById("myPreview").addEventListener("click", function (e) {
-			if (!this.classList.contains("hidden")) {
-				this.classList.add("hidden");
-			}
-			this.innerHTML = "";
-		});
-
-		function writeCanvasData() {
-			var state = canvaaas.getCanvas();
-
-			var sFilename = document.getElementById("myCanvas-filename");
-			var sEditabled = document.getElementById("myCanvas-editabled");
-			var sFocusabled = document.getElementById("myCanvas-focusabled");
-			var sOverlay = document.getElementById("myCanvas-overlay");
-			var sChecker = document.getElementById("myCanvas-checker");
-			var sBackground = document.getElementById("myCanvas-backgroundColor");
-			var sState = document.getElementById("myCanvas-state");
-
-			sFilename.innerHTML = state.filename + "." + state.mimeType.split("/").pop();
-
-			sState.innerHTML = "";
-			sState.innerHTML += Math.floor(state.width) + " x " + Math.floor(state.height);
-			sState.innerHTML += " px";
-
-			sEditabled.innerHTML = state.editabled ? "" : "<span style='color: red;'>Uneditabled</span>";
-			sFocusabled.innerHTML = state.focusabled ? "" : "<span style='color: red;'>Unfocusabled</span>";
-			sOverlay.innerHTML = state.overlay ? "" : "<span style='color: red;'>Hide overlay</span>";
-			sChecker.innerHTML = state.checker ? "" : "<span style='color: red;'>Hide checker</span>";
-			sBackground.style.backgroundColor = state.background;
-		}
-
-		function writeImageData(state) {
-			var sId = document.getElementById("myImage-id");
-			var sState = document.getElementById("myImage-state");
-			var sCrop = document.getElementById("myImage-crop"); 
-			var sEditabled = document.getElementById("myImage-editabled");
-			var sFocusabled = document.getElementById("myImage-focusabled");
-			var sVisible = document.getElementById("myImage-visible");
-			var sAspectRatio = document.getElementById("myImage-lockAspectRatio");
-			var sDrawabled = document.getElementById("myImage-drawabled");
-
-			if (!state) {
-				sId.innerHTML = "";
-				sState.innerHTML = "";
-				sCrop.innerHTML = "";
-				sEditabled.innerHTML = "";
-				sFocusabled.innerHTML = "";
-				sVisible.innerHTML = "";
-				sAspectRatio.innerHTML = "";
-				sDrawabled.innerHTML = "";
-				return false;
-			}
-
-			sId.innerHTML = state.id;
-
-			sState.innerHTML = "";
-			sState.innerHTML += "index: " + state.index;
-			sState.innerHTML += " / x: " + Math.floor(state.x);
-			sState.innerHTML += " / y: " + Math.floor(state.y);
-			sState.innerHTML += " / w: " + Math.floor(state.width);
-			sState.innerHTML += " / h: " + Math.floor(state.height);
-			sState.innerHTML += " / deg: " + Math.floor(state.rotate);
-			sState.innerHTML += " / flip-x: " + state.scaleY;
-			sState.innerHTML += " / flip-y: " + state.scaleX;
-			sState.innerHTML += " / opacity " + state.opacity;
-
-			sEditabled.innerHTML = state.editabled ? "" : "<span style='color: red;'>Uneditabled</span>";
-			sFocusabled.innerHTML = state.focusabled ? "" : "<span style='color: red;'>Unfocusabled</span>";
-			sDrawabled.innerHTML = state.drawabled ? "" : "<span style='color: red;'>Undrawabled</span>";
-			sVisible.innerHTML = state.visible ? "" : "<span style='color: red;'>Hidden</span>";
-			sAspectRatio.innerHTML = state.lockAspectRatio ? "<span style='color: red;'>Lock Aspect Ratio</span>" : "";
-
-			sCrop.innerHTML = "";
-			sCrop.innerHTML += "crop-top: ";
-			sCrop.innerHTML += Math.floor(state.cropTop);
-			sCrop.innerHTML += " / crop-bottom: ";
-			sCrop.innerHTML += Math.floor(state.cropBottom);
-			sCrop.innerHTML += " / crop-left: ";
-			sCrop.innerHTML += Math.floor(state.cropLeft);
-			sCrop.innerHTML += " / crop-right: ";
-			sCrop.innerHTML += Math.floor(state.cropRight);
-		}
-
-		function checkCaches() {
-			var undo = document.getElementById("undo");
-			var redo = document.getElementById("redo");
+		function chkCache() {
+			var u = document.getElementById("myUndo");
+			var r = document.getElementById("myRedo");
 			if (canvaaas.getUndo().length < 1) {
-				undo.style.pointerEvents = "none";
-				undo.style.cursor = "default";
-				undo.style.color = "#777";
+				u.classList.add("disabled");
 			} else {
-				undo.style.pointerEvents = "";
-				undo.style.cursor = "";
-				undo.style.color = "";
+				u.classList.remove("disabled");
 			}
 			if (canvaaas.getRedo().length < 1) {
-				redo.style.pointerEvents = "none";
-				redo.style.cursor = "default";
-				redo.style.color = "#777";
+				r.classList.add("disabled");
 			} else {
-				redo.style.pointerEvents = "";
-				redo.style.cursor = "";
-				redo.style.color = "";
+				r.classList.remove("disabled");
 			}
 		}
 
-		(function () {
-			var header = document.getElementById("header");
-			var tabs = header.querySelectorAll("a.header-subject");
-			var opened;
+		function chkSelected() {
+			var buttons = document.body.querySelectorAll("div.selection");
+			var inputs = {
+				index: document.getElementById("myIndex"),
+				id: document.getElementById("myId"),
+				x: document.getElementById("myX"),
+				y: document.getElementById("myY"),
+				width: document.getElementById("myWidth"),
+				height: document.getElementById("myHeight"),
+				rotate: document.getElementById("myRotate"),
+				scaleX: document.getElementById("myFlipY"),
+				scaleY: document.getElementById("myFlipX"),
+				opacity: document.getElementById("myOpacity"),
+				lockAspectRatio: document.getElementById("myLockAspectRatio"),
+				editable: document.getElementById("myEditable"),
+				drawable: document.getElementById("myDrawable"),
+			}
+			if (selectedId) {
+				canvaaas.getImage(selectedId, function(err, res){
+					if (err) {return false;}
+					inputs.index.innerHTML = "(" + Math.floor(res.index) + ")";
+					inputs.id.innerHTML = res.id;
+					inputs.x.innerHTML = Math.floor(res.x) + "px";
+					inputs.y.innerHTML = Math.floor(res.y) + "px";
+					inputs.width.innerHTML = Math.floor(res.width) + "px";
+					inputs.height.innerHTML = Math.floor(res.height) + "px";
+					inputs.rotate.innerHTML = Math.floor(res.rotate) + "deg";
+					inputs.scaleX.innerHTML = res.scaleX === -1;
+					inputs.scaleY.innerHTML = res.scaleY === -1;
+					inputs.opacity.innerHTML = Math.floor(res.opacity);
+					if (!res.editable) {
+						inputs.editable.innerHTML = "Uneditabled";
+						inputs.editable.style.color = "red";
+					} else {
+						inputs.editable.innerHTML = "Editabled";
+						inputs.editable.style.color = "#FFFFFF";
+					}
+					if (!res.lockAspectRatio) {
+						inputs.lockAspectRatio.innerHTML = "Unlocked";
+						inputs.lockAspectRatio.style.color = "#FFFFFF";
+					} else {
+						inputs.lockAspectRatio.innerHTML = "Locked";
+						inputs.lockAspectRatio.style.color = "red";
+					}
+					if (!res.drawable) {
+						inputs.drawable.innerHTML = "Undrawbled";
+						inputs.drawable.style.color = "red";
+					} else {
+						inputs.drawable.innerHTML = "Drawbled";
+						inputs.drawable.style.color = "#FFFFFF";
+					}
+				});
 
-			tabs.forEach(function (t) {
-				t.addEventListener("click", function (e) {
+				buttons.forEach(function(elem){
+					var btn = elem.querySelector("a");
+					if (btn) {
+						if (btn.classList.contains("disabled")) {
+							btn.classList.remove("disabled");
+						}
+					}
+				})
+			} else {
+				inputs.index.innerHTML = "(Index)";
+				inputs.id.innerHTML = "ID";
+				inputs.x.innerHTML = "X";
+				inputs.y.innerHTML = "Y";
+				inputs.width.innerHTML = "Width";
+				inputs.height.innerHTML = "Height";
+				inputs.rotate.innerHTML = "Rotate";
+				inputs.scaleX.innerHTML = "FlipY";
+				inputs.scaleY.innerHTML = "FlipX";
+				inputs.opacity.innerHTML = "Opacity";
+				inputs.lockAspectRatio.innerHTML = "Lock Aspect Ratio";
+				inputs.lockAspectRatio.style.color = "#FFFFFF";
+				inputs.editable.innerHTML = "Editable";
+				inputs.editable.style.color = "#FFFFFF";
+				inputs.drawable.innerHTML = "Drawable";
+				inputs.drawable.style.color = "#FFFFFF";
+
+				buttons.forEach(function(elem){
+					var btn = elem.querySelector("a");
+					if (btn) {
+						if (!btn.classList.contains("disabled")) {
+							btn.classList.add("disabled");
+						}
+					}
+				})
+			}
+		}
+
+		document.body.addEventListener("click", function(e) {
+			var isTarget = e.target.tagName === "BODY" || e.target.classList.contains("canvaaas-canvas") || e.target.id === "target";
+			// console.log(isTarget);
+			if (!isTarget) {
+				return false;
+			}
+
+			if (selectedId) {
+				selectedId = undefined;
+			}
+			chkSelected()
+		});
+
+		chkCache();
+		chkSelected();
+
+		// 
+		// header
+		// 
+
+		(function(){
+			var header = document.body.querySelector("div.header");
+			var tabs = header.querySelectorAll("div.title");
+			var isOpened = false;
+
+			tabs.forEach(function(elem){
+				elem.addEventListener("click", function(e){
+					if (isOpened) {
+						closeAll();
+					}
+
 					e.preventDefault();
 					e.stopPropagation();
 
-					var isThis = false;
-					var list = e.target.parentNode.querySelector(".header-list");
+					openOne(this);
 
-					if (opened) {
-						if (opened.isSameNode(list)) {
-							isThis = true;
+					document.addEventListener("click", function(e){
+						if (isOpened) {
+							closeAll();
 						}
-						opened.classList.add("hidden");
-						opened = undefined;
-					}
+					});
 
-					if (isThis === true) {
-						return false;
-					}
-
-					if (list.classList.contains("hidden") === true) {
-						list.classList.remove("hidden");
-						opened = list;
-					}
+				});
+			})
+			
+			function closeAll() {
+				tabs.forEach(function(elem){
+					var list = elem.parentNode.querySelector("div.list");
+					list.style.display = "none";
 				});
 
-				var btns = t.parentNode.querySelector(".header-list").querySelectorAll("li");
-				btns.forEach(function (b) {
-					if (!b.classList.contains("rule")) {
-						b.addEventListener("click", function (e) {
-							if (opened) {
-								opened.classList.add("hidden");
-								opened = undefined;
-							}
-						})
-					}
-				});
-			});
-		})();
-
-		var defaultConfig = {
-			allowedExtensionsForUpload: [
-				"jpg",
-				"jpeg",
-				"png",
-				"gif",
-				"svg",
-				"svg+xml",
-				"tiff",
-				"tif",
-				"webp",
-			], // array of allowed extensions
-
-			cacheLevels: 999, // number
-
-			dragAndDrop: true, // boolean
-
-			containerAspectRatio: 1 / 1, // number, width / height
-
-			maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
-
-			maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
-
-			maxDrawWidth: 4096 * 4, // number, px, max zoom size if over quality loss
-
-			maxDrawHeight: 4096 * 4, // number, px, max zoom size if over quality loss
-
-			maxDrawWidthOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
-
-			maxDrawHeightOnMobile: 4096, // number, if bigger than 4096px throw an error in iOS
-
-			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-
-			lockAspectRatioAfterRender: false, // boolean
-
-			upload: undefined, // callback function
-
-			focus: undefined, // callback function
-
-			edit: undefined, // callback function
-
-			remove: undefined, // callback function
-		}
-
-		var testConfig = {
-			upload: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeCanvasData();
-				checkCaches();
-
-				console.log("config.upload callback", res);
-			},
-			focus: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeImageData(res);
-				checkCaches();
-
-				console.log("config.focus callback", res);
-			},
-			edit: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				writeImageData(res);
-				checkCaches();
-
-				console.log("config.edit callback", res);
-			},
-			remove: function (err, res) {
-				if (err) {
-					console.log(err);
-					return false;
-				}
-
-				checkCaches();
-
-				console.log("config.remove callback", res);
-			},
-		}
-
-		var exportedCanvasState = {
-			"filename": "TEST",
-			"quality": 0.92,
-			"mimeType": "image/png",
-			"dataType": "url",
-			"editabled": true,
-			"focusabled": true,
-			"background": "#FFFFFF",
-			"overlay": true,
-			"checker": true,
-			"width": 1800,
-			"height": 1200,
-			"aspectRatio": "3:2"
-		}
-
-		var exportedStates = [{
-			"id": "TEST_PNG",
-			"src": "./img/1.png",
-			"cropTop": 0,
-			"cropBottom": 0,
-			"cropLeft": 0,
-			"cropRight": 0,
-			"index": 1,
-			"originalWidth": 800,
-			"originalHeight": 800,
-			"width": 600.0000000000001,
-			"height": 600.0000000000001,
-			"x": 399.07235621521335,
-			"y": 808.7198515769946,
-			"rotate": 17.46323891797897,
-			"scaleX": 1,
-			"scaleY": 1,
-			"opacity": 1,
-			"lockAspectRatio": false,
-			"visible": true,
-			"focusabled": true,
-			"editabled": true,
-			"drawabled": true,
-			"originalAspectRatio": "1:1",
-			"aspectRatio": "1:1",
-			"left": 99.07235621521329,
-			"top": 508.7198515769946
-		}, {
-			"id": "TEST_JPG",
-			"src": "./img/2.jpg",
-			"cropTop": 0,
-			"cropBottom": 0,
-			"cropLeft": 0,
-			"cropRight": 0,
-			"index": 2,
-			"originalWidth": 1350,
-			"originalHeight": 1800,
-			"width": 594.2754728305664,
-			"height": 792.367297107422,
-			"x": 1629.1280148423007,
-			"y": 366.2337662337663,
-			"rotate": 383.231324008005,
-			"scaleX": 1,
-			"scaleY": -1,
-			"opacity": 1,
-			"lockAspectRatio": false,
-			"visible": true,
-			"focusabled": true,
-			"editabled": true,
-			"drawabled": true,
-			"originalAspectRatio": "3:4",
-			"aspectRatio": "3:4",
-			"left": 1331.9902784270175,
-			"top": -29.94988231994472
-		}, {
-			"id": "TEST_JPEG",
-			"src": "./img/3.jpeg",
-			"cropTop": 0,
-			"cropBottom": 0,
-			"cropLeft": 0,
-			"cropRight": 0,
-			"index": 3,
-			"originalWidth": 1800,
-			"originalHeight": 1200,
-			"width": 948.4312600294483,
-			"height": 632.2875066862982,
-			"x": 151.39146567717992,
-			"y": 291.0946196660483,
-			"rotate": 334.3516430373584,
-			"scaleX": -1,
-			"scaleY": -1,
-			"opacity": 1,
-			"lockAspectRatio": false,
-			"visible": true,
-			"focusabled": true,
-			"editabled": true,
-			"drawabled": true,
-			"originalAspectRatio": "3:2",
-			"aspectRatio": "3:2",
-			"left": -322.8241643375442,
-			"top": -25.049133677100826
-		}];
-
-		var exportedStates2 = [{
-				"id": "TEST_PNG",
-				"src": "./img/1.png",
-				"index": 1,
-				"originalWidth": 800,
-				"originalHeight": 800,
-				"width": 1389.1845477281024,
-				"height": 1452.5345652293522,
-				"x": 216.7047507081002,
-				"y": 904.9299631740255,
-				"rotate": 17.46323891797897,
-				"scaleX": 1,
-				"scaleY": 1,
-				"opacity": 1,
-				"lockAspectRatio": false,
-				"visible": true,
-				"focusabled": true,
-				"editabled": true,
-				"drawabled": true,
-				"cropTop": 529.1925640873653,
-				"cropBottom": 366.4937371942563,
-				"cropLeft": 401.27017944833125,
-				"cropRight": 409.5133951606077,
-				"originalAspectRatio": "1:1",
-				"aspectRatio": "22:23",
-				"left": -477.88752315595104,
-				"top": 178.66268055934938
-			},
-			{
-				"id": "TEST_JPG",
-				"src": "./img/2.jpg",
-				"index": 2,
-				"originalWidth": 1350,
-				"originalHeight": 1800,
-				"width": 1751.507666697458,
-				"height": 2335.3435555966116,
-				"x": 1447.1731276242556,
-				"y": 650.4442925495557,
-				"rotate": 527.5827758913651,
-				"scaleX": 1,
-				"scaleY": -1,
-				"opacity": 1,
-				"lockAspectRatio": false,
-				"visible": true,
-				"focusabled": true,
-				"editabled": true,
-				"drawabled": true,
-				"cropTop": 426.9755450634543,
-				"cropBottom": 380.74198598946873,
-				"cropLeft": 686.5002741759678,
-				"cropRight": 616.2810396067391,
-				"originalAspectRatio": "3:4",
-				"aspectRatio": "3:4",
-				"left": 571.4192942755266,
-				"top": -517.2274852487501
-			},
-			{
-				"id": "TEST_JPEG",
-				"src": "./img/3.jpeg",
-				"index": 3,
-				"originalWidth": 1800,
-				"originalHeight": 1200,
-				"width": 4472.358161839274,
-				"height": 3738.0871229562276,
-				"x": 770.1435807665739,
-				"y": 625.8704040235699,
-				"rotate": 532.2230993660178,
-				"scaleX": -1,
-				"scaleY": -1,
-				"opacity": 1,
-				"lockAspectRatio": false,
-				"visible": true,
-				"focusabled": true,
-				"editabled": true,
-				"drawabled": true,
-				"cropTop": 467.4256376666018,
-				"cropBottom": 1810.244266582043,
-				"cropLeft": 2076.7733033665018,
-				"cropRight": 2015.4215795849188,
-				"originalAspectRatio": "3:2",
-				"aspectRatio": "6:5",
-				"left": -1466.035500153063,
-				"top": -1243.1731574545438
+				isOpened = false;
 			}
-		];
+
+			function openOne(elem) {
+				var list = elem.parentNode.querySelector("div.list");
+				list.style.display = "block";
+
+				isOpened = true;
+			}
+		})();
 	</script>
 </body>
 

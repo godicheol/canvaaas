@@ -15,75 +15,54 @@
 <!-- MAIN ELEMENT -->
 <div id="target"></div>
 ```
+
 ## Init
 
 ```html
 <script>
   canvaaas.init(document.getElementById("target"), function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.init() callback", res);
+    // Your code
   });
 </script>
 ```
+
 ## Set config (optional)
 
 ```html
 <script>
   canvaaas.config({
-    allowedExtensionsForUpload: [
-      "bmp",
-      "jpg",
-      "jpeg",
-      "png",
-      "gif",
-      "svg",
-      "svg+xml",
-      "tiff",
-      "tif",
-      "webp",
-    ], // array of allowed extensions
+    allowedMimeTypesForUpload: [
+      "image/bmp",
+      "image/x-ms-bmp",
+      "image/jpg",
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/svg",
+      "image/svg+xml",
+      "image/tiff",
+      "image/tif",
+      "image/webp",
+    ], // array of allowed mimetypes
     cacheLevels: 999, // number
-    dragAndDrop: true, // boolean
-    containerAspectRatio: 1 / 1, // number, width / height
-    maxContainerWidth: 1, // number, 0 ~ 1 scale in viewport
-    maxContainerHeight: 0.7, // number, 0 ~ 1 scale in viewport
-    maxDrawWidth: 4096 * 4, // number, px,
-    maxDrawHeight: 4096 * 4, // number, px,
-    maxDrawWidthOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
-    maxDrawHeightOnMobile: 4096, // number, px, iOS always limited draw size in 4096px
-    imageScaleAfterRender: 0.7, // number, 0 ~ 1 scale in canvas
+    aspectRatioOfContainer: 1 / 1, // number, width / height
+    maxWidthOfContainer: undefined, // number, px
+    maxHeightOfContainer: undefined, // number, px
+    startIndexAfterRender: 1, // number
+    maxIndexAfterRender: 1000, // number
+    imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
     lockAspectRatioAfterRender: false, // boolean
-    upload: function(err, res){
-      if (err) {
-        console.log(err);
-        return false;
-      }
-      console.log("config.upload callback", res);
-    },
-    focus: function(err, res){
-      if (err) {
-        console.log(err);
-        return false;
-      }
-      console.log("config.focus callback", res);
-    },
-    edit: function(err, res){
-      if (err) {
-        console.log(err);
-        return false;
-      }
-      console.log("config.edit callback", res);
-    },
-    remove: function(err, res){
-      if (err) {
-        console.log(err);
-        return false;
-      }
-      console.log("config.remove callback", res);
-    },
+    showGridAfterRender: true, // boolean
+    showPivotAfterRender: true, // boolean
+    click: undefined, // function(err, res)
+    rightClick: undefined, // function(err, res, next)
+    doubleClick: undefined, // function(err, res)
+    clickHandle: undefined, // function(err, res, direction)
+    upload: undefined, // function(err, res)
+    edit: undefined, // function(err, res)
+    remove: undefined, // function(err, res)
+  }, function(err, res) {
+    // Your code
   });
 </script>
 ```
@@ -93,23 +72,17 @@
 ```html
 <script>
   canvaaas.new({
-    filename: "filename", // string
-    dataType: "url", // string
-    mimeType: "image/png", // string
+    filename: "untitled", // string, without extension
+    mimetype: "image/png", // string
     quality: 0.92, // number, 0 ~ 1
-    width: 1800, // number, required, px
-    height: 1200, // number, required, px
+    background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
     overlay: true, // boolean
     checker: true, // boolean
-    editabled: true, // boolean
-    focusabled: true, // boolean
-    background: "#FFFFFF" // string, rgb format(7 characters) or "alpha" or "transparent"
+    ruler: false, // boolean
+    clickable: true, // boolean
+    editable: true, // boolean
   }, function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.new() callback", res);
+    // Your code
   });
 </script>
 ```
@@ -122,61 +95,60 @@
 
 ```html
 <script>
-  canvaaas.uploadUrls(["./img/1.png", "./img/2.png"], function(err, res, status){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.uploadUrls() callback", res, status);
+  // Argument type `Array`
+  canvaaas.uploadUrls(["./img/1.png", "./img/2.png"], function(err, res){
+    // Your code
   });
 </script>
 ```
 
 ```html
 <script>
-  canvaaas.uploadStates([{
-    "id": "blahblah-1", // string
-    "src": "./img/1.png", // string
-    "cropTop": 0, // number
-    "cropBottom": 0, // number
-    "cropLeft": 0, // number
-    "cropRight": 0, // number
-    "index": 1, // number
-    "width": 600.0000000000001, // number
-    "height": 600.0000000000001, // number
-    "x": 399.07235621521335, // number
-    "y": 808.7198515769946, // number
-    "rotate": 17.46323891797897, // number
-    "scaleX": 1, // number
-    "scaleY": 1, // number
-    "opacity": 1, // number
-    "lockAspectRatio": false, // boolean
-    "visible": true, // boolean
-    "focusabled": true, // boolean
-    "editabled": true, // boolean
-    "drawabled": true, // boolean
+  // Argument type `Array`
+  var exportedStates = [{
+    "id": "test-1",
+    "src": "http://localhost:3000/img/2.jpg",
+    "index": 2,
+    "x": 502.5849709826538,
+    "y": 986.9335338039346,
+    "width": 2193.6405871177067,
+    "height": 2924.854116156941,
+    "cropTop": 0,
+    "cropBottom": 0,
+    "cropLeft": 651.3696207894449,
+    "cropRight": 621.4903760197732,
+    "rotate": -17.881805128766516,
+    "scaleX": 1,
+    "scaleY": 1,
+    "opacity": 1,
+    "lockAspectRatio": false,
+    "visible": true,
+    "clickable": true,
+    "editable": true,
+    "drawable": true,
   }, {
-    "id": "blahblah-2", // string
-    "src": "./img/2.png", // string
-    "cropTop": 0, // number
-    "cropBottom": 0, // number
-    "cropLeft": 0, // number
-    "cropRight": 0, // number
-    "index": 1, // number
-    "width": 600.0000000000001, // number
-    "height": 600.0000000000001, // number
-    "x": 399.07235621521335, // number
-    "y": 808.7198515769946, // number
-    "rotate": 17.46323891797897, // number
-    "scaleX": 1, // number
-    "scaleY": 1, // number
-    "opacity": 1, // number
-    "lockAspectRatio": false, // boolean
-    "visible": true, // boolean
-    "focusabled": true, // boolean
-    "editabled": true, // boolean
-    "drawabled": true, // boolean
-  }], function(err, res){
+    "id": "test-2",
+    "src": "http://localhost:3000/img/1.png",
+    "index": 3,
+    "x": 1005.7025081608402,
+    "y": 233.64928605958755,
+    "width": 2124.7504194708827,
+    "height": 2124.7504194708827,
+    "cropTop": 801.2362568440648,
+    "cropBottom": 749.4330219066668,
+    "cropLeft": 671.584540163499,
+    "cropRight": 723.0107480910889,
+    "rotate": 6.213787277395312,
+    "scaleX": 1,
+    "scaleY": 1,
+    "opacity": 1,
+    "lockAspectRatio": false,
+    "visible": true,
+    "clickable": true,
+    "editable": true,
+    "drawable": true,
+  }];
+  canvaaas.uploadStates(exportedStates, function(err, res){
     if (err) {
       console.log(err);
       return false;
@@ -206,9 +178,9 @@
   data-crop-right = "0"
   data-lock-aspect-ratio = "false"
   data-visible = "true"
-  data-focusabled = "true"
-  data-editabled = "true"
-  data-drawabled = "true">
+  data-clickable = "true"
+  data-editable = "true"
+  data-drawable = "true">
 
 <script>
   canvaaas.uploadElements([document.getElementById("blahblah")], function(err, res, status){
