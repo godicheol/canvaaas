@@ -149,11 +149,7 @@
     "drawable": true,
   }];
   canvaaas.uploadStates(exportedStates, function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.uploadStates() callback", res, status);
+    // Your code
   });
 </script>
 ```
@@ -183,12 +179,8 @@
   data-drawable = "true">
 
 <script>
-  canvaaas.uploadElements([document.getElementById("blahblah")], function(err, res, status){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.uploadElements() callback", res, status);
+  canvaaas.uploadElements([document.getElementById("blahblah")], function(err, res){
+    // Your code
   });
 </script>
 ```
@@ -199,18 +191,13 @@
 <script>
   canvaaas.draw({
     filename: 'filename', // optional
-    dataType: 'url',  // optional, "url" or "file"
     mimeType: 'image/png', // optional
+    quality: 0.92, // optional
     width: 256, // optional
     height: 256, // optional
-    quality: 0.5, // optional
-    background: '#000000', // optional, rgb format, 7 characters
+    background: '#000000', // optional, rgb format, 7 characters or "transparent"
   }, function(err, file, result){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.draw() callback", file, result);
+    // Your code
   });
 </script>
 ```
@@ -275,49 +262,96 @@
     "cropRight": 0, // number, min: 0
     "lockAspectRatio": true, // boolean
     "visible": true, // boolean
-    "editabled": true, // boolean
-    "focusabled": true, // boolean
-    "drawabled": true, // boolean
-  }, function(err, res) {
-    if (err) {
-      console.log(err);
-      return false;
+    "clickable": true, // boolean
+    "editable": true, // boolean
+    "drawable": true, // boolean
+    "pivot": true, // boolean
+    "grid": true, // boolean
+    "handle": {
+      'n': 'resize',
+      'ne': 'resize',
+      'e': 'resize',
+      'se': 'resize',
+      's': 'resize',
+      'sw': 'resize',
+      'w': 'resize',
+      'nw': 'resize',
+      "n-n": null,
+      "ne-ne": null,
+      "e-e": null,
+      "se-se": null,
+      "s-s": null,
+      "sw-sw": null,
+      "w-w": null,
+      "nw-nw": null,
     }
-    console.log("canvaaas.state() callback", res);
+  }, function(err, res) {
+    // Your code
   })
 </script>
 ```
+
+## Add filter
+
+```html
+<script>
+  canvaaas.filter("id", function(red, green, blue, alpha) {
+    var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+    return [luma, luma, luma, alpha]; // return [red, green, blue, alpha];
+  }, function(err, res) {
+    // Your code
+  })
+</script>
+```
+
 ## Handle style
 
 ```html
 <script>
-  canvaaas.handle({
-    inside: {
-      n: "resize", // resize, crop
-      ne: "resize", // resize, crop
-      e: "resize", // resize, crop
-      se: "resize", // resize, crop
-      s: "resize", // resize, crop
-      sw: "resize", // resize, crop
-      w: "resize", // resize, crop
-      nw: "resize" // resize, crop
-    },
-    outside: {
-      n: "rotate", // rotate, flip, crop, resize
-      ne: "flip", // flip, crop, resize
-      e: "flip", // rotate, flip, crop, resize
-      se: "flip", // flip, crop, resize
-      s: "flip", // rotate, flip, crop, resize
-      sw: "flip", // flip, crop, resize
-      w: "flip", // rotate, flip, crop, resize
-      nw: "flip" // flip, crop, resize
-    }
+  canvaaas.handle(id, {
+    'n': 'resize',
+    'ne': 'resize',
+    'e': 'resize',
+    'se': 'resize',
+    's': 'resize',
+    'sw': 'resize',
+    'w': 'resize',
+    'nw': 'resize',
+    "n-n": "rotate",
+    "ne-ne": null, // hide
+    "e-e": "flip",
+    "se-se": null, // hide
+    "s-s": "click", // config.clickHandle callback
+    "sw-sw": null, // hide
+    "w-w": "click", // config.clickHandle callback
+    "nw-nw": null, // hide
   }, function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.handle() callback", res);
+    // Your code
+  });
+</script>
+```
+
+```html
+<script>
+  canvaaas.handleAll({
+    'n': 'crop',
+    'ne': 'crop',
+    'e': 'crop',
+    'se': 'crop',
+    's': 'crop',
+    'sw': 'crop',
+    'w': 'crop',
+    'nw': 'crop',
+    "n-n": null, // hide
+    "ne-ne": null, // hide
+    "e-e": null, // hide
+    "se-se": null, // hide
+    "s-s": null, // hide
+    "sw-sw": null, // hide
+    "w-w": null, // hide
+    "nw-nw": null, // hide
+  }, function(err, res){
+    // Your code
   });
 </script>
 ```
@@ -326,13 +360,9 @@
 
 ```html
 <script>
-  canvaaas.export(function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log('canvaaas.export()', res);
-  });
+canvaaas.export(["id-1", "id-2"], function(err, res){
+  // Your code
+});
 </script>
 ```
 
@@ -342,67 +372,51 @@
 <script>
 
   var exportedStates = [{
-    "id": "TEST_1",
-    "src": "./img/1.png", // required
-    "index": 1,
-    "originalWidth": 800,
-    "originalHeight": 800,
-    "width": 1389.1845477281024,
-    "height": 1452.5345652293522,
-    "x": 216.7047507081002,
-    "y": 904.9299631740255,
-    "rotate": 17.46323891797897,
+    "id": "test-1",
+    "src": "http://localhost:3000/img/2.jpg",
+    "index": 2,
+    "x": 502.5849709826538,
+    "y": 986.9335338039346,
+    "width": 2193.6405871177067,
+    "height": 2924.854116156941,
+    "cropTop": 0,
+    "cropBottom": 0,
+    "cropLeft": 651.3696207894449,
+    "cropRight": 621.4903760197732,
+    "rotate": -17.881805128766516,
     "scaleX": 1,
     "scaleY": 1,
     "opacity": 1,
     "lockAspectRatio": false,
     "visible": true,
-    "focusabled": true,
-    "editabled": true,
-    "drawabled": true,
-    "cropTop": 529.1925640873653,
-    "cropBottom": 366.4937371942563,
-    "cropLeft": 401.27017944833125,
-    "cropRight": 409.5133951606077,
-    "originalAspectRatio": "1:1", // not reuiqred
-    "aspectRatio": "22:23", // not reuiqred
-    "left": -477.88752315595104,
-    "top": 178.66268055934938
+    "clickable": true,
+    "editable": true,
+    "drawable": true,
   }, {
-    "id": "TEST_2",
-    "src": "./img/2.jpg", // required
-    "index": 2,
-    "originalWidth": 1350,
-    "originalHeight": 1800,
-    "width": 1751.507666697458,
-    "height": 2335.3435555966116,
-    "x": 1447.1731276242556,
-    "y": 650.4442925495557,
-    "rotate": 527.5827758913651,
+    "id": "test-2",
+    "src": "http://localhost:3000/img/1.png",
+    "index": 3,
+    "x": 1005.7025081608402,
+    "y": 233.64928605958755,
+    "width": 2124.7504194708827,
+    "height": 2124.7504194708827,
+    "cropTop": 801.2362568440648,
+    "cropBottom": 749.4330219066668,
+    "cropLeft": 671.584540163499,
+    "cropRight": 723.0107480910889,
+    "rotate": 6.213787277395312,
     "scaleX": 1,
-    "scaleY": -1,
+    "scaleY": 1,
     "opacity": 1,
     "lockAspectRatio": false,
     "visible": true,
-    "focusabled": true,
-    "editabled": true,
-    "drawabled": true,
-    "cropTop": 426.9755450634543,
-    "cropBottom": 380.74198598946873,
-    "cropLeft": 686.5002741759678,
-    "cropRight": 616.2810396067391,
-    "originalAspectRatio": "3:4", // not reuiqred
-    "aspectRatio": "3:4", // not reuiqred
-    "left": 571.4192942755266,
-    "top": -517.2274852487501
-  }];
+    "clickable": true,
+    "editable": true,
+    "drawable": true,
+  }]
 
   canvaaas.import(exportedStates, function(err, res){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log('import callback', res);
+    // Your code
   })
 </script>
 ```
