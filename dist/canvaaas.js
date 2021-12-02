@@ -5542,10 +5542,10 @@
 			}
 			if (!isObject(imageFiles)) {
 				if (config.upload) {
-					config.upload("Argument `imageFiles` is not object");
+					config.upload("Argument `imageFiles` is not Object");
 				}
 				if (cb) {
-					cb("Argument `imageFiles` is not object");
+					cb("Argument `imageFiles` is not Object");
 				}
 				return false;
 			}
@@ -5606,10 +5606,10 @@
 			}
 			if (!isArray(imageUrls)) {
 				if (config.upload) {
-					config.upload("Argument `imageUrls` is not array");
+					config.upload("Argument `imageUrls` is not Array");
 				}
 				if (cb) {
-					cb("Argument `imageUrls` is not array");
+					cb("Argument `imageUrls` is not Array");
 				}
 				return false;
 			}
@@ -5670,10 +5670,10 @@
 			}
 			if (!isArray(exportedStates)) {
 				if (config.upload) {
-					config.upload("Argument `exportedStates` is not array");
+					config.upload("Argument `exportedStates` is not Array");
 				}
 				if (cb) {
-					cb("Argument `exportedStates` is not array");
+					cb("Argument `exportedStates` is not Array");
 				}
 				return false;
 			}
@@ -5741,12 +5741,12 @@
 				}
 				return false;
 			}
-			if (!isArray(imgElements)) {
+			if (!isArray(imgElements) && !isNodeList(imgElements)) {
 				if (config.upload) {
-					config.upload("Argument `imgElements` is not array");
+					config.upload("Argument `imgElements` is not Array or NodeList");
 				}
 				if (cb) {
-					cb("Argument `imgElements` is not array");
+					cb("Argument `imgElements` is not Array or NodeList");
 				}
 				return false;
 			}
@@ -5812,7 +5812,7 @@
 		myObject.find = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
-					cb("Argument `query` is not object");
+					cb("Argument `query` is not Object");
 				}
 				return false;
 			}
@@ -5870,10 +5870,10 @@
 			}
 			if (!isString(cls)) {
 				if (config.edit) {
-					config.edit("Argument `cls` is not string");
+					config.edit("Argument `cls` is not String");
 				}
 				if (cb) {
-					cb("Argument `cls` is not string");
+					cb("Argument `cls` is not String");
 				}
 				return false;
 			}
@@ -5915,10 +5915,10 @@
 			}
 			if (!isString(cls)) {
 				if (config.edit) {
-					config.edit("Argument `cls` is not string");
+					config.edit("Argument `cls` is not String");
 				}
 				if (cb) {
-					cb("Argument `cls` is not string");
+					cb("Argument `cls` is not String");
 				}
 				return false;
 			}
@@ -5985,10 +5985,10 @@
 			}
 			if (!isObject(newState)) {
 				if (config.edit) {
-					config.edit("Argument `newState` is not object");
+					config.edit("Argument `newState` is not Object");
 				}
 				if (cb) {
-					cb("Argument `newState` is not object");
+					cb("Argument `newState` is not Object");
 				}
 				return false;
 			}
@@ -6055,10 +6055,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6112,10 +6112,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6169,10 +6169,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6396,10 +6396,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6549,10 +6549,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6606,10 +6606,10 @@
 			}
 			if (!isNumeric(n)) {
 				if (config.edit) {
-					config.edit("Argument `n` is not numeric");
+					config.edit("Argument `n` is not Numeric");
 				}
 				if (cb) {
-					cb("Argument `n` is not numeric");
+					cb("Argument `n` is not Numeric");
 				}
 				return false;
 			}
@@ -6864,7 +6864,7 @@
 			}
 			if (!isObject(newHandle)) {
 				if (cb) {
-					cb("Argument `newHandle` is not object");
+					cb("Argument `newHandle` is not Object");
 				}
 				return false;
 			}
@@ -6987,7 +6987,7 @@
 		myObject.handleAll = function(newHandle, cb) {
 			if (!isObject(newHandle)) {
 				if (cb) {
-					cb("Argument `newHandle` is not object");
+					cb("Argument `newHandle` is not Object");
 				}
 				return false;
 			}
@@ -7070,7 +7070,7 @@
 		myObject.config = function(newConfig, cb) {
 			if (!isObject(newConfig)) {
 				if (cb) {
-					cb("Argument `newConfig` is not object");
+					cb("Argument `newConfig` is not Object");
 				}
 				return false;
 			}
@@ -7119,7 +7119,7 @@
 			}
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument `options` is not object");
+					cb("Argument `options` is not Object");
 				}
 				return false;
 			}
@@ -7137,13 +7137,13 @@
 			}
 			if (!isNumeric(options.width)) {
 				if (cb) {
-					cb("Argument `options.width` is not numeric");
+					cb("Argument `options.width` is not Numeric");
 				}
 				return false;
 			}
 			if (!isNumeric(options.height)) {
 				if (cb) {
-					cb("Argument `options.height` is not numeric");
+					cb("Argument `options.height` is not Numeric");
 				}
 				return false;
 			}
@@ -7217,7 +7217,7 @@
 			}
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument `options` is not object");
+					cb("Argument `options` is not Object");
 				}
 				return false;
 			}
@@ -7352,19 +7352,19 @@
 			}
 			if (!isObject(options)) {
 				if (cb) {
-					cb("Argument `options` is not object");
+					cb("Argument `options` is not Object");
 				}
 				return false;
 			}
 			if (!isObject(exportedCanvasSizes)) {
 				if (cb) {
-					cb("Argument `exportedCanvasSizes` is not object");
+					cb("Argument `exportedCanvasSizes` is not Object");
 				}
 				return false;
 			}
 			if (!isArray(exportedImageStates)) {
 				if (cb) {
-					cb("Argument `exportedImageStates` is not array");
+					cb("Argument `exportedImageStates` is not Array");
 				}
 				return false;
 			}
@@ -7382,7 +7382,7 @@
 			}
 			if (!isNumeric(exportedCanvasSizes.width)) {
 				if (cb) {
-					cb("Argument `exportedCanvasSizes.width` is not numeric");
+					cb("Argument `exportedCanvasSizes.width` is not Numeric");
 				}
 				return false;
 			} else {
@@ -7390,7 +7390,7 @@
 			}
 			if (!isNumeric(exportedCanvasSizes.height)) {
 				if (cb) {
-					cb("Argument `exportedCanvasSizes.height` is not numeric");
+					cb("Argument `exportedCanvasSizes.height` is not Numeric");
 				}
 				return false;
 			} else {
@@ -7651,7 +7651,7 @@
 		myObject.export = function(imageIds, cb) {
 			if (!isArray(imageIds)) {
 				if (cb) {
-					cb("Argument `imageIds` is not array");
+					cb("Argument `imageIds` is not Array");
 				}
 				return false;
 			}
@@ -7691,7 +7691,7 @@
 			}
 			if (!isArray(exportedStates)) {
 				if (cb) {
-					cb("Argument `exportedStates` is not array");
+					cb("Argument `exportedStates` is not Array");
 				}
 				return false;
 			}
