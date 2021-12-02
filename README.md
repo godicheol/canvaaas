@@ -60,6 +60,7 @@
     upload: undefined, // function(err, res)
     edit: undefined, // function(err, res)
     remove: undefined, // function(err, res)
+    handle: undefined, // object, set global handle
   }, function(err, res) {
     // Your code
   });
@@ -343,27 +344,29 @@
 </script>
 ```
 
-## Handle style (global)
+## Global handle style
 
 ```html
 <script>
-  canvaaas.handleAll({
-    'n': 'crop',
-    'ne': 'crop',
-    'e': 'crop',
-    'se': 'crop',
-    's': 'crop',
-    'sw': 'crop',
-    'w': 'crop',
-    'nw': 'crop',
-    "nn": null, // hide
-    "nene": null, // hide
-    "ee": null, // hide
-    "sese": null, // hide
-    "ss": null, // hide
-    "swsw": null, // hide
-    "ww": null, // hide
-    "nwnw": null, // hide
+  canvaaas.config({
+    handle: {
+      'n': 'crop',
+      'ne': 'crop',
+      'e': 'crop',
+      'se': 'crop',
+      's': 'crop',
+      'sw': 'crop',
+      'w': 'crop',
+      'nw': 'crop',
+      "nn": null, // hide
+      "nene": null, // hide
+      "ee": null, // hide
+      "sese": null, // hide
+      "ss": null, // hide
+      "swsw": null, // hide
+      "ww": null, // hide
+      "nwnw": null, // hide
+    }
   }, function(err, res){
     // Your code
   });

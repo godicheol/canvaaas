@@ -2500,10 +2500,20 @@
 					updated.grid = true;
 				}
 				if (isObject(newState.handle)) {
-					for (var i = 0; i < Object.keys(newState.handle).length; i++) {
-						var k = Object.keys(newState.handle)[i];
-						if (_directions.indexOf(k) > -1) {						
-							state["handle"][k] = newState.handle[k];
+					// insert
+					// for (var i = 0; i < Object.keys(newState.handle).length; i++) {
+					// 	var k = Object.keys(newState.handle)[i];
+					// 	if (_directions.indexOf(k) > -1) {						
+					// 		state["handle"][k] = newState.handle[k];
+					// 	}
+					// }
+					// replace
+					for (var i = 0; i < _directions.length; i++) {
+						var k = _directions[i];
+						if (isString(newState.handle[k])) {
+							state["handle"][k] = toString(newState.handle[k]);
+						} else {
+							state["handle"][k] = undefined;
 						}
 					}
 					updated.handle = true;
@@ -3121,10 +3131,21 @@
 
 		function setHandleState(obj) {
 			try {
-				for (var i = 0; i < Object.keys(obj).length; i++) {
-					var k = Object.keys(obj)[i];
-					if (_directions.indexOf(k) > -1) {						
-						handleState[k] = obj[k];
+				// insert
+				// for (var i = 0; i < Object.keys(obj).length; i++) {
+				// 	var k = Object.keys(obj)[i];
+				// 	if (_directions.indexOf(k) > -1) {						
+				// 		handleState[k] = obj[k];
+				// 	}
+				// }
+				
+				// replace
+				for (var i = 0; i < _directions.length; i++) {
+					var k = _directions[i];
+					if (isString(obj[k])) {
+						handleState[k] = toString(obj[k]);
+					} else {
+						handleState[k] = undefined;
 					}
 				}
 				return true;
@@ -6984,6 +7005,7 @@
 			}
 		}
 
+		// deprecated
 		myObject.handleAll = function(newHandle, cb) {
 			if (!isObject(newHandle)) {
 				if (cb) {
@@ -7001,9 +7023,6 @@
 					handle: newHandle
 				});
 			}
-
-			// set global handle state
-			setHandleState(newHandle);
 
 			// callback
 			if (cb) {
@@ -7075,13 +7094,21 @@
 				return false;
 			}
 
-			// set config
+			// copy to config
 			copyObject(config, newConfig);
 
 			// check cache level
 			if (undoCaches.length > config.cacheLevels) {
 				undoCaches.splice(-config.cacheLevels);
 				redoCaches = [];
+			}
+
+			// check handle
+			if (isObject(config.handle)) {
+				// set global handle state
+				setHandleState(config.handle);
+				// clear tmp
+				config.handle = undefined;
 			}
 
 			// check container
