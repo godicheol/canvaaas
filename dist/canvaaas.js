@@ -1905,22 +1905,7 @@
 						return false;
 					}
 
-					// fix direction
-					if (scaleX === -1) {
-						if (direction.indexOf("e") > -1) {
-							direction = direction.replace(/e/gi, "w");
-						} else if (direction.indexOf("w") > -1) {
-							direction = direction.replace(/w/gi, "e");
-						}
-					}
-					if (scaleY === -1) {
-						if (direction.indexOf("n") > -1) {
-							direction = direction.replace(/n/gi, "s");
-						} else if (direction.indexOf("s") > -1) {
-							direction = direction.replace(/s/gi, "n");
-						}
-					}
-
+					direction = flipDirection(direction, scaleX, scaleY);
 					radians = state.rotate * Math.PI / 180;
 					cosFraction = Math.cos(radians);
 					sinFraction = Math.sin(radians);
@@ -2436,7 +2421,7 @@
 					updated.cropRight = true;
 				}
 
-				// fix flipped Y
+				// fix flip Y
 				if (newScaleX !== oldScaleX) {
 					// crop
 					tmp = state.cropLeft;
@@ -2444,9 +2429,10 @@
 					state.cropRight = tmp;
 					updated.cropLeft = true;
 					updated.cropRight = true;
+					updated.handle = true;
 				}
 
-				// fix flipped X
+				// fix flip X
 				if (newScaleY !== oldScaleY) {
 					// crop
 					tmp = state.cropTop;
@@ -2454,6 +2440,7 @@
 					state.cropBottom = tmp;
 					updated.cropTop = true;
 					updated.cropBottom = true;
+					updated.handle = true;
 				}
 				if (isBoolean(newState.lockAspectRatio)) {
 					oldLAR = state.lockAspectRatio;
@@ -2507,6 +2494,7 @@
 					// 		state["handle"][k] = newState.handle[k];
 					// 	}
 					// }
+
 					// replace
 					for (var i = 0; i < _directions.length; i++) {
 						var k = _directions[i];
@@ -3157,6 +3145,8 @@
 
 		function setHandle(state) {
 			try {
+				var scaleX = state.scaleX;
+				var scaleY = state.scaleY;
 				var origin = document.getElementById(_originId + state.id);
 				var clone = document.getElementById(_cloneId + state.id);
 				if (!origin) {
@@ -3199,17 +3189,18 @@
 				// set event container
 				for (var i = 0; i < _directions.length; i++) {
 					var d = _directions[i];
+					var f = flipDirection(d, scaleX, scaleY);
 					if (state["handle"][d]) {
 						if (state["handle"][d] === "resize") {
-							state["handleEvents"][d] = handlers.startResize;
+							state["handleEvents"][f] = handlers.startResize;
 						} else if (state["handle"][d] === "crop") {
-							state["handleEvents"][d] = handlers.startCrop;
+							state["handleEvents"][f] = handlers.startCrop;
 						} else if (state["handle"][d] === "rotate") {
-							state["handleEvents"][d] = handlers.startRotate;
+							state["handleEvents"][f] = handlers.startRotate;
 						} else if (state["handle"][d] === "flip") {
-							state["handleEvents"][d] = handlers.startFlip;
+							state["handleEvents"][f] = handlers.startFlip;
 						} else if (state["handle"][d] === "click") {
-							state["handleEvents"][d] = handlers.startClick;
+							state["handleEvents"][f] = handlers.startClick;
 						}
 					}
 				}
@@ -4881,7 +4872,34 @@
 						found = _directions[i];
 					}
 				}
+
 				return found;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function flipDirection(direction, scaleX, scaleY) {
+			try {
+				var tmp = direction;
+				if (scaleX && scaleX === -1) {
+					if (tmp.indexOf("e") > -1) {
+						tmp = tmp.replace(/e/gi, "w");
+					} else if (tmp.indexOf("w") > -1) {
+						tmp = tmp.replace(/w/gi, "e");
+					}
+				}
+
+				if (scaleY && scaleY === -1) {
+					if (tmp.indexOf("n") > -1) {
+						tmp = tmp.replace(/n/gi, "s");
+					} else if (tmp.indexOf("s") > -1) {
+						tmp = tmp.replace(/s/gi, "n");
+					}
+				}
+
+				return tmp;
 			} catch(err) {
 				console.log(err);
 				return false;
