@@ -410,6 +410,8 @@
 	-ms-user-select: none;
 	user-select: none;
 	pointer-events: none;
+	border-color: #000000;
+	color: #000000;
 }
 
 .canvaaas-ruler.canvaaas-direction-n{
@@ -418,6 +420,8 @@
 	left: 0;
 	width: 100%;
 	height: auto;
+	color: inherit;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-major{
 	display: block;
@@ -425,7 +429,9 @@
 	bottom: 0;
 	width: 0;
 	height: 9px;
-	border-left: 1px solid #000000;
+	border-width: 1px;
+	border-style: none none none solid;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-minor{
 	display: block;
@@ -433,7 +439,9 @@
 	bottom: 0;
 	width: 0;
 	height: 6px;
-	border-left: 1px solid #000000;
+	border-width: 1px;
+	border-style: none none none solid;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-value{
 	position: absolute;
@@ -441,6 +449,7 @@
 	top: -6px;
 	font-size: 10px;
 	transform: translateX(-50%);
+	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-s{
@@ -449,6 +458,8 @@
 	left: 0;
 	width: 100%;
 	height: auto;
+	color: inherit;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-major{
 	display: block;
@@ -456,7 +467,9 @@
 	top: 0;
 	width: 0;
 	height: 9px;
-	border-left: 1px solid #000000;
+	border-width: 1px;
+	border-style: none none none solid;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-minor{
 	display: block;
@@ -464,7 +477,9 @@
 	top: 0;
 	width: 0;
 	height: 6px;
-	border-left: 1px solid #000000;
+	border-width: 1px;
+	border-style: none none none solid;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-value{
 	position: absolute;
@@ -472,6 +487,7 @@
 	bottom: -9px;
 	font-size: 10px;
 	transform: translateX(-50%);
+	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-e{
@@ -480,6 +496,8 @@
 	left: 100%;
 	width: auto;
 	height: 100%;
+	color: inherit;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-major{
 	display: block;
@@ -487,7 +505,9 @@
 	left: 100%;
 	width: 9px;
 	height: 0;
-	border-top: 1px solid #000000;
+	border-width: 1px;
+	border-style: solid none none none;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-minor{
 	display: block;
@@ -495,7 +515,9 @@
 	left: 100%;
 	width: 6px;
 	height: 0;
-	border-top: 1px solid #000000;
+	border-width: 1px;
+	border-style: solid none none none;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-value{
 	position: absolute;
@@ -503,6 +525,7 @@
 	top: 0;
 	font-size: 10px;
 	transform: translateY(-50%);
+	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-w{
@@ -511,6 +534,8 @@
 	left: 0;
 	width: auto;
 	height: 100%;
+	color: inherit;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-major{
 	display: block;
@@ -518,7 +543,9 @@
 	right: 0;
 	width: 9px;
 	height: 0;
-	border-top: 1px solid #000000;
+	border-width: 1px;
+	border-style: solid none none none;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-minor{
 	display: block;
@@ -526,7 +553,9 @@
 	right: 0;
 	width: 6px;
 	height: 0;
-	border-top: 1px solid #000000;
+	border-width: 1px;
+	border-style: solid none none none;
+	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-value{
 	position: absolute;
@@ -534,6 +563,7 @@
 	top: 0;
 	font-size: 10px;
 	transform: translateY(-50%);
+	color: inherit;
 }
 
 /* editing */
