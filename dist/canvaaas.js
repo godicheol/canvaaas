@@ -5736,16 +5736,7 @@
 
 			function recursiveFunc() {
 				if (count < index) {
-					var importedState = importImageState(exportedStates[count]);
-					if (!importedState) {
-						if (config.upload) {
-							config.upload("State not found");
-						}
-						count++;
-						recursiveFunc();
-						return false;
-					}
-					renderImage(importedState.src, importedState, function(err, res) {
+					renderImage(exportedStates[count].src, exportedStates[count], function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
@@ -5818,9 +5809,8 @@
 						return false;
 					}
 					var attrs = getDataset(imgElements[count]);
-					var importedState = importImageState(attrs);
-					var src = imgElements[count].src || importedState.src;
-					renderImage(src, importedState, function(err, res) {
+					var src = imgElements[count].src || attrs.src;
+					renderImage(src, attrs, function(err, res) {
 						if (err) {
 							if (config.upload) {
 								config.upload(err);
