@@ -371,6 +371,73 @@
 </script>
 ```
 
+## Custom handle event
+
+```html
+<script>
+  canvaaas.config({
+    clickHandle: function(err, res, direction) {
+      if (err) { return false; }
+      var id = res.id;
+      switch(direciton) {
+        case "n":
+          // Example
+          canvaaas.rotate(id, 50);
+          break;
+        case "s":
+          // Your code
+          break;
+        case "e":
+          // Your code
+          break;
+        case "w":
+          // Your code
+          break;
+        case "ne":
+          // Your code
+          break;
+        case "nw":
+          // Your code
+          break;
+        case "se":
+          // Your code
+          break;
+        case "sw":
+          // Your code
+          break;
+        case "n-n":
+          // Your code
+          break;
+        case "s-s":
+          // Your code
+          break;
+        case "e-e":
+          // Your code
+          break;
+        case "w-w":
+          // Your code
+          break;
+        case "ne-ne":
+          // Your code
+          break;
+        case "nw-nw":
+          // Your code
+          break;
+        case "se-se":
+          // Your code
+          break;
+        case "sw-sw":
+          // Your code
+          break;
+      }
+    }
+  }, function(err, res){
+    // Your code
+  })
+</script>
+
+```
+
 ## Export
 
 ```html

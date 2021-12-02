@@ -200,50 +200,34 @@
 .canvaaas-grid.hidden{
 	display: none;
 }
-.canvaaas-grid-2x2{
-	display: none !important;
-}
-.canvaaas-grid-2x2.canvaaas-direction-x{
-	top: 50%;
-	left: 0;
-	width: 100%;
-	height: 0;
-	border-top: 1px dashed #a7a7a7;
-}
-.canvaaas-grid-2x2.canvaaas-direction-y{
-	top: 0;
-	left: 50%;
-	width: 0;
-	height: 100%;
-	border-left: 1px dashed #a7a7a7;
-}
-.canvaaas-grid-3x3.canvaaas-direction-x-1{
+
+.canvaaas-grid.canvaaas-direction-n{
 	top: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
 	border-top: 1px dashed #a7a7a7;
 }
-.canvaaas-grid-3x3.canvaaas-direction-x-2{
+.canvaaas-grid.canvaaas-direction-s{
 	bottom: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
 	border-bottom: 1px dashed #a7a7a7;
 }
-.canvaaas-grid-3x3.canvaaas-direction-y-1{
-	top: 0;
-	left: 33%;
-	width: 0;
-	height: 100%;
-	border-left: 1px dashed #a7a7a7;
-}
-.canvaaas-grid-3x3.canvaaas-direction-y-2{
+.canvaaas-grid.canvaaas-direction-e{
 	top: 0;
 	right: 33%;
 	width: 0;
 	height: 100%;
 	border-right: 1px dashed #a7a7a7;
+}
+.canvaaas-grid.canvaaas-direction-w{
+	top: 0;
+	left: 33%;
+	width: 0;
+	height: 100%;
+	border-left: 1px dashed #a7a7a7;
 }
 
 /* border */
@@ -258,29 +242,29 @@
 	user-select: none;
 	pointer-events: none;
 }
-.canvaaas-border.canvaaas-direction-x-1{
+.canvaaas-border.canvaaas-direction-n{
 	top: 0;
 	left: 0;
 	width: 100%;
 	border-top: 1px solid #000000;
 }
-.canvaaas-border.canvaaas-direction-x-2{
+.canvaaas-border.canvaaas-direction-s{
 	bottom: 0;
 	left: 0;
 	width: 100%;
 	border-bottom: 1px solid #000000;
 }
-.canvaaas-border.canvaaas-direction-y-1{
-	top: 0;
-	left: 0;
-	height: 100%;
-	border-left: 1px solid #000000;
-}
-.canvaaas-border.canvaaas-direction-y-2{
+.canvaaas-border.canvaaas-direction-e{
 	top: 0;
 	right: 0;
 	height: 100%;
 	border-right: 1px solid #000000;
+}
+.canvaaas-border.canvaaas-direction-w{
+	top: 0;
+	left: 0;
+	height: 100%;
+	border-left: 1px solid #000000;
 }
 
 /* overlay */
@@ -374,42 +358,42 @@
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-n-n{
+.canvaaas-handle.canvaaas-direction-nn{
 	top: -36px;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-ne-ne{
+.canvaaas-handle.canvaaas-direction-nene{
 	top: -36px;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-e-e{
+.canvaaas-handle.canvaaas-direction-ee{
 	top: 50%;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-se-se{
+.canvaaas-handle.canvaaas-direction-sese{
 	bottom: -72px;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-s-s{
+.canvaaas-handle.canvaaas-direction-ss{
 	bottom: -72px;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-sw-sw{
+.canvaaas-handle.canvaaas-direction-swsw{
 	bottom: -72px;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-w-w{
+.canvaaas-handle.canvaaas-direction-ww{
 	top: 50%;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-nw-nw{
+.canvaaas-handle.canvaaas-direction-nwnw{
 	top: -36px;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);

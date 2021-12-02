@@ -55,21 +55,21 @@
 		// allowed values = ["resize", "crop", "rotate", "flip"];
 		var defaultHandleState = {
 			"n": "resize",
-			"ne": "resize",
-			"e": "resize",
-			"se": "resize",
 			"s": "resize",
-			"sw": "resize",
+			"e": "resize",
 			"w": "resize",
+			"ne": "resize",
 			"nw": "resize",
-			"n-n": "rotate",
-			"ne-ne": "crop",
-			"e-e": "flip",
-			"se-se": "crop",
-			"s-s": "click",
-			"sw-sw": "crop",
-			"w-w": "click",
-			"nw-nw": "crop"
+			"se": "resize",
+			"sw": "resize",
+			"nn": "rotate",
+			"ss": "flip",
+			"ee": "flip",
+			"ww": "rotate",
+			"nene": "crop",
+			"nwnw": "crop",
+			"sese": "crop",
+			"swsw": "crop",
 		};
 
 		// generate default state of image
@@ -92,7 +92,6 @@
 				}
 			}
 
-			
 			for (var i = 0; i < Object.keys(handleState).length; i++) {
 				var k = Object.keys(handleState)[i];
 				if (_directions.indexOf(k) > -1) {						
@@ -152,16 +151,14 @@
 		_imageTemplate += "<div class='canvaaas-overlay'></div>";
 		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
 		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-2x2 canvaaas-direction-x'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-2x2 canvaaas-direction-y'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-x-1'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-x-2'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-y-1'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-grid-3x3 canvaaas-direction-y-2'></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-x-1'></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-x-2'></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-y-1'></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-y-2'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-n'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-s'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-e'></div>";
+		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-w'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-n'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-s'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-e'></div>";
+		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-w'></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s'><div class='canvaaas-handle-square'></div></div>";
@@ -170,36 +167,36 @@
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
 		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n-n'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e-e'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s-s'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w-w'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne-ne'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw-nw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se-se'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw-sw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nn'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ee'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ss'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ww'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nene'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nwnw'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sese'><div class='canvaaas-handle-square'></div></div>";
+		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-swsw'><div class='canvaaas-handle-square'></div></div>";
 
 		var _directions = [
 			"n",
 			"s",
 			"e",
 			"w",
-			"nw",
 			"ne",
-			"sw",
+			"nw",
 			"se",
-			"n-n",
-			"s-s",
-			"e-e",
-			"w-w",
-			"nw-nw",
-			"ne-ne",
-			"sw-sw",
-			"se-se",
+			"sw",
+			"nn",
+			"ss",
+			"ee",
+			"ww",
+			"nwnw",
+			"nene",
+			"swsw",
+			"sese",
 		];
 
-		var _maxWidth = 4096;
-		var _maxHeight = 4096;
+		var _maxWidth;
+		var _maxHeight;
 		var _minWidth = 1;
 		var _minHeight = 1;
 		var _originId = "canvaaas-" + getShortId() + "-";
@@ -229,17 +226,6 @@
 		copyObject(config, defaultConfig);
 		copyObject(canvasState, defaultCanvasState);
 		copyObject(handleState, defaultHandleState);
-
-		// get limited canvas sizes
-		var __max = getMaximumCanvas();
-		console.log("canvaaas response time: " + __max.responseTime + " ms");
-		console.log("canvaaas max area: " + __max.maxWidth + " x " + __max.maxHeight + " px");
-		if (__max.maxWidth) {
-			_maxWidth = __max.maxWidth;
-		}
-		if (__max.maxHeight) {
-			_maxHeight = __max.maxHeight;
-		}
 
 		//
 		// event handlers start
@@ -592,6 +578,7 @@
 					eventState.onClick = false;
 					eventState.target = undefined;
 					eventState.handle = undefined;
+					eventState.direction = undefined;
 					eventState.click = false;
 				} catch(err) {
 					console.log(err);
@@ -670,8 +657,6 @@
 						mouseY = e.touches[0].clientY;
 					} else {
 						// mobile
-						eventState.onMove = false;
-						eventState.target = id;
 						return handlers.startPinchZoom(e);
 					}
 	
@@ -930,7 +915,7 @@
 
 					if (
 						direction === "n" ||
-						direction === "n-n"
+						direction === "nn"
 					) {
 						height -= diffY;
 						if (onShiftKey) {
@@ -940,7 +925,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "ne" ||
-						direction === "ne-ne"
+						direction === "nene"
 					) {
 						width += diffX;
 						height -= diffY;
@@ -959,7 +944,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "e" ||
-						direction === "e-e"
+						direction === "ee"
 					) {
 						width += diffX;
 						if (onShiftKey) {
@@ -969,7 +954,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "se" ||
-						direction === "se-se"
+						direction === "sese"
 					) {
 						width += diffX;
 						height += diffY;
@@ -988,7 +973,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "s" ||
-						direction === "se-se"
+						direction === "sese"
 					) {
 						height += diffY;
 						if (onShiftKey) {
@@ -998,7 +983,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "sw" ||
-						direction === "sw-sw"
+						direction === "swsw"
 					) {
 						width -= diffX;
 						height += diffY;
@@ -1017,7 +1002,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "w" ||
-						direction === "w-w"
+						direction === "ww"
 					) {
 						width -= diffX;
 						if (onShiftKey) {
@@ -1027,7 +1012,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "nw" ||
-						direction === "nw-nw"
+						direction === "nwnw"
 					) {
 						width -= diffX;
 						height -= diffY;
@@ -1216,15 +1201,34 @@
 				}
 			},
 
+			fixPinchZoom: function(e){
+				if (typeof(e.touches) === "undefined") {
+					return false;
+				}
+				if (e.touches.length < 2) {
+					return false;
+				}
+				if (eventState.target && eventState.onMove) {
+					handlers.endMove(e);
+				}
+
+				handlers.startPinchZoom(e);
+			},
+
 			startPinchZoom: function(e){
 				try {
-
+					if (typeof(e.touches) === "undefined") {
+						return false;
+					}
+					if (e.touches.length < 2) {
+						return false;
+					}
 
 					var id = getTargetId(e);
 					var state = getImageState(id);
-					var mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-					var mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-					var diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
+					var mouseX;
+					var mouseY;
+					var diagonal;
 
 					if (!state) {
 						return false;
@@ -1235,6 +1239,7 @@
 					if (!state.clickable) {
 						return false;
 					}
+					
 
 					e.preventDefault();
 					e.stopPropagation();
@@ -1248,6 +1253,10 @@
 					if (!state.editable) {
 						return false;
 					}
+
+					mouseX = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+					mouseY = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+					diagonal = Math.sqrt(Math.pow(mouseX, 2) + Math.pow(mouseY, 2));
 
 					// save event state
 					eventState.onZoom = true;
@@ -1330,7 +1339,7 @@
 	
 					// callback
 					if (config.edit) {
-						config.edit(null, exportImageState(id));
+						config.edit(null, exportImageState(eventState.target));
 					}
 	
 					// clear event state
@@ -1338,7 +1347,7 @@
 					eventState.target = undefined;
 					
 					// event propagation
-					handlers.startMove(e);
+					return handlers.startMove(e);
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1472,16 +1481,9 @@
 					e.preventDefault();
 					e.stopPropagation();
 
-					var id = eventState.target;
-
 					// remove class
 					removeClassToImage(eventState.target, "editing");
 					removeClassToHandle(eventState.handle, "editing");
-
-					// clear event state
-					eventState.onRotate = false;
-					eventState.handle = undefined;
-					eventState.target = undefined;
 
 					// remove events
 					document.removeEventListener("mousemove", handlers.onRotate, false);
@@ -1492,8 +1494,13 @@
 
 					// callback
 					if (config.edit) {
-						config.edit(null, exportImageState(id));
+						config.edit(null, exportImageState(eventState.target));
 					}
+
+					// clear event state
+					eventState.onRotate = false;
+					eventState.handle = undefined;
+					eventState.target = undefined;
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1652,7 +1659,7 @@
 	
 					if (
 						direction === "n" ||
-						direction === "n-n"
+						direction === "nn"
 					) {
 						degY = distanceMoved * (180 / maxDiagonal);
 	
@@ -1661,7 +1668,7 @@
 						}
 					} else if (
 						direction === "ne" ||
-						direction === "ne-ne"
+						direction === "nene"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 						degY = distanceMoved * (180 / maxDiagonal);
@@ -1672,7 +1679,7 @@
 						}
 					} else if (
 						direction === "e" ||
-						direction === "e-e"
+						direction === "ee"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 	
@@ -1681,7 +1688,7 @@
 						}
 					} else if (
 						direction === "se" ||
-						direction === "se-se"
+						direction === "sese"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 						degY = distanceMoved * (180 / maxDiagonal);
@@ -1692,7 +1699,7 @@
 						}
 					} else if (
 						direction === "s" ||
-						direction === "s-s"
+						direction === "ss"
 					) {
 						degY = distanceMoved * (180 / maxDiagonal);
 	
@@ -1701,7 +1708,7 @@
 						}
 					} else if (
 						direction === "sw" ||
-						direction === "sw-sw"
+						direction === "swsw"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 						degY = distanceMoved * (180 / maxDiagonal);
@@ -1712,7 +1719,7 @@
 						}
 					} else if (
 						direction === "w" ||
-						direction === "w-w"
+						direction === "ww"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 	
@@ -1721,7 +1728,7 @@
 						}
 					} else if (
 						direction === "nw" ||
-						direction === "nw-nw"
+						direction === "nwnw"
 					) {
 						degX = distanceMoved * (180 / maxDiagonal);
 						degY = distanceMoved * (180 / maxDiagonal);
@@ -1956,7 +1963,7 @@
 	
 					if (
 						direction === "n" ||
-						direction === "n-n"
+						direction === "nn"
 					) {
 						if (-diffY > cropTop) {
 							diffY = -cropTop;
@@ -1966,7 +1973,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "ne" ||
-						direction === "ne-ne"
+						direction === "nene"
 					) {
 						if (-diffY > cropTop) {
 							diffY = -cropTop;
@@ -1982,7 +1989,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "e" ||
-						direction === "e-e"
+						direction === "ee"
 					) {
 						if (diffX > cropRight) {
 							diffX = cropRight;
@@ -1992,7 +1999,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "se" ||
-						direction === "se-se"
+						direction === "sese"
 					) {
 						if (diffY > cropBottom) {
 							diffY = cropBottom;
@@ -2008,7 +2015,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "s" ||
-						direction === "s-s"
+						direction === "ss"
 					) {
 						if (diffY > cropBottom) {
 							diffY = cropBottom;
@@ -2018,7 +2025,7 @@
 						axisY += 0.5 * diffY * cosFraction;
 					} else if (
 						direction === "sw" ||
-						direction === "sw-sw"
+						direction === "swsw"
 					) {
 						if (diffY > cropBottom) {
 							diffY = cropBottom;
@@ -2034,7 +2041,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "w" ||
-						direction === "w-w"
+						direction === "ww"
 					) {
 						if (-diffX > cropLeft) {
 							diffX = -cropLeft;
@@ -2044,7 +2051,7 @@
 						axisY += 0.5 * diffX * sinFraction;
 					} else if (
 						direction === "nw" ||
-						direction === "nw-nw"
+						direction === "nwnw"
 					) {
 						if (-diffY > cropTop) {
 							diffY = -cropTop;
@@ -2188,16 +2195,33 @@
 		
 		function getTargetId(e) {
 			try {
-				var tmp = e.target;
+				var candidate;
 				var found;
 				var id;
+
+				if (typeof(e.touches) === "undefined") {
+					candidate = e.target;
+				} else if (e.touches.length > 0) {
+					for(var i = 0; i < e.touches.length; i++) {
+						if (!candidate) {
+							if (
+								e.touches[i].target.classList.contains("canvaaas-content") ||
+								e.touches[i].target.classList.contains("canvaaas-image")
+							) {
+								candidate = e.touches[i].target;
+							}
+						}
+					}
+				} else {
+					return false;
+				}
 				for(var i = 0; i < 4; i++) {
 					if (!found) {
-						if (tmp.classList.contains("canvaaas-image")) {
-							found = tmp;
+						if (candidate.classList.contains("canvaaas-image")) {
+							found = candidate;
 						} else {
-							if (tmp.parentNode) {
-								tmp = tmp.parentNode;
+							if (candidate.parentNode) {
+								candidate = candidate.parentNode;
 							}
 						}
 					}
@@ -2255,7 +2279,7 @@
 			}
 		}
 
-		function setImageState(id, newState) {
+		function setImageState(id, newState, force) {
 			try {
 				var cadidate;
 				if (isString(id)) {
@@ -2280,6 +2304,7 @@
 				var newLAR;
 				var oldLAR;
 				var tmp;
+				var updated = {};
 
 				if (!state) {
 					return false;
@@ -2301,6 +2326,7 @@
 						newScaleX = oldScaleX
 					}
 					state.scaleX = newScaleX;
+					updated.scaleX = true;
 				}
 
 				if (isNumeric(newState.scaleY)) {
@@ -2313,6 +2339,7 @@
 						newScaleY = oldScaleY
 					}
 					state.scaleY = newScaleY;
+					updated.scaleY = true;
 				}
 
 				// id change
@@ -2339,32 +2366,41 @@
 						clone.id = _cloneId + newId;
 						// change state
 						state.id = newId;
+						updated.id = true;
 					}
 				}
 
 				if (isNumeric(newState.index)) {
 					state.index = toNumber(newState.index);
+					updated.index = true;
 				}
 				if (isNumeric(newState.x)) {
 					state.x = toNumber(newState.x);
+					updated.x = true;
 				}
 				if (isNumeric(newState.y)) {
 					state.y = toNumber(newState.y);
+					updated.y = true;
 				}
 				if (isNumeric(newState.width)) {
 					state.width = toNumber(newState.width);
+					updated.width = true;
 				}
 				if (isNumeric(newState.height)) {
 					state.height = toNumber(newState.height);
+					updated.height = true;
 				}
 				if (isNumeric(newState.rotate)) {
 					state.rotate = toNumber(newState.rotate);
+					updated.rotate = true;
 				}
 				if (isNumeric(newState.rotateX)) {
 					state.rotateX = toNumber(newState.rotateX);
+					updated.rotateX = true;
 				}
 				if (isNumeric(newState.rotateY)) {
 					state.rotateY = toNumber(newState.rotateY);
+					updated.rotateY = true;
 				}
 				if (isNumeric(newState.opacity)) {
 					tmp = toNumber(newState.opacity);
@@ -2375,18 +2411,23 @@
 					} else {
 						state.opacity = tmp;
 					}
+					updated.opacity = true;
 				}
 				if (isBoolean(newState.visible)) {
 					state.visible = toBoolean(newState.visible);
+					updated.visible = true;
 				}
 				if (isBoolean(newState.clickable)) {
 					state.clickable = toBoolean(newState.clickable);
+					updated.clickable = true;
 				}
 				if (isBoolean(newState.editable)) {
 					state.editable = toBoolean(newState.editable);
+					updated.editable = true;
 				}
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
+					updated.drawable = true;
 				}
 				if (isNumeric(newState.cropTop)) {
 					tmp = toNumber(newState.cropTop);
@@ -2395,6 +2436,7 @@
 					} else if (tmp < state.height - (state.cropBottom + 10)) {
 						state.cropTop = tmp;
 					}
+					updated.cropTop = true;
 				}
 				if (isNumeric(newState.cropBottom)) {
 					tmp = toNumber(newState.cropBottom);
@@ -2403,6 +2445,7 @@
 					} else if (tmp < state.height - (state.cropTop + 10)) {
 						state.cropBottom = tmp;
 					}
+					updated.cropBottom = true;
 				}
 				if (isNumeric(newState.cropLeft)) {
 					tmp = toNumber(newState.cropLeft);
@@ -2411,6 +2454,7 @@
 					} else if (tmp < state.width - (state.cropRight + 10)) {
 						state.cropLeft = tmp;
 					}
+					updated.cropLeft = true;
 				}
 				if (isNumeric(newState.cropRight)) {
 					tmp = toNumber(newState.cropRight);
@@ -2419,6 +2463,7 @@
 					} else if (tmp < state.width - (state.cropLeft + 10)) {
 						state.cropRight = tmp;
 					}
+					updated.cropRight = true;
 				}
 
 				// fix flipped Y
@@ -2427,6 +2472,8 @@
 					tmp = state.cropLeft;
 					state.cropLeft = state.cropRight;
 					state.cropRight = tmp;
+					updated.cropLeft = true;
+					updated.cropRight = true;
 				}
 
 				// fix flipped X
@@ -2435,6 +2482,8 @@
 					tmp = state.cropTop;
 					state.cropTop = state.cropBottom;
 					state.cropBottom = tmp;
+					updated.cropTop = true;
+					updated.cropBottom = true;
 				}
 				if (isBoolean(newState.lockAspectRatio)) {
 					oldLAR = state.lockAspectRatio;
@@ -2462,15 +2511,23 @@
 						state.cropRight = croppedWidth * scaleCropRight;
 						state.width = croppedWidth + (croppedWidth * scaleCropLeft) + (croppedWidth * scaleCropRight);
 						state.height = croppedHeight + (croppedHeight * scaleCropTop) + (croppedHeight * scaleCropBottom);
+						updated.cropTop = true;
+						updated.cropBottom = true;
+						updated.cropLeft = true;
+						updated.cropRight = true;
+						updated.width = true;
+						updated.height = true;
 					}
-					
 					state.lockAspectRatio = newLAR;
+					updated.lockAspectRatio = true;
 				}
 				if (isBoolean(newState.pivot)) {
 					state.pivot = toBoolean(newState.pivot);
+					updated.pivot = true;
 				}
 				if (isBoolean(newState.grid)) {
 					state.grid = toBoolean(newState.grid);
+					updated.grid = true;
 				}
 				if (isObject(newState.handle)) {
 					for (var i = 0; i < Object.keys(newState.handle).length; i++) {
@@ -2479,16 +2536,43 @@
 							state["handle"][k] = newState.handle[k];
 						}
 					}
+					updated.handle = true;
 				}
 
-				return setImage(state);
+				if (force) {
+					updated = {
+						id: true,
+						index: true,
+						x: true,
+						y: true,
+						width: true,
+						height: true,
+						rotate: true,
+						rotateX: true,
+						rotateY: true,
+						scaleX: true,
+						scaleY: true,
+						opacity: true,
+						lockAspectRatio: true,
+						visible: true,
+						clickable: true,
+						editable: true,
+						drawable: true,
+						grid: true,
+						pivot: true,
+						handle: true
+					}
+				}
+
+				var res = setImage(state, updated);
+				return res;
 			} catch(err) {
 				console.log(err);
 				return false;
 			}
 		}
 
-		function setImage(state) {
+		function setImage(state, updated) {
 			try {
 				var origin = document.getElementById(_originId + state.id);
 				var clone = document.getElementById(_cloneId + state.id);
@@ -2588,7 +2672,7 @@
 				cloneImg.style.height = state.height + "px";
 				cloneImg.style.opacity = state.opacity;
 				
-				if (!state.visible) {
+				if (!state.visible && updated.visible) {
 					if (!origin.classList.contains("hidden")) {
 						origin.classList.add("hidden");
 					}
@@ -2604,7 +2688,7 @@
 					}
 				}
 
-				if (!state.clickable) {
+				if (!state.clickable && updated.clickable) {
 					if (!origin.classList.contains("unclickable")) {
 						origin.classList.add("unclickable");
 					}
@@ -2620,7 +2704,7 @@
 					}
 				}
 
-				if (!state.editable) {
+				if (!state.editable && updated.editable) {
 					if (!origin.classList.contains("uneditable")) {
 						origin.classList.add("uneditable");
 					}
@@ -2636,7 +2720,7 @@
 					}
 				}
 
-				if (!state.drawable) {
+				if (!state.drawable && updated.drawable) {
 					if (!origin.classList.contains("undrawable")) {
 						origin.classList.add("undrawable");
 					}
@@ -2653,56 +2737,63 @@
 				}
 
 				// set pivots
-				for (var i = 0; i < originPivots.length; i++) {
-					if (!state.pivot) {
-						if (!originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.add("hidden");
-						}
-					} else {
-						if (originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.remove("hidden");
+				if (updated.pivot) {
+					for (var i = 0; i < originPivots.length; i++) {
+						if (!state.pivot) {
+							if (!originPivots[i].classList.contains("hidden")) {
+								originPivots[i].classList.add("hidden");
+							}
+						} else {
+							if (originPivots[i].classList.contains("hidden")) {
+								originPivots[i].classList.remove("hidden");
+							}
 						}
 					}
-				}
-				for (var i = 0; i < clonePivots.length; i++) {
-					if (!state.pivot) {
-						if (!clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.add("hidden");
-						}
-					} else {
-						if (clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.remove("hidden");
+					for (var i = 0; i < clonePivots.length; i++) {
+						if (!state.pivot) {
+							if (!clonePivots[i].classList.contains("hidden")) {
+								clonePivots[i].classList.add("hidden");
+							}
+						} else {
+							if (clonePivots[i].classList.contains("hidden")) {
+								clonePivots[i].classList.remove("hidden");
+							}
 						}
 					}
 				}
 
 				// set grids
-				for (var i = 0; i < originGrids.length; i++) {
-					if (!state.grid) {
-						if (!originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.remove("hidden");
+				if (updated.grid) {
+					for (var i = 0; i < originGrids.length; i++) {
+						if (!state.grid) {
+							if (!originGrids[i].classList.contains("hidden")) {
+								originGrids[i].classList.add("hidden");
+							}
+						} else {
+							if (originGrids[i].classList.contains("hidden")) {
+								originGrids[i].classList.remove("hidden");
+							}
 						}
 					}
-				}
-				for (var i = 0; i < cloneGrids.length; i++) {
-					if (!state.grid) {
-						if (!cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.add("hidden");
-						}
-					} else {
-						if (cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.remove("hidden");
+					for (var i = 0; i < cloneGrids.length; i++) {
+						if (!state.grid) {
+							if (!cloneGrids[i].classList.contains("hidden")) {
+								cloneGrids[i].classList.add("hidden");
+							}
+						} else {
+							if (cloneGrids[i].classList.contains("hidden")) {
+								cloneGrids[i].classList.remove("hidden");
+							}
 						}
 					}
 				}
 
 				// set handle
-				var res = setHandle(state);
-				return res;
+				if (updated.handle) {
+					setHandle(state);
+				}				
+
+				return true;
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -2996,8 +3087,8 @@
 				var rulers = rulerElement.querySelectorAll("div.canvaaas-ruler");
 				var length;
 				var count;
-				var start;
 				var step;
+				var style;
 				var absLength;
 				var absStep;
 				var graduation;
@@ -3005,56 +3096,50 @@
 				for (var i = 0; i < rulers.length; i++) {
 					var d = getDirection(rulers[i]);
 					// init
-					start = 0;
-					count = Math.round((canvasState.width / 10) / 5) * 5;
-					if (d === "n" || d === "s") {
+					if (d === "n") {
+						count = Math.round((canvasState.width / 10) / 5) * 5;
 						step = canvasState.width / count;
 						absStep = canvasState.originalWidth / count;
-						for (var j = 0; j < count + 1; j++) {
-							graduation = "";
-							length = step * j;
-							absLength = Math.round(absStep * j);
-							if (j % 5 === 0) {
-								if (j === 0) {
-									// first
-									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length - 1)+"px;'>";
-								} else if (j === count) {
-									// last
-									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length)+"px;'>";
-								} else {
-									graduation += "<div class='canvaaas-graduation-major' style='left:"+(length)+"px;'>";
-								}
-								graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
-							} else {
-								graduation += "<div class='canvaaas-graduation-minor' style='left:"+(length)+"px;'>";
-							}
-							graduation += "</div>";
-							rulers[i].innerHTML += graduation;
-						}
-					} else if (d === "e" || d === "w") {
+						style = "left";
+					} else if (d === "s") {
+						count = Math.round((canvasState.width / 10) / 5) * 5;
+						step = canvasState.width / count;
+						absStep = canvasState.originalWidth / count;
+						style = "right";
+					} else if (d === "e") {
+						count = Math.round((canvasState.height / 10) / 5) * 5;
 						step = canvasState.height / count;
 						absStep = canvasState.originalHeight / count;
-						for (var j = 0; j < count + 1; j++) {
-							graduation = "";
-							length = step * j;
-							absLength = Math.round(absStep * j);
-							if (j % 5 === 0) {
-								if (j === 0) {
-									// first
-									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length - 1)+"px;'>";
-								} else if (j === count) {
-									// last
-									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length)+"px;'>";
-								} else {
-									graduation += "<div class='canvaaas-graduation-major' style='top:"+(length)+"px;'>";
-								}
-								graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
+						style = "bottom";
+					} else if (d === "w") {
+						count = Math.round((canvasState.height / 10) / 5) * 5;
+						step = canvasState.height / count;
+						absStep = canvasState.originalHeight / count;
+						style = "top";
+					} else {
+						break;
+					}
+					// draw
+					for (var j = 0; j < count + 1; j++) {
+						graduation = "";
+						length = step * j;
+						absLength = Math.round(absStep * j);
+						if (j % 5 === 0) {
+							if (j === 0) {
+								// first
+								graduation += "<div class='canvaaas-graduation-major' style='"+style+":"+(length - 1)+"px;'>";
+							} else if (j === count) {
+								// last
+								graduation += "<div class='canvaaas-graduation-major' style='"+style+":"+(length)+"px;'>";
 							} else {
-								graduation += "<div class='canvaaas-graduation-minor' style='top:"+(length)+"px;'>";
+								graduation += "<div class='canvaaas-graduation-major' style='"+style+":"+(length)+"px;'>";
 							}
-							graduation += "</div>";
-							rulers[i].innerHTML += graduation;
+							graduation += "<div class='canvaaas-graduation-value'>"+absLength+"</div>";
+						} else {
+							graduation += "<div class='canvaaas-graduation-minor' style='"+style+":"+(length)+"px;'>";
 						}
+						graduation += "</div>";
+						rulers[i].innerHTML += graduation;
 					}
 				}
 				return true;
@@ -3509,7 +3594,7 @@
 				tmp.drawable = state.drawable;
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
-				tmp.filter = state.filter;
+				// tmp.filter = state.filter;
 				tmp.handle = state.handle;
 				// tmp.handleEvents = state.handleEvents;
 
@@ -4352,6 +4437,7 @@
 		}
 
 		// var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
+		// asynchronous
 		function applyFilter(id, filterFunc, cb) {
 			var state = getImageState(id);
 			var origin = document.getElementById(_originId + id);
@@ -4376,15 +4462,16 @@
 			if (!cloneImg) {
 				return false;
 			}
-			if (!filterFunc) {
-				originImg.src = cloneImg.src;
-				state.filter = undefined;
-				cb(null, true);
-			}
 
 			var canvas = document.createElement("canvas");
 			var ctx = canvas.getContext("2d");
 			var img = new Image();
+			var tmp;
+
+			if (state.filter) {
+				tmp = originImg.src;
+			}
+
 			img.onerror = function(err) {
 				cb(err);
 				return false;
@@ -4401,16 +4488,57 @@
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.putImageData(filteredImageData, 0, 0);
 
-				var base64 = canvas.toDataURL('image/jpeg', 0.92);
+				var base64 = canvas.toDataURL('image/jpeg', 0.72);
 
 				originImg.src = base64;
 				// cloneImg.src = base64;
 
 				state.filter = filterFunc;
 
+				if (tmp) {
+					// remove cache
+					window.URL.revokeObjectURL(tmp);
+				}
+
 				cb(null, true);
 			}
-			img.src = originImg.src;
+			img.src = state.src;
+		}
+
+		function removeFilter(id) {
+			var state = getImageState(id);
+			var origin = document.getElementById(_originId + id);
+			var clone = document.getElementById(_cloneId + id);
+
+			if (!state) {
+				return false;
+			}
+			if (!origin) {
+				return false;
+			}
+			if (!clone) {
+				return false;
+			}
+
+			var originImg = origin.querySelector("img");
+			var cloneImg = clone.querySelector("img");
+
+			if (!originImg) {
+				return false;
+			}
+			if (!cloneImg) {
+				return false;
+			}
+
+			var tmp = originImg.src;
+
+			originImg.src = state.src;
+			state.filter = undefined;
+
+			// remove cache
+			window.URL.revokeObjectURL(tmp);
+			
+			return true;
 		}
 
 		// asynchronous
@@ -4510,14 +4638,11 @@
 
 				imageStates.push(state);
 
-				// add events to handle
-				setHandleState(state.id, handleState);
-
 				// save image state
 				if (isObject(exportedState)) {
 					additionalState = importImageState(exportedState);
 				}
-				setImageState(state.id, additionalState);
+				setImageState(state.id, additionalState, true);
 
 				if (cb) {
 					cb(null, state.id);
@@ -4571,7 +4696,7 @@
 					}
 				}
 
-				URL.revokeObjectURL(src);
+				window.URL.revokeObjectURL(src);
 
 				return true;
 			} catch(err) {
@@ -5324,7 +5449,19 @@
 					}
 					return false;
 				}
-	
+
+				// get limited canvas sizes
+				var maxCanvasSizes = getMaximumCanvas();
+				if (!maxCanvasSizes) {
+					_maxWidth = 4096;
+					_maxHeight = 4096;
+				} else {
+					_maxWidth = maxCanvasSizes.maxWidth;
+					_maxHeight = maxCanvasSizes.maxHeight;
+				}
+				console.log("canvaaas response time: " + maxCanvasSizes.responseTime + " ms");
+				console.log("canvaaas max area: " + _maxWidth + " x " + _maxHeight + " px");
+
 				// set template
 				target.innerHTML = _containerTemplate;
 	
@@ -5348,12 +5485,15 @@
 				// windowScrollEvent = handlers.debounce( handlers.scrollWindow, 300 );
 				// window.addEventListener("scroll", windowScrollEvent, false);
 
+				document.addEventListener("touchstart", handlers.fixPinchZoom, false);
+
 				// drag and drop upload event
 				canvasElement.addEventListener('dragenter', handlers.stopEvents, false);
 				canvasElement.addEventListener('dragleave', handlers.stopEvents, false);
 				canvasElement.addEventListener('dragover', handlers.stopEvents, false);
 				canvasElement.addEventListener('drop', handlers.stopEvents, false);
 				canvasElement.addEventListener('drop', handlers.drop, false);
+
 				// callback
 				if (cb) {
 					cb(null, exportConfig());
@@ -5398,6 +5538,8 @@
 				// reset ID
 				_originId = "canvaaas-" + getShortId() + "-";
 				_cloneId = "canvaaas-" + getShortId() + "-";
+				_maxWidth = undefined;
+				_maxHeight = undefined;
 
 				// reset default states
 				copyObject(config, defaultConfig);
@@ -6924,14 +7066,17 @@
 
 			var state = getImageState(id);
 
-			if (isFunction(newFunction) && state.filter) {
+			if (newFunction === null || newFunction === false) {
+
+				removeFilter(id);
+
 				if (cb) {
-					cb("This image already applied filter");
+					cb(null, exportImageState(id));
 				}
 				return false;
 			}
 
-			applyFilter(state.id, newFunction, function(err, res) {
+			applyFilter(id, newFunction, function(err, res) {
 				if (err) {
 					if (config.edit) {
 						config.edit(err);
@@ -6941,14 +7086,11 @@
 					}
 					return false;
 				}
-				if (config.edit) {
-					config.edit(null, exportImageState(id));
-				}
 				if (cb) {
 					cb(null, exportImageState(id));
 				}
 				return exportImageState(id);
-			})
+			});
 		}
 
 		//
@@ -7156,9 +7298,9 @@
 	
 				for (var i = 0; i < imageStates.length; i++) {
 					if (imageStates[i].drawable) {
-						convertedImageStates.push(
-							exportImageState(imageStates[i].id)
-						);
+						var tmp = exportImageState(imageStates[i].id);
+						tmp.filter = imageStates[i].filter;
+						convertedImageStates.push(tmp);
 					}
 				}
 	
@@ -7290,7 +7432,9 @@
 					(exportedImageStates[i].drawable === undefined || exportedImageStates[i].drawable === true) &&
 					exportedImageStates[i].index
 				) {
-					convertedImageStates.push(exportedImageStates[i])
+					var tmp = exportImageState(imageStates[i].id);
+					tmp.filter = exportedImageStates[i].filter;
+					convertedImageStates.push(tmp);
 				}
 			}
 
