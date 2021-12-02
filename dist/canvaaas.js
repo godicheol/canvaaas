@@ -370,29 +370,6 @@
 				}
 			},
 
-			click: function(e) {
-				try {
-					e.preventDefault();
-					e.stopPropagation();
-
-					var id = getTargetId(e);
-					var isTarget = e.target.classList.contains("canvaaas-image") || e.target.classList.contains("canvaaas-content");
-
-					if (!isExist(id)) {
-						return false;
-					}
-					if (!isTarget) {
-						return false;
-					}
-					if (config.click) {
-						config.click(null, exportImageState(id));
-					}
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-
 			// deprecated
 			doubleClick: function(e) {
 				try {
@@ -430,7 +407,6 @@
 
 					if (config.rightClick) {
 						config.rightClick(null, e, exportImageState(id));
-						return false;
 					}
 				} catch(err) {
 					console.log(err);
@@ -438,8 +414,7 @@
 				}
 			},
 
-			// for handle
-			startClick: function(e) {
+			startClickHandle: function(e) {
 				try {
 					var id = getTargetId(e);
 					var state = getImageState(id);
@@ -478,17 +453,141 @@
 					}
 
 					// save event state
+					eventState.click = true;
 					eventState.onClick = true;
 					eventState.target = id;
 					eventState.handle = handle;
 					eventState.direction = direction;
 					eventState.mouseX = mouseX;
 					eventState.mouseY = mouseY;
-					eventState.click = true;
 
 					// add class
 					addClassToImage(eventState.target, "editing");
 					addClassToHandle(eventState.handle, "editing");
+
+					// add events
+					document.addEventListener("mousemove", handlers.onClickHandle, false);
+					document.addEventListener("mouseup", handlers.endClickHandle, false);
+
+					document.addEventListener("touchmove", handlers.onClickHandle, false);
+					document.addEventListener("touchend", handlers.endClickHandle, false);
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			onClickHandle: function(e) {
+				try {
+					if (!eventState.onClick) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					var mouseX;
+					var mouseY;
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX - eventState.mouseX;
+						mouseY = e.clientY - eventState.mouseY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX - eventState.mouseX;
+						mouseY = e.touches[0].clientY - eventState.mouseY;
+					} else {
+						return false;
+					}
+
+					if (Math.abs(mouseX) > 12 || Math.abs(mouseY) > 12) {
+						eventState.click = false;
+						eventState.onClick = false;
+
+						removeClassToImage(eventState.target, "editing");
+						removeClassToHandle(eventState.handle, "editing");
+					}
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+
+			endClickHandle: function(e) {
+				try {
+					e.preventDefault();
+					e.stopPropagation();
+
+					// remove class
+					removeClassToImage(eventState.target, "editing");
+					removeClassToHandle(eventState.handle, "editing");
+
+					// remove events
+					document.removeEventListener("mousemove", handlers.onClickHandle, false);
+					document.removeEventListener("mouseup", handlers.endClickHandle, false);
+
+					document.removeEventListener("touchmove", handlers.onClickHandle, false);
+					document.removeEventListener("touchend", handlers.endClickHandle, false);
+
+					// callback
+					if (eventState.click) {
+						if (config.clickHandle) {
+							config.clickHandle(null, exportImageState(eventState.target), eventState.direction);
+						}
+					}
+
+					// clear event state
+					eventState.click = false;
+					eventState.onClick = false;
+					eventState.target = undefined;
+					eventState.handle = undefined;
+					eventState.direction = undefined;
+				} catch(err) {
+					console.log(err);
+					return false;
+				}
+			},
+			
+			startClick: function(e) {
+				try {
+					var id = getTargetId(e);
+					var state = getImageState(id);
+					var mouseX;
+					var mouseY;
+
+					if (!state) {
+						return false;
+					}
+					if (!canvasState.clickable) {
+						return false;
+					}
+					if (!state.clickable) {
+						return false;
+					}
+
+					e.preventDefault();
+					e.stopPropagation();
+
+					if (typeof(e.touches) === "undefined") {
+						mouseX = e.clientX;
+						mouseY = e.clientY;
+					} else if(e.touches.length === 1) {
+						mouseX = e.touches[0].clientX;
+						mouseY = e.touches[0].clientY;
+					} else if (e.touches.length > 1) {
+						// mobile
+						return handlers.startPinchZoom(e);
+					} else {
+						return false;
+					}
+
+					// save event state
+					eventState.click = true;
+					eventState.onClick = true;
+					eventState.target = id;
+					eventState.mouseX = mouseX;
+					eventState.mouseY = mouseY;
+
+					// add class
+					addClassToImage(eventState.target, "editing");
 
 					// add events
 					document.addEventListener("mousemove", handlers.onClick, false);
@@ -523,16 +622,27 @@
 						return false;
 					}
 
-					if (Math.abs(mouseX) > 12) {
+					if (Math.abs(mouseX) > 2 || Math.abs(mouseY) > 2) {
 						eventState.click = false;
-					} else if (Math.abs(mouseY) > 12) {
-						eventState.click = false;
-					}
+						eventState.onClick = false;
 
-					if (!eventState.click) {
 						// remove class
 						removeClassToImage(eventState.target, "editing");
-						removeClassToHandle(eventState.handle, "editing");
+
+						// remove events
+						document.removeEventListener("mousemove", handlers.onClick, false);
+						document.removeEventListener("mouseup", handlers.endClick, false);
+
+						document.removeEventListener("touchmove", handlers.onClick, false);
+						document.removeEventListener("touchend", handlers.endClick, false);
+
+						// clear event state
+						eventState.click = false;
+						eventState.onClick = false;
+						eventState.target = undefined;
+
+						// event propagation
+						return handlers.startMove(e);
 					}
 				} catch(err) {
 					console.log(err);
@@ -547,7 +657,6 @@
 
 					// remove class
 					removeClassToImage(eventState.target, "editing");
-					removeClassToHandle(eventState.handle, "editing");
 
 					// remove events
 					document.removeEventListener("mousemove", handlers.onClick, false);
@@ -558,39 +667,15 @@
 
 					// callback
 					if (eventState.click) {
-						if (config.clickHandle) {
-							config.clickHandle(null, exportImageState(eventState.target), eventState.direction);
+						if (config.click) {
+							config.click(null, exportImageState(eventState.target));
 						}
 					}
 
 					// clear event state
+					eventState.click = false;
 					eventState.onClick = false;
 					eventState.target = undefined;
-					eventState.handle = undefined;
-					eventState.direction = undefined;
-					eventState.click = false;
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-			
-			// deprecated
-			touch: function(e) {
-				try {
-					e.preventDefault();
-					e.stopPropagation();
-				} catch(err) {
-					console.log(err);
-					return false;
-				}
-			},
-
-			// deprecated
-			doubleTouch: function(e) {
-				try {
-					e.preventDefault();
-					e.stopPropagation();
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -640,9 +725,11 @@
 						// mobile
 						mouseX = e.touches[0].clientX;
 						mouseY = e.touches[0].clientY;
-					} else {
+					} else if (e.touches.length > 1) {
 						// mobile
 						return handlers.startPinchZoom(e);
+					} else {
+						return false;
 					}
 	
 					// save event state
@@ -1088,6 +1175,12 @@
 						return false;
 					}
 					if (eventState.onClick) {
+						return false;
+					}
+					if (eventState.onCrop) {
+						return false;
+					}
+					if (eventState.onFlip) {
 						return false;
 					}
 
@@ -3200,7 +3293,7 @@
 						} else if (state["handle"][d] === "flip") {
 							state["handleEvents"][f] = handlers.startFlip;
 						} else if (state["handle"][d] === "click") {
-							state["handleEvents"][f] = handlers.startClick;
+							state["handleEvents"][f] = handlers.startClickHandle;
 						}
 					}
 				}
@@ -4136,10 +4229,12 @@
 				var dh;
 
 				resizedCanvas = getResizedCanvas(newImage, {
-					width: width,
-					height: height,
 					maxWidth: _maxWidth,
 					maxHeight: _maxHeight,
+					minWidth: _minWidth,
+					minHeight: _minHeight,
+					width: width,
+					height: height,
 				});
 
 				scaleRatioX = resizedCanvas.width / width;
@@ -4162,6 +4257,8 @@
 				rotatedCanvas = getRotatedCanvas(croppedCanvas, {
 					maxWidth: _maxWidth,
 					maxHeight: _maxHeight,
+					minWidth: _minWidth,
+					minHeight: _minHeight,
 					rotate: rotate,
 					scaleX: scaleX,
 					scaleY: scaleY,
@@ -4213,6 +4310,8 @@
 				var height = options.height;
 				var maxWidth = options.maxWidth;
 				var maxHeight = options.maxHeight;
+				var minWidth = options.minWidth;
+				var minHeight = options.minHeight;
 				var dx;
 				var dy;
 				var dw;
@@ -4223,10 +4322,15 @@
 					height: height,
 					maxWidth: maxWidth,
 					maxHeight: maxHeight,
-					minWidth: _minWidth,
-					minHeight: _minHeight
+					minWidth: minWidth,
+					minHeight: minHeight
 				});
 	
+				dx = 0;
+				dy = 0;
+				dw = Math.floor(fittedSizes[0]);
+				dh = Math.floor(fittedSizes[1]);
+
 				canvas.width = Math.floor(fittedSizes[0]);
 				canvas.height = Math.floor(fittedSizes[1]);
 	
@@ -4235,12 +4339,6 @@
 				ctx.imageSmoothingQuality = "low";
 				ctx.imageSmoothingEnabled = false;
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
-	
-				dx = 0;
-				dy = 0;
-				dw = Math.floor(canvas.width);
-				dh = Math.floor(canvas.height);
-	
 				ctx.drawImage(
 					img,
 					dx, dy,
@@ -4258,6 +4356,8 @@
 			try {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
+				var width = canv.width;
+				var height = canv.height;
 				var cropTop = options.cropTop;
 				var cropBottom = options.cropBottom;
 				var cropLeft = options.cropLeft;
@@ -4287,9 +4387,18 @@
 					cropBottom = tmp;
 				}
 	
-				var croppedWidth = canv.width - (cropLeft + cropRight);
-				var croppedHeight = canv.height - (cropTop + cropBottom);
+				croppedWidth = width - (cropLeft + cropRight);
+				croppedHeight = height - (cropTop + cropBottom);
 
+				sx = Math.floor(cropLeft);
+				sy = Math.floor(cropTop);
+				sw = Math.floor(croppedWidth);
+				sh = Math.floor(croppedHeight);
+				dx = 0;
+				dy = 0;
+				dw = Math.floor(croppedWidth);
+				dh = Math.floor(croppedHeight);
+	
 				canvas.width = Math.floor(croppedWidth);
 				canvas.height = Math.floor(croppedHeight);
 
@@ -4298,16 +4407,6 @@
 				ctx.imageSmoothingQuality = "low";
 				ctx.imageSmoothingEnabled = false;
 				ctx.fillRect(0, 0, canvas.width, canvas.height);
-	
-				sx = Math.floor(cropLeft);
-				sy = Math.floor(cropTop);
-				sw = Math.floor(canvas.width);
-				sh = Math.floor(canvas.height);
-				dx = 0;
-				dy = 0;
-				dw = Math.floor(canvas.width);
-				dh = Math.floor(canvas.height);
-	
 				ctx.drawImage(
 					canv,
 					sx, sy,
@@ -4329,20 +4428,22 @@
 				var ctx = canvas.getContext("2d");
 				var maxWidth = options.maxWidth;
 				var maxHeight = options.maxHeight;
+				var minWidth = options.minWidth;
+				var minHeight = options.minHeight;
 				var opacity = options.opacity;
 				var rotate = options.rotate;
 				var scaleX = options.scaleX;
 				var scaleY = options.scaleY;
 				var width = canv.width;
 				var height = canv.height;
-				var sx;
-				var sy;
-				var sw;
-				var sh;
-				var dx;
-				var dy;
-				var dw;
-				var dh;
+				var sx = 0;
+				var sy = 0;
+				var sw = Math.floor(width);
+				var sh = Math.floor(height);
+				var dx = -Math.floor(width * 0.5);
+				var dy = -Math.floor(height * 0.5);
+				var dw = Math.floor(width);
+				var dh = Math.floor(height);
 
 				var rotatedSizes = getRotatedSizes(
 					width,
@@ -4355,8 +4456,8 @@
 					height: rotatedSizes[1],
 					maxWidth: maxWidth,
 					maxHeight: maxHeight,
-					minWidth: 0,
-					minHeight: 0
+					minWidth: minWidth,
+					minHeight: minHeight
 				});
 	
 				// set canvas sizes
@@ -4373,16 +4474,6 @@
 				ctx.translate(Math.floor(canvas.width * 0.5), Math.floor(canvas.height * 0.5));
 				ctx.rotate(rotate * (Math.PI / 180));
 				ctx.scale(scaleX, scaleY);
-
-				sx = 0;
-				sy = 0;
-				sw = Math.floor(width);
-				sh = Math.floor(height);
-				dx = -Math.floor(width * 0.5);
-				dy = -Math.floor(height * 0.5);
-				dw = Math.floor(width);
-				dh = Math.floor(height);
-	
 				ctx.drawImage(
 					canv,
 					sx, sy,
@@ -4599,20 +4690,16 @@
 				// set events
 				newOrigin.addEventListener("contextmenu", handlers.rightClick, false);
 				// newOrigin.addEventListener("dblclick", handlers.doubleClick, false); // deprecated
-				newOrigin.addEventListener("click", handlers.click, false);
-				newOrigin.addEventListener("touchstart", handlers.click, false);
+				newOrigin.addEventListener("mousedown", handlers.startClick, false);
+				newOrigin.addEventListener("touchstart", handlers.startClick, false);
 				// newOrigin.addEventListener("mouseover", handlers.startHover, false); // deprecated
-				newOrigin.addEventListener("mousedown", handlers.startMove, false);
-				newOrigin.addEventListener("touchstart", handlers.startMove, false);
 				newOrigin.addEventListener("wheel", handlers.startWheelZoom, false);
 
 				newClone.addEventListener("contextmenu", handlers.rightClick, false);
 				// newClone.addEventListener("dblclick", handlers.doubleClick, false); // deprecated
-				newClone.addEventListener("click", handlers.click, false);
-				newClone.addEventListener("touchstart", handlers.click, false);
+				newClone.addEventListener("mousedown", handlers.startClick, false);
+				newClone.addEventListener("touchstart", handlers.startClick, false);
 				// newClone.addEventListener("mouseover", handlers.startHover, false); // deprecated
-				newClone.addEventListener("mousedown", handlers.startMove, false);
-				newClone.addEventListener("touchstart", handlers.startMove, false);
 				newClone.addEventListener("wheel", handlers.startWheelZoom, false);
 
 				canvasElement.appendChild(newOrigin);
