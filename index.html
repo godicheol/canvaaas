@@ -82,6 +82,16 @@
 			overflow: hidden;
 		}
 
+
+		/*  */
+		#myHelp{
+			font-size: 0.8rem;
+			text-align: center;
+		}
+		#myDebug{
+			text-align: center;
+		}
+
 		/* header */
 		.header{
 			position: fixed;
@@ -996,17 +1006,19 @@
 
 	<div id="target"></div>
 
-	<div id="myDebug" style="text-align: center;"></div>
+	<div id="myHelp" style=""></div>
+	<div id="myDebug" style=""></div>
 
 	<!-- controller -->
 	<div class="ctrl">
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="index"
 				data-value="1"
+				data-help="Index up"
 				>
 				<span class="material-icons">
 					thumb_up
@@ -1015,11 +1027,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="index"
 				data-value="-1"
+				data-help="Index down"
 				>
 				<span class="material-icons">
 					thumb_down
@@ -1028,11 +1041,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="crop"
 				data-value=""
+				data-help="Crop mode"
 				>
 				<span class="material-icons">
 					crop
@@ -1041,11 +1055,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="resize"
 				data-value=""
+				data-help="Resize mode"
 				>
 				<span class="material-icons">
 					transform
@@ -1054,33 +1069,36 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="moveY"
 				data-value="-10"
+				data-help="Move top 10px"
 				>
 				<span class="material-icons">expand_less</span>
 			</a>
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="moveY"
 				data-value="10"
+				data-help="Move bottom 10px"
 				>
 				<span class="material-icons">expand_more</span>
 			</a>
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="moveX"
 				data-value="-10"
+				data-help="Move left 10px"
 				>
 				<span class="material-icons">
 					navigate_before
@@ -1089,11 +1107,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="moveX"
 				data-value="10"
+				data-help="Move right 10px"
 				>
 				<span class="material-icons">
 					navigate_next
@@ -1102,11 +1121,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="zoom"
 				data-value="1.1"
+				data-help="Zoom in 10%"
 				>
 				<span class="material-icons">
 					zoom_in
@@ -1115,11 +1135,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="zoom"
 				data-value="0.9"
+				data-help="Zoom out 10%"
 				>
 				<span class="material-icons">
 					zoom_out
@@ -1128,11 +1149,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="cover"
 				data-value=""
+				data-help="Cover to canvas"
 				>
 				<span class="material-icons">
 					open_in_full
@@ -1141,11 +1163,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="contain"
 				data-value=""
+				data-help="Contain to canvas"
 				>
 				<span class="material-icons">
 					open_in_full
@@ -1154,11 +1177,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="rotate"
 				data-value="45"
+				data-help="Rotate right 45 deg"
 				>
 				<span class="material-icons">
 					rotate_right
@@ -1167,11 +1191,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="rotate"
 				data-value="-45"
+				data-help="Rotate left 45 deg"
 				>
 				<span class="material-icons">
 					rotate_left
@@ -1180,11 +1205,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="flipY"
 				data-value=""
+				data-help="Flip horizontal"
 				>
 				<span class="material-icons">
 					flip
@@ -1193,11 +1219,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="flipX"
 				data-value=""
+				data-help="Flip vertical"
 				>
 				<span class="material-icons" style="transform: rotate(90deg);">
 					flip
@@ -1206,11 +1233,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="opacity"
-				data-value="0.1"
+				data-value="-0.1"
+				data-help="Opacity -0.1"
 				>
 				<span class="material-icons">
 					opacity
@@ -1219,11 +1247,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="opacity"
-				data-value="-0.1"
+				data-value="0.1"
+				data-help="Opacity +0.1"
 				>
 				<span class="material-icons">
 					invert_colors_off
@@ -1232,11 +1261,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="lockAspectRatio"
 				data-value=""
+				data-help="Lock aspect ratio"
 				>
 				<span class="material-icons">
 					aspect_ratio
@@ -1245,11 +1275,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="visible"
 				data-value=""
+				data-help="Visible"
 				>
 				<span class="material-icons">
 					visibility_off
@@ -1258,24 +1289,26 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="clickable"
 				data-value=""
+				data-help="Clickable"
 				>
 				<span class="material-icons">
-					do_not_disturb_off
+					do_not_touch
 				</span>
 			</a>
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="editable"
 				data-value=""
+				data-help="Editable"
 				>
 				<span class="material-icons">
 					edit_off
@@ -1284,11 +1317,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="drawable"
 				data-value=""
+				data-help="Drawable"
 				>
 				<span class="material-icons">
 					file_download_off
@@ -1297,11 +1331,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="remove"
 				data-value=""
+				data-help="Remove"
 				>
 				<span class="material-icons">
 					delete
@@ -1310,11 +1345,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="grid"
 				data-value=""
+				data-help="Grid"
 				>
 				<span class="material-icons">
 					grid_3x3
@@ -1323,11 +1359,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="pivot"
 				data-value=""
+				data-help="Pivot"
 				>
 				<span class="material-icons">
 					adjust
@@ -1336,11 +1373,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-grayscale"
 				data-value=""
+				data-help="Filter grayscale"
 				>
 				<span class="material-icons">
 					join_right
@@ -1349,11 +1387,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-sepia"
 				data-value=""
+				data-help="Filter sepia"
 				>
 				<span class="material-icons">
 					join_right
@@ -1362,11 +1401,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-negative"
 				data-value=""
+				data-help="Filter negative"
 				>
 				<span class="material-icons">
 					join_right
@@ -1375,11 +1415,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-brightness"
 				data-value=""
+				data-help="Filter brightness"
 				>
 				<span class="material-icons">
 					join_right
@@ -1388,11 +1429,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-darkness"
 				data-value=""
+				data-help="Filter drakness"
 				>
 				<span class="material-icons">
 					join_right
@@ -1401,11 +1443,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-contrast"
 				data-value=""
+				data-help="Filter contrast"
 				>
 				<span class="material-icons">
 					join_right
@@ -1414,11 +1457,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="filter-unset"
 				data-value=""
+				data-help="Filter unset"
 				>
 				<span class="material-icons">
 					switch_access_shortcut
@@ -1427,11 +1471,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="drawable-hide"
 				data-value=""
+				data-help="Hide undrawable images"
 				>
 				<span class="material-icons">
 					visibility_off
@@ -1440,11 +1485,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="drawable-show"
 				data-value=""
+				data-help="Show undrawable images"
 				>
 				<span class="material-icons">
 					visibility
@@ -1453,11 +1499,12 @@
 		</div>
 		<div class="row">
 			<a
-				class=""
+				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
 				data-method="ruler"
 				data-value=""
+				data-help="Ruler"
 				>
 				<span class="material-icons">
 					straighten
@@ -1502,10 +1549,13 @@
 	</style>
 	<script>
 		var tool;
+		var hlp = document.getElementById("myHelp");
 
 		function selectTool(self) {
 			var m = self.getAttribute("data-method");
 			var v = self.getAttribute("data-value");
+			var t = self.getAttribute("data-help");
+			hlp.innerHTML = t;
 
 			switch(m) {
 				case "resize":
