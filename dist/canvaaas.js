@@ -2204,18 +2204,22 @@
 				} else if (e.touches.length > 0) {
 					for(var i = 0; i < e.touches.length; i++) {
 						if (!candidate) {
-							if (
-								e.touches[i].target.classList.contains("canvaaas-content") ||
-								e.touches[i].target.classList.contains("canvaaas-image")
-							) {
-								candidate = e.touches[i].target;
+							var tmp = e.touches[i].target;
+							for(var j = 0; j < 2; j++) {
+								if (tmp.classList.contains("canvaaas-image")) {
+									candidate = e.touches[i].target;
+								} else {
+									if (tmp.parentNode) {
+										tmp = tmp.parentNode;
+									}
+								}
 							}
 						}
 					}
 				} else {
 					return false;
 				}
-				for(var i = 0; i < 4; i++) {
+				for(var i = 0; i < 2; i++) {
 					if (!found) {
 						if (candidate.classList.contains("canvaaas-image")) {
 							found = candidate;
