@@ -33,7 +33,7 @@
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
 			click: undefined, // function(err, res)
-			rightClick: undefined, // function(err, res, next)
+			rightClick: undefined, // function(err, event, res)
 			clickHandle: undefined, // function(err, res, direction)
 			upload: undefined, // function(err, res)
 			edit: undefined, // function(err, res)
@@ -421,10 +421,6 @@
 				try {
 					var id = getTargetId(e);
 					var rightClick = e.button === 2 || e.ctrlKey;
-					var endFunc = function() {
-						eventState.onMenu = false;
-					}
-
 					if (!rightClick) {
 						return false;
 					}
@@ -433,10 +429,7 @@
 					e.stopPropagation();
 
 					if (config.rightClick) {
-
-						eventState.onMenu = true;
-
-						config.rightClick(null, exportImageState(id), endFunc);
+						config.rightClick(null, e, exportImageState(id));
 						return false;
 					}
 				} catch(err) {
@@ -455,10 +448,6 @@
 					var mouseX;
 					var mouseY;
 
-					// fix opened menu
-					if (eventState.onMenu) {
-						return false;
-					}
 					if (!state) {
 						return false;
 					}
@@ -620,10 +609,6 @@
 					if (eventState.onZoom) {
 						return false;
 					}
-					// fix opened menu
-					if (eventState.onMenu) {
-						return false;
-					}
 					// fix right click
 					if (rightClick) {
 						return false;
@@ -770,10 +755,6 @@
 
 					// fix osx wheeling
 					if (eventState.onZoom) {
-						return false;
-					}
-					// fix opened menu
-					if (eventState.onMenu) {
 						return false;
 					}
 					if (!state) {
@@ -1109,9 +1090,6 @@
 					if (eventState.onClick) {
 						return false;
 					}
-					if (eventState.onMenu) {
-						return false;
-					}
 
 					var id = getTargetId(e);
 					var state = getImageState(id);
@@ -1372,10 +1350,6 @@
 					if (!state.clickable) {
 						return false;
 					}
-					// fix opened menu
-					if (eventState.onMenu) {
-						return false;
-					}
 
 					e.preventDefault();
 					e.stopPropagation();
@@ -1526,10 +1500,6 @@
 						return false;
 					}
 					if (!state.clickable) {
-						return false;
-					}
-					// fix opened menu
-					if (eventState.onMenu) {
 						return false;
 					}
 
@@ -1836,10 +1806,6 @@
 						return false;
 					}
 					if (!state.clickable) {
-						return false;
-					}
-					// fix opened menu
-					if (eventState.onMenu) {
 						return false;
 					}
 

@@ -26,7 +26,7 @@
 </script>
 ```
 
-## Set config (optional)
+## Set config
 
 ```html
 <script>
@@ -55,8 +55,7 @@
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
     click: undefined, // function(err, res)
-    rightClick: undefined, // function(err, res, next)
-    doubleClick: undefined, // function(err, res)
+    rightClick: undefined, // function(err, event, res)
     clickHandle: undefined, // function(err, res, direction)
     upload: undefined, // function(err, res)
     edit: undefined, // function(err, res)
@@ -67,7 +66,7 @@
 </script>
 ```
 
-## New canvas (optional)
+## New canvas
 
 ```html
 <script>
@@ -104,7 +103,6 @@
 
 ```html
 <script>
-  // Argument type `Array`
   var exportedStates = [{
     "id": "test-1",
     "src": "http://localhost:3000/img/2.jpg",
@@ -148,6 +146,7 @@
     "editable": true,
     "drawable": true,
   }];
+  // Argument type `Array`
   canvaaas.uploadStates(exportedStates, function(err, res){
     // Your code
   });
@@ -179,6 +178,7 @@
   data-drawable = "true">
 
 <script>
+  // Argument type `Array`
   canvaaas.uploadElements([document.getElementById("blahblah")], function(err, res){
     // Your code
   });
@@ -195,7 +195,7 @@
     quality: 0.92, // optional
     width: 256, // optional
     height: 256, // optional
-    background: '#000000', // optional, rgb format, 7 characters or "transparent"
+    background: '#FFFFFF', // optional, rgb format, 7 characters or "transparent"
   }, function(err, file, result){
     // Your code
   });
@@ -223,14 +223,11 @@
 <script>
   canvaaas.drawTo({
     filename: 'filename', // optional
-    dataType: 'url', // optional
     mimeType: 'image/png', // optional
-    width: 1800, // required
-    height: 1200, // required
-    drawWidth: 3600, // optional
-    drawHeight: 3600, // optional
     quality: 0.92, // optional
-    background: '#FFFFFF', // optional, rgb format, 7 characters
+    width: 256, // optional
+    height: 256, // optional
+    background: '#FFFFFF', // optional, rgb format, 7 characters or "transparent"
   }, [{
     "src": "./img/1.png", // required
     "index": 1, // required
@@ -291,14 +288,14 @@
       'sw': 'resize',
       'w': 'resize',
       'nw': 'resize',
-      "n-n": null,
-      "ne-ne": null,
-      "e-e": null,
-      "se-se": null,
-      "s-s": null,
-      "sw-sw": null,
-      "w-w": null,
-      "nw-nw": null,
+      "nn": null,
+      "nene": null,
+      "ee": null,
+      "sese": null,
+      "ss": null,
+      "swsw": null,
+      "ww": null,
+      "nwnw": null,
     }
   }, function(err, res) {
     // Your code
@@ -332,19 +329,21 @@
     'sw': 'resize',
     'w': 'resize',
     'nw': 'resize',
-    "n-n": "rotate",
-    "ne-ne": null, // hide
-    "e-e": "flip",
-    "se-se": null, // hide
-    "s-s": "click", // config.clickHandle callback
-    "sw-sw": null, // hide
-    "w-w": "click", // config.clickHandle callback
-    "nw-nw": null, // hide
+    "nn": "rotate",
+    "nene": null, // hide
+    "ee": "flip",
+    "sese": null, // hide
+    "ss": "click", // config.clickHandle callback
+    "swsw": null, // hide
+    "ww": "click", // config.clickHandle callback
+    "nwnw": null, // hide
   }, function(err, res){
     // Your code
   });
 </script>
 ```
+
+## Handle style (global)
 
 ```html
 <script>
@@ -357,14 +356,14 @@
     'sw': 'crop',
     'w': 'crop',
     'nw': 'crop',
-    "n-n": null, // hide
-    "ne-ne": null, // hide
-    "e-e": null, // hide
-    "se-se": null, // hide
-    "s-s": null, // hide
-    "sw-sw": null, // hide
-    "w-w": null, // hide
-    "nw-nw": null, // hide
+    "nn": null, // hide
+    "nene": null, // hide
+    "ee": null, // hide
+    "sese": null, // hide
+    "ss": null, // hide
+    "swsw": null, // hide
+    "ww": null, // hide
+    "nwnw": null, // hide
   }, function(err, res){
     // Your code
   });
@@ -378,56 +377,12 @@
   canvaaas.config({
     clickHandle: function(err, res, direction) {
       if (err) { return false; }
+      // direction (n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw)
       var id = res.id;
+      // e.g.
       switch(direciton) {
         case "n":
-          // Example
           canvaaas.rotate(id, 50);
-          break;
-        case "s":
-          // Your code
-          break;
-        case "e":
-          // Your code
-          break;
-        case "w":
-          // Your code
-          break;
-        case "ne":
-          // Your code
-          break;
-        case "nw":
-          // Your code
-          break;
-        case "se":
-          // Your code
-          break;
-        case "sw":
-          // Your code
-          break;
-        case "n-n":
-          // Your code
-          break;
-        case "s-s":
-          // Your code
-          break;
-        case "e-e":
-          // Your code
-          break;
-        case "w-w":
-          // Your code
-          break;
-        case "ne-ne":
-          // Your code
-          break;
-        case "nw-nw":
-          // Your code
-          break;
-        case "se-se":
-          // Your code
-          break;
-        case "sw-sw":
-          // Your code
           break;
       }
     }
