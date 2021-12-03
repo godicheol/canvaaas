@@ -413,12 +413,14 @@
 
 ```html
 <script>
+  canvaaas.handle(id, {
+    n: "click"
+  });
+
   canvaaas.config({
     clickHandle: function(err, res, direction) {
       if (err) { return false; }
-      // direction (n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw)
       var id = res.id;
-      // e.g.
       switch(direciton) {
         case "n":
           canvaaas.rotate(id, 50);
