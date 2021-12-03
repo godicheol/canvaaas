@@ -580,12 +580,12 @@
 /* unclickabled */
 .canvaaas-canvas.unclickable .canvaaas-image,
 .canvaaas-mirror.unclickable .canvaaas-image{
-	pointer-events: none;
-	cursor: default;
+	pointer-events: none !important;
+	cursor: default !important;
 }
 .canvaaas-image.unclickable{
-	pointer-events: none;
-	cursor: default;
+	pointer-events: none !important;
+	cursor: default !important;
 }
 
 /* mobile */

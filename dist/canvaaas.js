@@ -48,6 +48,7 @@
 			overlay: true, // boolean
 			checker: true, // boolean
 			ruler: false, // boolean
+			uploadable: true, // boolean
 			clickable: true, // boolean
 			editable: true, // boolean
 		};
@@ -123,6 +124,14 @@
 				visible: true,
 				clickable: true,
 				editable: true,
+				indexable: true,
+				movable: true,
+				resizable: true,
+				rotatable: true,
+				flippable: true,
+				croppable: true,
+				filterable: true,
+				removable: true,
 				drawable: true,
 				pivot: config.showPivotAfterRender || false,
 				grid: config.showGridAfterRender || false,
@@ -248,6 +257,12 @@
 					if (eventState.onUpload) {
 						if (config.upload) {
 							config.upload("Already in progress");
+						}
+						return false;
+					}
+					if (!canvasState.uploadable) {
+						if (config.upload) {
+							config.upload("You are not allowed to upload in this canvas by canvas settings");
 						}
 						return false;
 					}
@@ -436,12 +451,6 @@
 					e.preventDefault();
 					e.stopPropagation();
 
-					// if (!canvasState.editable) {
-					// 	return false;
-					// }
-					// if (!state.editable) {
-					// 	return false;
-					// }
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
@@ -717,6 +726,9 @@
 					if (!state.editable) {
 						return false;
 					}
+					if (!state.movable) {
+						return false;
+					}
 					if (typeof(e.touches) === "undefined") {
 						// desktop
 						mouseX = e.clientX;
@@ -847,6 +859,9 @@
 					if (!state) {
 						return false;
 					}
+					if (!direction) {
+						return false;
+					}
 					if (!canvasState.clickable) {
 						return false;
 					}
@@ -863,7 +878,7 @@
 					if (!state.editable) {
 						return false;
 					}
-					if (!direction) {
+					if (!state.resizable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -1208,11 +1223,13 @@
 					e.stopPropagation();
 
 					if (!eventState.onZoom) {
-						
 						if (!canvasState.editable) {
 							return false;
 						}
 						if (!state.editable) {
+							return false;
+						}
+						if (!state.resizable) {
 							return false;
 						}
 
@@ -1310,18 +1327,17 @@
 					if (!state.clickable) {
 						return false;
 					}
-					
 
 					e.preventDefault();
 					e.stopPropagation();
 
-					// if (eventState.onMove) {
-					// 	handlers.endMove(e);
-					// }
 					if (!canvasState.editable) {
 						return false;
 					}
 					if (!state.editable) {
+						return false;
+					}
+					if (!state.resizable) {
 						return false;
 					}
 
@@ -1456,8 +1472,10 @@
 					}
 					if (!state.editable) {
 						return false;
-					}					
-					
+					}
+					if (!state.rotatable) {
+						return false;
+					}		
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX - (containerState.left + canvasState.left);
 						mouseY = e.clientY - (containerState.top + canvasState.top);
@@ -1589,6 +1607,9 @@
 					if (!state) {
 						return false;
 					}
+					if (!direction) {
+						return false;
+					}
 					if (!canvasState.clickable) {
 						return false;
 					}
@@ -1599,17 +1620,17 @@
 					e.preventDefault();
 					e.stopPropagation();
 
+					// fix container offset
+					if (!chkContainerCoordinates()) {
+						return false;
+					}
 					if (!canvasState.editable) {
 						return false;
 					}
 					if (!state.editable) {
 						return false;
 					}
-					if (!direction) {
-						return false;
-					}
-					// fix container offset
-					if (!chkContainerCoordinates()) {
+					if (!state.flippable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -1895,6 +1916,9 @@
 					if (!state) {
 						return false;
 					}
+					if (!direction) {
+						return false;
+					}
 					if (!canvasState.clickable) {
 						return false;
 					}
@@ -1911,7 +1935,7 @@
 					if (!state.editable) {
 						return false;
 					}
-					if (!direction) {
+					if (!state.croppable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -2473,6 +2497,38 @@
 					state.editable = toBoolean(newState.editable);
 					updated.editable = true;
 				}
+				if (isBoolean(newState.indexable)) {
+					state.indexable = toBoolean(newState.indexable);
+					updated.indexable = true;
+				}
+				if (isBoolean(newState.movable)) {
+					state.movable = toBoolean(newState.movable);
+					updated.movable = true;
+				}
+				if (isBoolean(newState.resizable)) {
+					state.resizable = toBoolean(newState.resizable);
+					updated.resizable = true;
+				}
+				if (isBoolean(newState.rotatable)) {
+					state.rotatable = toBoolean(newState.rotatable);
+					updated.rotatable = true;
+				}
+				if (isBoolean(newState.flippable)) {
+					state.flippable = toBoolean(newState.flippable);
+					updated.flippable = true;
+				}
+				if (isBoolean(newState.croppable)) {
+					state.croppable = toBoolean(newState.croppable);
+					updated.croppable = true;
+				}
+				if (isBoolean(newState.filterable)) {
+					state.filterable = toBoolean(newState.filterable);
+					updated.filterable = true;
+				}
+				if (isBoolean(newState.removable)) {
+					state.removable = toBoolean(newState.removable);
+					updated.removable = true;
+				}
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
 					updated.drawable = true;
@@ -2580,15 +2636,6 @@
 					updated.grid = true;
 				}
 				if (isObject(newState.handle)) {
-					// insert
-					// for (var i = 0; i < Object.keys(newState.handle).length; i++) {
-					// 	var k = Object.keys(newState.handle)[i];
-					// 	if (_directions.indexOf(k) > -1) {						
-					// 		state["handle"][k] = newState.handle[k];
-					// 	}
-					// }
-
-					// replace
 					for (var i = 0; i < _directions.length; i++) {
 						var k = _directions[i];
 						if (isString(newState.handle[k])) {
@@ -2618,6 +2665,14 @@
 						visible: true,
 						clickable: true,
 						editable: true,
+						indexable: true,
+						movable: true,
+						resizable: true,
+						rotatable: true,
+						flippable: true,
+						croppable: true,
+						filterable: true,
+						removable: true,
 						drawable: true,
 						grid: true,
 						pivot: true,
@@ -2733,6 +2788,7 @@
 				cloneImg.style.height = state.height + "px";
 				cloneImg.style.opacity = state.opacity;
 				
+				// set visible
 				if (!state.visible && updated.visible) {
 					if (!origin.classList.contains("hidden")) {
 						origin.classList.add("hidden");
@@ -2749,6 +2805,7 @@
 					}
 				}
 
+				// set clickable
 				if (!state.clickable && updated.clickable) {
 					if (!origin.classList.contains("unclickable")) {
 						origin.classList.add("unclickable");
@@ -2762,38 +2819,6 @@
 					}
 					if (clone.classList.contains("unclickable")) {
 						clone.classList.remove("unclickable");
-					}
-				}
-
-				if (!state.editable && updated.editable) {
-					if (!origin.classList.contains("uneditable")) {
-						origin.classList.add("uneditable");
-					}
-					if (!clone.classList.contains("uneditable")) {
-						clone.classList.add("uneditable");
-					}
-				} else {
-					if (origin.classList.contains("uneditable")) {
-						origin.classList.remove("uneditable");
-					}
-					if (clone.classList.contains("uneditable")) {
-						clone.classList.remove("uneditable");
-					}
-				}
-
-				if (!state.drawable && updated.drawable) {
-					if (!origin.classList.contains("undrawable")) {
-						origin.classList.add("undrawable");
-					}
-					if (!clone.classList.contains("undrawable")) {
-						clone.classList.add("undrawable");
-					}
-				} else {
-					if (origin.classList.contains("undrawable")) {
-						origin.classList.remove("undrawable");
-					}
-					if (clone.classList.contains("undrawable")) {
-						clone.classList.remove("undrawable");
 					}
 				}
 
@@ -2912,6 +2937,9 @@
 				if (isBoolean(newState.checker)) {
 					canvasState.checker = toBoolean(newState.checker);
 				}
+				if (isBoolean(newState.uploadable)) {
+					canvasState.uploadable = toBoolean(newState.uploadable);
+				}
 				if (isBoolean(newState.clickable)) {
 					canvasState.clickable = toBoolean(newState.clickable);
 				}
@@ -3008,7 +3036,7 @@
 						checkerElement.classList.remove("hidden");
 					}
 				}
-	
+
 				if (!canvasState.overlay) {
 					if (!mirrorElement.classList.contains("hidden")) {
 						mirrorElement.classList.add("hidden");
@@ -3016,38 +3044,6 @@
 				} else {
 					if (mirrorElement.classList.contains("hidden")) {
 						mirrorElement.classList.remove("hidden");
-					}
-				}
-	
-				if (!canvasState.clickable) {
-					if (!canvasElement.classList.contains("unclickable")) {
-						canvasElement.classList.add("unclickable");
-					}
-					if (!mirrorElement.classList.contains("unclickable")) {
-						mirrorElement.classList.add("unclickable");
-					}
-				} else {
-					if (canvasElement.classList.contains("unclickable")) {
-						canvasElement.classList.remove("unclickable");
-					}
-					if (mirrorElement.classList.contains("unclickable")) {
-						mirrorElement.classList.remove("unclickable");
-					}
-				}
-
-				if (!canvasState.editable) {
-					if (!canvasElement.classList.contains("uneditable")) {
-						canvasElement.classList.add("uneditable");
-					}
-					if (!mirrorElement.classList.contains("uneditable")) {
-						mirrorElement.classList.add("uneditable");
-					}
-				} else {
-					if (canvasElement.classList.contains("uneditable")) {
-						canvasElement.classList.remove("uneditable");
-					}
-					if (mirrorElement.classList.contains("uneditable")) {
-						mirrorElement.classList.remove("uneditable");
 					}
 				}
 
@@ -3066,8 +3062,6 @@
 
 		function clearCanvas() {
 			try {
-				var rulers = rulerElement.querySelectorAll("div.canvaaas-ruler");
-
 				// clear images
 				for (var i = imageStates.length - 1; i >= 0; i--) {
 					removeImage(imageStates[i].id);
@@ -3105,20 +3099,6 @@
 
 				// clear ruler
 				clearRuler();
-
-				// clear class names
-				if (canvasElement.classList.contains("unclickable")) {
-					canvasElement.classList.remove("unclickable");
-				}
-				if (mirrorElement.classList.contains("unclickable")) {
-					mirrorElement.classList.remove("unclickable");
-				}
-				if (canvasElement.classList.contains("uneditable")) {
-					canvasElement.classList.remove("uneditable");
-				}
-				if (mirrorElement.classList.contains("uneditable")) {
-					mirrorElement.classList.remove("uneditable");
-				}
 
 				return true;
 			} catch(err) {
@@ -3549,6 +3529,48 @@
 			}
 		}
 
+		function addClassToCanvas(cls) {
+			try {
+				var clsName;
+				if (isString(cls)) {
+					clsName = toString(cls);
+				} else {
+					return false;
+				}
+				if (!canvasElement.classList.contains(clsName)) {
+					canvasElement.classList.add(clsName);
+				}
+				if (!mirrorElement.classList.contains(clsName)) {
+					mirrorElement.classList.add(clsName);
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function removeClassToCanvas(cls) {
+			try {
+				var clsName;
+				if (isString(cls)) {
+					clsName = toString(cls);
+				} else {
+					return false;
+				}
+				if (canvasElement.classList.contains(clsName)) {
+					canvasElement.classList.remove(clsName);
+				}
+				if (mirrorElement.classList.contains(clsName)) {
+					mirrorElement.classList.remove(clsName);
+				}
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
 		function exportConfig() {
 			try {
 				var tmp = {};
@@ -3603,6 +3625,7 @@
 				tmp.background = canvasState.background;
 				tmp.overlay = canvasState.overlay;
 				tmp.checker = canvasState.checker;
+				tmp.uploadable = canvasState.uploadable;
 				tmp.clickable = canvasState.clickable;
 				tmp.editable = canvasState.editable;
 				tmp.ruler = canvasState.ruler;
@@ -3666,6 +3689,14 @@
 				tmp.visible = state.visible;
 				tmp.clickable = state.clickable;
 				tmp.editable = state.editable;
+				tmp.indexable = state.indexable;
+				tmp.movable = state.movable;
+				tmp.resizable = state.resizable;
+				tmp.rotatable = state.rotatable;
+				tmp.flippable = state.flippable;
+				tmp.croppable = state.croppable;
+				tmp.filterable = state.filterable;
+				tmp.removable = state.removable;
 				tmp.drawable = state.drawable;
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
@@ -3765,6 +3796,30 @@
 				if (isBoolean(state.editable)) {
 					tmp.editable = toBoolean(state.editable);
 				}
+				if (isBoolean(state.indexable)) {
+					tmp.indexable = toBoolean(state.indexable);
+				}
+				if (isBoolean(state.movable)) {
+					tmp.movable = toBoolean(state.movable);
+				}
+				if (isBoolean(state.resizable)) {
+					tmp.resizable = toBoolean(state.resizable);
+				}
+				if (isBoolean(state.rotatable)) {
+					tmp.rotatable = toBoolean(state.rotatable);
+				}
+				if (isBoolean(state.flippable)) {
+					tmp.flippable = toBoolean(state.flippable);
+				}
+				if (isBoolean(state.croppable)) {
+					tmp.croppable = toBoolean(state.croppable);
+				}
+				if (isBoolean(state.filterable)) {
+					tmp.filterable = toBoolean(state.filterable);
+				}
+				if (isBoolean(state.removable)) {
+					tmp.removable = toBoolean(state.removable);
+				}
 				if (isBoolean(state.drawable)) {
 					tmp.drawable = toBoolean(state.drawable);
 				}
@@ -3810,6 +3865,14 @@
 					"visible",
 					"clickable",
 					"editable",
+					"indexable",
+					"movable",
+					"resizable",
+					"rotatable",
+					"flippable",
+					"croppable",
+					"filterable",
+					"removable",
 					"drawable",
 				];
 
@@ -4525,6 +4588,9 @@
 			if (!clone) {
 				return false;
 			}
+			if (!state.filterable) {
+				return false;
+			}
 
 			var originImg = origin.querySelector("img");
 			var cloneImg = clone.querySelector("img");
@@ -4619,6 +4685,13 @@
 			var initialized = canvasState.originalWidth && canvasState.originalHeight;
 			var newImage = new Image();
 			var src;
+
+			if (!canvasState.uploadable) {
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
+				}
+				return false;
+			}
 
 			try {
 				// check file or url
@@ -5684,6 +5757,15 @@
 				}
 				return false;
 			}
+			if (!canvasState.uploadable) {
+				if (config.upload) {
+					config.upload("You are not allowed to upload in this canvas by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
+				}
+				return false;
+			}
 
 			var index = imageFiles.length;
 			var count = 0;
@@ -5745,6 +5827,15 @@
 				}
 				if (cb) {
 					cb("File not found");
+				}
+				return false;
+			}
+			if (!canvasState.uploadable) {
+				if (config.upload) {
+					config.upload("You are not allowed to upload in this canvas by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
 				}
 				return false;
 			}
@@ -5812,6 +5903,15 @@
 				}
 				return false;
 			}
+			if (!canvasState.uploadable) {
+				if (config.upload) {
+					config.upload("You are not allowed to upload in this canvas by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
+				}
+				return false;
+			}
 
 			var index = exportedStates.length;
 			var count = 0;
@@ -5873,6 +5973,15 @@
 				}
 				if (cb) {
 					cb("File not found");
+				}
+				return false;
+			}
+			if (!canvasState.uploadable) {
+				if (config.upload) {
+					config.upload("You are not allowed to upload in this canvas by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
 				}
 				return false;
 			}
@@ -6130,6 +6239,29 @@
 				}
 				return false;
 			}
+			if (
+				(isNumeric(updates.index) && !state.indexable) ||
+				(isNumeric(updates.x) && !state.movable) ||
+				(isNumeric(updates.y) && !state.movable) ||
+				(isNumeric(updates.width) && !state.resizable) ||
+				(isNumeric(updates.height) && !state.resizable) ||
+				(isNumeric(updates.rotate) && !state.rotatable) ||
+				(isNumeric(updates.scaleX) && !state.flippable) ||
+				(isNumeric(updates.scaleY) && !state.flippable) ||
+				(isNumeric(updates.cropTop) && !state.croppable) ||
+				(isNumeric(updates.cropBottom) && !state.croppable) ||
+				(isNumeric(updates.cropLeft) && !state.croppable) ||
+				(isNumeric(updates.cropRight) && !state.croppable) ||
+				(isBoolean(updates.lockAspectRatio) && !state.resizable)
+			) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			if (isString(updates.id)) {
 				if (isExist(toString(updates.id))) {
@@ -6190,7 +6322,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -6247,7 +6379,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -6305,7 +6437,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.resizable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -6531,7 +6663,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.rotatable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -6579,7 +6711,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.flippable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -6627,7 +6759,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.flippable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -6741,7 +6873,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.indexable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -6781,6 +6913,25 @@
 
 			var state = getImageState(id);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("This image not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("This image not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable || !state.resizable) {
+				if (config.edit) {
+					config.edit("This image not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("This image not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
@@ -6809,6 +6960,25 @@
 			}
 
 			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
@@ -6839,6 +7009,25 @@
 
 			var state = getImageState(id);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
@@ -6868,11 +7057,333 @@
 
 			var state = getImageState(id);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
 			setImageState(id, {
 				editable: state.editable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.indexable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				indexable: state.indexable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.movable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				movable: state.movable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.resizable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				resizable: state.resizable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.rotatable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				rotatable: state.rotatable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.flippable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				flippable: state.flippable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.croppable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				croppable: state.croppable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.filterable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				filterable: state.filterable === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
+		myObject.removable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				removable: state.removable === false
 			});
 			// callback
 			if (config.edit) {
@@ -6896,6 +7407,25 @@
 			}
 
 			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			// save cache
 			saveUndo(id);
@@ -6926,6 +7456,25 @@
 
 			var state = getImageState(id);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
@@ -6955,6 +7504,25 @@
 
 			var state = getImageState(id);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
@@ -6981,6 +7549,27 @@
 			if (!isObject(newHandle)) {
 				if (cb) {
 					cb("Argument `newHandle` is not Object");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -7017,6 +7606,25 @@
 				canvasState.height * config.imageScaleAfterRender,
 			);
 
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
 			// save cache
 			saveUndo(id);
 			// save image state
@@ -7034,7 +7642,15 @@
 				lockAspectRatio: config.lockAspectRatioAfterRender || false,
 				visible: true,
 				clickable: true,
-				editabled: true,
+				editable: true,
+				indexable: true,
+				movable: true,
+				resizable: true,
+				rotatable: true,
+				flippable: true,
+				croppable: true,
+				filterable: true,
+				removable: true,
 				drawable: true,
 				cropTop: 0,
 				cropBottom: 0,
@@ -7070,7 +7686,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.removable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7100,32 +7716,6 @@
 			}
 		}
 
-		// deprecated
-		myObject.handleAll = function(newHandle, cb) {
-			if (!isObject(newHandle)) {
-				if (cb) {
-					cb("Argument `newHandle` is not Object");
-				}
-				return false;
-			}
-
-			for (var i = 0; i < imageStates.length; i++) {
-				// save cache
-				// saveUndo(id);
-
-				// save image state
-				setImageState(imageStates[i].id, {
-					handle: newHandle
-				});
-			}
-
-			// callback
-			if (cb) {
-				cb(null, true);
-			}
-			return true;
-		}
-
 		// 
 		// filter (test)
 		// 
@@ -7149,6 +7739,25 @@
 			}
 
 			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("This image not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("This image not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable || !state.filterable) {
+				if (config.edit) {
+					config.edit("This image not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("This image not allowed to edit this image by image settings");
+				}
+				return false;
+			}
 
 			if (newFunction === null || newFunction === false) {
 
@@ -7317,6 +7926,7 @@
 				background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
 				overlay: true, // boolean
 				checker: true, // boolean
+				uploadable: true, // boolean
 				clickable: true, // boolean
 				editable: true, // boolean
 				ruler: false, // boolean
@@ -7353,6 +7963,69 @@
 			}
 			return exportCanvasState();
 		}
+		
+		myObject.addClassToCanvas = function(clsName, cb) {
+			var containerInitialized = containerState.width && containerState.height;
+			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!containerInitialized) {
+				if (cb) {
+					cb("Container has been not initialized");
+				}
+				return false;
+			}
+			if (!canvasInitialized) {
+				if (cb) {
+					cb("Canvas has been not initialized");
+				}
+				return false;
+			}
+			if (!isString(clsName)) {
+				if (cb) {
+					cb("Argument `clsName` is not String");
+				}
+				return false;
+			}
+
+			addClassToCanvas(clsName);
+
+			// callback
+			if (cb) {
+				cb(null, true);
+			}
+			return true;
+		}
+
+		myObject.removeClassToCanvas = function(clsName, cb) {
+			var containerInitialized = containerState.width && containerState.height;
+			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!containerInitialized) {
+				if (cb) {
+					cb("Container has been not initialized");
+				}
+				return false;
+			}
+			if (!canvasInitialized) {
+				if (cb) {
+					cb("Canvas has been not initialized");
+				}
+				return false;
+			}
+			if (!isString(clsName)) {
+				if (cb) {
+					cb("Argument `clsName` is not String");
+				}
+				return false;
+			}
+
+			removeClassToCanvas(clsName);
+
+			// callback
+			if (cb) {
+				cb(null, true);
+			}
+			return true;
+		}
+		
 
 		//
 		// draw
@@ -7814,6 +8487,15 @@
 			if (!isArray(exportedStates)) {
 				if (cb) {
 					cb("Argument `exportedStates` is not Array");
+				}
+				return false;
+			}
+			if (!canvasState.uploadable) {
+				if (config.upload) {
+					config.upload("You are not allowed to upload in this canvas by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to upload in this canvas by canvas settings");
 				}
 				return false;
 			}

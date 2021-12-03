@@ -606,6 +606,46 @@
 						canvaaas.editable(selectedId)
 					">Editable</a>
 				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.indexable(selectedId)
+					">Indexable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.movable(selectedId)
+					">Movable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.resizable(selectedId)
+					">Resizable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.rotatable(selectedId)
+					">Rotatable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.flippable(selectedId)
+					">Flippable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.croppable(selectedId)
+					">Croppable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.filterable(selectedId)
+					">Filterable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.removable(selectedId)
+					">Removable</a>
+				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.drawable(selectedId)
@@ -678,6 +718,13 @@
 							background: window.prompt('background (e.g. #272727)', canvaaas.getCanvas().background)
 						})
 					">background</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							uploadable: canvaaas.getCanvas().uploadable === false
+						})
+					">Uploadable</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -918,6 +965,28 @@
 							'nwnw': null,
 						})
 					">Handle style 8</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handleAll({
+							'n': 'click',
+							'ne': 'click',
+							'e': 'click',
+							'se': 'click',
+							's': 'click',
+							'sw': 'click',
+							'w': 'click',
+							'nw': 'click',
+							'nn': 'click',
+							'nene': 'click',
+							'ee': 'click',
+							'sese': 'click',
+							'ss': 'click',
+							'swsw': 'click',
+							'ww': 'click',
+							'nwnw': 'click',
+						})
+					">Handle style click test</a>
 				</div>
 			</div>
 		</div>
@@ -1309,6 +1378,118 @@
 				data-method="editable"
 				data-value=""
 				data-help="Editable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="indexable"
+				data-value=""
+				data-help="Indexable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="movable"
+				data-value=""
+				data-help="Movable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="resizable"
+				data-value=""
+				data-help="Resizable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="rotatable"
+				data-value=""
+				data-help="Rotatable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="flippable"
+				data-value=""
+				data-help="Flippable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="croppable"
+				data-value=""
+				data-help="Croppable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="filterable"
+				data-value=""
+				data-help="Filterable"
+				>
+				<span class="material-icons">
+					edit_off
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="removable"
+				data-value=""
+				data-help="Removable"
 				>
 				<span class="material-icons">
 					edit_off
@@ -1794,6 +1975,38 @@
 							cancelTool(tool);
 							break;
 						case "editable":
+							canvaaas.editable(id)
+							cancelTool(tool);
+							break;
+						case "indexable":
+							canvaaas.indexable(id)
+							cancelTool(tool);
+							break;
+						case "movable":
+							canvaaas.movable(id)
+							cancelTool(tool);
+							break;
+						case "resizable":
+							canvaaas.resizable(id)
+							cancelTool(tool);
+							break;
+						case "rotatable":
+							canvaaas.rotatable(id)
+							cancelTool(tool);
+							break;
+						case "flippable":
+							canvaaas.flippable(id)
+							cancelTool(tool);
+							break;
+						case "croppable":
+							canvaaas.croppable(id)
+							cancelTool(tool);
+							break;
+						case "filterable":
+							canvaaas.filterable(id)
+							cancelTool(tool);
+							break;
+						case "removable":
 							canvaaas.editable(id)
 							cancelTool(tool);
 							break;
