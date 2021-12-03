@@ -437,6 +437,7 @@
 					var state = getImageState(id);
 					var handle = e.target;
 					var direction = getDirection(e.target);
+					// var flippedDirection = flipDirection(direction, state.scaleX, state.scaleY);
 					var mouseX;
 					var mouseY;
 
@@ -2368,6 +2369,7 @@
 				var state = getImageState(cadidate);
 				var origin = document.getElementById(_originId + cadidate);
 				var clone = document.getElementById(_cloneId + cadidate);
+				var isForce = force !== undefined;
 				var state;
 				var oldId;
 				var newId;
@@ -2653,7 +2655,7 @@
 					updated.handle = true;
 				}
 
-				if (force) {
+				if (isForce) {
 					updated = {
 						id: true,
 						index: true,

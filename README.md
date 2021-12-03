@@ -232,21 +232,10 @@
     width: 256, // optional
     height: 256, // optional
     background: '#FFFFFF', // optional, rgb format, 7 characters or "transparent"
-  }, function(err, file, result){
-    // Your code
-  });
-</script>
-```
-
-## Save image with filter
-
-```html
-<script>
-  canvaaas.draw({
     filter: function(red, green, blue, alpha) {
       var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722; // grayscale
       return [luma, luma, luma, alpha];
-    }
+    } // optional
   }, function(err, file, result){
     // Your code
   });
@@ -264,6 +253,10 @@
     width: 256, // optional
     height: 256, // optional
     background: '#FFFFFF', // optional, rgb format, 7 characters or "transparent"
+    filter: function(red, green, blue, alpha) {
+      var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722; // grayscale
+      return [luma, luma, luma, alpha];
+    } // optional
   }, [{
     "src": "./img/1.png", // required
     "index": 1, // required
@@ -312,6 +305,14 @@
     "visible": true, // boolean
     "clickable": true, // boolean
     "editable": true, // boolean
+    "indexable": true, // boolean
+    "movable": true, // boolean
+    "resizable": true, // boolean
+    "rotatable": true, // boolean
+    "flippable": true, // boolean
+    "croppable": true, // boolean
+    "filterable": true, // boolean
+    "removable": true, // boolean
     "drawable": true, // boolean
     "border": true, // boolean
     "pivot": true, // boolean
@@ -325,7 +326,7 @@
       'sw': 'resize',
       'w': 'resize',
       'nw': 'resize',
-    } // object [n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw]
+    } // object (keys: n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw)
   }, function(err, res) {
     // Your code
   })
