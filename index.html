@@ -653,6 +653,11 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
+						canvaaas.border(selectedId)
+					">Border</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
 						canvaaas.pivot(selectedId)
 					">Pivot</a>
 				</div>
@@ -660,6 +665,24 @@
 					<a href="javascript:void(0)" onclick="
 						canvaaas.grid(selectedId)
 					">Grids</a>
+				</div>
+				<div class="row selection">
+					<a class="" href="javascript:void(0)" onclick="
+						canvaaas.filter(selectedId, function(r, g, b, a) {
+							var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
+							return [luma, luma, luma, a];
+						})
+					">Filter grayscale</a>
+				</div>
+				<div class="row selection rule">
+					<a class="" href="javascript:void(0)" onclick="
+						canvaaas.filter(selectedId, function(r, g, b, a) {
+							var tr = r - 40;
+							var tg = g - 40;
+							var tb = b - 40;
+							return [tr, tg, tb, a];
+						})
+					">Filter brightness</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
@@ -670,11 +693,6 @@
 					<a href="javascript:void(0)" onclick="
 						canvaaas.remove(selectedId)
 					">Remove</a>
-				</div>
-				<div class="row">
-					<a class="" href="javascript:void(0)" onclick="
-						alert('You can only be applied in <script></script>')
-					">About filter</a>
 				</div>
 			</div>
 		</div>
@@ -717,7 +735,7 @@
 						canvaaas.canvas({
 							background: window.prompt('background (e.g. #272727)', canvaaas.getCanvas().background)
 						})
-					">background</a>
+					">Background</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -770,221 +788,205 @@
 			<div class="list" style="display: none;">
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'resize',
-							'ne': 'resize',
-							'e': 'resize',
-							'se': 'resize',
-							's': 'resize',
-							'sw': 'resize',
-							'w': 'resize',
-							'nw': 'resize',
-							'nn': 'rotate',
-							'nene': 'crop',
-							'ee': 'flip',
-							'sese': 'crop',
-							'ss': 'flip',
-							'swsw': 'crop',
-							'ww': 'rotate',
-							'nwnw': 'crop',
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'resize',
+									'ne': 'resize',
+									'e': 'resize',
+									'se': 'resize',
+									's': 'resize',
+									'sw': 'resize',
+									'w': 'resize',
+									'nw': 'resize',
+									'nn': 'rotate',
+									'nene': 'crop',
+									'ee': 'flip',
+									'sese': 'crop',
+									'ss': 'flip',
+									'swsw': 'crop',
+									'ww': 'rotate',
+									'nwnw': 'crop',
+								})
+							})
 						})
 					">Handle style default</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'resize',
-							'ne': 'resize',
-							'e': 'resize',
-							'se': 'resize',
-							's': 'resize',
-							'sw': 'resize',
-							'w': 'resize',
-							'nw': 'resize',
-							'nn': 'rotate',
-							'nene': null,
-							'ee': 'flip',
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'resize',
+									'ne': 'resize',
+									'e': 'resize',
+									'se': 'resize',
+									's': 'resize',
+									'sw': 'resize',
+									'w': 'resize',
+									'nw': 'resize',
+									'nn': 'rotate',
+									'ee': 'flip',
+								})
+							})
 						})
 					">Handle style 1</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'crop',
-							'ne': 'crop',
-							'e': 'crop',
-							'se': 'crop',
-							's': 'crop',
-							'sw': 'crop',
-							'w': 'crop',
-							'nw': 'crop',
-							'nn': 'rotate',
-							'nene': null,
-							'ee': 'flip',
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'crop',
+									'ne': 'crop',
+									'e': 'crop',
+									'se': 'crop',
+									's': 'crop',
+									'sw': 'crop',
+									'w': 'crop',
+									'nw': 'crop',
+									'nn': 'rotate',
+									'ee': 'flip',
+								})
+							})
 						})
 					">Handle style 2</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'resize',
-							'ne': 'resize',
-							'e': 'resize',
-							'se': 'resize',
-							's': 'resize',
-							'sw': 'resize',
-							'w': 'resize',
-							'nw': 'resize',
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'resize',
+									'ne': 'resize',
+									'e': 'resize',
+									'se': 'resize',
+									's': 'resize',
+									'sw': 'resize',
+									'w': 'resize',
+									'nw': 'resize',
+								})
+							})
 						})
 					">Handle style 3</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'crop',
-							'ne': 'crop',
-							'e': 'crop',
-							'se': 'crop',
-							's': 'crop',
-							'sw': 'crop',
-							'w': 'crop',
-							'nw': 'crop',
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'crop',
+									'ne': 'crop',
+									'e': 'crop',
+									'se': 'crop',
+									's': 'crop',
+									'sw': 'crop',
+									'w': 'crop',
+									'nw': 'crop',
+								})
+							})
 						})
 					">Handle style 4</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': null,
-							'ne': 'resize',
-							'e': null,
-							'se': 'resize',
-							's': null,
-							'sw': 'resize',
-							'w': null,
-							'nw': 'resize',
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'ne': 'resize',
+									'se': 'resize',
+									'sw': 'resize',
+									'nw': 'resize',
+								})
+							})
 						})
 					">Handle style 5</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': null,
-							'ne': 'crop',
-							'e': null,
-							'se': 'crop',
-							's': null,
-							'sw': 'crop',
-							'w': null,
-							'nw': 'crop',
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'ne': 'crop',
+									'se': 'crop',
+									'sw': 'crop',
+									'nw': 'crop',
+								})
+							})
 						})
 					">Handle style 6</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'resize',
-							'ne': null,
-							'e': 'resize',
-							'se': null,
-							's': 'resize',
-							'sw': null,
-							'w': 'resize',
-							'nw': null,
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'resize',
+									'e': 'resize',
+									's': 'resize',
+									'w': 'resize',
+								})
+							})
 						})
 					">Handle style 7</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'crop',
-							'ne': null,
-							'e': 'crop',
-							'se': null,
-							's': 'crop',
-							'sw': null,
-							'w': 'crop',
-							'nw': null,
-							'nn': null,
-							'nene': null,
-							'ee': null,
-							'sese': null,
-							'ss': null,
-							'swsw': null,
-							'ww': null,
-							'nwnw': null,
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'crop',
+									'e': 'crop',
+									's': 'crop',
+									'w': 'crop',
+								})
+							})
 						})
 					">Handle style 8</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.handleAll({
-							'n': 'click',
-							'ne': 'click',
-							'e': 'click',
-							'se': 'click',
-							's': 'click',
-							'sw': 'click',
-							'w': 'click',
-							'nw': 'click',
-							'nn': 'click',
-							'nene': 'click',
-							'ee': 'click',
-							'sese': 'click',
-							'ss': 'click',
-							'swsw': 'click',
-							'ww': 'click',
-							'nwnw': 'click',
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {})
+							})
+						})
+					">Handle style 9</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'click',
+									'ne': 'click',
+									'e': 'click',
+									'se': 'click',
+									's': 'click',
+									'sw': 'click',
+									'w': 'click',
+									'nw': 'click',
+									'nn': 'click',
+									'nene': 'click',
+									'ee': 'click',
+									'sese': 'click',
+									'ss': 'click',
+									'swsw': 'click',
+									'ww': 'click',
+									'nwnw': 'click',
+								})
+							})
 						})
 					">Handle style click test</a>
 				</div>
@@ -1529,6 +1531,20 @@
 				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
+				data-method="border"
+				data-value=""
+				data-help="Border"
+				>
+				<span class="material-icons">
+					border_style
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
 				data-method="grid"
 				data-value=""
 				data-help="Grid"
@@ -1740,48 +1756,42 @@
 
 			switch(m) {
 				case "resize":
-					canvaaas.handleAll({
-						'n': 'resize',
-						'ne': 'resize',
-						'e': 'resize',
-						'se': 'resize',
-						's': 'resize',
-						'sw': 'resize',
-						'w': 'resize',
-						'nw': 'resize',
-						"nn": null,
-						"nene": null,
-						"ee": null,
-						"sese": null,
-						"ss": null,
-						"swsw": null,
-						"ww": null,
-						"nwnw": null,
-					});
+					canvaaas.find({}, function(err, res){
+						if (err) {return false;}
+						res.forEach(function(elem){
+							canvaaas.handle(elem.id, {
+								'n': 'resize',
+								'ne': 'resize',
+								'e': 'resize',
+								'se': 'resize',
+								's': 'resize',
+								'sw': 'resize',
+								'w': 'resize',
+								'nw': 'resize',
+							})
+						})
+					})
 					if (tool) {
 						cancelTool(tool);
 					}
 					return false;
 					break;
 				case "crop":
-					canvaaas.handleAll({
-						'n': 'crop',
-						'ne': 'crop',
-						'e': 'crop',
-						'se': 'crop',
-						's': 'crop',
-						'sw': 'crop',
-						'w': 'crop',
-						'nw': 'crop',
-						"nn": null,
-						"nene": null,
-						"ee": null,
-						"sese": null,
-						"ss": null,
-						"swsw": null,
-						"ww": null,
-						"nwnw": null,
-					});
+					canvaaas.find({}, function(err, res){
+						if (err) {return false;}
+						res.forEach(function(elem){
+							canvaaas.handle(elem.id, {
+								'n': 'crop',
+								'ne': 'crop',
+								'e': 'crop',
+								'se': 'crop',
+								's': 'crop',
+								'sw': 'crop',
+								'w': 'crop',
+								'nw': 'crop',
+							})
+						})
+					})
 					if (tool) {
 						cancelTool(tool);
 					}
@@ -2022,6 +2032,10 @@
 							canvaaas.remove(id)
 							cancelTool(tool);
 							break;
+						case "border":
+							canvaaas.border(id)
+							cancelTool(tool);
+							break;
 						case "grid":
 							canvaaas.grid(id)
 							cancelTool(tool);
@@ -2147,6 +2161,24 @@
 				chkCache();
 				if (res.id === selectedId) {
 					chkSelected();
+				}
+
+				if (!res.clickable) {
+					canvaaas.addClass(selectedId, "unclickable");
+				} else {
+					canvaaas.removeClass(selectedId, "unclickable");
+				}
+
+				if (!res.editable) {
+					canvaaas.addClass(selectedId, "uneditable");
+				} else {
+					canvaaas.removeClass(selectedId, "uneditable");
+				}
+
+				if (!res.drawable) {
+					canvaaas.addClass(selectedId, "undrawable");
+				} else {
+					canvaaas.removeClass(selectedId, "undrawable");
 				}
 			},
 			upload: function(err, res) {

@@ -52,6 +52,7 @@
     maxIndexAfterRender: 1000, // number
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
     lockAspectRatioAfterRender: false, // boolean
+    showBorderAfterRender: true, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
     click: undefined, // function(err, res)
@@ -79,6 +80,7 @@
     overlay: true, // boolean
     checker: true, // boolean
     ruler: false, // boolean
+    uploadable: true, // boolean
     clickable: true, // boolean
     editable: true, // boolean
   }, function(err, res){
@@ -124,7 +126,18 @@
     "visible": true,
     "clickable": true,
     "editable": true,
+    "indexable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
+    "filterable": true,
+    "removable": true,
     "drawable": true,
+    "border": true,
+    "pivot": true,
+    "grid": true,
   }, {
     "id": "test-2",
     "src": "http://localhost:3000/img/1.png",
@@ -145,7 +158,18 @@
     "visible": true,
     "clickable": true,
     "editable": true,
+    "indexable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
+    "filterable": true,
+    "removable": true,
     "drawable": true,
+    "border": true,
+    "pivot": true,
+    "grid": true,
   }];
   // Argument type `Array`
   canvaaas.uploadStates(exportedStates, function(err, res){
@@ -176,7 +200,18 @@
   data-visible = "true"
   data-clickable = "true"
   data-editable = "true"
-  data-drawable = "true">
+  data-indexable = "true"
+  data-movable = "true"
+  data-resizable = "true"
+  data-rotatable = "true"
+  data-flippable = "true"
+  data-croppable = "true"
+  data-filterable = "true"
+  data-removable = "true"
+  data-drawable = "true"
+  data-border = "true"
+  data-pivot = "true"
+  data-grid = "true">
 
 <script>
   // Argument type `Array`
@@ -278,6 +313,7 @@
     "clickable": true, // boolean
     "editable": true, // boolean
     "drawable": true, // boolean
+    "border": true, // boolean
     "pivot": true, // boolean
     "grid": true, // boolean
     "handle": {
@@ -289,15 +325,7 @@
       'sw': 'resize',
       'w': 'resize',
       'nw': 'resize',
-      "nn": null,
-      "nene": null,
-      "ee": null,
-      "sese": null,
-      "ss": null,
-      "swsw": null,
-      "ww": null,
-      "nwnw": null,
-    }
+    } // object [n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw]
   }, function(err, res) {
     // Your code
   })
@@ -344,28 +372,35 @@
 </script>
 ```
 
+```html
+<script>
+  canvaaas.handle(id, {
+    'n': 'crop',
+    'e': 'crop',
+    's': 'crop',
+    'w': 'crop',
+  }, function(err, res){
+    // Your code
+  });
+</script>
+```
+
 ## Global handle style
 
 ```html
 <script>
   canvaaas.config({
     handle: {
-      'n': 'crop',
-      'ne': 'crop',
-      'e': 'crop',
-      'se': 'crop',
-      's': 'crop',
-      'sw': 'crop',
-      'w': 'crop',
-      'nw': 'crop',
-      "nn": null, // hide
-      "nene": null, // hide
-      "ee": null, // hide
-      "sese": null, // hide
-      "ss": null, // hide
-      "swsw": null, // hide
-      "ww": null, // hide
-      "nwnw": null, // hide
+      'n': 'resize',
+      'ne': 'resize',
+      'e': 'resize',
+      'se': 'resize',
+      's': 'resize',
+      'sw': 'resize',
+      'w': 'resize',
+      'nw': 'resize',
+      "nn": "rotate",
+      "ee": "flip",
     }
   }, function(err, res){
     // Your code
@@ -431,7 +466,18 @@ canvaaas.export(["id-1", "id-2"], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
+    "indexable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
+    "filterable": true,
+    "removable": true,
     "drawable": true,
+    "border": true,
+    "pivot": true,
+    "grid": true,
   }, {
     "id": "test-2",
     "src": "http://localhost:3000/img/1.png",
@@ -452,7 +498,18 @@ canvaaas.export(["id-1", "id-2"], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
+    "indexable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
+    "filterable": true,
+    "removable": true,
     "drawable": true,
+    "border": true,
+    "pivot": true,
+    "grid": true,
   }]
 
   canvaaas.import(exportedStates, function(err, res){

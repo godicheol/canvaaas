@@ -104,7 +104,7 @@
 	user-select: none;
 }
 .canvaaas-checker.hidden{
-	display: none;
+	display: none !important;
 }
 
 /* image */
@@ -121,7 +121,7 @@
 	cursor: move;
 }
 .canvaaas-image.hidden{
-	visibility: hidden;
+	visibility: hidden !important;
 	pointer-events: none;
 }
 /* .canvaaas-image.unclickable{
@@ -139,7 +139,7 @@
 	overflow: hidden;
 }
 .canvaaas-content.hidden{
-	visibility: hidden;
+	visibility: hidden !important;
 }
 
 .canvaaas-content img{
@@ -167,7 +167,7 @@
 	pointer-events: none;
 }
 .canvaaas-pivot.hidden{
-	display: none;
+	display: none !important;
 }
 .canvaaas-pivot.canvaaas-direction-x{
 	top: 50%;
@@ -198,9 +198,8 @@
 	pointer-events: none;
 }
 .canvaaas-grid.hidden{
-	display: none;
+	display: none !important;
 }
-
 .canvaaas-grid.canvaaas-direction-n{
 	top: 33%;
 	left: 0;
@@ -241,6 +240,9 @@
 	-ms-user-select: none;
 	user-select: none;
 	pointer-events: none;
+}
+.canvaaas-border.hidden{
+	display: none !important;
 }
 .canvaaas-border.canvaaas-direction-n{
 	top: 0;
@@ -306,7 +308,6 @@
 	border: 1px solid #000000;
 	background-color: #FFFFFF;
 }
-
 .canvaaas-handle{
 	position: absolute;
 	display: block; /* hide */
@@ -315,9 +316,8 @@
 	cursor: grab;
 }
 .canvaaas-handle.hidden{
-	display: none;
+	display: none !important;
 }
-
 .canvaaas-handle.canvaaas-direction-n{
 	top: 0;
 	left: 50%;
@@ -410,18 +410,25 @@
 	-ms-user-select: none;
 	user-select: none;
 	pointer-events: none;
-	border-color: #000000;
+}
+.canvaaas-graduation-major{
+	/* display: none !important; */
+
+}
+.canvaaas-graduation-minor{
+	/* display: none !important; */
+}
+.canvaaas-graduation-value{
+	/* display: none !important; */
+	font-size: 0.6rem;
 	color: #000000;
 }
-
 .canvaaas-ruler.canvaaas-direction-n{
 	position: absolute;
 	bottom: 100%;
 	left: 0;
 	width: 100%;
 	height: auto;
-	color: inherit;
-	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-major{
 	display: block;
@@ -429,9 +436,9 @@
 	bottom: 0;
 	width: 0;
 	height: 9px;
-	border-width: 1px;
-	border-style: none none none solid;
-	border-color: inherit;
+
+	/* ruler major */
+	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-minor{
 	display: block;
@@ -439,17 +446,15 @@
 	bottom: 0;
 	width: 0;
 	height: 6px;
-	border-width: 1px;
-	border-style: none none none solid;
-	border-color: inherit;
+
+	/* ruler minor */
+	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-value{
 	position: absolute;
 	left: 0;
 	top: -6px;
-	font-size: 10px;
 	transform: translateX(-50%);
-	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-s{
@@ -458,8 +463,6 @@
 	left: 0;
 	width: 100%;
 	height: auto;
-	color: inherit;
-	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-major{
 	display: block;
@@ -467,9 +470,9 @@
 	top: 0;
 	width: 0;
 	height: 9px;
-	border-width: 1px;
-	border-style: none none none solid;
-	border-color: inherit;
+
+	/* ruler major */
+	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-minor{
 	display: block;
@@ -477,17 +480,15 @@
 	top: 0;
 	width: 0;
 	height: 6px;
-	border-width: 1px;
-	border-style: none none none solid;
-	border-color: inherit;
+
+	/* ruler minor */
+	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-value{
 	position: absolute;
 	left: 0;
 	bottom: -9px;
-	font-size: 10px;
 	transform: translateX(-50%);
-	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-e{
@@ -496,8 +497,6 @@
 	left: 100%;
 	width: auto;
 	height: 100%;
-	color: inherit;
-	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-major{
 	display: block;
@@ -505,9 +504,9 @@
 	left: 100%;
 	width: 9px;
 	height: 0;
-	border-width: 1px;
-	border-style: solid none none none;
-	border-color: inherit;
+
+	/* ruler major */
+	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-minor{
 	display: block;
@@ -515,17 +514,15 @@
 	left: 100%;
 	width: 6px;
 	height: 0;
-	border-width: 1px;
-	border-style: solid none none none;
-	border-color: inherit;
+
+	/* ruler minor */
+	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-value{
 	position: absolute;
 	left: 14px;
 	top: 0;
-	font-size: 10px;
 	transform: translateY(-50%);
-	color: inherit;
 }
 
 .canvaaas-ruler.canvaaas-direction-w{
@@ -534,8 +531,6 @@
 	left: 0;
 	width: auto;
 	height: 100%;
-	color: inherit;
-	border-color: inherit;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-major{
 	display: block;
@@ -543,9 +538,9 @@
 	right: 0;
 	width: 9px;
 	height: 0;
-	border-width: 1px;
-	border-style: solid none none none;
-	border-color: inherit;
+
+	/* ruler major */
+	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-minor{
 	display: block;
@@ -553,17 +548,15 @@
 	right: 0;
 	width: 6px;
 	height: 0;
-	border-width: 1px;
-	border-style: solid none none none;
-	border-color: inherit;
+
+	/* ruler minor */
+	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-value{
 	position: absolute;
 	right: 14px;
 	top: 0;
-	font-size: 10px;
 	transform: translateY(-50%);
-	color: inherit;
 }
 
 /* editing */

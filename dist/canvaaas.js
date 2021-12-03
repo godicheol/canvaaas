@@ -30,6 +30,7 @@
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 			lockAspectRatioAfterRender: false, // boolean
+			showBorderAfterRender: true, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
 			click: undefined, // function(err, res)
@@ -135,6 +136,7 @@
 				drawable: true,
 				pivot: config.showPivotAfterRender || false,
 				grid: config.showGridAfterRender || false,
+				border: config.showBorderAfterRender || false,
 				handle: tmpHandleState,
 				handleEvents: {},
 				filter: undefined
@@ -2627,6 +2629,10 @@
 					state.lockAspectRatio = newLAR;
 					updated.lockAspectRatio = true;
 				}
+				if (isBoolean(newState.border)) {
+					state.border = toBoolean(newState.border);
+					updated.border = true;
+				}
 				if (isBoolean(newState.pivot)) {
 					state.pivot = toBoolean(newState.pivot);
 					updated.pivot = true;
@@ -2674,8 +2680,9 @@
 						filterable: true,
 						removable: true,
 						drawable: true,
-						grid: true,
+						border: true,
 						pivot: true,
+						grid: true,
 						handle: true
 					}
 				}
@@ -2694,6 +2701,8 @@
 				var clone = document.getElementById(_cloneId + state.id);
 				var originImg;
 				var cloneImg;
+				var originBorders;
+				var cloneBorders;
 				var originPivots;
 				var clonePivots;
 				var originGrids;
@@ -2721,6 +2730,8 @@
 					return false;
 				}
 
+				originBorders = origin.querySelectorAll("div.canvaaas-border");
+				cloneBorders = clone.querySelectorAll("div.canvaaas-border");
 				originPivots = origin.querySelectorAll("div.canvaaas-pivot");
 				clonePivots = clone.querySelectorAll("div.canvaaas-pivot");
 				originGrids = origin.querySelectorAll("div.canvaaas-grid");
@@ -2819,6 +2830,32 @@
 					}
 					if (clone.classList.contains("unclickable")) {
 						clone.classList.remove("unclickable");
+					}
+				}
+
+				// set border
+				if (updated.border) {
+					for (var i = 0; i < originBorders.length; i++) {
+						if (!state.border) {
+							if (!originBorders[i].classList.contains("hidden")) {
+								originBorders[i].classList.add("hidden");
+							}
+						} else {
+							if (originBorders[i].classList.contains("hidden")) {
+								originBorders[i].classList.remove("hidden");
+							}
+						}
+					}
+					for (var i = 0; i < cloneBorders.length; i++) {
+						if (!state.border) {
+							if (!cloneBorders[i].classList.contains("hidden")) {
+								cloneBorders[i].classList.add("hidden");
+							}
+						} else {
+							if (cloneBorders[i].classList.contains("hidden")) {
+								cloneBorders[i].classList.remove("hidden");
+							}
+						}
 					}
 				}
 
@@ -3698,6 +3735,7 @@
 				tmp.filterable = state.filterable;
 				tmp.removable = state.removable;
 				tmp.drawable = state.drawable;
+				tmp.border = state.border;
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
 				// tmp.filter = state.filter;
@@ -3823,6 +3861,9 @@
 				if (isBoolean(state.drawable)) {
 					tmp.drawable = toBoolean(state.drawable);
 				}
+				if (isBoolean(state.border)) {
+					tmp.border = toBoolean(state.border);
+				}
 				if (isBoolean(state.pivot)) {
 					tmp.pivot = toBoolean(state.pivot);
 				}
@@ -3874,6 +3915,9 @@
 					"filterable",
 					"removable",
 					"drawable",
+					"border",
+					"pivot",
+					"grid",
 				];
 
 				for (var i = 0; i < datasetKeys.length; i++) {
@@ -3917,19 +3961,19 @@
 		function saveUndo(id, keepRedo) {
 			try {
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(_originId + id);
+				// var clone = document.getElementById(_cloneId + id);
 				var copiedState = {};
 				var newCache = {};
-				var originCls = origin.className;
-				var cloneCls = clone.className;
+				// var originCls = origin.className;
+				// var cloneCls = clone.className;
 
 				copyObject(copiedState, state);
 	
 				newCache.id = copiedState.id;
 				newCache.state = copiedState;
-				newCache.originClassNames = originCls;
-				newCache.cloneClassNames = cloneCls;
+				// newCache.originClassNames = originCls;
+				// newCache.cloneClassNames = cloneCls;
 				newCache.updatedAt = Date.now();
 	
 				undoCaches.push(newCache);
@@ -3950,19 +3994,19 @@
 		function saveRedo(id) {
 			try {
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(_originId + id);
+				// var clone = document.getElementById(_cloneId + id);
 				var copiedState = {};
 				var newCache = {};
-				var originCls = origin.className;
-				var cloneCls = clone.className;
+				// var originCls = origin.className;
+				// var cloneCls = clone.className;
 
 				copyObject(copiedState, state);
 	
 				newCache.id = copiedState.id;
 				newCache.state = copiedState;
-				newCache.originClassNames = originCls;
-				newCache.cloneClassNames = cloneCls;
+				// newCache.originClassNames = originCls;
+				// newCache.cloneClassNames = cloneCls;
 				newCache.updatedAt = Date.now();
 	
 				redoCaches.push(newCache);
@@ -3982,15 +4026,15 @@
 
 				var recent = undoCaches.pop();
 				var id = recent.id;
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(_originId + id);
+				// var clone = document.getElementById(_cloneId + id);
 
 				saveRedo(id);
 
 				setImageState(id, recent.state);
 
-				origin.className = recent.originClassNames;
-				clone.className = recent.cloneClassNames;
+				// origin.className = recent.originClassNames;
+				// clone.className = recent.cloneClassNames;
 
 				return true;
 			} catch(err) {
@@ -4007,16 +4051,16 @@
 	
 				var recent = redoCaches.pop();
 				var id = recent.id;
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(_originId + id);
+				// var clone = document.getElementById(_cloneId + id);
 
 				// keep redo
 				saveUndo(id, true);
 	
 				setImageState(id, recent.state);
 
-				origin.className = recent.originClassNames;
-				clone.className = recent.cloneClassNames;
+				// origin.className = recent.originClassNames;
+				// clone.className = recent.cloneClassNames;
 
 				return true;
 			} catch(err) {
@@ -4627,6 +4671,7 @@
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.putImageData(filteredImageData, 0, 0);
 
+				// lagged image/png
 				var base64 = canvas.toDataURL('image/jpeg', 0.72);
 
 				originImg.src = base64;
@@ -6083,35 +6128,23 @@
 			return founds;
 		}
 
+		// test
 		myObject.addClass = function(id, cls, cb) {
 			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				}
 				return false;
 			}
 			if (!isString(cls)) {
-				if (config.edit) {
-					config.edit("Argument `cls` is not String");
-				}
 				if (cb) {
 					cb("Argument `cls` is not String");
 				}
 				return false;
 			}
 
-			// test
-			// save cache
-			saveUndo(id);
-
 			var res = addClassToImage(id, cls);
 			if (!res) {
-				if (config.edit) {
-					config.edit("Unknown error occurred");
-				}
 				if (cb) {
 					cb("Unknown error occurred");
 				}
@@ -6119,44 +6152,29 @@
 			}
 
 			// callback
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
 			return exportImageState(id);
 		}
 
+		// test
 		myObject.removeClass = function(id, cls, cb) {
 			if (!isExist(id)) {
-				if (config.edit) {
-					config.edit("Image not found");
-				}
 				if (cb) {
 					cb("Image not found");
 				}
 				return false;
 			}
 			if (!isString(cls)) {
-				if (config.edit) {
-					config.edit("Argument `cls` is not String");
-				}
 				if (cb) {
 					cb("Argument `cls` is not String");
 				}
 				return false;
 			}
 
-			// test
-			// save cache
-			saveUndo(id);
-
 			var res = removeClassToImage(id, cls);
 			if (!res) {
-				if (config.edit) {
-					config.edit("Unknown error occurred");
-				}
 				if (cb) {
 					cb("Unknown error occurred");
 				}
@@ -6164,9 +6182,6 @@
 			}
 
 			// callback
-			if (config.edit) {
-				config.edit(null, exportImageState(id));
-			}
 			if (cb) {
 				cb(null, exportImageState(id));
 			}
@@ -7443,6 +7458,54 @@
 			return exportImageState(id);
 		}
 
+		myObject.border = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				border: state.border === false
+			});
+			// callback
+			if (config.edit) {
+				config.edit(null, exportImageState(id));
+			}
+			if (cb) {
+				cb(null, exportImageState(id));
+			}
+			return exportImageState(id);
+		}
+
 		myObject.pivot = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -7656,8 +7719,9 @@
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
-				grid: config.showGridAfterRender || false,
+				border: config.showBorderAfterRender || false,
 				pivot: config.showPivotAfterRender || false,
+				grid: config.showGridAfterRender || false,
 			});
 			// callback
 			if (cb) {
@@ -7717,7 +7781,7 @@
 		}
 
 		// 
-		// filter (test)
+		// filter
 		// 
 
 		myObject.filter = function(id, newFunction, cb) {
@@ -7789,6 +7853,30 @@
 		//
 		// config
 		//
+
+		/*
+			newConfig = {
+				allowedMimeTypesForUpload: [], // array
+				cacheLevels: 999, // number
+				aspectRatioOfContainer: 1 / 1, // number, width / height
+				maxWidthOfContainer: undefined, // number, px
+				maxHeightOfContainer: undefined, // number, px
+				startIndexAfterRender: 1, // number
+				maxIndexAfterRender: 1000, // number
+				imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+				lockAspectRatioAfterRender: false, // boolean
+				showBorderAfterRender: true, // boolean
+				showGridAfterRender: true, // boolean
+				showPivotAfterRender: true, // boolean
+				click: undefined, // function(err, res)
+				rightClick: undefined, // function(err, event, res)
+				clickHandle: undefined, // function(err, res, direction)
+				upload: undefined, // function(err, res)
+				edit: undefined, // function(err, res)
+				remove: undefined, // function(err, res)
+				handle: // object, set global handle
+			}
+		*/
 
 		myObject.config = function(newConfig, cb) {
 			if (!isObject(newConfig)) {
