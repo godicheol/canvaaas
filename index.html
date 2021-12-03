@@ -1854,12 +1854,12 @@
 			<span id="myId">ID</span>
 		</div>
 		<div class="footer-right">
-			<span id="myDrawable" style="color: #FFFFFF;">Drawable</span>
+			<!-- <span id="myDrawable" style="color: #FFFFFF;">Drawable</span>
 			/
 			<span id="myEditable" style="color: #FFFFFF;">Editable</span>
 			/
 			<span id="myLockAspectRatio" style="color: #FFFFFF;">Lock Aspect Ratio</span>
-			/
+			/ -->
 			<span id="myX">X</span>
 			/
 			<span id="myY">Y</span>
@@ -2221,9 +2221,9 @@
 				scaleX: document.getElementById("myFlipY"),
 				scaleY: document.getElementById("myFlipX"),
 				opacity: document.getElementById("myOpacity"),
-				lockAspectRatio: document.getElementById("myLockAspectRatio"),
-				editable: document.getElementById("myEditable"),
-				drawable: document.getElementById("myDrawable"),
+				// lockAspectRatio: document.getElementById("myLockAspectRatio"),
+				// editable: document.getElementById("myEditable"),
+				// drawable: document.getElementById("myDrawable"),
 			}
 			if (selectedId) {
 				canvaaas.getImage(selectedId, function(err, res){
@@ -2238,27 +2238,27 @@
 					inputs.scaleX.innerHTML = res.scaleX === -1;
 					inputs.scaleY.innerHTML = res.scaleY === -1;
 					inputs.opacity.innerHTML = Math.floor(res.opacity);
-					if (!res.editable) {
-						inputs.editable.innerHTML = "Uneditabled";
-						inputs.editable.style.color = "red";
-					} else {
-						inputs.editable.innerHTML = "Editabled";
-						inputs.editable.style.color = "#FFFFFF";
-					}
-					if (!res.lockAspectRatio) {
-						inputs.lockAspectRatio.innerHTML = "Unlocked";
-						inputs.lockAspectRatio.style.color = "#FFFFFF";
-					} else {
-						inputs.lockAspectRatio.innerHTML = "Locked";
-						inputs.lockAspectRatio.style.color = "red";
-					}
-					if (!res.drawable) {
-						inputs.drawable.innerHTML = "Undrawbled";
-						inputs.drawable.style.color = "red";
-					} else {
-						inputs.drawable.innerHTML = "Drawbled";
-						inputs.drawable.style.color = "#FFFFFF";
-					}
+					// if (!res.editable) {
+					// 	inputs.editable.innerHTML = "Uneditabled";
+					// 	inputs.editable.style.color = "red";
+					// } else {
+					// 	inputs.editable.innerHTML = "Editabled";
+					// 	inputs.editable.style.color = "#FFFFFF";
+					// }
+					// if (!res.lockAspectRatio) {
+					// 	inputs.lockAspectRatio.innerHTML = "Unlocked";
+					// 	inputs.lockAspectRatio.style.color = "#FFFFFF";
+					// } else {
+					// 	inputs.lockAspectRatio.innerHTML = "Locked";
+					// 	inputs.lockAspectRatio.style.color = "red";
+					// }
+					// if (!res.drawable) {
+					// 	inputs.drawable.innerHTML = "Undrawbled";
+					// 	inputs.drawable.style.color = "red";
+					// } else {
+					// 	inputs.drawable.innerHTML = "Drawbled";
+					// 	inputs.drawable.style.color = "#FFFFFF";
+					// }
 				});
 
 				buttons.forEach(function(elem){
@@ -2280,12 +2280,12 @@
 				inputs.scaleX.innerHTML = "FlipY";
 				inputs.scaleY.innerHTML = "FlipX";
 				inputs.opacity.innerHTML = "Opacity";
-				inputs.lockAspectRatio.innerHTML = "Lock Aspect Ratio";
-				inputs.lockAspectRatio.style.color = "#FFFFFF";
-				inputs.editable.innerHTML = "Editable";
-				inputs.editable.style.color = "#FFFFFF";
-				inputs.drawable.innerHTML = "Drawable";
-				inputs.drawable.style.color = "#FFFFFF";
+				// inputs.lockAspectRatio.innerHTML = "Lock Aspect Ratio";
+				// inputs.lockAspectRatio.style.color = "#FFFFFF";
+				// inputs.editable.innerHTML = "Editable";
+				// inputs.editable.style.color = "#FFFFFF";
+				// inputs.drawable.innerHTML = "Drawable";
+				// inputs.drawable.style.color = "#FFFFFF";
 
 				buttons.forEach(function(elem){
 					var btn = elem.querySelector("a");
