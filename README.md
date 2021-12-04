@@ -1,6 +1,6 @@
 [DEMO](https://godicheol.github.io/canvaaas/)
 
-## HTML set size to js
+## HTML
 
 ```html
 <style>
@@ -10,6 +10,13 @@
     overflow: hidden; /* recommend */
   }
 </style>
+<!-- Main container -->
+<div id="target"></div>
+```
+
+## Set size to js
+
+```html
 <script>
   canvaaas.config({
     aspectRatioOfContainer: 1 / 1, // number, width / height
@@ -17,31 +24,23 @@
     maxHeightOfContainer: 500, // number, px
   })
 </script>
-<!-- Main container -->
-<div id="target"></div>
 ```
 
-## HTML set size to css
+## Set size to css
 
 ```html
 <style>
   #target{
-    padding: 24px; /* overlay size */
-    margin: 0 auto; /* container align center */
-    overflow: hidden; /* recommend */
     box-sizing: border-box; /* recommend */
-    
     width: 100%;
     height: 500px;
   }
 </style>
 <script>
   canvaaas.config({
-    aspectRatioOfContainer: undefined // required
+    aspectRatioOfContainer: undefined 
   })
 </script>
-<!-- Main container -->
-<div id="target"></div>
 ```
 
 ## Init
