@@ -5,8 +5,11 @@
 ```html
 <style>
   #target{
-    margin: 24px; /* overlay size */
+    padding: 24px; /* overlay size */
+    margin: 0 auto; /* container align center */
     overflow: hidden; /* recommend */
+    max-width: 500px; /* container max width */
+    max-height: 500px; /* container max height */
   }
 </style>
 ```

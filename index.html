@@ -78,8 +78,12 @@
 
 		/* container for init */
 		#target{
-			padding: 36px;
+			/* margin: 36px; */
 			overflow: hidden;
+			max-width: 500px;
+			max-height: 500px;
+			margin: 0 auto;
+			padding: 36px;
 		}
 
 
@@ -1074,7 +1078,7 @@
 	</div>
 	<!-- header end -->
 
-
+	<!-- main -->
 	<div id="target"></div>
 
 	<div id="myHelp" style=""></div>
@@ -1928,8 +1932,8 @@
 			], // array of allowed mimetypes
 			cacheLevels: 999, // number
 			aspectRatioOfContainer: 1 / 1, // number, width / height
-			maxWidthOfContainer: 500, // number, px
-			maxHeightOfContainer: 500, // number, px
+			maxWidthOfContainer: undefined, // number, px
+			maxHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas

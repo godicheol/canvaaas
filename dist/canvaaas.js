@@ -2962,12 +2962,10 @@
 				}
 				if (isString(newState.background)) {
 					tmp = toString(newState.background);
-					if (isColor(tmp)) {
-						canvasState.background = tmp;
-					} else if (
-						["alpha","unset","transparent","none"].indexOf(tmp) > -1
-					) {
+					if (["alpha","unset","transparent","none"].indexOf(tmp) > -1) {
 						canvasState.background = "transparent";
+					} else if (isColor(tmp)) {
+						canvasState.background = tmp;
 					}
 				}
 				if (isBoolean(newState.overlay)) {
@@ -4118,7 +4116,9 @@
 					}
 					if (isString(options.background)) {
 						tmp = toString(options.background);
-						if (isColor(tmp)) {
+						if (["alpha","unset","transparent","none"].indexOf(tmp) > -1) {
+							background = "transparent";
+						} else if (isColor(tmp)) {
 							background = tmp;
 						}
 					}
@@ -4885,9 +4885,6 @@
 					}
 				}
 
-				// fix error
-				// setTimeout(function(){}, 128);
-
 				// clear caches
 				for (var i = undoCaches.length - 1; i >= 0; i--) {
 					if (undoCaches[i].id === id) {
@@ -4912,8 +4909,8 @@
 		function setContainer() {
 			try {
 				var aspectRatio = config.aspectRatioOfContainer;
-				var width;
-				var height;
+				var maxSizes;
+				var containedSizes;
 				var fittedSizes;
 				var scrollBarWidth;
 
@@ -4921,16 +4918,25 @@
 					return false;
 				}
 
-				// reset container size
-				containerElement.style.width = "";
-				containerElement.style.height = "";
+				maxSizes = getMaxSizes(containerElement);
 
-				width = containerElement.offsetWidth;
-				height = containerElement.offsetWidth / aspectRatio;
+				console.log(maxSizes)
+
+				containedSizes = getContainedSizes(
+					aspectRatio,
+					1,
+					maxSizes[0],
+					maxSizes[1]
+				);
+
+				// old code
+				// containerElement.style.width = "100%";
+				// width = containerElement.offsetWidth;
+				// height = containerElement.offsetWidth / aspectRatio;
 
 				fittedSizes = getFittedSizes({
-					width: width,
-					height: height,
+					width: containedSizes[0],
+					height: containedSizes[1],
 					maxWidth: config.maxWidthOfContainer || 8388607,
 					maxHeight: config.maxHeightOfContainer || 8388607,
 					minWidth: 0,
@@ -4956,6 +4962,33 @@
 				}
 
 				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getMaxSizes(elem) {
+			try {
+				var parent = elem.parentNode;
+				var tmp = parent.style.height;
+				var style = parent.currentStyle || window.getComputedStyle(parent);
+				var paddingX = toNumber(style.paddingLeft.replace(/px/gi, "")) + toNumber(style.paddingRight.replace(/px/gi, ""));
+				var paddingY = toNumber(style.paddingTop.replace(/px/gi, "")) + toNumber(style.paddingBottom.replace(/px/gi, ""));
+				var mxw = parent.offsetWidth - paddingX;
+				var mxh = 0;
+				
+				parent.style.height = "100%";
+	
+				mxh = parent.offsetHeight - paddingY;
+	
+				parent.style.height = tmp;
+	
+				if (mxh < 1) {
+					return false;
+				}
+	
+				return [mxw, mxh];
 			} catch(err) {
 				console.log(err);
 				return false;
