@@ -4077,12 +4077,13 @@
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
 				var canvasSizes;
+				var maxSizes;
 				var filename = canvasState.filename || "untitled";
 				var mimetype = canvasState.mimetype || "image/png";
 				var quality = canvasState.quality || 0.92;
 				var background = canvasState.background || "#FFFFFF";
-				var maxWidth = canvState.width;
-				var maxHeight = canvState.height;
+				var canvasWidth = canvState.width;
+				var canvasHeight = canvState.height;
 				var filter;
 				var scaleRatioX = 1;
 				var scaleRatioY = 1;
@@ -4132,11 +4133,20 @@
 					}
 				}
 
+				maxSizes = getFittedSizes({
+					width: canvasWidth,
+					height: canvasHeight,
+					maxWidth: _maxWidth,
+					maxHeight: _maxHeight,
+					minWidth: _minWidth,
+					minHeight: _minHeight,
+				})
+
 				canvasSizes = getContainedSizes(
 					canvState.width,
 					canvState.height,
-					maxWidth,
-					maxHeight
+					maxSizes[0],
+					maxSizes[1]
 				);
 				
 				// fix canvas resized
@@ -4673,10 +4683,13 @@
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 				ctx.putImageData(filteredImageData, 0, 0);
 
-				// lagged image/png
+				// error lagged
+				// var base64 = canvas.toDataURL('image/png', 0.92);
 				var base64 = canvas.toDataURL('image/jpeg', 0.72);
 
 				originImg.src = base64;
+
+				// error lagged
 				// cloneImg.src = base64;
 
 				state.filter = filterFunc;
@@ -4719,6 +4732,8 @@
 			var tmp = originImg.src;
 
 			originImg.src = state.src;
+			// cloneImg.src = state.src;
+
 			state.filter = undefined;
 
 			// remove cache
@@ -5622,25 +5637,36 @@
 		function debugCanvas(base64) {
 			try {
 				var image = new Image();
+				image.onerror = function(err) {
+					console.log(err);
+					return false;
+				}
+				image.onload = function() {
+					if (image.width > image.height) {
+						image.style.width = '100%';
+						image.style.height = 'auto';
+					} else {
+						image.style.width = 'auto';
+						image.style.height = '100%';
+					}
+					image.style.display = "block";
+					image.style.position = 'absolute';
+					image.style.top = '50%';
+					image.style.left = '50%';
+					image.style.transform = 'translate(-50%, -50%)';
+					// image.style.objectFit = "contain";
+					// image.style.objectPosition = "50% 50%";
+					image.style.border = "1px solid #FFFFFF";
+	
+					var newTab = window.open(base64);
+					newTab.document.write(image.outerHTML);
+					newTab.document.body.style.backgroundColor = '#000000';
+					newTab.document.body.style.padding = '24px';
+					newTab.document.body.style.position = 'relative';
+	
+					window.URL.revokeObjectURL(base64);
+				}
 				image.src = base64;
-				image.style.display = "block";
-				image.style.position = 'absolute';
-				image.style.top = '50%';
-				image.style.left = '50%';
-				image.style.transform = 'translate(-50%, -50%)';
-				image.style.width = '256px';
-				image.style.height = '256px';
-				image.style.objectFit = "contain";
-				image.style.objectPosition = "50% 50%";
-				image.style.border = "2px dashed #FFFFFF";
-
-				var newTab = window.open(base64);
-				newTab.document.write(image.outerHTML);
-				newTab.document.body.style.backgroundColor = '#000000';
-				newTab.document.body.style.padding = '24px';
-				newTab.document.body.style.position = 'relative';
-
-				window.URL.revokeObjectURL(base64);
 			} catch(err) {
 				console.log(err);
 				return false;
