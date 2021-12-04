@@ -33,6 +33,7 @@
 			showBorderAfterRender: true, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
+			setHandleAfterRender: {}, // object
 			click: undefined, // function(err, res)
 			rightClick: undefined, // function(err, event, res)
 			clickHandle: undefined, // function(err, res, direction)
@@ -54,7 +55,7 @@
 			editable: true, // boolean
 		};
 
-		// allowed values = ["resize", "crop", "rotate", "flip"];
+		// allowed values = ["resize", "crop", "rotate", "flip", "click"];
 		var defaultHandleState = {
 			"n": "resize",
 			"s": "resize",
@@ -94,10 +95,10 @@
 				}
 			}
 
-			for (var i = 0; i < Object.keys(handleState).length; i++) {
-				var k = Object.keys(handleState)[i];
+			for (var i = 0; i < Object.keys(config.setHandleAfterRender).length; i++) {
+				var k = Object.keys(config.setHandleAfterRender)[i];
 				if (_directions.indexOf(k) > -1) {						
-					tmpHandleState[k] = handleState[k];
+					tmpHandleState[k] = config.setHandleAfterRender[k];
 				}
 			}
 
@@ -217,7 +218,6 @@
 		var eventState = {};
 		var containerState = {};
 		var canvasState = {};
-		var handleState = {};
 		var imageStates = [];
 		var undoCaches = [];
 		var redoCaches = [];
@@ -236,7 +236,6 @@
 
 		copyObject(config, defaultConfig);
 		copyObject(canvasState, defaultCanvasState);
-		copyObject(handleState, defaultHandleState);
 
 		//
 		// event handlers start
@@ -2925,6 +2924,144 @@
 			}
 		}
 
+		function setConfig(newConfig) {
+			try {
+				var tmp;
+				if (!isObject(newConfig)) {
+					return false;
+				}
+				if (isArray(newConfig.allowedMimeTypesForUpload)) {
+					var arr = [];
+					for (var i = 0; i < newConfig.allowedMimeTypesForUpload.length; i++) {
+						if (isMimetype(newConfig.allowedMimeTypesForUpload[i])) {
+							arr.push(newConfig.allowedMimeTypesForUpload[i]);
+						}
+					}
+					config.allowedMimeTypesForUpload = arr;
+				} else if (newConfig.allowedMimeTypesForUpload === null) {
+					config.allowedMimeTypesForUpload = undefined;	
+				}
+				if (isNumeric(newConfig.cacheLevels)) {
+					tmp = toNumber(newConfig.cacheLevels);
+					if (tmp > 0) {
+						config.cacheLevels = tmp;
+
+						// check cache level
+						if (undoCaches.length > config.cacheLevels) {
+							undoCaches.splice(-config.cacheLevels);
+							redoCaches = [];
+						}
+					}
+				}
+				if (isNumeric(newConfig.aspectRatioOfContainer)) {
+					tmp = toNumber(newConfig.aspectRatioOfContainer);
+					if (tmp > 0) {
+						config.aspectRatioOfContainer = tmp;
+					}
+				} else if (newConfig.aspectRatioOfContainer === null) {
+					config.aspectRatioOfContainer = undefined;
+				}
+				if (isNumeric(newConfig.maxWidthOfContainer)) {
+					tmp = toNumber(newConfig.maxWidthOfContainer);
+					if (tmp > 0) {
+						config.maxWidthOfContainer = tmp;
+					}
+				} else if (newConfig.maxWidthOfContainer === null) {
+					config.maxWidthOfContainer = undefined;
+				}
+				if (isNumeric(newConfig.maxHeightOfContainer)) {
+					tmp = toNumber(newConfig.maxHeightOfContainer);
+					if (tmp > 0) {
+						config.maxHeightOfContainer = tmp;
+					}
+				} else if (newConfig.maxHeightOfContainer === null) {
+					config.maxHeightOfContainer = undefined;
+				}
+				if (isNumeric(newConfig.startIndexAfterRender)) {
+					tmp = toNumber(newConfig.startIndexAfterRender);
+					config.startIndexAfterRender = tmp;
+				}
+				if (isNumeric(newConfig.maxIndexAfterRender)) {
+					tmp = toNumber(newConfig.maxIndexAfterRender);
+					if (tmp > config.startIndexAfterRender) {
+						config.maxIndexAfterRender = tmp;
+					}
+				}
+				if (isNumeric(newConfig.imageScaleAfterRender)) {
+					tmp = toNumber(newConfig.imageScaleAfterRender);
+					if (tmp > 1) {
+						config.imageScaleAfterRender = 1;
+					} else if (tmp <  0) {
+						config.imageScaleAfterRender = 0;
+					} else {
+						config.imageScaleAfterRender = tmp;
+					}
+				}
+				if (isBoolean(newConfig.lockAspectRatioAfterRender)) {
+					config.lockAspectRatioAfterRender = toBoolean(newConfig.lockAspectRatioAfterRender);
+				}
+				if (isBoolean(newConfig.showBorderAfterRender)) {
+					config.showBorderAfterRender = toBoolean(newConfig.showBorderAfterRender);
+				}
+				if (isBoolean(newConfig.showGridAfterRender)) {
+					config.showGridAfterRender = toBoolean(newConfig.showGridAfterRender);
+				}
+				if (isBoolean(newConfig.showPivotAfterRender)) {
+					config.showPivotAfterRender = toBoolean(newConfig.showPivotAfterRender);
+				}
+				if (isBoolean(newConfig.lockAspectRatioAfterRender)) {
+					config.lockAspectRatioAfterRender = toBoolean(newConfig.lockAspectRatioAfterRender);
+				}
+				if (isFunction(newConfig.click)) {
+					config.click = newConfig.click;
+				} else if (newConfig.click === null) {
+					config.click = undefined;
+				}
+				if (isFunction(newConfig.rightClick)) {
+					config.rightClick = newConfig.rightClick;
+				} else if (newConfig.rightClick === null) {
+					config.rightClick = undefined;
+				}
+				if (isFunction(newConfig.clickHandle)) {
+					config.clickHandle = newConfig.clickHandle;
+				} else if (newConfig.clickHandle === null) {
+					config.clickHandle = undefined;
+				}
+				if (isFunction(newConfig.upload)) {
+					config.upload = newConfig.upload;
+				} else if (newConfig.upload === null) {
+					config.upload = undefined;
+				}
+				if (isFunction(newConfig.edit)) {
+					config.edit = newConfig.edit;
+				} else if (newConfig.edit === null) {
+					config.edit = undefined;
+				}
+				if (isFunction(newConfig.remove)) {
+					config.remove = newConfig.remove;
+				} else if (newConfig.remove === null) {
+					config.remove = undefined;
+				}
+				if (isFunction(newConfig.setHandleAfterRender)) {
+					var obj = {};
+					for (var i = 0; i < Object.keys(newConfig.setHandleAfterRender).length; i++) {
+						var k = Object.keys(newConfig.setHandleAfterRender)[i];
+						if (_directions.indexOf(k) > -1) {
+							obj[k] = newConfig.setHandleAfterRender[k];
+						}
+					}
+					config.setHandleAfterRender = obj;
+				} else if (newConfig.handle === null) {
+					config.setHandleAfterRender = undefined;
+				}
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
 		function setCanvasState(newState) {
 			try {
 				var tmp;
@@ -3218,32 +3355,6 @@
 						}
 						graduation += "</div>";
 						rulers[i].innerHTML += graduation;
-					}
-				}
-				return true;
-			} catch(err) {
-				console.log(err);
-				return false;
-			}
-		}
-
-		function setHandleState(obj) {
-			try {
-				// insert
-				// for (var i = 0; i < Object.keys(obj).length; i++) {
-				// 	var k = Object.keys(obj)[i];
-				// 	if (_directions.indexOf(k) > -1) {						
-				// 		handleState[k] = obj[k];
-				// 	}
-				// }
-				
-				// replace
-				for (var i = 0; i < _directions.length; i++) {
-					var k = _directions[i];
-					if (isString(obj[k])) {
-						handleState[k] = toString(obj[k]);
-					} else {
-						handleState[k] = undefined;
 					}
 				}
 				return true;
@@ -5733,8 +5844,8 @@
 					_maxWidth = maxCanvasSizes.maxWidth;
 					_maxHeight = maxCanvasSizes.maxHeight;
 				}
-				console.log("canvaaas response time: " + maxCanvasSizes.responseTime + " ms");
-				console.log("canvaaas max area: " + _maxWidth + " x " + _maxHeight + " px");
+				console.log("canvaaas.init() response time: " + maxCanvasSizes.responseTime + " ms");
+				console.log("canvaaas.init() max area: " + _maxWidth + " x " + _maxHeight + " px");
 
 				// set template
 				target.innerHTML = _containerTemplate;
@@ -5749,6 +5860,12 @@
 	
 				// set container
 				setContainer();
+
+				// set handle state
+				var tmpHandleState = {};
+				copyObject(tmpHandleState, defaultHandleState);
+				config.setHandleAfterRender = tmpHandleState;
+				
 
 				// set events
 				windowResizeEvent = handlers.resizeWindow;
@@ -5793,7 +5910,6 @@
 				eventState = {};
 				containerState = {};
 				canvasState = {};
-				handleState = {};
 				imageStates = [];
 				undoCaches = [];
 				redoCaches = [];
@@ -5818,7 +5934,6 @@
 				// reset default states
 				copyObject(config, defaultConfig);
 				copyObject(canvasState, defaultCanvasState);
-				copyObject(handleState, defaultHandleState);
 
 				// callback
 				if (cb) {
@@ -7928,13 +8043,13 @@
 				showBorderAfterRender: true, // boolean
 				showGridAfterRender: true, // boolean
 				showPivotAfterRender: true, // boolean
+				setHandleAfterRender: // object
 				click: undefined, // function(err, res)
 				rightClick: undefined, // function(err, event, res)
 				clickHandle: undefined, // function(err, res, direction)
 				upload: undefined, // function(err, res)
 				edit: undefined, // function(err, res)
 				remove: undefined, // function(err, res)
-				handle: // object, set global handle
 			}
 		*/
 
@@ -7946,22 +8061,8 @@
 				return false;
 			}
 
-			// copy to config
-			copyObject(config, newConfig);
-
-			// check cache level
-			if (undoCaches.length > config.cacheLevels) {
-				undoCaches.splice(-config.cacheLevels);
-				redoCaches = [];
-			}
-
-			// check handle
-			if (isObject(config.handle)) {
-				// set global handle state
-				setHandleState(config.handle);
-				// clear tmp
-				config.handle = undefined;
-			}
+			// set config
+			setConfig(newConfig);
 
 			// check container
 			setContainer();

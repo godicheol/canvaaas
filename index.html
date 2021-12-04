@@ -71,20 +71,20 @@
 		}
 		html, body{
 			position: relative;
-			width: 100%;
+			max-width: 100%;
 			height: 100%;
 			/* overflow: hidden; */
 		}
 
-		/* container for init */
+		/* container */
 		#target{
 			overflow: hidden;
-			max-width: 500px;
-			max-height: 500px;
 			margin: 0 auto;
 			padding: 36px;
+			box-sizing: border-box;
+			width: 100%;
+			height: 500px;
 		}
-
 
 		/*  */
 		#myHelp{
@@ -714,6 +714,16 @@
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
+						canvaaas.addClassToCanvas(window.prompt('Class name'))
+					">Add class name</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.removeClassToCanvas(window.prompt('Class name'))
+					">Remove class name</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
 						canvaaas.canvas({
 							filename: window.prompt('Filename', canvaaas.getCanvas().filename)
 						})
@@ -991,7 +1001,7 @@
 								})
 							})
 						})
-					">Handle style click test</a>
+					">Handle style click</a>
 				</div>
 			</div>
 		</div>
@@ -1930,15 +1940,17 @@
 				"image/webp",
 			], // array of allowed mimetypes
 			cacheLevels: 999, // number
-			aspectRatioOfContainer: 1 / 1, // number, width / height
+			aspectRatioOfContainer: undefined, // number, width / height
 			maxWidthOfContainer: undefined, // number, px
 			maxHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 			lockAspectRatioAfterRender: false, // boolean
+			showBorderAfterRender: true, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
+			setHandleAfterRender: {}, // object
 			click: function(err, res) {
 				if (err) {return false;}
 				console.log("click", res);

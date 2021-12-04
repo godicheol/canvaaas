@@ -82,13 +82,13 @@
     showBorderAfterRender: true, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
+    setHandleAfterRender: {}, // object
     click: undefined, // function(err, res)
     rightClick: undefined, // function(err, event, res)
     clickHandle: undefined, // function(err, res, direction)
     upload: undefined, // function(err, res)
     edit: undefined, // function(err, res)
     remove: undefined, // function(err, res)
-    handle: undefined, // object, set global handle
   }, function(err, res) {
     // Your code
   });
@@ -439,7 +439,7 @@
 ```html
 <script>
   canvaaas.config({
-    handle: {
+    setHandleAfterRender: {
       'n': 'resize',
       'ne': 'resize',
       'e': 'resize',
@@ -450,6 +450,7 @@
       'nw': 'resize',
       "nn": "rotate",
       "ee": "flip",
+      "nene": null, // hide
     }
   }, function(err, res){
     // Your code
@@ -479,7 +480,6 @@
     // Your code
   })
 </script>
-
 ```
 
 ## Export
