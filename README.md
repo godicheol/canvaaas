@@ -333,14 +333,35 @@
 </script>
 ```
 
+```html
+<script>
+  canvaaas.state(id, {
+    "rotate": 45, // number
+    "opacity": 0.5, // number, min: 0, max: 1
+  }, function(err, res) {
+    // Your code
+  })
+</script>
+```
+
 ## Add filter
 
 ```html
 <script>
-  canvaaas.filter("id", function(red, green, blue, alpha) {
+  canvaaas.filter(id, function(red, green, blue, alpha) {
     var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722;
     return [luma, luma, luma, alpha]; // return [red, green, blue, alpha];
   }, function(err, res) {
+    // Your code
+  })
+</script>
+```
+
+## Remove filter
+
+```html
+<script>
+  canvaaas.filter(id, null, function(err, res) {
     // Your code
   })
 </script>
@@ -438,7 +459,7 @@
 
 ```html
 <script>
-canvaaas.export(["id-1", "id-2"], function(err, res){
+canvaaas.export([id, id], function(err, res){
   // Your code
 });
 </script>
