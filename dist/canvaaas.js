@@ -23,7 +23,7 @@
 				"image/webp",
 			], // array of allowed mimetypes
 			cacheLevels: 999, // number
-			aspectRatioOfContainer: 1 / 1, // number, width / height
+			aspectRatioOfContainer: undefined, // number, width / height
 			maxWidthOfContainer: undefined, // number, px
 			maxHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
@@ -4909,8 +4909,9 @@
 		function setContainer() {
 			try {
 				var aspectRatio = config.aspectRatioOfContainer;
+				var width;
+				var height;
 				var maxSizes;
-				var containedSizes;
 				var fittedSizes;
 				var scrollBarWidth;
 
@@ -4920,21 +4921,19 @@
 
 				maxSizes = getMaxSizes(containerElement);
 
-				containedSizes = getContainedSizes(
-					aspectRatio,
-					1,
-					maxSizes[0],
-					maxSizes[1]
-				);
-
-				// old code
-				// containerElement.style.width = "100%";
-				// width = containerElement.offsetWidth;
-				// height = containerElement.offsetWidth / aspectRatio;
+				if (!aspectRatio) {
+					width = maxSizes[0];
+					height = maxSizes[1];
+					aspectRatio = width / height;
+				} else {
+					containerElement.style.width = "100%";
+					width = containerElement.offsetWidth;
+					height = containerElement.offsetWidth / aspectRatio;
+				}
 
 				fittedSizes = getFittedSizes({
-					width: containedSizes[0],
-					height: containedSizes[1],
+					width: width,
+					height: height,
 					maxWidth: config.maxWidthOfContainer || 8388607,
 					maxHeight: config.maxHeightOfContainer || 8388607,
 					minWidth: 0,
@@ -4966,31 +4965,29 @@
 			}
 		}
 
+		function getPadding(elem) {
+			try {
+				var style = elem.currentStyle || window.getComputedStyle(elem);
+
+				return [
+					toNumber(style.paddingTop.replace(/px/gi, "")),
+					toNumber(style.paddingRight.replace(/px/gi, "")),
+					toNumber(style.paddingBottom.replace(/px/gi, "")),
+					toNumber(style.paddingLeft.replace(/px/gi, "")),
+				];
+			} catch(err) {
+				console.log(err);
+				return false;
+			} 
+		}
+
 		function getMaxSizes(elem) {
 			try {
 				var parent = elem.parentNode;
-				var style = parent.currentStyle || window.getComputedStyle(parent);
-				var tmp = parent.style.height;
-				var currentWidth = parent.offsetWidth;
-				var currentHeight = parent.offsetHeight;
-				var paddingX = toNumber(style.paddingLeft.replace(/px/gi, "")) + toNumber(style.paddingRight.replace(/px/gi, ""));
-				var paddingY = toNumber(style.paddingTop.replace(/px/gi, "")) + toNumber(style.paddingBottom.replace(/px/gi, ""));
-				var mxw = currentWidth - paddingX;
-				var mxh = currentHeight - paddingY;
-
-				parent.style.height = "100%";
-	
-				if (mxh < 1) {
-					mxh = parent.offsetHeight - paddingY;
-				}
-	
-				parent.style.height = tmp;
-	
-				if (mxh < 1) {
-					return false;
-				}
-	
-				return [mxw, mxh];
+				var padding = getPadding(parent);
+				var maxWidth = parent.offsetWidth - (padding[1] + padding[3]);
+				var maxHeight = parent.offsetHeight - (padding[0] + padding[2]);
+				return [maxWidth, maxHeight];
 			} catch(err) {
 				console.log(err);
 				return false;

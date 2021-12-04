@@ -1,6 +1,6 @@
 [DEMO](https://godicheol.github.io/canvaaas/)
 
-## HTML
+## HTML set size to js
 
 ```html
 <style>
@@ -8,14 +8,39 @@
     padding: 24px; /* overlay size */
     margin: 0 auto; /* container align center */
     overflow: hidden; /* recommend */
-    max-width: 500px; /* container max width */
-    max-height: 500px; /* container max height */
   }
 </style>
+<script>
+  canvaaas.config({
+    aspectRatioOfContainer: 1 / 1, // number, width / height
+    maxWidthOfContainer: 500, // number, px
+    maxHeightOfContainer: 500, // number, px
+  })
+</script>
+<!-- Main container -->
+<div id="target"></div>
 ```
 
+## HTML set size to css
+
 ```html
-<!-- MAIN ELEMENT -->
+<style>
+  #target{
+    padding: 24px; /* overlay size */
+    margin: 0 auto; /* container align center */
+    overflow: hidden; /* recommend */
+    box-sizing: border-box; /* recommend */
+    
+    width: 100%;
+    height: 500px;
+  }
+</style>
+<script>
+  canvaaas.config({
+    aspectRatioOfContainer: undefined // required
+  })
+</script>
+<!-- Main container -->
 <div id="target"></div>
 ```
 
