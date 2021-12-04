@@ -4920,8 +4920,6 @@
 
 				maxSizes = getMaxSizes(containerElement);
 
-				console.log(maxSizes)
-
 				containedSizes = getContainedSizes(
 					aspectRatio,
 					1,
@@ -4971,16 +4969,20 @@
 		function getMaxSizes(elem) {
 			try {
 				var parent = elem.parentNode;
-				var tmp = parent.style.height;
 				var style = parent.currentStyle || window.getComputedStyle(parent);
+				var tmp = parent.style.height;
+				var currentWidth = parent.offsetWidth;
+				var currentHeight = parent.offsetHeight;
 				var paddingX = toNumber(style.paddingLeft.replace(/px/gi, "")) + toNumber(style.paddingRight.replace(/px/gi, ""));
 				var paddingY = toNumber(style.paddingTop.replace(/px/gi, "")) + toNumber(style.paddingBottom.replace(/px/gi, ""));
-				var mxw = parent.offsetWidth - paddingX;
-				var mxh = 0;
-				
+				var mxw = currentWidth - paddingX;
+				var mxh = currentHeight - paddingY;
+
 				parent.style.height = "100%";
 	
-				mxh = parent.offsetHeight - paddingY;
+				if (mxh < 1) {
+					mxh = parent.offsetHeight - paddingY;
+				}
 	
 				parent.style.height = tmp;
 	
