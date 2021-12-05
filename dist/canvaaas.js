@@ -3066,6 +3066,7 @@
 					config.remove = undefined;
 				}
 				if (isObject(newConfig.showHandleAfterRender)) {
+					var obj = {};
 					for (var i = 0; i < Object.keys(_directions).length; i++) {
 						var k = Object.keys(_directions)[i];
 						var v = newConfig.showHandleAfterRender[k];
@@ -3073,11 +3074,12 @@
 						var isAllowed = allowedHandleEvents.indexOf(v);
 
 						if (isStr && isAllowed) {
-							config.showHandleAfterRender[k] = toString(v);
+							obj[k] = toString(v);
 						} else {
-							config.showHandleAfterRender[k] = undefined;
+							obj[k] = undefined;
 						}
 					}
+					config.showHandleAfterRender = obj;
 				} else if (newConfig.showHandleAfterRender === null) {
 					config.showHandleAfterRender = {};
 				}
@@ -5892,7 +5894,6 @@
 				var tmpHandleState = {};
 				copyObject(tmpHandleState, defaultHandleState);
 				config.showHandleAfterRender = tmpHandleState;
-				
 
 				// set events
 				windowResizeEvent = handlers.resizeWindow;
