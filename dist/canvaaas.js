@@ -2808,36 +2808,40 @@
 				cloneImg.style.opacity = state.opacity;
 				
 				// set visible
-				if (!state.visible && updated.visible) {
-					if (!origin.classList.contains("hidden")) {
-						origin.classList.add("hidden");
-					}
-					if (!clone.classList.contains("hidden")) {
-						clone.classList.add("hidden");
-					}
-				} else {
-					if (origin.classList.contains("hidden")) {
-						origin.classList.remove("hidden");
-					}
-					if (clone.classList.contains("hidden")) {
-						clone.classList.remove("hidden");
+				if (updated.visible) {
+					if (!state.visible) {
+						if (!origin.classList.contains("hidden")) {
+							origin.classList.add("hidden");
+						}
+						if (!clone.classList.contains("hidden")) {
+							clone.classList.add("hidden");
+						}
+					} else {
+						if (origin.classList.contains("hidden")) {
+							origin.classList.remove("hidden");
+						}
+						if (clone.classList.contains("hidden")) {
+							clone.classList.remove("hidden");
+						}
 					}
 				}
 
 				// set clickable
-				if (!state.clickable && updated.clickable) {
-					if (!origin.classList.contains("unclickable")) {
-						origin.classList.add("unclickable");
-					}
-					if (!clone.classList.contains("unclickable")) {
-						clone.classList.add("unclickable");
-					}
-				} else {
-					if (origin.classList.contains("unclickable")) {
-						origin.classList.remove("unclickable");
-					}
-					if (clone.classList.contains("unclickable")) {
-						clone.classList.remove("unclickable");
+				if (updated.clickable) {
+					if (!state.clickable) {
+						if (!origin.classList.contains("unclickable")) {
+							origin.classList.add("unclickable");
+						}
+						if (!clone.classList.contains("unclickable")) {
+							clone.classList.add("unclickable");
+						}
+					} else {
+						if (origin.classList.contains("unclickable")) {
+							origin.classList.remove("unclickable");
+						}
+						if (clone.classList.contains("unclickable")) {
+							clone.classList.remove("unclickable");
+						}
 					}
 				}
 
@@ -3247,6 +3251,22 @@
 				} else {
 					if (mirrorElement.classList.contains("hidden")) {
 						mirrorElement.classList.remove("hidden");
+					}
+				}
+
+				if (!canvasState.clickable) {
+					if (!canvasElement.classList.contains("unclickable")) {
+						canvasElement.classList.add("unclickable");
+					}
+					if (!mirrorElement.classList.contains("unclickable")) {
+						mirrorElement.classList.add("unclickable");
+					}
+				} else {
+					if (canvasElement.classList.contains("unclickable")) {
+						canvasElement.classList.remove("unclickable");
+					}
+					if (mirrorElement.classList.contains("unclickable")) {
+						mirrorElement.classList.remove("unclickable");
 					}
 				}
 
