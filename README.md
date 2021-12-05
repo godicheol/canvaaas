@@ -75,6 +75,8 @@
     aspectRatioOfContainer: 1 / 1, // number, width / height
     maxWidthOfContainer: undefined, // number, px
     maxHeightOfContainer: undefined, // number, px
+    minWidthOfContainer: undefined, // number, px
+    minHeightOfContainer: undefined, // number, px
     startIndexAfterRender: 1, // number
     maxIndexAfterRender: 1000, // number
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
@@ -82,7 +84,7 @@
     showBorderAfterRender: true, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
-    setHandleAfterRender: {}, // object
+    showHandleAfterRender: {}, // object
     click: undefined, // function(err, res)
     rightClick: undefined, // function(err, event, res)
     clickHandle: undefined, // function(err, res, direction)
@@ -439,7 +441,7 @@
 ```html
 <script>
   canvaaas.config({
-    setHandleAfterRender: {
+    showHandleAfterRender: {
       'n': 'resize',
       'ne': 'resize',
       'e': 'resize',

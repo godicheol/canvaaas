@@ -35,7 +35,7 @@
 			showBorderAfterRender: true, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
-			setHandleAfterRender: {}, // object
+			showHandleAfterRender: {}, // object
 			click: undefined, // function(err, res)
 			rightClick: undefined, // function(err, event, res)
 			clickHandle: undefined, // function(err, res, direction)
@@ -43,7 +43,6 @@
 			edit: undefined, // function(err, res)
 			remove: undefined, // function(err, res)
 		};
-
 		var defaultCanvasState = {
 			filename: "untitled", // string, without extension
 			mimetype: "image/png", // string
@@ -56,8 +55,13 @@
 			clickable: true, // boolean
 			editable: true, // boolean
 		};
-
-		var allowedHandleEvents = ["resize", "crop", "rotate", "flip", "click"];
+		var allowedHandleEvents = [
+			"resize",
+			"crop",
+			"rotate",
+			"flip",
+			"click"
+		];
 		var defaultHandleState = {
 			"n": "resize",
 			"s": "resize",
@@ -97,9 +101,9 @@
 				}
 			}
 
-			for (var i = 0; i < Object.keys(config.setHandleAfterRender).length; i++) {
-				var k = Object.keys(config.setHandleAfterRender)[i];
-				var v = config.setHandleAfterRender[k];
+			for (var i = 0; i < Object.keys(config.showHandleAfterRender).length; i++) {
+				var k = Object.keys(config.showHandleAfterRender)[i];
+				var v = config.showHandleAfterRender[k];
 				if (_directions.indexOf(k) > -1) {						
 					tmpHandleState[k] = v;
 				}
@@ -2980,6 +2984,22 @@
 				} else if (newConfig.maxHeightOfContainer === null) {
 					config.maxHeightOfContainer = undefined;
 				}
+				if (isNumeric(newConfig.minWidthOfContainer)) {
+					tmp = toNumber(newConfig.minWidthOfContainer);
+					if (tmp > 0) {
+						config.minWidthOfContainer = tmp;
+					}
+				} else if (newConfig.minWidthOfContainer === null) {
+					config.minWidthOfContainer = undefined;
+				}
+				if (isNumeric(newConfig.minHeightOfContainer)) {
+					tmp = toNumber(newConfig.minHeightOfContainer);
+					if (tmp > 0) {
+						config.minHeightOfContainer = tmp;
+					}
+				} else if (newConfig.minHeightOfContainer === null) {
+					config.minHeightOfContainer = undefined;
+				}
 				if (isNumeric(newConfig.startIndexAfterRender)) {
 					tmp = toNumber(newConfig.startIndexAfterRender);
 					config.startIndexAfterRender = tmp;
@@ -3045,21 +3065,21 @@
 				} else if (newConfig.remove === null) {
 					config.remove = undefined;
 				}
-				if (isObject(newConfig.setHandleAfterRender)) {
+				if (isObject(newConfig.showHandleAfterRender)) {
 					for (var i = 0; i < Object.keys(_directions).length; i++) {
 						var k = Object.keys(_directions)[i];
-						var v = newConfig.setHandleAfterRender[k];
+						var v = newConfig.showHandleAfterRender[k];
 						var isStr = isString(v);
 						var isAllowed = allowedHandleEvents.indexOf(v);
 
 						if (isStr && isAllowed) {
-							config.setHandleAfterRender[k] = toString(v);
+							config.showHandleAfterRender[k] = toString(v);
 						} else {
-							config.setHandleAfterRender[k] = undefined;
+							config.showHandleAfterRender[k] = undefined;
 						}
 					}
-				} else if (newConfig.setHandleAfterRender === null) {
-					config.setHandleAfterRender = {};
+				} else if (newConfig.showHandleAfterRender === null) {
+					config.showHandleAfterRender = {};
 				}
 
 				return true;
@@ -5054,8 +5074,8 @@
 					height: height,
 					maxWidth: config.maxWidthOfContainer || 8388607,
 					maxHeight: config.maxHeightOfContainer || 8388607,
-					minWidth: 0,
-					minHeight: 0
+					minWidth: config.minWidthOfContainer || 1,
+					minHeight: config.minHeightOfContainer || 1
 				});
 
 				containerState.width = fittedSizes[0];
@@ -5871,7 +5891,7 @@
 				// set handle state
 				var tmpHandleState = {};
 				copyObject(tmpHandleState, defaultHandleState);
-				config.setHandleAfterRender = tmpHandleState;
+				config.showHandleAfterRender = tmpHandleState;
 				
 
 				// set events
@@ -8043,6 +8063,8 @@
 				aspectRatioOfContainer: 1 / 1, // number, width / height
 				maxWidthOfContainer: undefined, // number, px
 				maxHeightOfContainer: undefined, // number, px
+				minWidthOfContainer: undefined, // number, px
+				minHeightOfContainer: undefined, // number, px
 				startIndexAfterRender: 1, // number
 				maxIndexAfterRender: 1000, // number
 				imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
@@ -8050,7 +8072,7 @@
 				showBorderAfterRender: true, // boolean
 				showGridAfterRender: true, // boolean
 				showPivotAfterRender: true, // boolean
-				setHandleAfterRender: // object
+				showHandleAfterRender: // object
 				click: undefined, // function(err, res)
 				rightClick: undefined, // function(err, event, res)
 				clickHandle: undefined, // function(err, res, direction)
