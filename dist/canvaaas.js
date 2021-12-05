@@ -26,6 +26,8 @@
 			aspectRatioOfContainer: undefined, // number, width / height
 			maxWidthOfContainer: undefined, // number, px
 			maxHeightOfContainer: undefined, // number, px
+			minWidthOfContainer: undefined, // number, px
+			minHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
@@ -55,7 +57,7 @@
 			editable: true, // boolean
 		};
 
-		// allowed values = ["resize", "crop", "rotate", "flip", "click"];
+		var allowedHandleEvents = ["resize", "crop", "rotate", "flip", "click"];
 		var defaultHandleState = {
 			"n": "resize",
 			"s": "resize",
@@ -97,8 +99,9 @@
 
 			for (var i = 0; i < Object.keys(config.setHandleAfterRender).length; i++) {
 				var k = Object.keys(config.setHandleAfterRender)[i];
+				var v = config.setHandleAfterRender[k];
 				if (_directions.indexOf(k) > -1) {						
-					tmpHandleState[k] = config.setHandleAfterRender[k];
+					tmpHandleState[k] = v;
 				}
 			}
 
@@ -3042,17 +3045,21 @@
 				} else if (newConfig.remove === null) {
 					config.remove = undefined;
 				}
-				if (isFunction(newConfig.setHandleAfterRender)) {
-					var obj = {};
-					for (var i = 0; i < Object.keys(newConfig.setHandleAfterRender).length; i++) {
-						var k = Object.keys(newConfig.setHandleAfterRender)[i];
-						if (_directions.indexOf(k) > -1) {
-							obj[k] = newConfig.setHandleAfterRender[k];
+				if (isObject(newConfig.setHandleAfterRender)) {
+					for (var i = 0; i < Object.keys(_directions).length; i++) {
+						var k = Object.keys(_directions)[i];
+						var v = newConfig.setHandleAfterRender[k];
+						var isStr = isString(v);
+						var isAllowed = allowedHandleEvents.indexOf(v);
+
+						if (isStr && isAllowed) {
+							config.setHandleAfterRender[k] = toString(v);
+						} else {
+							config.setHandleAfterRender[k] = undefined;
 						}
 					}
-					config.setHandleAfterRender = obj;
-				} else if (newConfig.handle === null) {
-					config.setHandleAfterRender = undefined;
+				} else if (newConfig.setHandleAfterRender === null) {
+					config.setHandleAfterRender = {};
 				}
 
 				return true;
@@ -4181,7 +4188,7 @@
 		}
 
 		// asynchronous
-		function drawCanvas(options, canvState, imgStates, cb) {
+		function drawCanvas(option, canvState, imgStates, cb) {
 			try {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
@@ -4202,21 +4209,21 @@
 				var count;
 				var tmp;
 
-				if (isObject(options)) {
-					if (isString(options.filename)) {
-						tmp = toString(options.filename);
+				if (isObject(option)) {
+					if (isString(option.filename)) {
+						tmp = toString(option.filename);
 						if (!isEmpty(tmp)) {
 							filename = tmp;
 						}
 					}
-					if (isString(options.mimetype)) {
-						tmp = toString(options.mimetype);
+					if (isString(option.mimetype)) {
+						tmp = toString(option.mimetype);
 						if (isMimetype(tmp)) {
 							mimetype = tmp;
 						}
 					}
-					if (isNumeric(options.quality)) {
-						tmp = toNumber(options.quality);
+					if (isNumeric(option.quality)) {
+						tmp = toNumber(option.quality);
 						if (tmp > 1) {
 							quality = 1;
 						} else if (tmp < 0) {
@@ -4225,22 +4232,22 @@
 							quality = tmp;
 						}
 					}
-					if (isString(options.background)) {
-						tmp = toString(options.background);
+					if (isString(option.background)) {
+						tmp = toString(option.background);
 						if (["alpha","unset","transparent","none"].indexOf(tmp) > -1) {
 							background = "transparent";
 						} else if (isColor(tmp)) {
 							background = tmp;
 						}
 					}
-					if (isNumeric(options.width)) {
-						maxWidth = toNumber(options.width);
+					if (isNumeric(option.width)) {
+						maxWidth = toNumber(option.width);
 					}
-					if (isNumeric(options.height)) {
-						maxHeight = toNumber(options.height);
+					if (isNumeric(option.height)) {
+						maxHeight = toNumber(option.height);
 					}
-					if (isFunction(options.filter)) {
-						filter = options.filter;
+					if (isFunction(option.filter)) {
+						filter = option.filter;
 					}
 				}
 
@@ -4424,26 +4431,26 @@
 		}
 
 		// asynchronous
-		function drawImage(canv, options, cb) {
+		function drawImage(canv, option, cb) {
 			var newImage = new Image();
 			newImage.onerror = function(err) {
 				return cb(err);
 			}
 			newImage.onload = function(e) {
 				var ctx = canv.getContext("2d");
-				var axisX = options.x;
-				var axisY = options.y;
-				var width = options.width;
-				var height = options.height;
-				var rotate = options.rotate;
-				var scaleX = options.scaleX;
-				var scaleY = options.scaleY;
-				var opacity = options.opacity;
-				var cropTop = options.cropTop;
-				var cropBottom = options.cropBottom;
-				var cropLeft = options.cropLeft;
-				var cropRight = options.cropRight;
-				var filter = options.filter;
+				var axisX = option.x;
+				var axisY = option.y;
+				var width = option.width;
+				var height = option.height;
+				var rotate = option.rotate;
+				var scaleX = option.scaleX;
+				var scaleY = option.scaleY;
+				var opacity = option.opacity;
+				var cropTop = option.cropTop;
+				var cropBottom = option.cropBottom;
+				var cropLeft = option.cropLeft;
+				var cropRight = option.cropRight;
+				var filter = option.filter;
 				var scaleRatioX;
 				var scaleRatioY;
 				var resizedCanvas;
@@ -4529,19 +4536,19 @@
 				}
 				return false;
 			}
-			newImage.src = options.src;
+			newImage.src = option.src;
 		}
 
-		function getResizedCanvas(img, options) {
+		function getResizedCanvas(img, option) {
 			try {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
-				var width = options.width;
-				var height = options.height;
-				var maxWidth = options.maxWidth;
-				var maxHeight = options.maxHeight;
-				var minWidth = options.minWidth;
-				var minHeight = options.minHeight;
+				var width = option.width;
+				var height = option.height;
+				var maxWidth = option.maxWidth;
+				var maxHeight = option.maxHeight;
+				var minWidth = option.minWidth;
+				var minHeight = option.minHeight;
 				var dx;
 				var dy;
 				var dw;
@@ -4582,18 +4589,18 @@
 			}
 		}
 
-		function getCroppedCanvas(canv, options) {
+		function getCroppedCanvas(canv, option) {
 			try {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
 				var width = canv.width;
 				var height = canv.height;
-				var cropTop = options.cropTop;
-				var cropBottom = options.cropBottom;
-				var cropLeft = options.cropLeft;
-				var cropRight = options.cropRight;
-				var scaleX = options.scaleX;
-				var scaleY = options.scaleY;
+				var cropTop = option.cropTop;
+				var cropBottom = option.cropBottom;
+				var cropLeft = option.cropLeft;
+				var cropRight = option.cropRight;
+				var scaleX = option.scaleX;
+				var scaleY = option.scaleY;
 				var croppedWidth;
 				var croppedHeight;
 				var tmp;
@@ -4652,18 +4659,18 @@
 			}
 		}
 
-		function getRotatedCanvas(canv, options) {
+		function getRotatedCanvas(canv, option) {
 			try {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d");
-				var maxWidth = options.maxWidth;
-				var maxHeight = options.maxHeight;
-				var minWidth = options.minWidth;
-				var minHeight = options.minHeight;
-				var opacity = options.opacity;
-				var rotate = options.rotate;
-				var scaleX = options.scaleX;
-				var scaleY = options.scaleY;
+				var maxWidth = option.maxWidth;
+				var maxHeight = option.maxHeight;
+				var minWidth = option.minWidth;
+				var minHeight = option.minHeight;
+				var opacity = option.opacity;
+				var rotate = option.rotate;
+				var scaleX = option.scaleX;
+				var scaleY = option.scaleY;
 				var width = canv.width;
 				var height = canv.height;
 				var sx = 0;
@@ -5141,25 +5148,25 @@
 			}
 		}
 
-		function getFittedSizes(options) {
+		function getFittedSizes(option) {
 			try {
 				var fooMax = getContainedSizes(
-					options.width,
-					options.height,
-					options.maxWidth,
-					options.maxHeight
+					option.width,
+					option.height,
+					option.maxWidth,
+					option.maxHeight
 				);
 	
 				var fooMin = getCoveredSizes(
-					options.width,
-					options.height,
-					options.minWidth,
-					options.minHeight
+					option.width,
+					option.height,
+					option.minWidth,
+					option.minHeight
 				);
 	
 				return [
-					Math.min(fooMax[0], Math.max(fooMin[0], options.width)),
-					Math.min(fooMax[1], Math.max(fooMin[1], options.height))
+					Math.min(fooMax[0], Math.max(fooMin[0], option.width)),
+					Math.min(fooMax[1], Math.max(fooMin[1], option.height))
 				];
 			} catch(err) {
 				console.log(err);
@@ -8082,7 +8089,7 @@
 		// canvas
 		//
 
-		myObject.new = function(options, cb) {
+		myObject.new = function(option, cb) {
 			var containerInitialized = containerState.width && containerState.height;
 			var canvaInitialized = canvasState.originalWidth && canvasState.originalHeight;
 			if (!containerInitialized) {
@@ -8097,38 +8104,38 @@
 				}
 				return false;
 			}
-			if (!isObject(options)) {
+			if (!isObject(option)) {
 				if (cb) {
-					cb("Argument `options` is not Object");
+					cb("Argument `option` is not Object");
 				}
 				return false;
 			}
-			if (!options.width === undefined) {
+			if (!option.width === undefined) {
 				if (cb) {
-					cb("Argument `options.width` is required");
+					cb("Argument `option.width` is required");
 				}
 				return false;
 			}
-			if (!options.height === undefined) {
+			if (!option.height === undefined) {
 				if (cb) {
-					cb("Argument `options.height` is required");
+					cb("Argument `option.height` is required");
 				}
 				return false;
 			}
-			if (!isNumeric(options.width)) {
+			if (!isNumeric(option.width)) {
 				if (cb) {
-					cb("Argument `options.width` is not Numeric");
+					cb("Argument `option.width` is not Numeric");
 				}
 				return false;
 			}
-			if (!isNumeric(options.height)) {
+			if (!isNumeric(option.height)) {
 				if (cb) {
-					cb("Argument `options.height` is not Numeric");
+					cb("Argument `option.height` is not Numeric");
 				}
 				return false;
 			}
 
-			setCanvasState(options);
+			setCanvasState(option);
 			setCanvas();
 
 			// callback
@@ -8168,7 +8175,7 @@
 		}
 
 		/*
-			options = {
+			option = {
 				filename: "untitled", // string, without extension
 				mimetype: "image/png", // string
 				quality: 0.92, // number, 0 ~ 1
@@ -8181,7 +8188,7 @@
 				ruler: false, // boolean
 			}
 		*/
-		myObject.canvas = function(options, cb) {
+		myObject.canvas = function(option, cb) {
 			var containerInitialized = containerState.width && containerState.height;
 			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 			if (!containerInitialized) {
@@ -8196,14 +8203,14 @@
 				}
 				return false;
 			}
-			if (!isObject(options)) {
+			if (!isObject(option)) {
 				if (cb) {
-					cb("Argument `options` is not Object");
+					cb("Argument `option` is not Object");
 				}
 				return false;
 			}
 
-			setCanvasState(options);
+			setCanvasState(option);
 			setCanvas();
 
 			// callback
@@ -8281,7 +8288,7 @@
 		//
 
 		/*
-			options = {
+			option = {
 				filename(optional)
 				mimetype(optional)
 				quality(optional)
@@ -8291,7 +8298,7 @@
 				filter(optional)(function)
 			}
 		*/
-		myObject.draw = function(options, cb){
+		myObject.draw = function(option, cb){
 			try {
 				var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 				if (eventState.onDraw) {
@@ -8330,7 +8337,7 @@
 	
 				eventState.onDraw = true;
 	
-				drawCanvas(options, canvState, convertedImageStates, function(err, base64, result){
+				drawCanvas(option, canvState, convertedImageStates, function(err, base64, result){
 					if (err) {
 						if (cb) {
 							cb(err);
@@ -8353,7 +8360,7 @@
 		}
 
 		/*
-			options = {
+			option = {
 				filename(optional)
 				mimetype(optional)
 				quality(optional)
@@ -8384,7 +8391,7 @@
 				drawable(optional)
 			}
 		*/
-		myObject.drawTo = function(options, exportedCanvasSizes, exportedImageStates, cb){
+		myObject.drawTo = function(option, exportedCanvasSizes, exportedImageStates, cb){
 			var canvState = {};
 			var convertedImageStates = [];
 
@@ -8394,9 +8401,9 @@
 				}
 				return false;
 			}
-			if (!isObject(options)) {
+			if (!isObject(option)) {
 				if (cb) {
-					cb("Argument `options` is not Object");
+					cb("Argument `option` is not Object");
 				}
 				return false;
 			}
@@ -8464,7 +8471,7 @@
 
 			eventState.onDraw = true;
 
-			drawCanvas(options, canvState, convertedImageStates, function(err, base64, result){
+			drawCanvas(option, canvState, convertedImageStates, function(err, base64, result){
 				if (err) {
 					if (cb) {
 						cb(err);
