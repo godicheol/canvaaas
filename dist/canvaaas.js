@@ -2553,7 +2553,7 @@
 					tmp = toNumber(newState.cropTop);
 					if (tmp < 0) {
 						state.cropTop = 0;
-					} else if (tmp < state.height - (state.cropBottom + 10)) {
+					} else {
 						state.cropTop = tmp;
 					}
 					updated.cropTop = true;
@@ -2562,7 +2562,7 @@
 					tmp = toNumber(newState.cropBottom);
 					if (tmp < 0) {
 						state.cropBottom = 0;
-					} else if (tmp < state.height - (state.cropTop + 10)) {
+					} else {
 						state.cropBottom = tmp;
 					}
 					updated.cropBottom = true;
@@ -2571,7 +2571,7 @@
 					tmp = toNumber(newState.cropLeft);
 					if (tmp < 0) {
 						state.cropLeft = 0;
-					} else if (tmp < state.width - (state.cropRight + 10)) {
+					} else {
 						state.cropLeft = tmp;
 					}
 					updated.cropLeft = true;
@@ -2580,7 +2580,7 @@
 					tmp = toNumber(newState.cropRight);
 					if (tmp < 0) {
 						state.cropRight = 0;
-					} else if (tmp < state.width - (state.cropLeft + 10)) {
+					} else {
 						state.cropRight = tmp;
 					}
 					updated.cropRight = true;
