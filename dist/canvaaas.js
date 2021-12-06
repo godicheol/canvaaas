@@ -2216,11 +2216,14 @@
 					e.preventDefault();
 					e.stopPropagation();
 	
-					var initialized = canvasState.originalWidth && canvasState.originalHeight;
-					var oldWidth = containerState.width;
-					var oldHeight = containerState.height;
-					var newWidth;
-					var newHeight;
+					// var oldContainerWidth = containerState.width;
+					// var oldContainerHeight = containerState.height;
+					// var newContainerWidth;
+					// var newContainerHeight;
+					var oldCanvasWidth = canvasState.width;
+					var oldCanvasHeight = canvasState.height;
+					var newCanvasWidth;
+					var newCanvasHeight;
 					var scaleRatioX;
 					var scaleRatioY;
 
@@ -2228,11 +2231,14 @@
 	
 					if (initialized) {
 						setCanvas();
-	
-						newWidth = containerState.width;
-						newHeight = containerState.height;
-						scaleRatioX = newWidth / oldWidth;
-						scaleRatioY = newHeight / oldHeight;
+
+						// newContainerWidth = containerState.width;
+						// newContainerHeight = containerState.height;
+						newCanvasWidth = canvasState.width;
+						newCanvasHeight = canvasState.height;
+
+						scaleRatioX = newCanvasWidth / oldCanvasWidth;
+						scaleRatioY = newCanvasHeight / oldCanvasHeight;
 	
 						for(var i = 0; i < imageStates.length; i++) {
 							var state = imageStates[i];
@@ -3232,7 +3238,7 @@
 				rulerElement.style.height = canvasState.height + "px";
 				rulerElement.style.left = canvasState.left + "px";
 				rulerElement.style.top = canvasState.top + "px";
-	
+
 				// set class names
 				if (!canvasState.checker) {
 					if (!checkerElement.classList.contains("hidden")) {
