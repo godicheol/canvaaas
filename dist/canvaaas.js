@@ -3198,14 +3198,12 @@
 				}
 
 				// calculate max sizes in container
-				fittedSizes = getFittedSizes({
-					width: canvasState.originalWidth,
-					height: canvasState.originalHeight,
-					maxWidth: containerState.width,
-					maxHeight: containerState.height,
-					minWidth: 0,
-					minHeight: 0
-				});
+				fittedSizes = getContainedSizes(
+					canvasState.originalWidth,
+					canvasState.originalHeight,
+					containerState.width,
+					containerState.height,
+				);
 	
 				// set styles
 				canvasState.width = fittedSizes[0];
