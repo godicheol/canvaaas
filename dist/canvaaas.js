@@ -4034,9 +4034,9 @@
 				if (isBoolean(state.grid)) {
 					tmp.grid = toBoolean(state.grid);
 				}
-				// if (isObject(state.handle)) {
-				// 	tmp.handle = state.handle;
-				// }
+				if (isObject(state.handle)) {
+					tmp.handle = state.handle;
+				}
 
 				return tmp;
 			} catch(err) {
@@ -6436,8 +6436,10 @@
 				clickable
 				editable
 				drawable
+				border
 				grid
 				pivot
+				handle
 			}
 		*/
 		myObject.state = function(id, newState, cb) {
@@ -6462,6 +6464,8 @@
 
 			var state = getImageState(id);
 			var updates = importImageState(newState);
+			var oldId = id;
+			var newId = id;
 
 			if (!canvasState.editable) {
 				if (config.edit) {
@@ -6506,7 +6510,8 @@
 			}
 
 			if (isString(updates.id)) {
-				if (isExist(toString(updates.id))) {
+				newId = toString(updates.id);
+				if (isExist(newId)) {
 					if (config.edit) {
 						config.edit("ID duplicated");
 					}
@@ -6515,22 +6520,20 @@
 					}
 					return false;
 				}
-			} else {
-				updates.id = id
 			}
-			
+
 			// save cache
-			saveUndo(id);
+			saveUndo(oldId);
 			// save image state
-			setImageState(id, updates);
+			setImageState(oldId, updates);
 			// callback
 			if (config.edit) {
-				config.edit(null, exportImageState(updates.id));
+				config.edit(null, exportImageState(newId));
 			}
 			if (cb) {
-				cb(null, exportImageState(updates.id));
+				cb(null, exportImageState(newId));
 			}
-			return exportImageState(updates.id);
+			return exportImageState(newId);
 		}
 
 		myObject.moveX = function(id, n, cb) {
