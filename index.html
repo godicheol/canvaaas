@@ -238,7 +238,7 @@
 		.canvaaas-image.selected .canvaaas-grid{
 			border-color: blue !important;
 		}
-		.canvaaas-image.selected .canvaaas-border{
+		.canvaaas-image.selected .canvaaas-border-line{
 			border-color: blue !important;
 		}
 		.canvaaas-image.selected .canvaaas-handle-square{
@@ -255,15 +255,8 @@
 		.canvaaas-image.uneditable .canvaaas-grid{
 			border-color: red !important;
 		}
-		.canvaaas-image.uneditable .canvaaas-border{
+		.canvaaas-image.uneditable .canvaaas-border-line{
 			border-color: red !important;
-		}
-		/* .canvaaas-image.uneditable .canvaaas-overlay{
-			display: block !important;
-			background-color: red !important;
-		} */
-		.canvaaas-image.uneditable .canvaaas-handle{
-			cursor: not-allowed;
 		}
 		.canvaaas-image.uneditable .canvaaas-handle-square{
 			border-color: red !important;
@@ -506,12 +499,12 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.addClass(selectedId, window.prompt('Class name', 'disabled'))
+						canvaaas.addClassToImage(selectedId, window.prompt('Class name', 'disabled'))
 					">Add class name</a>
 				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.removeClass(selectedId, window.prompt('Class name', 'disabled'))
+						canvaaas.removeClassToImage(selectedId, window.prompt('Class name', 'disabled'))
 					">Remove class name</a>
 				</div>
 				<div class="row selection">
@@ -656,8 +649,13 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.border(selectedId)
+						canvaaas.border(selectedId, {})
 					">Border</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handle(selectedId, {})
+					">Handle</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
@@ -814,13 +812,7 @@
 									'w': 'resize',
 									'nw': 'resize',
 									'nn': 'rotate',
-									'nene': 'crop',
 									'ee': 'flip',
-									'sese': 'crop',
-									'ss': 'flip',
-									'swsw': 'crop',
-									'ww': 'rotate',
-									'nwnw': 'crop',
 								})
 							})
 						})
@@ -974,34 +966,115 @@
 								canvaaas.handle(elem.id, {})
 							})
 						})
-					">Handle style 9</a>
+					">Handle style hide</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.handle(elem.id, {
+									'n': 'none',
+									'ne': 'none',
+									'e': 'none',
+									'se': 'none',
+									's': 'none',
+									'sw': 'none',
+									'w': 'none',
+									'nw': 'none',
+									'nn': 'none',
+									'nene': 'none',
+									'ee': 'none',
+									'sese': 'none',
+									'ss': 'none',
+									'swsw': 'none',
+									'ww': 'none',
+									'nwnw': 'none',
+								})
+							})
+						})
+					">Handle style custom</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.find({}, function(err, res){
 							if (err) {return false;}
 							res.forEach(function(elem){
-								canvaaas.handle(elem.id, {
-									'n': 'click',
-									'ne': 'click',
-									'e': 'click',
-									'se': 'click',
-									's': 'click',
-									'sw': 'click',
-									'w': 'click',
-									'nw': 'click',
-									'nn': 'click',
-									'nene': 'click',
-									'ee': 'click',
-									'sese': 'click',
-									'ss': 'click',
-									'swsw': 'click',
-									'ww': 'click',
-									'nwnw': 'click',
+								canvaaas.border(elem.id, {
+									n: 'crop',
+									s: 'crop',
+									e: 'crop',
+									w: 'crop',
 								})
 							})
 						})
-					">Handle style click</a>
+					">Border style default</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.border(elem.id, {
+									n: 'resize',
+									s: 'resize',
+									e: 'resize',
+									w: 'resize',
+								})
+							})
+						})
+					">Border style 1</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.border(elem.id, {
+									n: 'crop',
+									w: 'crop',
+								})
+							})
+						})
+					">Border style 2</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.border(elem.id, {
+									e: 'crop',
+									w: 'crop',
+								})
+							})
+						})
+					">Border style 3</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.border(elem.id, {
+									n: 'none',
+									s: 'none',
+									e: 'none',
+									w: 'none',
+								})
+							})
+						})
+					">Border style custom</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.find({}, function(err, res){
+							if (err) {return false;}
+							res.forEach(function(elem){
+								canvaaas.border(elem.id, {})
+							})
+						})
+					">Border style hide</a>
 				</div>
 			</div>
 		</div>
@@ -1544,9 +1617,23 @@
 				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
-				data-method="border"
+				data-method="border-hide"
 				data-value=""
-				data-help="Border"
+				data-help="Border hide"
+				>
+				<span class="material-icons">
+					border_style
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="border-show"
+				data-value=""
+				data-help="Border show"
 				>
 				<span class="material-icons">
 					border_style
@@ -1947,15 +2034,32 @@
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
 			lockAspectRatioAfterRender: false, // boolean
-			showBorderAfterRender: true, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
-			showHandleAfterRender: {}, // object
-			click: function(err, res) {
+			showBorderAfterRender: {
+				'n': 'flip',
+				'e': 'crop',
+				's': 'crop',
+				'w': 'crop',
+			}, // object
+			showHandleAfterRender: {
+				'n': 'resize',
+				'ne': 'resize',
+				'e': 'resize',
+				'se': 'resize',
+				's': 'resize',
+				'sw': 'resize',
+				'w': 'resize',
+				'nw': 'resize',
+				'nn': 'rotate',
+				'ee': 'flip',
+				"ww": "test"
+			}, // object
+			click: function(err, res, evt) {
 				if (err) {return false;}
-				console.log("click", res);
+				console.log("click", res, evt);
 				selectedId = res.id;
-				canvaaas.addClass(selectedId, "selected");
+				canvaaas.addClassToImage(selectedId, "selected");
 				chkSelected();
 
 				if (tool) {
@@ -2047,8 +2151,17 @@
 							canvaaas.remove(id)
 							cancelTool(tool);
 							break;
-						case "border":
-							canvaaas.border(id)
+						case "border-show":
+							canvaaas.border(id, {
+								n: "crop",
+								e: "crop",
+								s: "crop",
+								w: "crop",
+							})
+							cancelTool(tool);
+							break;
+						case "border-hide":
+							canvaaas.border(id, {})
 							cancelTool(tool);
 							break;
 						case "grid":
@@ -2129,71 +2242,67 @@
 					}
 				}
 			},
-			rightClick: function(err, e, res) {
+			rightClick: function(err, res, evt) {
 				if (err) {return false;}
+				if (evt.status === "end") {
 
-				var id = res.id;
-				var mouseX;
-				var mouseY;
-				if (typeof(e.touches) === "undefined") {
-					mouseX = e.clientX;
-					mouseY = e.clientY;
-				} else if(e.touches.length === 1) {
-					mouseX = e.touches[0].clientX;
-					mouseY = e.touches[0].clientY;
-				} else {
-					return false;
-				}
-				var viewportSizes = canvaaas.getViewport();
-				var posX;
-				var posY;
-				if (mouseX < 0.5 * viewportSizes.width) {
-					posX = "left: " + (mouseX) + "px;";
-				} else {
-					posX = "right: " + (viewportSizes.width - mouseX) + "px;";
-				}
-				if (mouseY < 0.5 * viewportSizes.height) {
-					posY = "top: " + (mouseY) + "px;";
-				} else {
-					posY = "bottom: " + (viewportSizes.height - mouseY) + "px;";
-				}
+					var id = evt.id;	
+					var mouseX = evt.mouseX;
+					var mouseY = evt.mouseY;
+					var viewportSizes = canvaaas.getViewport();
+					var posX;
+					var posY;
+					if (mouseX < 0.5 * viewportSizes.width) {
+						posX = "left: " + (mouseX) + "px;";
+					} else {
+						posX = "right: " + (viewportSizes.width - mouseX) + "px;";
+					}
+					if (mouseY < 0.5 * viewportSizes.height) {
+						posY = "top: " + (mouseY) + "px;";
+					} else {
+						posY = "bottom: " + (viewportSizes.height - mouseY) + "px;";
+					}
 
-				console.log("right click", res);
+					console.log("right click", res);
 
-				popup = openPopup(id, posX, posY);
-			},
-			clickHandle: function(err, res, d) {
-				if (err) {return false;}
-				// example
-				if (d === "w-w") {
-					canvaaas.editable(res.id);
-				} else if (d === "s-s") {
-					canvaaas.lockAspectRatio(res.id);
+					popup = openPopup(id, posX, posY);
 				}
 			},
-			edit: function(err, res) {
+			edit: function(err, res, evt) {
 				if (err) {return false;}
-				chkCache();
-				if (res.id === selectedId) {
-					chkSelected();
+
+				if (evt && evt.type ==="handle" && evt.status === "start") {
+					canvaaas.addClassToHandle(evt.id, evt.direction, "editing");
+				}
+				if (evt && evt.type ==="handle" && evt.status === "end") {
+					canvaaas.removeClassToHandle(evt.id, evt.direction, "editing");
+				}
+				if (evt && evt.type ==="border" && evt.status === "start") {
+					canvaaas.addClassToBorder(evt.id, evt.direction, "editing");
+				}
+				if (evt && evt.type ==="border" && evt.status === "end") {
+					canvaaas.removeClassToBorder(evt.id, evt.direction, "editing");
 				}
 
-				if (!res.clickable) {
-					canvaaas.addClass(selectedId, "unclickable");
-				} else {
-					canvaaas.removeClass(selectedId, "unclickable");
-				}
+				if (evt && evt.status === "end") {
+					console.log("edit", res, evt);
 
-				if (!res.editable) {
-					canvaaas.addClass(selectedId, "uneditable");
-				} else {
-					canvaaas.removeClass(selectedId, "uneditable");
-				}
+					chkCache();
+					if (res.id === selectedId) {
+						chkSelected();
+					}
 
-				if (!res.drawable) {
-					canvaaas.addClass(selectedId, "undrawable");
-				} else {
-					canvaaas.removeClass(selectedId, "undrawable");
+					if (!res.editable) {
+						canvaaas.addClassToImage(selectedId, "uneditable");
+					} else {
+						canvaaas.removeClassToImage(selectedId, "uneditable");
+					}
+
+					if (!res.drawable) {
+						canvaaas.addClassToImage(selectedId, "undrawable");
+					} else {
+						canvaaas.removeClassToImage(selectedId, "undrawable");
+					}
 				}
 			},
 			upload: function(err, res) {
@@ -2353,7 +2462,7 @@
 			}
 
 			if (selectedId) {
-				canvaaas.removeClass(selectedId, "selected");
+				canvaaas.removeClassToImage(selectedId, "selected");
 				selectedId = undefined;
 			}
 

@@ -118,15 +118,12 @@
 	-moz-user-select: none;
 	-ms-user-select: none;
 	user-select: none;
-	cursor: move;
+	/* cursor: move; */
 }
 .canvaaas-image.hidden{
 	visibility: hidden !important;
 	pointer-events: none;
 }
-/* .canvaaas-image.unclickable{
-	pointer-events: none;
-} */
 
 /* <img> wrapper */
 .canvaaas-content{
@@ -205,66 +202,26 @@
 	left: 0;
 	width: 100%;
 	height: 0;
-	border-top: 1px dashed #a7a7a7;
+	border-top: 1px solid #000000;
 }
 .canvaaas-grid.canvaaas-direction-s{
 	bottom: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
-	border-bottom: 1px dashed #a7a7a7;
+	border-bottom: 1px solid #000000;
 }
 .canvaaas-grid.canvaaas-direction-e{
 	top: 0;
 	right: 33%;
 	width: 0;
 	height: 100%;
-	border-right: 1px dashed #a7a7a7;
+	border-right: 1px solid #000000;
 }
 .canvaaas-grid.canvaaas-direction-w{
 	top: 0;
 	left: 33%;
 	width: 0;
-	height: 100%;
-	border-left: 1px dashed #a7a7a7;
-}
-
-/* border */
-.canvaaas-border{
-	position: absolute;
-	display: block;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	pointer-events: none;
-}
-.canvaaas-border.hidden{
-	display: none !important;
-}
-.canvaaas-border.canvaaas-direction-n{
-	top: 0;
-	left: 0;
-	width: 100%;
-	border-top: 1px solid #000000;
-}
-.canvaaas-border.canvaaas-direction-s{
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	border-bottom: 1px solid #000000;
-}
-.canvaaas-border.canvaaas-direction-e{
-	top: 0;
-	right: 0;
-	height: 100%;
-	border-right: 1px solid #000000;
-}
-.canvaaas-border.canvaaas-direction-w{
-	top: 0;
-	left: 0;
 	height: 100%;
 	border-left: 1px solid #000000;
 }
@@ -289,8 +246,90 @@
 	opacity: 0.7;
 }
 
+/* border */
+.canvaaas-border-line{
+	display: block;
+	position: absolute;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+}
+.canvaaas-border.canvaaas-direction-n .canvaaas-border-line{
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 0;
+	transform: translateY(-50%);
+	border-top: 1px solid #000000;
+}
+.canvaaas-border.canvaaas-direction-s .canvaaas-border-line{
+	top: 50%;
+	left: 0;
+	width: 100%;
+	height: 0;
+	transform: translateY(-50%);
+	border-bottom: 1px solid #000000;
+}
+.canvaaas-border.canvaaas-direction-e .canvaaas-border-line{
+	top: 0;
+	left: 50%;
+	width: 0;
+	height: 100%;
+	transform: translateX(-50%);
+	border-right: 1px solid #000000;
+}
+.canvaaas-border.canvaaas-direction-w .canvaaas-border-line{
+	top: 0;
+	left: 50%;
+	width: 0;
+	height: 100%;
+	transform: translateX(-50%);
+	border-left: 1px solid #000000;
+}
+.canvaaas-border{
+	position: absolute;
+	display: block;
+	/* cursor: grab; */
+}
+.canvaaas-border.hidden{
+	display: none !important;
+}
+.canvaaas-border.canvaaas-direction-n{
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 16px;
+	transform: translateY(-50%);
+}
+.canvaaas-border.canvaaas-direction-s{
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 16px;
+	transform: translateY(50%);
+}
+.canvaaas-border.canvaaas-direction-e{
+	top: 0;
+	right: 0;
+	height: 100%;
+	width: 16px;
+	transform: translateX(50%);
+}
+.canvaaas-border.canvaaas-direction-w{
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 16px;
+	transform: translateX(-50%);
+}
+
 /* handle */
 .canvaaas-handle-square{
+	display: block;
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -313,7 +352,7 @@
 	display: block; /* hide */
 	width: 36px; /* click space */
 	height: 36px; /* click space */
-	cursor: grab;
+	/* cursor: grab; */
 }
 .canvaaas-handle.hidden{
 	display: none !important;
@@ -412,11 +451,10 @@
 	pointer-events: none;
 }
 .canvaaas-graduation-major{
-	/* display: none !important; */
-
+	/* custom */
 }
 .canvaaas-graduation-minor{
-	/* display: none !important; */
+	/* custom */
 }
 .canvaaas-graduation-value{
 	/* display: none !important; */
@@ -436,8 +474,7 @@
 	bottom: 0;
 	width: 0;
 	height: 9px;
-
-	/* ruler major */
+	/* major */
 	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-minor{
@@ -446,8 +483,7 @@
 	bottom: 0;
 	width: 0;
 	height: 6px;
-
-	/* ruler minor */
+	/* minor */
 	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-value{
@@ -470,8 +506,7 @@
 	top: 0;
 	width: 0;
 	height: 9px;
-
-	/* ruler major */
+	/* major */
 	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-minor{
@@ -480,8 +515,7 @@
 	top: 0;
 	width: 0;
 	height: 6px;
-
-	/* ruler minor */
+	/* minor */
 	border-left: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-value{
@@ -504,8 +538,7 @@
 	left: 100%;
 	width: 9px;
 	height: 0;
-
-	/* ruler major */
+	/* major */
 	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-minor{
@@ -514,8 +547,7 @@
 	left: 100%;
 	width: 6px;
 	height: 0;
-
-	/* ruler minor */
+	/* minor */
 	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-value{
@@ -538,8 +570,7 @@
 	right: 0;
 	width: 9px;
 	height: 0;
-
-	/* ruler major */
+	/* major */
 	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-minor{
@@ -548,8 +579,7 @@
 	right: 0;
 	width: 6px;
 	height: 0;
-
-	/* ruler minor */
+	/* minor */
 	border-top: 1px solid #000000;
 }
 .canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-value{
@@ -559,10 +589,24 @@
 	transform: translateY(-50%);
 }
 
-/* editing */
-.canvaaas-handle.editing .canvaaas-handle-square{
-	background-color: #000000;
+/* clickable === false */
+.canvaaas-canvas.unclickable .canvaaas-image,
+.canvaaas-mirror.unclickable .canvaaas-image{
+	pointer-events: none !important;
+	/* cursor: default !important; */
 }
+.canvaaas-image.unclickable{
+	pointer-events: none !important;
+	/* cursor: default !important; */
+}
+
+/* mobile */
+@media only screen and (max-width: 768px) {
+
+}
+
+
+/* custom - canvaaas.addClassToImage(id, "editing") */
 .canvaaas-mirror .canvaaas-image.editing .canvaaas-overlay{
 	opacity: 0.8;
 }
@@ -570,18 +614,12 @@
 	display: block;
 }
 
-/* unclickabled */
-.canvaaas-canvas.unclickable .canvaaas-image,
-.canvaaas-mirror.unclickable .canvaaas-image{
-	pointer-events: none !important;
-	cursor: default !important;
-}
-.canvaaas-image.unclickable{
-	pointer-events: none !important;
-	cursor: default !important;
+/* custom - canvaaas.addClassToHandle(id, direction, "editing") */
+.canvaaas-handle.editing .canvaaas-handle-square{
+	background-color: #000000;
 }
 
-/* mobile */
-@media only screen and (max-width: 768px) {
-
+/* custom - canvaaas.addClassToBorder(id, direction, "editing") */
+.canvaaas-border.editing .canvaaas-border-line{
+	border-width: 3px;
 }

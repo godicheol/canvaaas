@@ -72,7 +72,7 @@
       "image/webp",
     ], // array of allowed mimetypes
     cacheLevels: 999, // number
-    aspectRatioOfContainer: 1 / 1, // number, width / height
+    aspectRatioOfContainer: undefined, // number, width / height
     maxWidthOfContainer: undefined, // number, px
     maxHeightOfContainer: undefined, // number, px
     minWidthOfContainer: undefined, // number, px
@@ -81,15 +81,36 @@
     maxIndexAfterRender: 1000, // number
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
     lockAspectRatioAfterRender: false, // boolean
-    showBorderAfterRender: true, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
-    showHandleAfterRender: {}, // object
-    click: undefined, // function(err, res)
-    rightClick: undefined, // function(err, event, res)
-    clickHandle: undefined, // function(err, res, direction)
+    showBorderAfterRender: {
+      n: "crop",
+      e: "resize",
+      s: "flip",
+      w: "none",
+    }, // object
+    showHandleAfterRender: {
+      'n': 'resize',
+      'ne': 'resize',
+      'e': 'resize',
+      'se': 'resize',
+      's': 'resize',
+      'sw': 'resize',
+      'w': 'resize',
+      'nw': 'resize',
+      "nn": "rotate",
+      "nene": null, // hide
+      "ee": "flip",
+      "sese": null, // hide
+      "ss": null, // hide
+      "swsw": null, // hide
+      "ww": null, // hide
+      "nwnw": null, // hide
+    }, // object
+    click: undefined, // function(err, res, mouseEvent)
+    rightClick: undefined, // function(err, res, mouseEvent)
     upload: undefined, // function(err, res)
-    edit: undefined, // function(err, res)
+    edit: undefined, // function(err, res, mouseEvent)
     remove: undefined, // function(err, res)
   }, function(err, res) {
     // Your code
@@ -155,16 +176,7 @@
     "visible": true,
     "clickable": true,
     "editable": true,
-    "indexable": true,
-    "movable": true,
-    "resizable": true,
-    "rotatable": true,
-    "flippable": true,
-    "croppable": true,
-    "filterable": true,
-    "removable": true,
     "drawable": true,
-    "border": true,
     "pivot": true,
     "grid": true,
   }, {
@@ -187,16 +199,7 @@
     "visible": true,
     "clickable": true,
     "editable": true,
-    "indexable": true,
-    "movable": true,
-    "resizable": true,
-    "rotatable": true,
-    "flippable": true,
-    "croppable": true,
-    "filterable": true,
-    "removable": true,
     "drawable": true,
-    "border": true,
     "pivot": true,
     "grid": true,
   }];
@@ -229,16 +232,7 @@
   data-visible = "true"
   data-clickable = "true"
   data-editable = "true"
-  data-indexable = "true"
-  data-movable = "true"
-  data-resizable = "true"
-  data-rotatable = "true"
-  data-flippable = "true"
-  data-croppable = "true"
-  data-filterable = "true"
-  data-removable = "true"
   data-drawable = "true"
-  data-border = "true"
   data-pivot = "true"
   data-grid = "true">
 
@@ -301,6 +295,7 @@
     "cropBottom": 0, // optional
     "cropLeft": 0, // optional
     "cropRight": 0, // optional
+    "drawable": true, // optional
   }], function(err, file, result){
     if (err) {
       console.log(err);
@@ -334,18 +329,15 @@
     "visible": true, // boolean
     "clickable": true, // boolean
     "editable": true, // boolean
-    "indexable": true, // boolean
-    "movable": true, // boolean
-    "resizable": true, // boolean
-    "rotatable": true, // boolean
-    "flippable": true, // boolean
-    "croppable": true, // boolean
-    "filterable": true, // boolean
-    "removable": true, // boolean
     "drawable": true, // boolean
-    "border": true, // boolean
     "pivot": true, // boolean
     "grid": true, // boolean
+    "border": {
+      'n': 'crop',
+      'e': 'crop',
+      's': 'crop',
+      'w': 'crop',
+    }, // object (key: n, s, e, w)
     "handle": {
       'n': 'resize',
       'ne': 'resize',
@@ -355,7 +347,7 @@
       'sw': 'resize',
       'w': 'resize',
       'nw': 'resize',
-    } // object (keys: n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw)
+    } // object (key: n, s, e, w, ne, nw, se, sw, nn, ss, ee, ww, nene, nwnw, sese, swsw)
   }, function(err, res) {
     // Your code
   })
@@ -365,11 +357,13 @@
 ```html
 <script>
   canvaaas.state(id, {
-    "rotate": 45, // number
-    "opacity": 0.5, // number, min: 0, max: 1
-  }, function(err, res) {
-    // Your code
-  })
+    "rotate": 45,
+    "opacity": 0.5,
+  });
+
+  canvaaas.state(id, {
+    "scaleX": -1
+  });
 </script>
 ```
 
@@ -410,13 +404,8 @@
     'w': 'resize',
     'nw': 'resize',
     "nn": "rotate",
-    "nene": null, // hide
     "ee": "flip",
-    "sese": null, // hide
-    "ss": "click", // config.clickHandle callback
-    "swsw": null, // hide
-    "ww": "click", // config.clickHandle callback
-    "nwnw": null, // hide
+    "nene": null, // hide
   }, function(err, res){
     // Your code
   });
@@ -465,17 +454,18 @@
 ```html
 <script>
   canvaaas.handle(id, {
-    n: "click"
+    n: "none"
   });
 
   canvaaas.config({
-    clickHandle: function(err, res, direction) {
+    edit: function(err, res, evt) {
       if (err) { return false; }
-      var id = res.id;
-      switch(direciton) {
-        case "n":
-          canvaaas.rotate(id, 50);
-          break;
+      if (evt && evt.status === "start" && evt.direction === "n") {
+          canvaaas.addClassToHandle(evt.id, evt.direction, "editing");
+      }
+      if (evt && evt.status === "end" && evt.direction === "n") {
+          canvaaas.removeClassToHandle(evt.id, evt.direction, "editing");
+          canvaaas.rotate(evt.id, 50);
       }
     }
   }, function(err, res){
@@ -488,7 +478,7 @@
 
 ```html
 <script>
-canvaaas.export([id, id], function(err, res){
+canvaaas.export([id1, id2], function(err, res){
   // Your code
 });
 </script>
@@ -519,16 +509,7 @@ canvaaas.export([id, id], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
-    "indexable": true,
-    "movable": true,
-    "resizable": true,
-    "rotatable": true,
-    "flippable": true,
-    "croppable": true,
-    "filterable": true,
-    "removable": true,
     "drawable": true,
-    "border": true,
     "pivot": true,
     "grid": true,
   }, {
@@ -551,19 +532,11 @@ canvaaas.export([id, id], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
-    "indexable": true,
-    "movable": true,
-    "resizable": true,
-    "rotatable": true,
-    "flippable": true,
-    "croppable": true,
-    "filterable": true,
     "removable": true,
     "drawable": true,
-    "border": true,
     "pivot": true,
     "grid": true,
-  }]
+  }];
 
   canvaaas.import(exportedStates, function(err, res){
     // Your code
