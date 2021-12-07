@@ -602,46 +602,6 @@
 						canvaaas.editable(selectedId)
 					">Editable</a>
 				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.indexable(selectedId)
-					">Indexable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.movable(selectedId)
-					">Movable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.resizable(selectedId)
-					">Resizable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.rotatable(selectedId)
-					">Rotatable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.flippable(selectedId)
-					">Flippable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.croppable(selectedId)
-					">Croppable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.filterable(selectedId)
-					">Filterable</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.removable(selectedId)
-					">Removable</a>
-				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.drawable(selectedId)
@@ -1477,118 +1437,6 @@
 				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
-				data-method="indexable"
-				data-value=""
-				data-help="Indexable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="movable"
-				data-value=""
-				data-help="Movable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="resizable"
-				data-value=""
-				data-help="Resizable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="rotatable"
-				data-value=""
-				data-help="Rotatable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="flippable"
-				data-value=""
-				data-help="Flippable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="croppable"
-				data-value=""
-				data-help="Croppable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filterable"
-				data-value=""
-				data-help="Filterable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="removable"
-				data-value=""
-				data-help="Removable"
-				>
-				<span class="material-icons">
-					edit_off
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
 				data-method="drawable"
 				data-value=""
 				data-help="Drawable"
@@ -2105,38 +1953,6 @@
 							break;
 						case "editable":
 							canvaaas.editable(id)
-							cancelTool(tool);
-							break;
-						case "indexable":
-							canvaaas.indexable(id)
-							cancelTool(tool);
-							break;
-						case "movable":
-							canvaaas.movable(id)
-							cancelTool(tool);
-							break;
-						case "resizable":
-							canvaaas.resizable(id)
-							cancelTool(tool);
-							break;
-						case "rotatable":
-							canvaaas.rotatable(id)
-							cancelTool(tool);
-							break;
-						case "flippable":
-							canvaaas.flippable(id)
-							cancelTool(tool);
-							break;
-						case "croppable":
-							canvaaas.croppable(id)
-							cancelTool(tool);
-							break;
-						case "filterable":
-							canvaaas.filterable(id)
-							cancelTool(tool);
-							break;
-						case "removable":
-							canvaaas.removable(id)
 							cancelTool(tool);
 							break;
 						case "drawable":
