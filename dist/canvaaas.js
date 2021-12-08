@@ -3262,8 +3262,13 @@
 				var state = getImageState(cadidate);
 				var origin = document.getElementById(_originId + cadidate);
 				var clone = document.getElementById(_cloneId + cadidate);
-				var state;
-				var oldId;
+				var originImg;
+				var cloneImg;
+				var originBorders;
+				var cloneBorders;
+				var originHandles;
+				var cloneHandles;
+				var oldId = state.id;
 				var newId;
 				var newScaleX;
 				var oldScaleX;
@@ -3285,9 +3290,9 @@
 
 				// id change
 				if (isString(newState.id)) {
-					oldId = state.id;
-					newId = toString(newState.id);
+					tmp = toString(newState.id);
 					if (!isExist(tmp)) {
+						newId = tmp;
 						// change undo caches
 						for (var i = 0; i < undoCaches.length; i++) {
 							if (undoCaches[i].id === oldId) {
@@ -3303,8 +3308,34 @@
 							}
 						}
 						// change element id
+						originImg = document.getElementById(_originImgId + oldId);
+						cloneImg = document.getElementById(_cloneImgId + oldId);
+						originHandles = origin.querySelectorAll("div.canvaaas-handle");
+						cloneHandles = origin.querySelectorAll("div.canvaaas-handle");
+						originBorders = clone.querySelectorAll("div.canvaaas-border");
+						cloneBorders = clone.querySelectorAll("div.canvaaas-border");
+
+						for (var i = 0; i < originHandles.length; i++) {
+							var d = getDirection(originHandles[i]);
+							originHandles[i].id = _originHandleId + newId + "-" + d;
+						}
+						for (var i = 0; i < cloneHandles.length; i++) {
+							var d = getDirection(cloneHandles[i]);
+							cloneHandles[i].id = _cloneHandleId + newId + "-" + d;
+						}
+						for (var i = 0; i < originBorders.length; i++) {
+							var d = getDirection(originBorders[i]);
+							originBorders[i].id = _originBorderId + newId + "-" + d;
+						}
+						for (var i = 0; i < cloneBorders.length; i++) {
+							var d = getDirection(cloneBorders[i]);
+							cloneBorders[i].id = _cloneBorderId + newId + "-" + d;
+						}
+						originImg.id = _originImgId + newId;
+						cloneImg.id = _cloneImgId + newId;
 						origin.id = _originId + newId;
 						clone.id = _cloneId + newId;
+
 						// change state
 						state.id = newId;
 					}
@@ -3471,7 +3502,11 @@
 					state.cropBottom = tmp;
 				}
 
-				return state.id;
+				if (newId) {
+					return newId;
+				} else {
+					return oldId;
+				}
 			} catch(err) {
 				console.log(err);
 				return false;
