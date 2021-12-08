@@ -14,7 +14,7 @@
 <div id="target"></div>
 ```
 
-## Set size to js
+## Set size with js
 
 ```html
 <script>
@@ -26,7 +26,7 @@
 </script>
 ```
 
-## Set size to css
+## Set size with css
 
 ```html
 <style>
@@ -244,7 +244,7 @@
 </script>
 ```
 
-## Save image
+## Create image
 
 ```html
 <script>
@@ -265,7 +265,7 @@
 </script>
 ```
 
-## Save image from JSON data
+## Create image with JSON data
 
 ```html
 <script>
