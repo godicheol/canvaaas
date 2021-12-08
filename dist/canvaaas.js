@@ -3094,12 +3094,19 @@
 					// var oldContainerHeight = containerState.height;
 					// var newContainerWidth;
 					// var newContainerHeight;
+
+					var containerInitialized = containerState.width && containerState.height;
+					var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 					var oldCanvasWidth = canvasState.width;
 					var oldCanvasHeight = canvasState.height;
 					var newCanvasWidth;
 					var newCanvasHeight;
 					var scaleRatioX;
 					var scaleRatioY;
+
+					if (!containerInitialized || !canvasInitialized) {
+						return false;
+					}
 
 					setContainer();
 	
@@ -3614,13 +3621,13 @@
 
 				// transform
 				if (rotate !== 0) {
-					transform += "rotate(" + rotate + "deg)";
+					transform += "rotate(" + Math.floor(rotate) + "deg)";
 				}
 				if (rotateX !== 0) {
-					transform += "rotateX(" + rotateX +  "deg)";
+					transform += "rotateX(" + Math.floor(rotateX) +  "deg)";
 				}
 				if (rotateY !== 0) {
-					transform += "rotateY(" + rotateY +  "deg)";
+					transform += "rotateY(" + Math.floor(rotateY) +  "deg)";
 				}
 				if (scaleX === -1) {
 					transform += "scaleX(" + scaleX + ")";
@@ -4697,6 +4704,8 @@
 				// tmp.croppedWidth = croppedWidth;
 				// tmp.croppedHeight = croppedHeight;
 				tmp.rotate = state.rotate;
+				tmp.rotateX = state.rotateX;
+				tmp.rotateY = state.rotateY;
 				tmp.scaleX = state.scaleX;
 				tmp.scaleY = state.scaleY;
 				// tmp.flipX = state.scaleY < 0;
@@ -4789,6 +4798,12 @@
 				if (isNumeric(state.rotate)) {
 					tmp.rotate = toNumber(state.rotate);
 				}
+				if (isNumeric(state.rotateX)) {
+					tmp.rotateX = toNumber(state.rotateX);
+				}
+				if (isNumeric(state.rotateY)) {
+					tmp.rotateY = toNumber(state.rotateY);
+				}
 				if (isNumeric(state.scaleX)) {
 					tmp.scaleX = toNumber(state.scaleX);
 				}
@@ -4861,6 +4876,8 @@
 					"width",
 					"height",
 					"rotate",
+					"rotate-x",
+					"rotate-y",
 					"scale-x",
 					"scale-y",
 					"opacity",
