@@ -3630,10 +3630,10 @@
 				}
 
 				// for image
-				croppedW = width - (cropLeft + cropRight);
-				croppedH = height - (cropTop + cropBottom);
-				croppedT = axisY - (0.5 * croppedH)
-				croppedL = axisX - (0.5 * croppedW) 
+				croppedW = Math.floor(width - (cropLeft + cropRight));
+				croppedH = Math.floor(height - (cropTop + cropBottom));
+				croppedT = Math.floor(axisY - (0.5 * croppedH));
+				croppedL = Math.floor(axisX - (0.5 * croppedW));
 
 				// chk flip
 				if (scaleX < 0) {
@@ -3648,10 +3648,10 @@
 				}
 				
 				// for img
-				imgT = -cropTop;
-				imgL = -cropLeft;
-				imgW = width;
-				imgH = height;
+				imgT = Math.floor(-cropTop);
+				imgL = Math.floor(-cropLeft);
+				imgW = Math.floor(width);
+				imgH = Math.floor(height);
 
 				// set image
 				origin.style.zIndex = index;
@@ -4004,7 +4004,6 @@
 				if (isBoolean(newState.ruler)) {
 					canvasState.ruler = toBoolean(newState.ruler);
 				}
-
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -4048,10 +4047,10 @@
 				);
 	
 				// set styles
-				canvasState.width = fittedSizes[0];
-				canvasState.height = fittedSizes[1];
-				canvasState.left = 0.5 * (containerState.width - fittedSizes[0]);
-				canvasState.top = 0.5 * (containerState.height - fittedSizes[1]);
+				canvasState.width = Math.floor(fittedSizes[0]);
+				canvasState.height = Math.floor(fittedSizes[1]);
+				canvasState.left = Math.floor(0.5 * (containerState.width - fittedSizes[0]));
+				canvasState.top = Math.floor(0.5 * (containerState.height - fittedSizes[1]));
 	
 				canvasElement.style.width = canvasState.width + "px";
 				canvasElement.style.height = canvasState.height + "px";

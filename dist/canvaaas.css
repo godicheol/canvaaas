@@ -134,6 +134,7 @@
 	display: block;
 	position: absolute;
 	transform-origin: center center;
+	-webkit-transform: translateZ(0);
 	/* cursor: move; */
 }
 .canvaaas-image.hidden{
@@ -153,6 +154,7 @@
 }
 .canvaaas-content.hidden{
 	visibility: hidden !important;
+	pointer-events: none;
 }
 
 .canvaaas-content img{
