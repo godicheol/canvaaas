@@ -3104,39 +3104,41 @@
 					var scaleRatioX;
 					var scaleRatioY;
 
-					if (!containerInitialized || !canvasInitialized) {
+					if (!containerInitialized) {
 						return false;
 					}
 
 					setContainer();
 	
-					if (initialized) {
-						setCanvas();
+					if (!canvasInitialized) {
+						return false;
+					}
+					
+					setCanvas();
 
-						// newContainerWidth = containerState.width;
-						// newContainerHeight = containerState.height;
-						newCanvasWidth = canvasState.width;
-						newCanvasHeight = canvasState.height;
+					// newContainerWidth = containerState.width;
+					// newContainerHeight = containerState.height;
+					newCanvasWidth = canvasState.width;
+					newCanvasHeight = canvasState.height;
 
-						scaleRatioX = newCanvasWidth / oldCanvasWidth;
-						scaleRatioY = newCanvasHeight / oldCanvasHeight;
-	
-						for(var i = 0; i < imageStates.length; i++) {
-							var state = imageStates[i];
-							// save image state
-							setImageState(state.id, {
-								x: state.x * scaleRatioX,
-								y: state.y * scaleRatioY,
-								width: state.width * scaleRatioX,
-								height: state.height * scaleRatioY,
-								cropTop: state.cropTop * scaleRatioY,
-								cropBottom: state.cropBottom * scaleRatioY,
-								cropLeft: state.cropLeft * scaleRatioX,
-								cropRight: state.cropRight * scaleRatioX
-							});
+					scaleRatioX = newCanvasWidth / oldCanvasWidth;
+					scaleRatioY = newCanvasHeight / oldCanvasHeight;
 
-							setImage(state.id);
-						}
+					for(var i = 0; i < imageStates.length; i++) {
+						var state = imageStates[i];
+						// save image state
+						setImageState(state.id, {
+							x: state.x * scaleRatioX,
+							y: state.y * scaleRatioY,
+							width: state.width * scaleRatioX,
+							height: state.height * scaleRatioY,
+							cropTop: state.cropTop * scaleRatioY,
+							cropBottom: state.cropBottom * scaleRatioY,
+							cropLeft: state.cropLeft * scaleRatioX,
+							cropRight: state.cropRight * scaleRatioX
+						});
+
+						setImage(state.id);
 					}
 				} catch(err) {
 					console.log(err);
