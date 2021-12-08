@@ -3311,8 +3311,8 @@
 						originImg = document.getElementById(_originImgId + oldId);
 						cloneImg = document.getElementById(_cloneImgId + oldId);
 						originHandles = origin.querySelectorAll("div.canvaaas-handle");
-						cloneHandles = origin.querySelectorAll("div.canvaaas-handle");
-						originBorders = clone.querySelectorAll("div.canvaaas-border");
+						cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
+						originBorders = origin.querySelectorAll("div.canvaaas-border");
 						cloneBorders = clone.querySelectorAll("div.canvaaas-border");
 
 						for (var i = 0; i < originHandles.length; i++) {
