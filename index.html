@@ -520,22 +520,42 @@
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.moveY(selectedId, -10)
-					">Move top 10</a>
+					">Move top +10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.moveY(selectedId, 10)
-					">Move bottom 10</a>
+					">Move bottom +10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.moveX(selectedId, -10)
-					">Move left 10</a>
+					">Move left +10 px</a>
 				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.moveX(selectedId, 10)
-					">Move right 10</a>
+					">Move right +10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.width(selectedId, -10)
+					">Width +10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.width(selectedId, 10)
+					">Width -10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.height(selectedId, -10)
+					">height +10 px</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.height(selectedId, 10)
+					">height -10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
@@ -569,18 +589,53 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.opacity(selectedId, 0.9)
-					">Opacity 0.9</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.opacity(selectedId, 0.5)
-					">Opacity 0.5</a>
+						canvaaas.opacity(selectedId, -0.1)
+					">Opacity -0.1</a>
 				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.opacity(selectedId, 0.1)
-					">Opacity 0.1</a>
+					">Opacity +0.1</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropTop(selectedId, 10)
+					">Crop top +10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropTop(selectedId, -10)
+					">Crop top -10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropBottom(selectedId, 10)
+					">Crop bottom +10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropBottom(selectedId, -10)
+					">Crop bottom -10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropLeft(selectedId, 10)
+					">Crop left +10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropLeft(selectedId, -10)
+					">Crop left -10 px</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropRight(selectedId, 10)
+					">Crop right +10 px</a>
+				</div>
+				<div class="row selection rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.cropRight(selectedId, -10)
+					">Crop right -10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
@@ -602,6 +657,31 @@
 						canvaaas.editable(selectedId)
 					">Editable</a>
 				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.movable(selectedId)
+					">Movable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.resizable(selectedId)
+					">Resizable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.rotatable(selectedId)
+					">Rotatable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.flippable(selectedId)
+					">Flippable</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.croppable(selectedId)
+					">Croppable</a>
+				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.drawable(selectedId)
@@ -610,12 +690,38 @@
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.border(selectedId, {})
-					">Border</a>
+					">Hide border</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.border(selectedId, {
+							n: 'crop',
+							e: 'crop',
+							s: 'crop',
+							w: 'crop',
+						})
+					">Show border</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.handle(selectedId, {})
-					">Handle</a>
+					">Hide handle</a>
+				</div>
+				<div class="row selection">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.handle(selectedId, {
+							'n': 'resize',
+							'ne': 'resize',
+							'e': 'resize',
+							'se': 'resize',
+							's': 'resize',
+							'sw': 'resize',
+							'w': 'resize',
+							'nw': 'resize',
+							'nn': 'rotate',
+							'ee': 'flip',
+						})
+					">Show handle</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
@@ -793,7 +899,13 @@
 									'w': 'resize',
 									'nw': 'resize',
 									'nn': 'rotate',
-									'ee': 'flip',
+									'ss': 'rotate',
+									'ee': 'rotate',
+									'ww': 'rotate',
+									'nene': 'rotate',
+									'nwnw': 'rotate',
+									'sese': 'rotate',
+									'swsw': 'rotate',
 								})
 							})
 						})
@@ -813,8 +925,14 @@
 									'sw': 'crop',
 									'w': 'crop',
 									'nw': 'crop',
-									'nn': 'rotate',
+									'nn': 'flip',
+									'ss': 'flip',
 									'ee': 'flip',
+									'ww': 'flip',
+									'nene': 'flip',
+									'nwnw': 'flip',
+									'sese': 'flip',
+									'swsw': 'flip',
 								})
 							})
 						})
@@ -1659,6 +1777,83 @@
 				</span>
 			</a>
 		</div>
+		<!--  -->
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="width"
+				data-value="10"
+				data-help="Width +10px"
+				>
+				<span class="material-icons">open_in_full</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="height"
+				data-value="10"
+				data-help="Height +10px"
+				>
+				<span class="material-icons">open_in_full</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="cropBottom"
+				data-value="10"
+				data-help="Crop bottom 10px"
+				>
+				<span class="material-icons">expand_less</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="cropTop"
+				data-value="10"
+				data-help="Crop top 10px"
+				>
+				<span class="material-icons">expand_more</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="cropRight"
+				data-value="10"
+				data-help="Crop right 10px"
+				>
+				<span class="material-icons">
+					navigate_before
+				</span>
+			</a>
+		</div>
+		<div class="row">
+			<a
+				class="tool"
+				href="javascript:void(0)"
+				onclick="selectTool(this)"
+				data-method="cropLeft"
+				data-value="10"
+				data-help="Crop left 10px"
+				>
+				<span class="material-icons">
+					navigate_next
+				</span>
+			</a>
+		</div>
 	</div>
 	<style>
 		/* controller */
@@ -1929,6 +2124,24 @@
 							break;
 						case "moveY":
 							canvaaas.moveY(id, v)
+							break;
+						case "width":
+							canvaaas.width(id, v)
+							break;
+						case "height":
+							canvaaas.height(id, v)
+							break;
+						case "cropTop":
+							canvaaas.cropTop(id, v)
+							break;
+						case "cropBottom":
+							canvaaas.cropBottom(id, v)
+							break;
+						case "cropLeft":
+							canvaaas.cropLeft(id, v)
+							break;
+						case "cropRight":
+							canvaaas.cropRight(id, v)
 							break;
 						case "zoom":
 							canvaaas.zoom(id, v)

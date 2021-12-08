@@ -172,13 +172,6 @@
     "scaleX": 1,
     "scaleY": 1,
     "opacity": 1,
-    "lockAspectRatio": false,
-    "visible": true,
-    "clickable": true,
-    "editable": true,
-    "drawable": true,
-    "pivot": true,
-    "grid": true,
   }, {
     "id": "test-2",
     "src": "http://localhost:3000/img/1.png",
@@ -195,13 +188,6 @@
     "scaleX": 1,
     "scaleY": 1,
     "opacity": 1,
-    "lockAspectRatio": false,
-    "visible": true,
-    "clickable": true,
-    "editable": true,
-    "drawable": true,
-    "pivot": true,
-    "grid": true,
   }];
   // Argument type `Array`
   canvaaas.uploadStates(exportedStates, function(err, res){
@@ -232,6 +218,11 @@
   data-visible = "true"
   data-clickable = "true"
   data-editable = "true"
+  data-movable = "true"
+  data-resizable = "true"
+  data-rotatable = "true"
+  data-flippable = "true"
+  data-croppable = "true"
   data-drawable = "true"
   data-pivot = "true"
   data-grid = "true">
@@ -310,6 +301,7 @@
 
 ```html
 <script>
+  // force update
   canvaaas.state(id, {
     "id": "test", // string
     "index": 1, // number
@@ -329,6 +321,11 @@
     "visible": true, // boolean
     "clickable": true, // boolean
     "editable": true, // boolean
+    "movable": true, // boolean
+    "resizable": true, // boolean
+    "rotatable": true, // boolean
+    "flippable": true, // boolean
+    "croppable": true, // boolean
     "drawable": true, // boolean
     "pivot": true, // boolean
     "grid": true, // boolean
@@ -354,16 +351,76 @@
 </script>
 ```
 
+## Move
+
 ```html
 <script>
-  canvaaas.state(id, {
-    "rotate": 45,
-    "opacity": 0.5,
-  });
+  canvaaas.moveX(id, 45);
+  canvaaas.moveY(id, -45);
+</script>
+```
 
-  canvaaas.state(id, {
-    "scaleX": -1
-  });
+## Resiza
+
+```html
+<script>
+  canvaaas.zoom(id, 1.1);
+  canvaaas.width(id, 45);
+  canvaaas.height(id, -45);
+</script>
+```
+
+## Rotate
+
+```html
+<script>
+  canvaaas.rotate(id, 45);
+</script>
+```
+
+## Flip
+
+```html
+<script>
+  canvaaas.flipX(id);
+  canvaaas.flipY(id);
+</script>
+```
+
+## Opacity
+
+```html
+<script>
+  canvaaas.opacity(id, -0.1);
+</script>
+```
+
+## Crop
+
+```html
+<script>
+  canvaaas.cropTop(id, 10);
+  canvaaas.cropBottom(id, 10);
+  canvaaas.cropLeft(id, 10);
+  canvaaas.cropRight(id, 10);
+</script>
+```
+
+## Index
+
+```html
+<script>
+  canvaaas.index(id, 1);
+  canvaaas.index(id, -3);
+</script>
+```
+
+## Fit
+
+```html
+<script>
+  canvaaas.cover(id);
+  canvaaas.contain(id);
 </script>
 ```
 
@@ -509,6 +566,11 @@ canvaaas.export([id1, id2], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
     "drawable": true,
     "pivot": true,
     "grid": true,
@@ -532,7 +594,11 @@ canvaaas.export([id1, id2], function(err, res){
     "visible": true,
     "clickable": true,
     "editable": true,
-    "removable": true,
+    "movable": true,
+    "resizable": true,
+    "rotatable": true,
+    "flippable": true,
+    "croppable": true,
     "drawable": true,
     "pivot": true,
     "grid": true,

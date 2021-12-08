@@ -169,6 +169,11 @@
 				visible: true,
 				clickable: true,
 				editable: true,
+				movable: true,
+				resizable: true,
+				rotatable: true,
+				flippable: true,
+				croppable: true,
 				drawable: true,
 				pivot: config.showPivotAfterRender || false,
 				grid: config.showGridAfterRender || false,
@@ -713,18 +718,18 @@
 					}
 
 					// callback
-					var res = exportImageState(id);
-					var evt = {
-						id: id,
-						status: "continue",
-						type: type,
-						direction: direction,
-						mouseX: mouseX,
-						mouseY: mouseY
-					}
-					if (config.edit) {	
-						config.edit(null, res, evt);
-					}
+					// var res = exportImageState(id);
+					// var evt = {
+					// 	id: id,
+					// 	status: "continue",
+					// 	type: type,
+					// 	direction: direction,
+					// 	mouseX: mouseX,
+					// 	mouseY: mouseY
+					// }
+					// if (config.edit) {	
+					// 	config.edit(null, res, evt);
+					// }
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -847,18 +852,18 @@
 					document.addEventListener("touchend", handlers.endClickBorder, false);
 
 					// callback
-					var res = exportImageState(id);
-					var evt = {
-						id: id,
-						status: "start",
-						type: type,
-						direction: direction,
-						mouseX: mouseX,
-						mouseY: mouseY
-					}
-					if (config.edit) {	
-						config.edit(null, res, evt);
-					}
+					// var res = exportImageState(id);
+					// var evt = {
+					// 	id: id,
+					// 	status: "start",
+					// 	type: type,
+					// 	direction: direction,
+					// 	mouseX: mouseX,
+					// 	mouseY: mouseY
+					// }
+					// if (config.edit) {	
+					// 	config.edit(null, res, evt);
+					// }
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -1206,6 +1211,9 @@
 					if (!state.editable) {
 						return false;
 					}
+					if (!state.movable) {
+						return false;
+					}
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
@@ -1412,6 +1420,9 @@
 						return false;
 					}
 					if (!state.editable) {
+						return false;
+					}
+					if (!state.resizable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -1807,7 +1818,9 @@
 						if (!state.editable) {
 							return false;
 						}
-
+						if (!state.resizable) {
+							return false;
+						}
 						eventState.onZoom = true;
 
 						// save cache
@@ -1954,7 +1967,9 @@
 					if (!state.editable) {
 						return false;
 					}
-
+					if (!state.resizable) {
+						return false;
+					}
 					mouseX = [e.touches[0].clientX, e.touches[1].clientX];
 					mouseY = [e.touches[0].clientY, e.touches[1].clientY];
 					diffX = Math.abs(mouseX[0] - mouseX[1]);
@@ -2171,7 +2186,10 @@
 					}
 					if (!state.editable) {
 						return false;
-					}	
+					}
+					if (!state.rotatable) {
+						return false;
+					}
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
@@ -2389,6 +2407,9 @@
 						return false;
 					}
 					if (!state.editable) {
+						return false;
+					}
+					if (!state.flippable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -2752,6 +2773,9 @@
 						return false;
 					}
 					if (!state.editable) {
+						return false;
+					}
+					if (!state.croppable) {
 						return false;
 					}
 					if (typeof(e.touches) === "undefined") {
@@ -3382,6 +3406,21 @@
 				}
 				if (isBoolean(newState.editable)) {
 					state.editable = toBoolean(newState.editable);
+				}
+				if (isBoolean(newState.movable)) {
+					state.movable = toBoolean(newState.movable);
+				}
+				if (isBoolean(newState.resizable)) {
+					state.resizable = toBoolean(newState.resizable);
+				}
+				if (isBoolean(newState.rotatable)) {
+					state.rotatable = toBoolean(newState.rotatable);
+				}
+				if (isBoolean(newState.flippable)) {
+					state.flippable = toBoolean(newState.flippable);
+				}
+				if (isBoolean(newState.croppable)) {
+					state.croppable = toBoolean(newState.croppable);
 				}
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
@@ -4556,6 +4595,11 @@
 				tmp.visible = state.visible;
 				tmp.clickable = state.clickable;
 				tmp.editable = state.editable;
+				tmp.movable = state.movable;
+				tmp.resizable = state.resizable;
+				tmp.rotatable = state.rotatable;
+				tmp.flippable = state.flippable;
+				tmp.croppable = state.croppable;
 				tmp.drawable = state.drawable;
 				tmp.border = state.border;
 				tmp.handle = state.handle;
@@ -4663,6 +4707,11 @@
 				tmp.visible = state.visible;
 				tmp.clickable = state.clickable;
 				tmp.editable = state.editable;
+				tmp.movable = state.movable;
+				tmp.resizable = state.resizable;
+				tmp.rotatable = state.rotatable;
+				tmp.flippable = state.flippable;
+				tmp.croppable = state.croppable;
 				tmp.drawable = state.drawable;
 				tmp.border = state.border;
 				tmp.handle = state.handle;
@@ -4762,6 +4811,21 @@
 				if (isBoolean(state.editable)) {
 					tmp.editable = toBoolean(state.editable);
 				}
+				if (isBoolean(state.movable)) {
+					tmp.movable = toBoolean(state.movable);
+				}
+				if (isBoolean(state.resizable)) {
+					tmp.resizable = toBoolean(state.resizable);
+				}
+				if (isBoolean(state.rotatable)) {
+					tmp.rotatable = toBoolean(state.rotatable);
+				}
+				if (isBoolean(state.flippable)) {
+					tmp.flippable = toBoolean(state.flippable);
+				}
+				if (isBoolean(state.croppable)) {
+					tmp.croppable = toBoolean(state.croppable);
+				}
 				if (isBoolean(state.drawable)) {
 					tmp.drawable = toBoolean(state.drawable);
 				}
@@ -4777,7 +4841,6 @@
 				if (isObject(state.handle)) {
 					tmp.handle = state.handle;
 				}
-
 				return tmp;
 			} catch(err) {
 				console.log(err);
@@ -4810,6 +4873,11 @@
 					"visible",
 					"clickable",
 					"editable",
+					"movable",
+					"resizable",
+					"rotatable",
+					"flippable",
+					"croppable",
 					"drawable",
 					"pivot",
 					"grid",
@@ -5798,7 +5866,7 @@
 				if (isObject(exportedState)) {
 					additionalState = importImageState(exportedState);
 				}
-				var newId = setImageState(state.id, additionalState, true);
+				var newId = setImageState(state.id, additionalState);
 				setImage(newId);
 
 				if (cb) {
@@ -7229,11 +7297,16 @@
 				visible
 				clickable
 				editable
+				movable
+				resizable
+				rotatable
+				flippable
+				croppable
 				drawable
-				border
 				grid
 				pivot
 				handle
+				border
 			}
 		*/
 		myObject.state = function(id, newState, cb) {
@@ -7265,15 +7338,6 @@
 				}
 				if (cb) {
 					cb("You are not allowed to edit this image by canvas settings");
-				}
-				return false;
-			}
-			if (!state.editable) {
-				if (config.edit) {
-					config.edit("You are not allowed to edit this image by image settings");
-				}
-				if (cb) {
-					cb("You are not allowed to edit this image by image settings");
 				}
 				return false;
 			}
@@ -7339,7 +7403,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -7399,7 +7463,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -7462,7 +7526,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.resizable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7525,7 +7589,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.resizable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7586,7 +7650,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.resizable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -7666,7 +7730,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable || !state.resizable || !state.rotatable || !state.flippable || !state.croppable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by image settings");
 				}
@@ -7751,7 +7815,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.movable || !state.resizable || !state.rotatable || !state.flippable || !state.croppable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7821,7 +7885,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.rotatable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7872,7 +7936,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.flippable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -7923,7 +7987,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.flippable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -8048,7 +8112,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.croppable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -8115,7 +8179,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.croppable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -8182,7 +8246,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.croppable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -8249,7 +8313,7 @@
 				}
 				return false;
 			}
-			if (!state.editable) {
+			if (!state.editable || !state.croppable) {
 				if (config.edit) {
 					config.edit("This image not allowed to edit this image by image settings");
 				}
@@ -8518,6 +8582,216 @@
 			return res;
 		}
 
+		myObject.movable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				movable: state.movable === false
+			});
+			setImage(id);
+
+			// callback
+			var res = exportImageState(id);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
+		myObject.resizable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				resizable: state.resizable === false
+			});
+			setImage(id);
+
+			// callback
+			var res = exportImageState(id);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
+		myObject.rotatable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				rotatable: state.rotatable === false
+			});
+			setImage(id);
+
+			// callback
+			var res = exportImageState(id);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
+		myObject.flippable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				flippable: state.flippable === false
+			});
+			setImage(id);
+
+			// callback
+			var res = exportImageState(id);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
+		myObject.croppable = function(id, cb) {
+			if (!isExist(id)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			// save cache
+			saveUndo(id);
+			// save image state
+			setImageState(id, {
+				croppable: state.croppable === false
+			});
+			setImage(id);
+
+			// callback
+			var res = exportImageState(id);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
 		myObject.drawable = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -8763,6 +9037,11 @@
 				visible: true,
 				clickable: true,
 				editable: true,
+				movable: true,
+				resizable: true,
+				rotatable: true,
+				flippable: true,
+				croppable: true,
 				drawable: true,
 				cropTop: 0,
 				cropBottom: 0,
