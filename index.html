@@ -1124,7 +1124,10 @@
 	<div id="target"></div>
 
 	<div id="myHelp" style=""></div>
-	<div id="myDebug" style=""></div>
+	<div id="myDebug" style="">
+		<span id="myDebug-1"></span>
+		<span id="myDebug-2"></span>
+	</div>
 
 	<!-- controller -->
 	<div class="ctrl">
@@ -1885,7 +1888,7 @@
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
 			showBorderAfterRender: {
-				'n': 'flip',
+				'n': 'crop',
 				'e': 'crop',
 				's': 'crop',
 				'w': 'crop',
@@ -1906,6 +1909,9 @@
 			click: function(err, res, evt) {
 				if (err) {return false;}
 				console.log("click", res, evt);
+				if (evt.status !== "end") {
+					return false;
+				}
 				selectedId = res.id;
 				canvaaas.addClassToImage(selectedId, "selected");
 				chkSelected();
@@ -2100,8 +2106,7 @@
 					canvaaas.removeClassToBorder(evt.id, evt.direction, "editing");
 				}
 
-				if (evt && evt.status === "end") {
-					console.log("edit", res, evt);
+				if (evt && evt.type ==="image" && evt.status === "end") {
 
 					chkCache();
 					if (res.id === selectedId) {
@@ -2156,10 +2161,11 @@
 		});
 
 		// 
-		// focus
+		// test
 		// 
 
 
+		canvaaas.uploadUrls(["img/1.png"]);
 
 		// 
 		// cache

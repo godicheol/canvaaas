@@ -491,7 +491,7 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
 					} else {
@@ -550,17 +550,17 @@
 					if (!target) {
 						return false;
 					}
+					var isRightClick = e.button === 2 || e.ctrlKey;
 					var targetData = getTargetData(target);
 					var id = targetData.id;
 					var type = targetData.type;
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					var rightClick = e.button === 2 || e.ctrlKey;
-					if (type !== image) {
+					if (type !== "image") {
 						return false;
 					}
-					if (!rightClick) {
+					if (!isRightClick) {
 						return false;
 					}
 
@@ -604,6 +604,7 @@
 					var type = targetData.type;
 					var direction = targetData.direction;
 					var state = getImageState(id);
+					var flippedDirection = flipDirection(direction, state.scaleX, state.scaleY);
 					var mouseX;
 					var mouseY;
 
@@ -616,20 +617,20 @@
 					if (!state.clickable) {
 						return false;
 					}
+					if (!state["handle"][flippedDirection]) {
+						return false;
+					}
 
 					e.preventDefault();
 					e.stopPropagation();
-
-					if (!state["handle"][direction]) {
-						return false;
-					}
-					if (state["handle"][direction] === "resize") {
+					
+					if (state["handle"][flippedDirection] === "resize") {
 						return handlers.startResize(e);
-					} else if (state["handle"][direction] === "rotate") {
+					} else if (state["handle"][flippedDirection] === "rotate") {
 						return handlers.startRotate(e);
-					} else if (state["handle"][direction] === "flip") {
+					} else if (state["handle"][flippedDirection] === "flip") {
 						return handlers.startFlip(e);
-					} else if (state["handle"][direction] === "crop") {
+					} else if (state["handle"][flippedDirection] === "crop") {
 						return handlers.startCrop(e);
 					}
 
@@ -741,12 +742,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -793,6 +794,7 @@
 					var type = targetData.type;
 					var direction = targetData.direction;
 					var state = getImageState(id);
+					var flippedDirection = flipDirection(direction, state.scaleX, state.scaleY);
 					var mouseX;
 					var mouseY;
 
@@ -805,18 +807,18 @@
 					if (!state.clickable) {
 						return false;
 					}
+					if (!state["border"][flippedDirection]) {
+						return false;
+					}
 
 					e.preventDefault();
 					e.stopPropagation();
 
-					if (!state["border"][direction]) {
-						return false;
-					}
-					if (state["border"][direction] === "resize") {
+					if (state["border"][flippedDirection] === "resize") {
 						return handlers.startResize(e);
-					} else if (state["border"][direction] === "crop") {
+					} else if (state["border"][flippedDirection] === "crop") {
 						return handlers.startCrop(e);
-					} else if (state["border"][direction] === "flip") {
+					} else if (state["border"][flippedDirection] === "flip") {
 						return handlers.startFlip(e);
 					}
 
@@ -838,11 +840,11 @@
 					eventState.mouseY = mouseY;
 
 					// add events
-					document.addEventListener("mousemove", handlers.onClickHandle, false);
-					document.addEventListener("mouseup", handlers.endClickHandle, false);
+					document.addEventListener("mousemove", handlers.onClickBorder, false);
+					document.addEventListener("mouseup", handlers.endClickBorder, false);
 
-					document.addEventListener("touchmove", handlers.onClickHandle, false);
-					document.addEventListener("touchend", handlers.endClickHandle, false);
+					document.addEventListener("touchmove", handlers.onClickBorder, false);
+					document.addEventListener("touchend", handlers.endClickBorder, false);
 
 					// callback
 					var res = exportImageState(id);
@@ -928,12 +930,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -944,11 +946,11 @@
 					eventState.target = undefined;
 
 					// remove events
-					document.removeEventListener("mousemove", handlers.onClickHandle, false);
-					document.removeEventListener("mouseup", handlers.endClickHandle, false);
+					document.removeEventListener("mousemove", handlers.onClickBorder, false);
+					document.removeEventListener("mouseup", handlers.endClickBorder, false);
 
-					document.removeEventListener("touchmove", handlers.onClickHandle, false);
-					document.removeEventListener("touchend", handlers.endClickHandle, false);
+					document.removeEventListener("touchmove", handlers.onClickBorder, false);
+					document.removeEventListener("touchend", handlers.endClickBorder, false);
 
 					// callback
 					var res = exportImageState(id);
@@ -1121,12 +1123,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -1168,6 +1170,7 @@
 					if (!target) {
 						return false;
 					}
+					var isLeftClick = (e.button === 0 && !e.ctrlKey) || typeof(e.touches) !== "undefined";
 					var targetData = getTargetData(target);
 					var id = targetData.id;
 					var type = targetData.type;
@@ -1175,14 +1178,13 @@
 					var state = getImageState(id);
 					var mouseX;
 					var mouseY;
-					var rightClick = e.button === 2 || e.ctrlKey;
 
 					// fix osx wheeling
 					if (eventState.onZoom) {
 						return false;
 					}
 					// fix right click
-					if (rightClick) {
+					if (!isLeftClick) {
 						return false;
 					}
 					if (!state) {
@@ -1271,6 +1273,8 @@
 					var mouseY;
 					var moveX;
 					var moveY;
+					var axisX = eventState.x;
+					var axisY = eventState.y;
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
@@ -1295,10 +1299,9 @@
 
 					// save image state
 					setImageState(id, {
-						x: eventState.x + moveX,
-						y: eventState.y + moveY,
+						x: axisX + moveX,
+						y: axisY + moveY,
 					});
-
 					setImage(id);
 
 					// callback
@@ -1331,12 +1334,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -1721,12 +1724,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -2080,8 +2083,15 @@
 						status: "continue",
 						type: type,
 						direction: direction,
-						mouseX: mouseX,
-						mouseY: mouseY
+						mouseX: mouseX[1],
+						mouseY: mouseY[1],
+						touches: [{
+							x: mouseX[0],
+							y: mouseY[0],
+						}, {
+							x: mouseX[1],
+							y: mouseY[1]
+						}],
 					}
 					if (config.edit) {	
 						config.edit(null, res, evt);
@@ -2101,8 +2111,16 @@
 					var id = targetData.id;
 					var type = targetData.type;
 					var direction = targetData.direction;
-					var mouseX = [e.touches[0].clientX, e.touches[1].clientX];
-					var mouseY = [e.touches[0].clientY, e.touches[1].clientY];
+					var keepTouchingX;
+					var keepTouchingY;
+					var touchEndX;
+					var touchEndY;
+					if (e.touches.length > 0 && e.changedTouches.length > 0) {
+						keepTouchingX = e.touches[e.touches.length - 1].clientX;
+						keepTouchingY = e.touches[e.touches.length - 1].clientY;
+						touchEndX = e.changedTouches[0].clientX;
+						touchEndY = e.changedTouches[0].clientY;
+					}
 
 					// clear event state
 					eventState.onZoom = false;
@@ -2119,8 +2137,15 @@
 						status: "end",
 						type: type,
 						direction: direction,
-						mouseX: mouseX,
-						mouseY: mouseY
+						mouseX: keepTouchingX,
+						mouseY: keepTouchingY,
+						touches: [{
+							x: keepTouchingX,
+							y: keepTouchingY,
+						}, {
+							x: touchEndX,
+							y: touchEndY
+						}],
 					}
 					if (config.edit) {	
 						config.edit(null, res, evt);
@@ -2308,20 +2333,15 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					// var canvasX;
-					// var canvasY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
-
-					// canvasX = mouseX - (containerState.left + canvasState.left);
-					// canvasY = mouseY - (containerState.top + canvasState.top);
 
 					// clear event state
 					eventState.onRotate = false;
@@ -2667,20 +2687,15 @@
 					var scaleY = state.scaleY;
 					var mouseX;
 					var mouseY;
-					var canvasX;
-					var canvasY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
-
-					// canvasX = mouseX - (containerState.left + canvasState.left);
-					// canvasY = mouseY - (containerState.top + canvasState.top);
 	
 					if (Math.abs(rotateX) > 90) {
 						scaleY = -1 * scaleY;
@@ -3031,12 +3046,12 @@
 					var direction = targetData.direction;
 					var mouseX;
 					var mouseY;
-					if (typeof(e.touches) === "undefined") {
+					if (typeof(e.changedTouches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
-					} else if(e.touches.length === 1) {
-						mouseX = e.touches[0].clientX;
-						mouseY = e.touches[0].clientY;
+					} else if(e.changedTouches.length === 1) {
+						mouseX = e.changedTouches[0].clientX;
+						mouseY = e.changedTouches[0].clientY;
 					} else {
 						return false;
 					}
@@ -3182,12 +3197,8 @@
 				} else {
 					return false;
 				}
-				var state = getImageState(id);
-				if (!state) {
-					return false;
-				}
 				if (arr.length > 3) {
-					direction = flipDirection(arr[3], state.scaleX, state.scaleY);
+					direction = arr[3];
 				}
 				return {
 					id: id,
@@ -3208,15 +3219,15 @@
 					candidate = e.target;
 				} else if (e.touches.length > 0) {
 					for(var i = 0; i < e.touches.length; i++) {
-						if (!candidate) {
-							var tmp = e.touches[i].target;
-							for(var j = 0; j < 2; j++) {
+						var tmp = e.touches[i].target;
+						for(var j = 0; j < 2; j++) {
+							if (!candidate) {
 								if (
 									tmp.classList.contains("canvaaas-image") ||
 									tmp.classList.contains("canvaaas-handle") ||
 									tmp.classList.contains("canvaaas-border")
 								) {
-									candidate = e.touches[i].target;
+									candidate = tmp;
 								} else {
 									if (tmp.parentNode) {
 										tmp = tmp.parentNode;
@@ -3436,7 +3447,6 @@
 						state.cropRight = tmp;
 					}
 				}
-
 				// fix flip Y
 				if (newScaleX !== oldScaleX) {
 					// crop
@@ -3526,18 +3536,21 @@
 				var clonePivots;
 				var originGrids;
 				var cloneGrids;
-				var index = state.index;
+				var index;
 				var croppedW;
 				var croppedH;
 				var croppedT;
 				var croppedL;
 				var imgLeft;
 				var imgTop;
-				var imgWidth = state.width;
-				var imgHeight = state.height;
-				var opacity = state.opacity;
+				var imgWidth;
+				var imgHeight;
+				var opacity;
 				var transform = "";
 
+				if (!state) {
+					return false;
+				}
 				if (!origin) {
 					return false;
 				}
@@ -3561,6 +3574,7 @@
 				croppedT = state.y - (croppedH * 0.5);
 				croppedL = state.x - (croppedW * 0.5);
 
+				index = state.index;
 				if (state.scaleX > 0) {
 					imgLeft = -state.cropLeft;
 				} else {
@@ -3571,6 +3585,9 @@
 				} else {
 					imgTop = -state.cropBottom;
 				}
+				imgWidth = state.width;
+				imgHeight = state.height;
+				opacity = state.opacity;
 
 				if (state.rotate !== 0) {
 					transform += "rotate(" + state.rotate + "deg)";
@@ -6601,6 +6618,19 @@
 			}
 		}
 
+		function debugMobile(v, vv) {
+			try {
+				if (v) {
+					document.getElementById("myDebug-1").innerHTML = v;
+				}
+				if (vv) {
+					document.getElementById("myDebug-2").innerHTML = vv;
+				}
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
 		function debugCanvas(base64) {
 			try {
 				var image = new Image();
