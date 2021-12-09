@@ -31,6 +31,8 @@
 			startIndexAfterRender: 1, // number
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+			maxLoadableWidth: undefined, // number, for downscale
+			maxLoadableHeight: undefined, // number, for downscale
 			lockAspectRatioAfterRender: false, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
@@ -151,6 +153,7 @@
 				index: lastIndex + 1,
 				originalWidth: newImage.width,
 				originalHeight: newImage.height,
+				displayScaleRatio: 1,
 				width: fittedSizes[0],
 				height: fittedSizes[1],
 				x: canvasState.width * 0.5,
@@ -3095,8 +3098,8 @@
 					// var newContainerWidth;
 					// var newContainerHeight;
 
-					var containerInitialized = containerState.width && containerState.height;
-					var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+					var isContainerInitialized = containerState.width && containerState.height;
+					var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 					var oldCanvasWidth = canvasState.width;
 					var oldCanvasHeight = canvasState.height;
 					var newCanvasWidth;
@@ -3104,13 +3107,13 @@
 					var scaleRatioX;
 					var scaleRatioY;
 
-					if (!containerInitialized) {
+					if (!isContainerInitialized) {
 						return false;
 					}
 
 					setContainer();
 	
-					if (!canvasInitialized) {
+					if (!isCanvasInitialized) {
 						return false;
 					}
 					
@@ -3874,6 +3877,22 @@
 						config.imageScaleAfterRender = tmp;
 					}
 				}
+				if (isNumeric(newConfig.maxLoadableWidth)) {
+					tmp = toNumber(newConfig.maxLoadableWidth);
+					if (tmp > 0) {
+						config.maxLoadableWidth = tmp;
+					}
+				} else if (newConfig.maxLoadableWidth === null) {
+					config.maxLoadableWidth = undefined;
+				}
+				if (isNumeric(newConfig.maxLoadableHeight)) {
+					tmp = toNumber(newConfig.maxLoadableHeight);
+					if (tmp > 0) {
+						config.maxLoadableHeight = tmp;
+					}
+				} else if (newConfig.maxLoadableHeight === null) {
+					config.maxLoadableHeight = undefined;
+				}
 				if (isBoolean(newConfig.lockAspectRatioAfterRender)) {
 					config.lockAspectRatioAfterRender = toBoolean(newConfig.lockAspectRatioAfterRender);
 				}
@@ -4022,7 +4041,7 @@
 
 		function setCanvas() {
 			try {
-				var initialized = canvasState.originalWidth && canvasState.originalHeight;
+				var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 				var fittedSizes;
 
 				if (!containerElement) {
@@ -4043,7 +4062,7 @@
 				if (!rulerElement) {
 					return false;
 				}
-				if (!initialized) {
+				if (!isCanvasInitialized) {
 					return false;
 				}
 
@@ -4567,10 +4586,10 @@
 				var state = getImageState(id);
 				var origin = document.getElementById(_originId + id);
 				var clone = document.getElementById(_cloneId + id);
+				var originImg = document.getElementById(_originImgId + id);
+				var cloneImg = document.getElementById(_cloneImgId + id);
 				var scaleRatioX = canvasState.width / canvasState.originalWidth;
 				var scaleRatioY = canvasState.height / canvasState.originalHeight;
-				var croppedWidth = (state.width - (state.cropLeft + state.cropRight)) / scaleRatioX;
-				var croppedHeight = (state.height - (state.cropTop + state.cropBottom)) / scaleRatioY;
 
 				if (!state) {
 					return false;
@@ -4581,6 +4600,12 @@
 				if (!clone) {
 					return false;
 				}
+				if (!originImg) {
+					return false;
+				}
+				if (!cloneImg) {
+					return false;
+				}
 
 				tmp.id = state.id;
 				tmp.src = state.src;
@@ -4589,6 +4614,7 @@
 				tmp.y = state.y / scaleRatioY;
 				tmp.originalWidth = state.originalWidth;
 				tmp.originalHeight = state.originalHeight;
+				tmp.displayScaleRatio = state.displayScaleRatio;
 				tmp.width = state.width / scaleRatioX;
 				tmp.height = state.height / scaleRatioY;
 				tmp.cropTop = state.cropTop / scaleRatioY;
@@ -4596,6 +4622,8 @@
 				tmp.cropLeft = state.cropLeft / scaleRatioX;
 				tmp.cropRight = state.cropRight / scaleRatioX;
 				tmp.rotate = state.rotate;
+				tmp.rotateX = state.rotateX;
+				tmp.rotateY = state.rotateY;
 				tmp.scaleX = state.scaleX;
 				tmp.scaleY = state.scaleY;
 				tmp.opacity = state.opacity;
@@ -4672,6 +4700,8 @@
 				var state = getImageState(id);
 				var origin = document.getElementById(_originId + id);
 				var clone = document.getElementById(_cloneId + id);
+				var originImg = document.getElementById(_originImgId + id);
+				var cloneImg = document.getElementById(_cloneImgId + id);
 				var scaleRatioX = canvasState.width / canvasState.originalWidth;
 				var scaleRatioY = canvasState.height / canvasState.originalHeight;
 				var originalAspectRatio;
@@ -4689,6 +4719,12 @@
 				if (!clone) {
 					return false;
 				}
+				if (!originImg) {
+					return false;
+				}
+				if (!cloneImg) {
+					return false;
+				}
 
 				tmp.id = state.id;
 				tmp.src = state.src;
@@ -4697,6 +4733,7 @@
 				tmp.y = state.y / scaleRatioY;
 				tmp.originalWidth = state.originalWidth;
 				tmp.originalHeight = state.originalHeight;
+				tmp.displayScaleRatio = state.displayScaleRatio;
 				tmp.width = state.width / scaleRatioX;
 				tmp.height = state.height / scaleRatioY;
 				tmp.cropTop = state.cropTop / scaleRatioY;
@@ -5632,11 +5669,19 @@
 		// var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
 		// asynchronous
 		function applyFilter(id, filterFunc, cb) {
+			var img = new Image();
 			var state = getImageState(id);
 			var origin = document.getElementById(_originId + id);
 			var clone = document.getElementById(_cloneId + id);
 			var originImg = document.getElementById(_originImgId + id);
 			var cloneImg = document.getElementById(_cloneImgId + id);
+			var canvas = document.createElement("canvas");
+			var ctx = canvas.getContext("2d");
+			var downscaledSizes;
+			var width;
+			var height;
+			var src;
+			var tmp;
 
 			if (!state) {
 				return false;
@@ -5653,12 +5698,6 @@
 			if (!cloneImg) {
 				return false;
 			}
-
-			var canvas = document.createElement("canvas");
-			var ctx = canvas.getContext("2d");
-			var img = new Image();
-			var tmp;
-
 			if (state.filter) {
 				tmp = originImg.src;
 			}
@@ -5668,10 +5707,20 @@
 				return false;
 			}
 			img.onload = function() {
-				canvas.width = img.width;
-				canvas.height = img.height;
+				if (!isLargeImage(img.width, img.height)) {
+					width = img.width;
+					height = img.height;
+				} else {
+					downscaledSizes = getDownscaledSizes(img.width, img.height);
+					state.displayScaleRatio = downscaledSizes[0] / img.width;
+					width = downscaledSizes[0];
+					height = downscaledSizes[1];
+				}
 
-				ctx.drawImage(img, 0, 0);
+				canvas.width = width;
+				canvas.height = height;
+				
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
 				var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 				var filteredImageData = getFilteredImageData(imageData, filterFunc);
@@ -5681,7 +5730,7 @@
 
 				// error lagged
 				// var base64 = canvas.toDataURL('image/png', 0.92);
-				var base64 = canvas.toDataURL('image/jpeg', 0.72);
+				var base64 = canvas.toDataURL('image/jpeg', 0.92);
 
 				originImg.src = base64;
 
@@ -5700,44 +5749,206 @@
 			img.src = state.src;
 		}
 
-		function removeFilter(id) {
-			var state = getImageState(id);
-			var origin = document.getElementById(_originId + id);
-			var clone = document.getElementById(_cloneId + id);
-			var originImg = document.getElementById(_originImgId + id);
-			var cloneImg = document.getElementById(_cloneImgId + id);
-			if (!state) {
-				return false;
-			}
-			if (!origin) {
-				return false;
-			}
-			if (!clone) {
-				return false;
-			}
-			if (!originImg) {
-				return false;
-			}
-			if (!cloneImg) {
-				return false;
-			}
+		// asynchronous
+		function removeFilter(id, cb) {
+			try {
+				var img = new Image();
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var originImg = document.getElementById(_originImgId + id);
+				var cloneImg = document.getElementById(_cloneImgId + id);
+				if (!state) {
+					return cb("Image not found");
+				}
+				if (!origin) {
+					return cb("Image not found");
+				}
+				if (!clone) {
+					return cb("Image not found");
+				}
+				if (!originImg) {
+					return cb("Image not found");
+				}
+				if (!cloneImg) {
+					return cb("Image not found");
+				}
 
-			var tmp = originImg.src;
+				var tmp = originImg.src;
 
-			originImg.src = state.src;
-			// cloneImg.src = state.src;
+				img.onerror = function(err) {
+					return cb(err);
+				}
+				img.onload = function() {
+					// check large image
+					if (!isLargeImage(img.width, img.height)) {
 
-			state.filter = undefined;
+						originImg.src = img.src;
 
-			// remove cache
-			window.URL.revokeObjectURL(tmp);
-			
-			return true;
+						return cb(null, true);
+					} else {
+						downscaledSizes = getDownscaledSizes(img.width, img.height);
+						scaleRatio = downscaledSizes[0] / img.width;
+						downscaleImage(img, scaleRatio, function(err, src) {
+							if (err) {
+								console.log(err);
+								originImg.src = state.src;
+							} else {
+								state.displayScaleRatio = scaleRatio;
+								originImg.src = src;
+							}
+
+							state.filter = undefined;
+
+							// remove cache
+							window.URL.revokeObjectURL(tmp);
+
+							return cb(null, true);
+						});
+					}
+				}
+				img.src = state.src;
+				return false;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function toLargeImage(state) {
+			try {
+				var state = getImageState(id);
+				var origin = document.getElementById(_originId + id);
+				var clone = document.getElementById(_cloneId + id);
+				var originImg = document.getElementById(_originImgId + id);
+				var cloneImg = document.getElementById(_cloneImgId + id);
+				if (!state) {
+					return false;
+				}
+				if (!origin) {
+					return false;
+				}
+				if (!clone) {
+					return false;
+				}
+				if (!originImg) {
+					return false;
+				}
+				if (!cloneImg) {
+					return false;
+				}
+	
+				var tmp = originImg.src;
+	
+				originImg.src = state.src;
+				// cloneImg.src = state.src;
+	
+				state.filter = undefined;
+	
+				// remove cache
+				window.URL.revokeObjectURL(tmp);
+				
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function isLargeImage(w, h) {
+			try {
+				if (config.maxLoadableWidth) {
+					if (config.maxLoadableWidth < w) {
+						return true;
+					}
+				}
+				if (config.maxLoadableHeight) {
+					if (config.maxLoadableWidth < h) {
+						return true;
+					}
+				}
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		function getDownscaledSizes(w, h) {
+			try {
+				var mxw = config.maxLoadableWidth || w;
+				var mxh = config.maxLoadableHeight || h;
+				var sizes = getFittedSizes({
+					width: w,
+					height: h,
+					maxWidth: mxw,
+					maxHeight: mxh,
+				});
+
+				return sizes;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
+		// asynchronous
+		function downscaleImage(image, scale, cb) {
+			try {
+				var newImage = new Image();
+				var canvas = document.createElement("canvas");
+				var ctx = canvas.getContext("2d");
+				var scaleRatio = scale;
+				var width;
+				var height;
+				var dx;
+				var dy;
+				var dw;
+				var dh;
+				var base64;
+
+				newImage.onerror = function(err) {
+					// console.log(err);
+					cb("Image load failed");
+					return false;
+				}
+				newImage.onload = function(e) {
+					width = newImage.width * scaleRatio;
+					height = newImage.height * scaleRatio;
+
+					canvas.width = Math.floor(width);
+					canvas.height = Math.floor(height);
+
+					dx = 0;
+					dy = 0;
+					dw = width;
+					dh = height;
+
+					ctx.imageSmoothingQuality = "low";
+					ctx.imageSmoothingEnabled = false;
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+					ctx.drawImage(
+						newImage,
+						dx, dy,
+						dw, dh
+					);
+
+					base64 = canvas.toDataURL('image/jpeg', 0.92);
+
+					// window.URL.revokeObjectURL(tmp);
+
+					cb(null, base64);
+					return false;
+				}
+				newImage.src = image.src;
+			} catch(err) {
+				console.log(err);
+				cb("Unknown error occurred");
+				return false;
+			}
 		}
 
 		// asynchronous
 		function renderImage(file, exportedState, cb) {
-			var initialized = canvasState.originalWidth && canvasState.originalHeight;
 			var newImage = new Image();
 			var src;
 
@@ -5791,6 +6002,7 @@
 				return false;
 			}
 			newImage.onload = function(e) {
+				var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 				var state = generateImageState(newImage);
 				var newOriginImage = document.createElement("div");
 				var newCloneImage = document.createElement("div");
@@ -5801,9 +6013,11 @@
 				var newOriginBorders;
 				var newCloneBorders;
 				var additionalState = {};
+				var downscaledSizes;
+				var scaleRatio;
 
 				// initialize canvas
-				if (!initialized) {
+				if (!isCanvasInitialized) {
 					canvasState.originalWidth = newImage.width;
 					canvasState.originalHeight = newImage.height;
 					setCanvas();
@@ -5816,7 +6030,6 @@
 
 				newOriginImg = newOriginImage.querySelector("img");
 				newOriginImg.id = _originImgId + state.id;
-				newOriginImg.src = newImage.src;
 
 				// create clone element
 				newCloneImage.classList.add("canvaaas-image");
@@ -5825,7 +6038,26 @@
 
 				newCloneImg = newCloneImage.querySelector("img");
 				newCloneImg.id = _cloneImgId + state.id;
-				newCloneImg.src = newImage.src;
+
+				// check large image
+				if (!isLargeImage(newImage.width, newImage.height)) {
+					newOriginImg.src = newImage.src;
+					newCloneImg.src = newImage.src;
+				} else {
+					downscaledSizes = getDownscaledSizes(newImage.width, newImage.height);
+					scaleRatio = downscaledSizes[0] / newImage.width;
+					downscaleImage(newImage, scaleRatio, function(err, src) {
+						if (err) {
+							console.log(err);
+							newOriginImg.src = newImage.src;
+							newCloneImg.src = newImage.src;
+						} else {
+							state.displayScaleRatio = scaleRatio;
+							newOriginImg.src = src;
+							newCloneImg.src = src;
+						}
+					});
+				}
 
 				// set events
 				newOriginImage.addEventListener("contextmenu", handlers.rightClick, false);
@@ -6090,8 +6322,8 @@
 				var minSizes = getCoveredSizes(
 					option.width,
 					option.height,
-					option.minWidth,
-					option.minHeight
+					option.minWidth || 0,
+					option.minHeight || 0
 				);
 	
 				return [
@@ -6494,6 +6726,33 @@
 			return n;
 		}
 
+		function toBlob(base64, contentType, sliceSize) {
+			if (!contentType) {
+				contentType = "";
+			}
+			if (!sliceSize) {
+				sliceSize = 512;
+			}
+
+			var byteCharacters = atob(base64);
+			var byteArrays = [];
+
+			for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+				var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+				var byteNumbers = new Array(slice.length);
+				for (let i = 0; i < slice.length; i++) {
+					byteNumbers[i] = slice.charCodeAt(i);
+				}
+
+				var byteArray = new Uint8Array(byteNumbers);
+					byteArrays.push(byteArray);
+				}
+
+				var blob = new Blob(byteArrays, {type: contentType});
+				return blob;
+		}
+		
 		function hasScrollbar() {
 			// The Modern solution
 			if (typeof window.innerWidth === 'number') {
@@ -9177,21 +9436,24 @@
 			// remove
 			if (newFunction === null || newFunction === false) {
 
-				removeFilter(id);
-
-				var tmp = exportImageState(id);
-				if (cb) {
-					cb(null, tmp);
-				}
-				return false;
+				removeFilter(id, function(err, res){
+					if (err) {
+						if (cb) {
+							cb(err);
+						}
+						return false;
+					}
+					var tmp = exportImageState(id);
+					if (cb) {
+						cb(null, tmp);
+					}
+					return false;
+				});				
 			}
 
 			// apply
 			applyFilter(id, newFunction, function(err, res) {
 				if (err) {
-					if (config.edit) {
-						config.edit(err);
-					}
 					if (cb) {
 						cb(err);
 					}
@@ -9432,15 +9694,15 @@
 		}
 		
 		myObject.addClassToCanvas = function(cls, cb) {
-			var containerInitialized = containerState.width && containerState.height;
-			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
-			if (!containerInitialized) {
+			var isContainerInitialized = containerState.width && containerState.height;
+			var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!isContainerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
 				return false;
 			}
-			if (!canvasInitialized) {
+			if (!isCanvasInitialized) {
 				if (cb) {
 					cb("Canvas has been not initialized");
 				}
@@ -9469,15 +9731,15 @@
 		}
 
 		myObject.removeClassToCanvas = function(clsNaclsme, cb) {
-			var containerInitialized = containerState.width && containerState.height;
-			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
-			if (!containerInitialized) {
+			var isContainerInitialized = containerState.width && containerState.height;
+			var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!isContainerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
 				return false;
 			}
-			if (!canvasInitialized) {
+			if (!isCanvasInitialized) {
 				if (cb) {
 					cb("Canvas has been not initialized");
 				}
@@ -9536,6 +9798,7 @@
 		*/
 
 		myObject.config = function(newConfig, cb) {
+			var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 			if (!isObject(newConfig)) {
 				if (cb) {
 					cb("Argument `newConfig` is not Object");
@@ -9549,8 +9812,7 @@
 			// check container
 			setContainer();
 			
-			var initialized = canvasState.originalWidth && canvasState.originalHeight;
-			if (initialized) {
+			if (isCanvasInitialized) {
 				setCanvas();
 			}
 
@@ -9565,9 +9827,9 @@
 		//
 
 		myObject.new = function(option, cb) {
-			var containerInitialized = containerState.width && containerState.height;
+			var isContainerInitialized = containerState.width && containerState.height;
 			var canvaInitialized = canvasState.originalWidth && canvasState.originalHeight;
-			if (!containerInitialized) {
+			if (!isContainerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
@@ -9622,8 +9884,8 @@
 
 		myObject.close = function(cb) {
 			try {
-				var initialized = canvasState.originalWidth && canvasState.originalHeight;
-				if (!initialized) {
+				var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+				if (!isCanvasInitialized) {
 					if (cb) {
 						cb("Canvas has been not initialized");
 					}
@@ -9664,15 +9926,15 @@
 			}
 		*/
 		myObject.canvas = function(option, cb) {
-			var containerInitialized = containerState.width && containerState.height;
-			var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
-			if (!containerInitialized) {
+			var isContainerInitialized = containerState.width && containerState.height;
+			var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+			if (!isContainerInitialized) {
 				if (cb) {
 					cb("Container has been not initialized");
 				}
 				return false;
 			}
-			if (!canvasInitialized) {
+			if (!isCanvasInitialized) {
 				if (cb) {
 					cb("Canvas has been not initialized");
 				}
@@ -9712,14 +9974,14 @@
 		*/
 		myObject.draw = function(option, cb){
 			try {
-				var canvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
+				var isCanvasInitialized = canvasState.originalWidth && canvasState.originalHeight;
 				if (eventState.onDraw) {
 					if (cb) {
 						cb("Already in progress");
 					}
 					return false;
 				}
-				if (!canvasInitialized) {
+				if (!isCanvasInitialized) {
 					if (cb) {
 						cb("Canvas has been not initialized");
 					}

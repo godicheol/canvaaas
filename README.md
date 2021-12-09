@@ -80,6 +80,8 @@
     startIndexAfterRender: 1, // number
     maxIndexAfterRender: 1000, // number
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
+    maxLoadableWidth: undefined, // number, for downscale
+    maxLoadableHeight: undefined, // number, for downscale
     lockAspectRatioAfterRender: false, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
