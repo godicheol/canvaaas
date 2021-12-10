@@ -1,15 +1,10 @@
 /* canvaaas.js */
 /* godicheol@gmail.com */
 
-/* container */
-.canvaaas-container{
+/* /root/screen */
+.canvaaas-screen{
 	display: block;
-	position: relative;
-	line-height: 0;
-	font-size: 0;
-	margin-left: auto;
-	margin-right: auto;
-	z-index: 1;
+	position: absolute;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -21,23 +16,14 @@
 	-moz-user-drag: none;
 	-o-user-drag: none;
 	user-drag: none;
+	overflow: hidden;
 }
-.canvaaas-container.hidden{
-	position: fixed;
-	top: -100%;
-	left: 0;
-	z-index: -1;
-	visibility: hidden;
-}
-
-/* canvas & mirror */
+/* /root/screen/canvas */
+/* /root/screen/mirror */
 .canvaaas-canvas,
 .canvaaas-mirror{
 	display: block;
 	position: absolute;
-	top: 0;
-	left: 0;
-	overflow: hidden;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -52,7 +38,7 @@
 }
 .canvaaas-canvas{
 	overflow: hidden;
-	z-index: 1004;
+	z-index: 1002;
 }
 .canvaaas-mirror{
 	overflow: visible;
@@ -61,14 +47,15 @@
 .canvaaas-mirror.hidden{
 	display: none;
 }
-
-/* background */
+/* /root/screen/canvas/background */
 .canvaaas-background{
 	display: block;
 	position: absolute;
 	top: 0;
+	bottom: 0;
 	left: 0;
-	z-index: 1003;
+	right: 0;
+	z-index: 1002;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -82,14 +69,15 @@
 	user-drag: none;
 	pointer-events: none;
 }
-
-/* checker */
+/* /root/screen/canvas/checker */
 .canvaaas-checker{
 	display: block;
 	position: absolute;
 	top: 0;
+	bottom: 0;
 	left: 0;
-	z-index: 1002;
+	right: 0;
+	z-index: 1001;
 	background: -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
 	background: -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
 	background: linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
@@ -128,8 +116,28 @@
 .canvaaas-checker.hidden{
 	display: none !important;
 }
-
-/* image */
+/* /root/screen/canvas/images */
+/* /root/screen/mirror/images */
+.canvaaas-images{
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1003;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-user-drag: none;
+	-khtml-user-drag: none;
+	-moz-user-drag: none;
+	-o-user-drag: none;
+	user-drag: none;
+}
+/* /root/screen/canvas/images/image */
+/* /root/screen/mirror/images/image */
 .canvaaas-image{
 	display: block;
 	position: absolute;
@@ -142,7 +150,8 @@
 	pointer-events: none;
 }
 
-/* <img> wrapper */
+/* /root/screen/canvas/images/image/content */
+/* /root/screen/mirror/images/image/content */
 .canvaaas-content{
 	display: block;
 	position: absolute;
@@ -156,7 +165,6 @@
 	visibility: hidden !important;
 	pointer-events: none;
 }
-
 .canvaaas-content img{
 	display: block;
 	position: absolute;
@@ -173,8 +181,35 @@
 	user-drag: none;
 	pointer-events: none;
 }
-
-/* pivot */
+/* /root/screen/canvas/images/image/overlay */
+/* /root/screen/mirror/images/image/overlay */
+.canvaaas-overlay{
+	display: block;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-user-drag: none;
+	-khtml-user-drag: none;
+	-moz-user-drag: none;
+	-o-user-drag: none;
+	user-drag: none;
+	pointer-events: none;
+	background-color: rgba(0,0,0);
+	opacity: 0;
+}
+.canvaaas-mirror .canvaaas-overlay{
+	opacity: 0.7;
+}
+/* /root/screen/canvas/images/image/pivot */
+/* /root/screen/mirror/images/image/pivot */
 .canvaaas-pivot{
 	position: absolute;
 	display: block;
@@ -210,7 +245,8 @@
 	transform: translate(-50%, -50%);
 	border-left: 1px solid #000000;
 }
-/* grid */
+/* /root/screen/canvas/images/image/grid */
+/* /root/screen/mirror/images/image/grid */
 .canvaaas-grid{
 	position: absolute;
 	display: block;
@@ -258,39 +294,10 @@
 	height: 100%;
 	border-left: 1px solid #000000;
 }
-
-/* overlay */
-.canvaaas-overlay{
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	-webkit-user-drag: none;
-	-khtml-user-drag: none;
-	-moz-user-drag: none;
-	-o-user-drag: none;
-	user-drag: none;
-	pointer-events: none;
-}
-.canvaaas-canvas .canvaaas-overlay{
-	display: none;
-	background-color: rgba(0,0,0);
-	opacity: 0.3;
-}
-.canvaaas-mirror .canvaaas-overlay{
-	display: block;
-	background-color: rgba(0,0,0);
-	opacity: 0.7;
-}
-
-/* border */
+/* /root/screen/canvas/images/image/border */
+/* /root/screen/mirror/images/image/border */
+/* /root/screen/canvas/images/image/border/border-line */
+/* /root/screen/mirror/images/image/border/border-line */
 .canvaaas-border-line{
 	display: block;
 	position: absolute;
@@ -375,8 +382,10 @@
 	width: 32px;
 	transform: translateX(-50%);
 }
-
-/* handle */
+/* /root/screen/canvas/images/image/handle */
+/* /root/screen/mirror/images/image/handle */
+/* /root/screen/canvas/images/image/handle/handle-square */
+/* /root/screen/mirror/images/image/handle/handle-square */
 .canvaaas-handle-square{
 	display: block;
 	position: absolute;
@@ -492,172 +501,34 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
-/* ruler */
-.canvaaas-rulers{
-	position: absolute;
-	z-index: 1005;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-	-webkit-user-drag: none;
-	-khtml-user-drag: none;
-	-moz-user-drag: none;
-	-o-user-drag: none;
-	user-drag: none;
-	pointer-events: none;
-}
-.canvaaas-graduation-major{
-	/* custom */
-}
-.canvaaas-graduation-minor{
-	/* custom */
-}
-.canvaaas-graduation-value{
-	/* display: none !important; */
-	font-size: 0.6rem;
-	color: #000000;
-}
-.canvaaas-ruler.canvaaas-direction-n{
-	position: absolute;
-	bottom: 100%;
-	left: 0;
-	width: 100%;
-	height: auto;
-}
-.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-major{
-	display: block;
-	position: absolute;
-	bottom: 0;
-	width: 0;
-	height: 9px;
-	/* major */
-	border-left: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-minor{
-	display: block;
-	position: absolute;
-	bottom: 0;
-	width: 0;
-	height: 6px;
-	/* minor */
-	border-left: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-n .canvaaas-graduation-value{
-	position: absolute;
-	left: 0;
-	top: -6px;
-	transform: translateX(-50%);
-}
-
-.canvaaas-ruler.canvaaas-direction-s{
-	position: absolute;
-	top: 100%;
-	left: 0;
-	width: 100%;
-	height: auto;
-}
-.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-major{
-	display: block;
-	position: absolute;
-	top: 0;
-	width: 0;
-	height: 9px;
-	/* major */
-	border-left: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-minor{
-	display: block;
-	position: absolute;
-	top: 0;
-	width: 0;
-	height: 6px;
-	/* minor */
-	border-left: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-s .canvaaas-graduation-value{
-	position: absolute;
-	left: 0;
-	bottom: -9px;
-	transform: translateX(-50%);
-}
-
-.canvaaas-ruler.canvaaas-direction-e{
-	position: absolute;
-	top: 0;
-	left: 100%;
-	width: auto;
-	height: 100%;
-}
-.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-major{
-	display: block;
-	position: absolute;
-	left: 100%;
-	width: 9px;
-	height: 0;
-	/* major */
-	border-top: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-minor{
-	display: block;
-	position: absolute;
-	left: 100%;
-	width: 6px;
-	height: 0;
-	/* minor */
-	border-top: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-e .canvaaas-graduation-value{
-	position: absolute;
-	left: 14px;
-	top: 0;
-	transform: translateY(-50%);
-}
-
-.canvaaas-ruler.canvaaas-direction-w{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: auto;
-	height: 100%;
-}
-.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-major{
-	display: block;
-	position: absolute;
-	right: 0;
-	width: 9px;
-	height: 0;
-	/* major */
-	border-top: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-minor{
-	display: block;
-	position: absolute;
-	right: 0;
-	width: 6px;
-	height: 0;
-	/* minor */
-	border-top: 1px solid #000000;
-}
-.canvaaas-ruler.canvaaas-direction-w .canvaaas-graduation-value{
-	position: absolute;
-	right: 14px;
-	top: 0;
-	transform: translateY(-50%);
-}
-
-/* clickable === false */
-.canvaaas-canvas.unclickable .canvaaas-image,
-.canvaaas-mirror.unclickable .canvaaas-image{
+/* canvas.clickable = false */
+.canvaaas-screen.unclickable .canvaaas-image{
 	pointer-events: none !important;
-	/* cursor: default !important; */
 }
+
+/* image.clickable = false */
 .canvaaas-image.unclickable{
 	pointer-events: none !important;
-	/* cursor: default !important; */
 }
+
+/* click image */
+.canvaaas-mirror .canvaaas-image.editing .canvaaas-overlay{
+	opacity: 0.8;
+}
+.canvaaas-canvas .canvaaas-image.editing .canvaaas-overlay{
+	opacity: 0.3;
+}
+
+/* click handle */
+.canvaaas-handle.editing .canvaaas-handle-square{
+	background-color: #000000;
+}
+
+/* click border */
+.canvaaas-border.editing .canvaaas-border-line{
+	border-width: 3px;
+}
+
 
 /* mobile */
 @media only screen and (max-width: 768px) {
@@ -665,20 +536,3 @@
 }
 
 
-/* custom - canvaaas.addClassToImage(id, "editing") */
-.canvaaas-mirror .canvaaas-image.editing .canvaaas-overlay{
-	opacity: 0.8;
-}
-.canvaaas-canvas .canvaaas-image.editing .canvaaas-overlay{
-	display: block;
-}
-
-/* custom - canvaaas.addClassToHandle(id, direction, "editing") */
-.canvaaas-handle.editing .canvaaas-handle-square{
-	background-color: #000000;
-}
-
-/* custom - canvaaas.addClassToBorder(id, direction, "editing") */
-.canvaaas-border.editing .canvaaas-border-line{
-	border-width: 3px;
-}
