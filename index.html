@@ -80,9 +80,9 @@
 		#target{
 			position: relative; /* required */
 			margin: 0 auto;
-			padding: 0;
+			padding: 24px;
 			box-sizing: border-box; /* for width 100% */
-			width: 80%;
+			width: 100%;
 			height: 500px;
 			z-index: 999;
 			/* background-color: #373737; */
@@ -739,11 +739,6 @@
 						canvaaas.grid(selectedId)
 					">Grids</a>
 				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.reset(selectedId)
-					">Reset</a>
-				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.remove(selectedId)
@@ -772,7 +767,7 @@
 							width: window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().width),
 							height: window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().height)
 						})
-					">Screen</a>
+					">Position</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="

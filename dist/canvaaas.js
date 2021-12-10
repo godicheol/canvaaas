@@ -1031,7 +1031,7 @@
 					eventState.mouseY = mouseY;
 
 					// add class
-					addClassToImage(id, "editing");
+					addClassToImage(id, "canvaaas-editing");
 
 					// add events
 					document.addEventListener("mousemove", handlers.onClick, false);
@@ -1132,7 +1132,7 @@
 					eventState.target = undefined;
 
 					// remove class
-					removeClassToImage(id, "editing");
+					removeClassToImage(id, "canvaaas-editing");
 
 					// remove events
 					document.removeEventListener("mousemove", handlers.onClick, false);
@@ -1226,7 +1226,7 @@
 					saveUndo(id);
 
 					// add class
-					addClassToImage(id, "editing");
+					addClassToImage(id, "canvaaas-editing");
 	
 					// add events
 					document.addEventListener("mousemove", handlers.onMove, false);
@@ -1348,7 +1348,7 @@
 					eventState.target = undefined;
 
 					// remove class
-					removeClassToImage(id, "editing");
+					removeClassToImage(id, "canvaaas-editing");
 
 					// remove events
 					document.removeEventListener("mousemove", handlers.onMove, false);
@@ -1438,9 +1438,9 @@
 					
 					// add class
 					if (type === "handle") {
-						addClassToHandle(id, direction, "editing");
+						addClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						addClassToBorder(id, direction, "editing");
+						addClassToBorder(id, direction, "canvaaas-editing");
 					}
 
 					// add events
@@ -1714,9 +1714,9 @@
 
 					// remove class
 					if (type === "handle") {
-						removeClassToHandle(id, direction, "editing");
+						removeClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						removeClassToBorder(id, direction, "editing");
+						removeClassToBorder(id, direction, "canvaaas-editing");
 					}
 
 					// remove events
@@ -2199,7 +2199,7 @@
 					saveUndo(id);
 
 					// add class
-					addClassToHandle(id, direction, "editing");
+					addClassToHandle(id, direction, "canvaaas-editing");
 
 					// add events
 					document.addEventListener("mousemove", handlers.onRotate, false);
@@ -2327,7 +2327,7 @@
 					eventState.target = undefined;
 
 					// remove class
-					removeClassToHandle(id, direction, "editing");
+					removeClassToHandle(id, direction, "canvaaas-editing");
 
 					// remove events
 					document.removeEventListener("mousemove", handlers.onRotate, false);
@@ -2433,9 +2433,9 @@
 
 					// add class
 					if (type === "handle") {
-						addClassToHandle(id, direction, "editing");
+						addClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						addClassToBorder(id, direction, "editing");
+						addClassToBorder(id, direction, "canvaaas-editing");
 					}
 
 					// add events
@@ -2706,9 +2706,9 @@
 
 					// remove class
 					if (type === "handle") {
-						removeClassToHandle(id, direction, "editing");
+						removeClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						removeClassToBorder(id, direction, "editing");
+						removeClassToBorder(id, direction, "canvaaas-editing");
 					}
 
 					// remove events
@@ -2795,9 +2795,9 @@
 
 					// add class
 					if (type === "handle") {
-						addClassToHandle(id, direction, "editing");
+						addClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						addClassToBorder(id, direction, "editing");
+						addClassToBorder(id, direction, "canvaaas-editing");
 					}
 
 					// add events
@@ -3045,9 +3045,9 @@
 
 					// remove class
 					if (type === "handle") {
-						removeClassToHandle(id, direction, "editing");
+						removeClassToHandle(id, direction, "canvaaas-editing");
 					} else if (type ==="border") {
-						removeClassToBorder(id, direction, "editing");
+						removeClassToBorder(id, direction, "canvaaas-editing");
 					}
 	
 					// remove events
@@ -3654,58 +3654,58 @@
 
 				// set visible
 				if (!state.visible) {
-					if (!origin.classList.contains("hidden")) {
-						origin.classList.add("hidden");
+					if (!origin.classList.contains("canvaaas-hidden")) {
+						origin.classList.add("canvaaas-hidden");
 					}
-					if (!clone.classList.contains("hidden")) {
-						clone.classList.add("hidden");
+					if (!clone.classList.contains("canvaaas-hidden")) {
+						clone.classList.add("canvaaas-hidden");
 					}
 				} else {
-					if (origin.classList.contains("hidden")) {
-						origin.classList.remove("hidden");
+					if (origin.classList.contains("canvaaas-hidden")) {
+						origin.classList.remove("canvaaas-hidden");
 					}
-					if (clone.classList.contains("hidden")) {
-						clone.classList.remove("hidden");
+					if (clone.classList.contains("canvaaas-hidden")) {
+						clone.classList.remove("canvaaas-hidden");
 					}
 				}
 
 				// set clickable
 				if (!state.clickable) {
-					if (!origin.classList.contains("unclickable")) {
-						origin.classList.add("unclickable");
+					if (!origin.classList.contains("canvaaas-unclickable")) {
+						origin.classList.add("canvaaas-unclickable");
 					}
-					if (!clone.classList.contains("unclickable")) {
-						clone.classList.add("unclickable");
+					if (!clone.classList.contains("canvaaas-unclickable")) {
+						clone.classList.add("canvaaas-unclickable");
 					}
 				} else {
-					if (origin.classList.contains("unclickable")) {
-						origin.classList.remove("unclickable");
+					if (origin.classList.contains("canvaaas-unclickable")) {
+						origin.classList.remove("canvaaas-unclickable");
 					}
-					if (clone.classList.contains("unclickable")) {
-						clone.classList.remove("unclickable");
+					if (clone.classList.contains("canvaaas-unclickable")) {
+						clone.classList.remove("canvaaas-unclickable");
 					}
 				}
 
 				// set pivots
 				for (var i = 0; i < originPivots.length; i++) {
 					if (!state.pivot) {
-						if (!originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.add("hidden");
+						if (!originPivots[i].classList.contains("canvaaas-hidden")) {
+							originPivots[i].classList.add("canvaaas-hidden");
 						}
 					} else {
-						if (originPivots[i].classList.contains("hidden")) {
-							originPivots[i].classList.remove("hidden");
+						if (originPivots[i].classList.contains("canvaaas-hidden")) {
+							originPivots[i].classList.remove("canvaaas-hidden");
 						}
 					}
 				}
 				for (var i = 0; i < clonePivots.length; i++) {
 					if (!state.pivot) {
-						if (!clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.add("hidden");
+						if (!clonePivots[i].classList.contains("canvaaas-hidden")) {
+							clonePivots[i].classList.add("canvaaas-hidden");
 						}
 					} else {
-						if (clonePivots[i].classList.contains("hidden")) {
-							clonePivots[i].classList.remove("hidden");
+						if (clonePivots[i].classList.contains("canvaaas-hidden")) {
+							clonePivots[i].classList.remove("canvaaas-hidden");
 						}
 					}
 				}
@@ -3713,23 +3713,23 @@
 				// set grids
 				for (var i = 0; i < originGrids.length; i++) {
 					if (!state.grid) {
-						if (!originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.add("hidden");
+						if (!originGrids[i].classList.contains("canvaaas-hidden")) {
+							originGrids[i].classList.add("canvaaas-hidden");
 						}
 					} else {
-						if (originGrids[i].classList.contains("hidden")) {
-							originGrids[i].classList.remove("hidden");
+						if (originGrids[i].classList.contains("canvaaas-hidden")) {
+							originGrids[i].classList.remove("canvaaas-hidden");
 						}
 					}
 				}
 				for (var i = 0; i < cloneGrids.length; i++) {
 					if (!state.grid) {
-						if (!cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.add("hidden");
+						if (!cloneGrids[i].classList.contains("canvaaas-hidden")) {
+							cloneGrids[i].classList.add("canvaaas-hidden");
 						}
 					} else {
-						if (cloneGrids[i].classList.contains("hidden")) {
-							cloneGrids[i].classList.remove("hidden");
+						if (cloneGrids[i].classList.contains("canvaaas-hidden")) {
+							cloneGrids[i].classList.remove("canvaaas-hidden");
 						}
 					}
 				}
@@ -4032,32 +4032,32 @@
 	
 				// set class names
 				if (!canvasState.checker) {
-					if (!checkerElement.classList.contains("hidden")) {
-						checkerElement.classList.add("hidden");
+					if (!checkerElement.classList.contains("canvaaas-hidden")) {
+						checkerElement.classList.add("canvaaas-hidden");
 					}
 				} else {
-					if (checkerElement.classList.contains("hidden")) {
-						checkerElement.classList.remove("hidden");
+					if (checkerElement.classList.contains("canvaaas-hidden")) {
+						checkerElement.classList.remove("canvaaas-hidden");
 					}
 				}
 
 				if (!canvasState.overflow) {
-					if (!mirrorElement.classList.contains("hidden")) {
-						mirrorElement.classList.add("hidden");
+					if (!mirrorElement.classList.contains("canvaaas-hidden")) {
+						mirrorElement.classList.add("canvaaas-hidden");
 					}
 				} else {
-					if (mirrorElement.classList.contains("hidden")) {
-						mirrorElement.classList.remove("hidden");
+					if (mirrorElement.classList.contains("canvaaas-hidden")) {
+						mirrorElement.classList.remove("canvaaas-hidden");
 					}
 				}
 
 				if (!canvasState.clickable) {
-					if (!screenElement.classList.contains("unclickable")) {
-						screenElement.classList.add("unclickable");
+					if (!screenElement.classList.contains("canvaaas-unclickable")) {
+						screenElement.classList.add("canvaaas-unclickable");
 					}
 				} else {
-					if (screenElement.classList.contains("unclickable")) {
-						screenElement.classList.remove("unclickable");
+					if (screenElement.classList.contains("canvaaas-unclickable")) {
+						screenElement.classList.remove("canvaaas-unclickable");
 					}
 				}
 
@@ -4122,32 +4122,32 @@
 				backgroundElement.style.background = canvasState.background;
 
 				if (!canvasState.checker) {
-					if (!checkerElement.classList.contains("hidden")) {
-						checkerElement.classList.add("hidden");
+					if (!checkerElement.classList.contains("canvaaas-hidden")) {
+						checkerElement.classList.add("canvaaas-hidden");
 					}
 				} else {
-					if (checkerElement.classList.contains("hidden")) {
-						checkerElement.classList.remove("hidden");
+					if (checkerElement.classList.contains("canvaaas-hidden")) {
+						checkerElement.classList.remove("canvaaas-hidden");
 					}
 				}
 
 				if (!canvasState.overflow) {
-					if (!mirrorElement.classList.contains("hidden")) {
-						mirrorElement.classList.add("hidden");
+					if (!mirrorElement.classList.contains("canvaaas-hidden")) {
+						mirrorElement.classList.add("canvaaas-hidden");
 					}
 				} else {
-					if (mirrorElement.classList.contains("hidden")) {
-						mirrorElement.classList.remove("hidden");
+					if (mirrorElement.classList.contains("canvaaas-hidden")) {
+						mirrorElement.classList.remove("canvaaas-hidden");
 					}
 				}
 
 				if (!canvasState.clickable) {
-					if (!screenElement.classList.contains("unclickable")) {
-						screenElement.classList.add("unclickable");
+					if (!screenElement.classList.contains("canvaaas-unclickable")) {
+						screenElement.classList.add("canvaaas-unclickable");
 					}
 				} else {
-					if (screenElement.classList.contains("unclickable")) {
-						screenElement.classList.remove("unclickable");
+					if (screenElement.classList.contains("canvaaas-unclickable")) {
+						screenElement.classList.remove("canvaaas-unclickable");
 					}
 				}
 
@@ -4179,18 +4179,18 @@
 					var cloneHandle = document.getElementById(_cloneHandleId+id+"-"+d);
 					if (originHandle && cloneHandle) {
 						if (state["handle"][f]) {
-							if (originHandle.classList.contains("hidden")) {
-								originHandle.classList.remove("hidden");
+							if (originHandle.classList.contains("canvaaas-hidden")) {
+								originHandle.classList.remove("canvaaas-hidden");
 							}
-							if (cloneHandle.classList.contains("hidden")) {
-								cloneHandle.classList.remove("hidden");
+							if (cloneHandle.classList.contains("canvaaas-hidden")) {
+								cloneHandle.classList.remove("canvaaas-hidden");
 							}
 						} else {
-							if (!originHandle.classList.contains("hidden")) {
-								originHandle.classList.add("hidden");
+							if (!originHandle.classList.contains("canvaaas-hidden")) {
+								originHandle.classList.add("canvaaas-hidden");
 							}
-							if (!cloneHandle.classList.contains("hidden")) {
-								cloneHandle.classList.add("hidden");
+							if (!cloneHandle.classList.contains("canvaaas-hidden")) {
+								cloneHandle.classList.add("canvaaas-hidden");
 							}
 						}
 					}
@@ -4223,18 +4223,18 @@
 					var cloneBorder = document.getElementById(_cloneBorderId+id+"-"+d);
 					if (originBorder && cloneBorder) {
 						if (state["border"][f]) {
-							if (originBorder.classList.contains("hidden")) {
-								originBorder.classList.remove("hidden");
+							if (originBorder.classList.contains("canvaaas-hidden")) {
+								originBorder.classList.remove("canvaaas-hidden");
 							}
-							if (cloneBorder.classList.contains("hidden")) {
-								cloneBorder.classList.remove("hidden");
+							if (cloneBorder.classList.contains("canvaaas-hidden")) {
+								cloneBorder.classList.remove("canvaaas-hidden");
 							}
 						} else {
-							if (!originBorder.classList.contains("hidden")) {
-								originBorder.classList.add("hidden");
+							if (!originBorder.classList.contains("canvaaas-hidden")) {
+								originBorder.classList.add("canvaaas-hidden");
 							}
-							if (!cloneBorder.classList.contains("hidden")) {
-								cloneBorder.classList.add("hidden");
+							if (!cloneBorder.classList.contains("canvaaas-hidden")) {
+								cloneBorder.classList.add("canvaaas-hidden");
 							}
 						}
 					}

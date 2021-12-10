@@ -45,8 +45,8 @@
 	overflow: visible;
 	z-index: 1001;
 }
-.canvaaas-mirror.hidden{
-	display: none;
+.canvaaas-mirror.canvaaas-hidden{
+	display: none !important;
 }
 /* /root/screen/canvas/background */
 .canvaaas-background{
@@ -114,7 +114,7 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-checker.hidden{
+.canvaaas-checker.canvaaas-hidden{
 	display: none !important;
 }
 /* /root/screen/canvas/images */
@@ -144,13 +144,11 @@
 	position: absolute;
 	transform-origin: center center;
 	-webkit-transform: translateZ(0);
-	/* cursor: move; */
 }
-.canvaaas-image.hidden{
+.canvaaas-image.canvaaas-hidden{
 	visibility: hidden !important;
 	pointer-events: none;
 }
-
 /* /root/screen/canvas/images/image/content */
 /* /root/screen/mirror/images/image/content */
 .canvaaas-content{
@@ -161,10 +159,6 @@
 	left: 0;
 	right: 0;
 	overflow: hidden;
-}
-.canvaaas-content.hidden{
-	visibility: hidden !important;
-	pointer-events: none;
 }
 .canvaaas-content img{
 	display: block;
@@ -227,7 +221,7 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-pivot.hidden{
+.canvaaas-pivot.canvaaas-hidden{
 	display: none !important;
 }
 .canvaaas-pivot.canvaaas-direction-x{
@@ -264,7 +258,7 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-grid.hidden{
+.canvaaas-grid.canvaaas-hidden{
 	display: none !important;
 }
 .canvaaas-grid.canvaaas-direction-n{
@@ -350,37 +344,36 @@
 .canvaaas-border{
 	position: absolute;
 	display: block;
-	/* cursor: grab; */
 }
-.canvaaas-border.hidden{
+.canvaaas-border.canvaaas-hidden{
 	display: none !important;
 }
 .canvaaas-border.canvaaas-direction-n{
 	top: 0;
 	left: 0;
 	width: 100%;
-	height: 32px;
+	height: 32px; /* click space */
 	transform: translateY(-50%);
 }
 .canvaaas-border.canvaaas-direction-s{
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	height: 32px;
+	height: 32px; /* click space */
 	transform: translateY(50%);
 }
 .canvaaas-border.canvaaas-direction-e{
 	top: 0;
 	right: 0;
 	height: 100%;
-	width: 32px;
+	width: 32px; /* click space */
 	transform: translateX(50%);
 }
 .canvaaas-border.canvaaas-direction-w{
 	top: 0;
 	left: 0;
 	height: 100%;
-	width: 32px;
+	width: 32px; /* click space */
 	transform: translateX(-50%);
 }
 /* /root/screen/canvas/images/image/handle */
@@ -416,9 +409,8 @@
 	display: block; /* hide */
 	width: 36px; /* click space */
 	height: 36px; /* click space */
-	/* cursor: grab; */
 }
-.canvaaas-handle.hidden{
+.canvaaas-handle.canvaaas-hidden{
 	display: none !important;
 }
 .canvaaas-handle.canvaaas-direction-n{
@@ -503,30 +495,30 @@
 }
 
 /* canvas.clickable = false */
-.canvaaas-screen.unclickable .canvaaas-image{
+.canvaaas-screen.canvaaas-unclickable .canvaaas-image{
 	pointer-events: none !important;
 }
 
 /* image.clickable = false */
-.canvaaas-image.unclickable{
+.canvaaas-image.canvaaas-unclickable{
 	pointer-events: none !important;
 }
 
 /* click image */
-.canvaaas-mirror .canvaaas-image.editing .canvaaas-overlay{
+.canvaaas-mirror .canvaaas-image.canvaaas-editing .canvaaas-overlay{
 	opacity: 0.8;
 }
-.canvaaas-canvas .canvaaas-image.editing .canvaaas-overlay{
+.canvaaas-canvas .canvaaas-image.canvaaas-editing .canvaaas-overlay{
 	opacity: 0.3;
 }
 
 /* click handle */
-.canvaaas-handle.editing .canvaaas-handle-square{
+.canvaaas-handle.canvaaas-editing .canvaaas-handle-square{
 	background-color: #000000;
 }
 
 /* click border */
-.canvaaas-border.editing .canvaaas-border-line{
+.canvaaas-border.canvaaas-editing .canvaaas-border-line{
 	border-width: 3px;
 }
 
