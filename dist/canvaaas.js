@@ -176,6 +176,7 @@
 				cropBottom: 0,
 				cropLeft: 0,
 				cropRight: 0,
+				anchor: 4,
 				lockAspectRatio: config.lockAspectRatioAfterRender || false,
 				visible: true,
 				clickable: true,
@@ -7196,6 +7197,22 @@
 			var obj = {
 				width: n
 			}
+			var add = importImageState(obj).width;
+			var fix = fixCoordinateX(add, state.rotate);
+			var width = state.width;
+			var axisX = state.x;
+			var axisY = state.y;
+			var anchor = state.anchor;
+
+			width += add;
+
+			if (anchor === 0 || anchor === 3 || anchor === 6) {
+				axisX += 0.5 * fix[0];
+				axisY += 0.5 * fix[1];	
+			} else if (anchor === 2 || anchor === 5 || anchor === 6) {
+				axisX -= 0.5 * fix[0];
+				axisY -= 0.5 * fix[1];	
+			}
 
 			if (!canvasState.editable || !canvasState.resizable) {
 				if (config.edit) {
@@ -7220,7 +7237,9 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				width: state.width + importImageState(obj).width,
+				x: axisX,
+				y: axisY,
+				width: width
 			});
 			// callback
 			var res = copyImageState(id);
@@ -7257,6 +7276,22 @@
 			var obj = {
 				height: n
 			}
+			var add = importImageState(obj).height;
+			var fix = fixCoordinateY(add, state.rotate);
+			var height = state.height;
+			var axisX = state.x;
+			var axisY = state.y;
+			var anchor = state.anchor;
+
+			height += add;
+
+			if (anchor === 0 || anchor === 1 || anchor === 2) {
+				axisX += 0.5 * fix[0];
+				axisY += 0.5 * fix[1];
+			} else if (anchor === 6 || anchor === 7 || anchor === 8) {
+				axisX -= 0.5 * fix[0];
+				axisY -= 0.5 * fix[1];	
+			}
 
 			if (!canvasState.editable || !canvasState.resizable) {
 				if (config.edit) {
@@ -7281,7 +7316,9 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				height: state.height + importImageState(obj).height,
+				x: axisX,
+				y: axisY,
+				height: height
 			});
 			// callback
 			var res = copyImageState(id);
@@ -7791,7 +7828,7 @@
 				cropTop: n
 			}
 			var add = importImageState(obj).cropTop;
-			var fixY = fixCoordinateY(add, state.rotate);
+			var fix = fixCoordinateY(add, state.rotate);
 
 			if (!canvasState.editable || !canvasState.croppable) {
 				if (config.edit) {
@@ -7817,8 +7854,8 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				x: state.x + 0.5 * fixY[0],
-				y: state.y + 0.5 * fixY[1],
+				x: state.x + 0.5 * fix[0],
+				y: state.y + 0.5 * fix[1],
 				cropTop: state.cropTop + add,
 			});
 			// callback
@@ -7857,7 +7894,7 @@
 				cropBottom: n
 			}
 			var add = importImageState(obj).cropBottom;
-			var fixY = fixCoordinateY(add, state.rotate);
+			var fix = fixCoordinateY(add, state.rotate);
 
 			if (!canvasState.editable || !canvasState.croppable) {
 				if (config.edit) {
@@ -7882,8 +7919,8 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				x: state.x - 0.5 * fixY[0],
-				y: state.y - 0.5 * fixY[1],
+				x: state.x - 0.5 * fix[0],
+				y: state.y - 0.5 * fix[1],
 				cropBottom: state.cropBottom + add,
 			});
 			// callback
@@ -7922,7 +7959,7 @@
 				cropLeft: n
 			}
 			var add = importImageState(obj).cropLeft;
-			var fixX = fixCoordinateX(add, state.rotate);
+			var fix = fixCoordinateX(add, state.rotate);
 
 			if (!canvasState.editable || !canvasState.croppable) {
 				if (config.edit) {
@@ -7947,8 +7984,8 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				x: state.x + 0.5 * fixX[0],
-				y: state.y + 0.5 * fixX[1],
+				x: state.x + 0.5 * fix[0],
+				y: state.y + 0.5 * fix[1],
 				cropLeft: state.cropLeft + add,
 			});
 			// callback
@@ -7987,7 +8024,7 @@
 				cropRight: n
 			}
 			var add = importImageState(obj).cropRight;
-			var fixX = fixCoordinateX(add, state.rotate);
+			var fix = fixCoordinateX(add, state.rotate);
 
 			if (!canvasState.editable || !canvasState.croppable) {
 				if (config.edit) {
@@ -8012,8 +8049,8 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				x: state.x - 0.5 * fixX[0],
-				y: state.y - 0.5 * fixX[1],
+				x: state.x - 0.5 * fix[0],
+				y: state.y - 0.5 * fix[1],
 				cropRight: state.cropRight + add,
 			});
 			// callback

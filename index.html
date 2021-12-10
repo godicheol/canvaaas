@@ -78,13 +78,23 @@
 
 		/* container */
 		#target{
-			overflow: hidden;
+			position: relative; /* required */
 			margin: 0 auto;
-			padding: 36px;
-			box-sizing: border-box;
-			width: 100%;
+			padding: 0;
+			box-sizing: border-box; /* for width 100% */
+			width: 80%;
 			height: 500px;
+			z-index: 999;
+			/* background-color: #373737; */
 		}
+		#target .canvaaas-screen{
+			background-color: #373737;
+			outline: 1px solid #000;
+		}
+		#target .canvaaas-canvas{
+			/* outline: 1px solid #000; */
+		}
+
 
 		/*  */
 		#myHelp{
@@ -323,15 +333,11 @@
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.new({
-							filename: window.prompt('Filename', 'untitled'),
-							mimetype: window.prompt('Mimetype', 'image/png'),
-							width: window.prompt('Width', '1800'),
-							height: window.prompt('Height', '1800'),
-							quality: window.prompt('Quality (e.g. 0 ~ 1)', '0.92'),
+							originalWidth: window.prompt('Width', '1800'),
+							originalHeight: window.prompt('Height', '1800'),
 							background: window.prompt('Background (e.g. #000000 ~ #FFFFFF)', 'transparent'),
 							checker: window.prompt('Checker (e.g. true, false)', 'true'),
-							overlay: window.prompt('Overlay (e.g. true, false)', 'true'),
-							ruler: window.prompt('Ruler (e.g. true, false)', 'false'),
+							overflow: window.prompt('Overlay (e.g. true, false)', 'true'),
 						})
 					">New</a>
 				</div>
@@ -356,7 +362,7 @@
 							mimetype: 'image/jpeg'
 						}, function(err, res){
 							if (err) {return false;}
-							canvaaas.debug(res);
+							debugCanvas(res);
 						})
 					">Preview</a>
 				</div>
@@ -371,7 +377,7 @@
 							background: '#272727'
 						}, function(err, res){
 							if (err) {return false;}
-							canvaaas.debug(res);
+							debugCanvas(res);
 						})
 					">Thumbnail</a>
 				</div>
@@ -386,7 +392,7 @@
 							}
 						}, function(err, res){
 							if (err) {return false;}
-							canvaaas.debug(res);
+							debugCanvas(res);
 						})
 					">Graycale</a>
 				</div>
@@ -403,7 +409,7 @@
 							}
 						}, function(err, res){
 							if (err) {return false;}
-							canvaaas.debug(res);
+							debugCanvas(res);
 						})
 					">Sepia</a>
 				</div>
@@ -418,7 +424,7 @@
 							background: '#272727'
 						}, function(err, res){
 							if (err) {return false;}
-							canvaaas.debug(res);
+							debugCanvas(res);
 						})
 					">From JSON</a>
 				</div>
@@ -539,22 +545,22 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.width(selectedId, -10)
+						canvaaas.width(selectedId, 10)
 					">Width +10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.width(selectedId, 10)
+						canvaaas.width(selectedId, -10)
 					">Width -10 px</a>
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.height(selectedId, -10)
+						canvaaas.height(selectedId, 10)
 					">height +10 px</a>
 				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.height(selectedId, 10)
+						canvaaas.height(selectedId, -10)
 					">height -10 px</a>
 				</div>
 				<div class="row selection">
@@ -734,24 +740,6 @@
 					">Grids</a>
 				</div>
 				<div class="row selection">
-					<a class="" href="javascript:void(0)" onclick="
-						canvaaas.filter(selectedId, function(r, g, b, a) {
-							var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
-							return [luma, luma, luma, a];
-						})
-					">Filter grayscale</a>
-				</div>
-				<div class="row selection rule">
-					<a class="" href="javascript:void(0)" onclick="
-						canvaaas.filter(selectedId, function(r, g, b, a) {
-							var tr = r - 40;
-							var tg = g - 40;
-							var tb = b - 40;
-							return [tr, tg, tb, a];
-						})
-					">Filter brightness</a>
-				</div>
-				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.reset(selectedId)
 					">Reset</a>
@@ -768,13 +756,48 @@
 				<span>Canvas</span>
 			</div>
 			<div class="list" style="display: none;">
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							originalWidth: window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().originalWidth),
+							originalHeight: window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().originalHeight)
+						})
+					">Resize</a>
+				</div>
 				<div class="row rule">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.canvas({
+							x: window.prompt('x (e.g. 1200)', canvaaas.getCanvas().x),
+							y: window.prompt('y (e.g. 1200)', canvaaas.getCanvas().y),
 							width: window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().width),
 							height: window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().height)
 						})
-					">Resize</a>
+					">Screen</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas(getPart()[0])
+					">1 x 1</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas(getPart()[1])
+					">2 x 2 [1]</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas(getPart()[2])
+					">2 x 2 [2]</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas(getPart()[3])
+					">2 x 2 [3]</a>
+				</div>
+				<div class="row rule">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas(getPart()[4])
+					">2 x 2 [4]</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -785,27 +808,6 @@
 					<a href="javascript:void(0)" onclick="
 						canvaaas.removeClassToCanvas(window.prompt('Class name'))
 					">Remove class name</a>
-				</div>
-				<div class="row">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.canvas({
-							filename: window.prompt('Filename', canvaaas.getCanvas().filename)
-						})
-					">Filename</a>
-				</div>
-				<div class="row">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.canvas({
-							mimetype: window.prompt('Mimetype', canvaaas.getCanvas().mimetype)
-						})
-					">Mimetype</a>
-				</div>
-				<div class="row">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.canvas({
-							quality: window.prompt('Quality (e.g. 0 ~ 1)', canvaaas.getCanvas().quality)
-						})
-					">Quality</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -838,9 +840,44 @@
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
 						canvaaas.canvas({
-							overlay: canvaaas.getCanvas().overlay === false
+							movable: canvaaas.getCanvas().movable === false
 						})
-					">Overlay</a>
+					">Moveable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							resizable: canvaaas.getCanvas().resizable === false
+						})
+					">Resizable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							rotatable: canvaaas.getCanvas().rotatable === false
+						})
+					">Rotatable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							flippable: canvaaas.getCanvas().flippable === false
+						})
+					">Flippable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							croppable: canvaaas.getCanvas().croppable === false
+						})
+					">Croppable</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.canvas({
+							overflow: canvaaas.getCanvas().overflow === false
+						}, console.log)
+					">Overflow</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -848,13 +885,6 @@
 							checker: canvaaas.getCanvas().checker === false
 						})
 					">Checker</a>
-				</div>
-				<div class="row">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.canvas({
-							ruler: canvaaas.getCanvas().ruler === false
-						})
-					">Ruler</a>
 				</div>
 			</div>
 		</div>
@@ -1193,6 +1223,13 @@
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
+						canvaaas.getDevice(function(err, res){
+							console.log('canvaaas.getDevice()', res);
+						})
+					">Get device data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
 						canvaaas.getConfig(function(err, res){
 							console.log('canvaaas.getConfig()', res);
 						})
@@ -1225,13 +1262,6 @@
 							console.log('canvaaas.getRedo()', res);
 						})
 					">Get redo data</a>
-				</div>
-				<div class="row">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.getLimit(function(err, res){
-							console.log('canvaaas.getLimit()', res);
-						})
-					">Get limit data</a>
 				</div>
 			</div>
 		</div>
@@ -1642,104 +1672,6 @@
 				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
-				data-method="filter-grayscale"
-				data-value=""
-				data-help="Filter grayscale"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-sepia"
-				data-value=""
-				data-help="Filter sepia"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-negative"
-				data-value=""
-				data-help="Filter negative"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-brightness"
-				data-value=""
-				data-help="Filter brightness"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-darkness"
-				data-value=""
-				data-help="Filter drakness"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-contrast"
-				data-value=""
-				data-help="Filter contrast"
-				>
-				<span class="material-icons">
-					join_right
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="filter-unset"
-				data-value=""
-				data-help="Filter unset"
-				>
-				<span class="material-icons">
-					switch_access_shortcut
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
 				data-method="drawable-hide"
 				data-value=""
 				data-help="Hide undrawable images"
@@ -1760,20 +1692,6 @@
 				>
 				<span class="material-icons">
 					visibility
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="ruler"
-				data-value=""
-				data-help="Ruler"
-				>
-				<span class="material-icons">
-					straighten
 				</span>
 			</a>
 		</div>
@@ -1943,15 +1861,6 @@
 					}
 					return false;
 					break;
-				case "ruler":
-					canvaaas.canvas({
-						ruler: canvaaas.getCanvas().ruler === false
-					})
-					if (tool) {
-						cancelTool(tool);
-					}
-					return false;
-					break;
 				case "drawable-hide":
 					canvaaas.find({
 						drawable: false,
@@ -2043,7 +1952,7 @@
 		// utils
 		// 
 
-		var viewportSizes = canvaaas.getViewport();
+		var viewportSizes = canvaaas.getDevice();
 		var selectedId;
 
 
@@ -2073,14 +1982,9 @@
 				"image/webp",
 			], // array of allowed mimetypes
 			cacheLevels: 999, // number
-			aspectRatioOfContainer: undefined, // number, width / height
-			maxWidthOfContainer: undefined, // number, px
-			maxHeightOfContainer: undefined, // number, px
 			startIndexAfterRender: 1, // number
 			maxIndexAfterRender: 1000, // number
 			imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-			maxLoadableWidth: undefined, // number
-			maxLoadableHeight: undefined, // number
 			lockAspectRatioAfterRender: false, // boolean
 			showGridAfterRender: true, // boolean
 			showPivotAfterRender: true, // boolean
@@ -2217,65 +2121,6 @@
 							canvaaas.contain(id)
 							cancelTool(tool);
 							break;
-						case "filter-grayscale":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
-								return [luma, luma, luma, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-sepia":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var tr = r *.393 + g *.769 + b *.189;
-								var tg = r *.349 + g *.686 + b *.168;
-								var tb = r *.272 + g *.534 + b *.131;
-								return [tr, tg, tb, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-negative":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var tr = 255 - r;
-								var tg = 255 - g;
-								var tb = 255 - b;
-								return [tr, tg, tb, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-brightness":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var tr = r - 40;
-								var tg = g - 40;
-								var tb = b - 40;
-								return [tr, tg, tb, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-darkness":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var tr = r + 40;
-								var tg = g + 40;
-								var tb = b + 40;
-								return [tr, tg, tb, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-contrast":
-							canvaaas.filter(id, function(r, g, b, a) {
-								var contrast = 10; // %
-								contrast *= 255 / 100;
-								var factor = (255 + contrast) / (255.01 - contrast);
-								var tr = factor * (r - 128) + 128;
-								var tg = factor * (g - 128) + 128;
-								var tb = factor * (b - 128) + 128;
-								return [tr, tg, tb, a];
-							})
-							cancelTool(tool);
-							break;
-						case "filter-unset":
-							canvaaas.filter(id, null)
-							cancelTool(tool);
-							break;
 					}
 				}
 			},
@@ -2286,7 +2131,7 @@
 					var id = evt.id;	
 					var mouseX = evt.mouseX;
 					var mouseY = evt.mouseY;
-					var viewportSizes = canvaaas.getViewport();
+					var viewportSizes = canvaaas.getDevice();
 					var posX;
 					var posY;
 					if (mouseX < 0.5 * viewportSizes.width) {
@@ -2308,18 +2153,18 @@
 			edit: function(err, res, evt) {
 				if (err) {return false;}
 
-				if (evt && evt.type ==="handle" && evt.status === "start") {
-					canvaaas.addClassToHandle(evt.id, evt.direction, "editing");
-				}
-				if (evt && evt.type ==="handle" && evt.status === "end") {
-					canvaaas.removeClassToHandle(evt.id, evt.direction, "editing");
-				}
-				if (evt && evt.type ==="border" && evt.status === "start") {
-					canvaaas.addClassToBorder(evt.id, evt.direction, "editing");
-				}
-				if (evt && evt.type ==="border" && evt.status === "end") {
-					canvaaas.removeClassToBorder(evt.id, evt.direction, "editing");
-				}
+				// if (evt && evt.type ==="handle" && evt.status === "start") {
+				// 	canvaaas.addClassToHandle(evt.id, evt.direction, "editing");
+				// }
+				// if (evt && evt.type ==="handle" && evt.status === "end") {
+				// 	canvaaas.removeClassToHandle(evt.id, evt.direction, "editing");
+				// }
+				// if (evt && evt.type ==="border" && evt.status === "start") {
+				// 	canvaaas.addClassToBorder(evt.id, evt.direction, "editing");
+				// }
+				// if (evt && evt.type ==="border" && evt.status === "end") {
+				// 	canvaaas.removeClassToBorder(evt.id, evt.direction, "editing");
+				// }
 
 				if (evt && evt.type ==="image" && evt.status === "end") {
 
@@ -2359,17 +2204,22 @@
 
 		// #3 create canvas
 		canvaaas.new({
-			filename: "untitled", // string, without extension
-			mimetype: "image/png", // string
-			quality: 0.92, // number, 0 ~ 1
 			background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
-			overlay: true, // boolean
+			overflow: true, // boolean
 			checker: true, // boolean
 			clickable: true, // boolean
 			editable: true, // boolean
-			ruler: false, // boolean
+			movable: true, // boolean
+			resizable: true, // boolean
+			rotatable: true, // boolean
+			flippable: true, // boolean
+			croppable: true, // boolean
+			originalWidth: 1200, // number
+			originalHeight: 1200, // number
+			x: 600,
+			y: 300,
 			width: 1200,
-			height: 1200,
+			height: 600,
 		}, function (err, res) {
 			if (err) {return false;}
 			console.log("canvaaas.new()", res);
@@ -2378,7 +2228,6 @@
 		// 
 		// test
 		// 
-
 
 		canvaaas.uploadUrls(["img/1.png"]);
 
@@ -2650,6 +2499,82 @@
 				isOpened = true;
 			}
 		})();
+
+		function getPart(n) {
+			var width = canvaaas.getCanvas().originalWidth;
+			var height = canvaaas.getCanvas().originalHeight;
+
+			return [
+				{
+					x: width/2,
+					y: height/2,
+					width: width,
+					height: height,
+				}, {
+					x: width * 1 / 4,
+					y: height * 1 / 4,
+					width: width/2,
+					height: height/2,
+				}, {
+					x: width * 3 / 4,
+					y: height * 1 / 4,
+					width: width/2,
+					height: height/2,
+				}, {
+					x: width * 1 / 4,
+					y: height * 3 / 4,
+					width: width/2,
+					height: height/2,
+				}, {
+					x: width * 3 / 4,
+					y: height * 3 / 4,
+					width: width/2,
+					height: height/2,
+				}
+			]
+		}
+
+		function debugCanvas(base64) {
+			try {
+				var image = new Image();
+				image.onerror = function(err) {
+					console.log(err);
+					return false;
+				}
+				image.onload = function() {
+					// if (image.width > image.height) {
+					// 	image.style.width = '100%';
+					// 	image.style.height = 'auto';
+					// } else {
+					// 	image.style.width = 'auto';
+					// 	image.style.height = '100%';
+					// }
+					image.style.width = '300px';
+					image.style.height = 'auto';
+					image.style.display = "block";
+					image.style.position = 'absolute';
+					image.style.top = '50%';
+					image.style.left = '50%';
+					image.style.transform = 'translate(-50%, -50%)';
+					// image.style.objectFit = "contain";
+					// image.style.objectPosition = "50% 50%";
+					image.style.border = "1px solid #FFFFFF";
+	
+					var newTab = window.open(base64);
+					newTab.document.write(image.outerHTML);
+					newTab.document.body.style.backgroundColor = '#000000';
+					newTab.document.body.style.padding = '24px';
+					newTab.document.body.style.height = '100%';
+					newTab.document.body.style.position = 'relative';
+	
+					window.URL.revokeObjectURL(base64);
+				}
+				image.src = base64;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
 	</script>
 </body>
 
