@@ -331,8 +331,6 @@
 </script>
 ```
 
-## Move
-
 ```html
 <script>
   canvaaas.moveX(id, 45);
