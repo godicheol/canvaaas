@@ -7098,9 +7098,9 @@
 			// save cache
 			saveUndo(id);
 			// save image state
-			setImage(id, updates);
+			var resId = setImage(id, updates);
 			// callback
-			var res = copyImageState(newId);
+			var res = copyImageState(resId);
 			if (config.edit) {
 				config.edit(null, res);
 			}
