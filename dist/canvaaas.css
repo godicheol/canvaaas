@@ -16,6 +16,7 @@
 	-moz-user-drag: none;
 	-o-user-drag: none;
 	user-drag: none;
+
 	overflow: hidden;
 }
 /* /root/screen/canvas */
