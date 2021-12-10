@@ -269,12 +269,20 @@
     "cropRight": 0, // optional
     "drawable": true, // optional
   }], function(err, file, result){
-    if (err) {
-      console.log(err);
-      return false;
-    }
-    console.log("canvaaas.drawTo() callback", file, result);
+    // Your code
   });
+</script>
+```
+
+## Find image
+```html
+<script>
+  var option = {
+    drawable: true
+  }
+  canvaaas.find(option, function(err, res){
+    // Your code
+  })
 </script>
 ```
 
