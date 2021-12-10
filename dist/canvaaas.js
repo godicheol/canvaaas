@@ -3535,6 +3535,7 @@
 				var originGrids;
 				var cloneGrids;
 				var transform = "";
+				var webkitTransform = ""; // deprecated
 				var index = state.index;
 				var axisX = state.x;
 				var axisY = state.y;
@@ -3586,18 +3587,23 @@
 				// transform
 				if (rotate !== 0) {
 					transform += "rotate(" + Math.floor(rotate) + "deg)";
+					webkitTransform += "rotate(" + Math.floor(rotate) + "deg)"; // deprecated
 				}
 				if (rotateX !== 0) {
 					transform += "rotateX(" + Math.floor(rotateX) +  "deg)";
+					webkitTransform +="rotateX(" + Math.floor(rotateX) +  "deg)"; // deprecated
 				}
 				if (rotateY !== 0) {
 					transform += "rotateY(" + Math.floor(rotateY) +  "deg)";
+					webkitTransform += "rotateY(" + Math.floor(rotateY) +  "deg)"; // deprecated
 				}
 				if (scaleX === -1) {
 					transform += "scaleX(" + scaleX + ")";
+					webkitTransform += "scaleX(" + scaleX + ")"; // deprecated
 				}
 				if (scaleY === -1) {
 					transform += "scaleY(" + scaleY + ")";
+					webkitTransform += "scaleY(" + scaleY + ")"; // deprecated
 				}
 
 				// for image
@@ -3631,6 +3637,7 @@
 				origin.style.width = croppedW + "px";
 				origin.style.height = croppedH + "px";
 				origin.style.transform = transform;
+				origin.style.webkitTransform = webkitTransform; // deprecated
 
 				clone.style.zIndex = index;
 				clone.style.top = croppedT + "px";
@@ -3638,6 +3645,7 @@
 				clone.style.width = croppedW + "px";
 				clone.style.height = croppedH + "px";
 				clone.style.transform = transform;
+				clone.style.webkitTransform = webkitTransform; // deprecated
 
 				// set img
 				originImg.style.top = imgT + "px";
