@@ -413,6 +413,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "hover",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -476,6 +477,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "hover",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -522,6 +524,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "hover",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -593,6 +596,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "rightClick",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -673,6 +677,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -727,6 +732,7 @@
 					// var res = copyImageState(id);
 					// var evt = {
 					// 	id: id,
+					// 	method: "click",
 					// 	status: "continue",
 					// 	type: type,
 					// 	direction: direction,
@@ -779,6 +785,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -857,6 +864,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -911,6 +919,7 @@
 					// var res = copyImageState(id);
 					// var evt = {
 					// 	id: id,
+					// 	method: "click",
 					// 	status: "continue",
 					// 	type: type,
 					// 	direction: direction,
@@ -963,6 +972,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -1034,6 +1044,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -1134,6 +1145,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "click",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -1227,6 +1239,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "move",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -1293,6 +1306,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "move",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -1347,6 +1361,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "move",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -1439,6 +1454,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -1655,6 +1671,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -1713,6 +1730,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -1803,6 +1821,7 @@
 						res = copyImageState(id);
 						evt = {
 							id: id,
+							method: "resize",
 							status: "start",
 							type: type,
 							direction: direction,
@@ -1846,6 +1865,7 @@
 					res = copyImageState(id);
 					evt = {
 						id: id,
+						method: "resize",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -1865,6 +1885,7 @@
 						res = copyImageState(id);
 						evt = {
 							id: id,
+							method: "resize",
 							status: "end",
 							type: type,
 							direction: direction,
@@ -1960,6 +1981,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -2027,6 +2049,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -2081,6 +2104,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "resize",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -2188,6 +2212,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "rotate",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -2260,6 +2285,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "rotate",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -2314,6 +2340,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "rotate",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -2422,6 +2449,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "flip",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -2615,6 +2643,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "flip",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -2693,6 +2722,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "flip",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -2781,6 +2811,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "crop",
 						status: "start",
 						type: type,
 						direction: direction,
@@ -2971,6 +3002,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "crop",
 						status: "continue",
 						type: type,
 						direction: direction,
@@ -3029,6 +3061,7 @@
 					var res = copyImageState(id);
 					var evt = {
 						id: id,
+						method: "crop",
 						status: "end",
 						type: type,
 						direction: direction,
@@ -3077,7 +3110,6 @@
 					return false;
 				}
 			},
-
 		};
 
 		//
@@ -3435,24 +3467,37 @@
 					state.grid = toBoolean(newState.grid);
 				}
 				if (isObject(newState.border)) {
+					var obj = {};
 					for (var i = 0; i < borderDirectionSet.length; i++) {
 						var k = borderDirectionSet[i];
-						if (isString(newState.border[k])) {
-							state["border"][k] = toString(newState.border[k]);
-						} else {
-							state["border"][k] = undefined;
+						var isStr = isString(newState.border[k]);
+						var isAllowed = false;
+						if (isStr) {
+							tmp = toString(newState.border[k]);
+							isAllowed = allowedBorderEvents.indexOf(tmp) > -1;
+						}
+
+						if (isAllowed) {
+							obj[k] = toString(newState.border[k]);
 						}
 					}
+					state.border = obj;
 				}
 				if (isObject(newState.handle)) {
+					var obj = {};
 					for (var i = 0; i < handleDirectionSet.length; i++) {
 						var k = handleDirectionSet[i];
-						if (isString(newState.handle[k])) {
-							state["handle"][k] = toString(newState.handle[k]);
-						} else {
-							state["handle"][k] = undefined;
+						var isStr = isString(newState.handle[k]);
+						var isAllowed = false;
+						if (isStr) {
+							tmp = toString(newState.handle[k]);
+							isAllowed = allowedHandleEvents.indexOf(tmp) > -1;
+						}
+						if (isAllowed) {
+							obj[k] = toString(newState.handle[k]);
 						}
 					}
+					state.handle = obj;
 				}
 
 				// fix flip Y

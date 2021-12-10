@@ -5,42 +5,14 @@
 ```html
 <style>
   #target{
-    padding: 24px; /* overlay size */
-    margin: 0 auto; /* container align center */
-    overflow: hidden; /* recommend */
+    box-sizing: border-box; /* for width 100% */
+    width: 100%; /* required */
+    height: 500px; /* required */
   }
 </style>
+
 <!-- Main container -->
 <div id="target"></div>
-```
-
-## Set size with js
-
-```html
-<script>
-  canvaaas.config({
-    aspectRatioOfContainer: 1 / 1, // number, width / height
-    maxWidthOfContainer: 500, // number, px
-    maxHeightOfContainer: 500, // number, px
-  })
-</script>
-```
-
-## Set size with css
-
-```html
-<style>
-  #target{
-    box-sizing: border-box; /* recommend */
-    width: 100%;
-    height: 500px;
-  }
-</style>
-<script>
-  canvaaas.config({
-    aspectRatioOfContainer: undefined 
-  })
-</script>
 ```
 
 ## Init
@@ -58,7 +30,7 @@
 ```html
 <script>
   canvaaas.config({
-    allowedMimeTypesForUpload: [
+    allowedMimeTypes: [
       "image/bmp",
       "image/x-ms-bmp",
       "image/jpg",
@@ -72,47 +44,34 @@
       "image/webp",
     ], // array of allowed mimetypes
     cacheLevels: 999, // number
-    aspectRatioOfContainer: undefined, // number, width / height
-    maxWidthOfContainer: undefined, // number, px
-    maxHeightOfContainer: undefined, // number, px
-    minWidthOfContainer: undefined, // number, px
-    minHeightOfContainer: undefined, // number, px
     startIndexAfterRender: 1, // number
     maxIndexAfterRender: 1000, // number
     imageScaleAfterRender: 0.5, // number, 0 ~ 1 scale in canvas
-    maxLoadableWidth: undefined, // number, for downscale
-    maxLoadableHeight: undefined, // number, for downscale
     lockAspectRatioAfterRender: false, // boolean
     showGridAfterRender: true, // boolean
     showPivotAfterRender: true, // boolean
     showBorderAfterRender: {
-      n: "crop",
-      e: "resize",
-      s: "flip",
-      w: "none",
+      "n": "crop",
+      "s": "crop",
+      "e": "crop",
+      "w": "crop",
     }, // object
     showHandleAfterRender: {
-      'n': 'resize',
-      'ne': 'resize',
-      'e': 'resize',
-      'se': 'resize',
-      's': 'resize',
-      'sw': 'resize',
-      'w': 'resize',
-      'nw': 'resize',
+      "n": "resize",
+      "s": "resize",
+      "e": "resize",
+      "w": "resize",
+      "ne": "resize",
+      "nw": "resize",
+      "se": "resize",
+      "sw": "resize",
       "nn": "rotate",
-      "nene": null, // hide
       "ee": "flip",
-      "sese": null, // hide
-      "ss": null, // hide
-      "swsw": null, // hide
-      "ww": null, // hide
-      "nwnw": null, // hide
     }, // object
-    click: undefined, // function(err, res, mouseEvent)
-    rightClick: undefined, // function(err, res, mouseEvent)
+    click: undefined, // function(err, res, event)
+    rightClick: undefined, // function(err, res. event)
     upload: undefined, // function(err, res)
-    edit: undefined, // function(err, res, mouseEvent)
+    edit: undefined, // function(err, res, event)
     remove: undefined, // function(err, res)
   }, function(err, res) {
     // Your code
@@ -125,16 +84,36 @@
 ```html
 <script>
   canvaaas.new({
-    filename: "untitled", // string, without extension
-    mimetype: "image/png", // string
-    quality: 0.92, // number, 0 ~ 1
+    originalWidth: 1200, // number, required
+    originalHeight: 1200, // number, required
     background: "transparent", // string, "transparent" or "#FFFFFF" ~ "#000000"
-    overlay: true, // boolean
+    overflow: true, // boolean
     checker: true, // boolean
-    ruler: false, // boolean
     uploadable: true, // boolean
     clickable: true, // boolean
     editable: true, // boolean
+    movable: true, // boolean
+    resizable: true, // boolean
+    rotatable: true, // boolean
+    flippable: true, // boolean
+    croppable: true, // boolean
+  }, function(err, res){
+    // Your code
+  });
+</script>
+```
+
+## Canvas divide
+
+```html
+<script>
+  canvaaas.canvas({
+    originalWidth: 1200, // number
+    originalHeight: 1200, // number
+    x: 600, // number
+    y: 300, // number
+    width: 1200, // number
+    height: 600 // number
   }, function(err, res){
     // Your code
   });
@@ -303,7 +282,6 @@
 
 ```html
 <script>
-  // force update
   canvaaas.state(id, {
     "id": "test", // string
     "index": 1, // number
@@ -359,151 +337,44 @@
 <script>
   canvaaas.moveX(id, 45);
   canvaaas.moveY(id, -45);
-</script>
-```
-
-## Resiza
-
-```html
-<script>
   canvaaas.zoom(id, 1.1);
   canvaaas.width(id, 45);
   canvaaas.height(id, -45);
-</script>
-```
-
-## Rotate
-
-```html
-<script>
   canvaaas.rotate(id, 45);
-</script>
-```
-
-## Flip
-
-```html
-<script>
   canvaaas.flipX(id);
   canvaaas.flipY(id);
-</script>
-```
-
-## Opacity
-
-```html
-<script>
   canvaaas.opacity(id, -0.1);
-</script>
-```
-
-## Crop
-
-```html
-<script>
   canvaaas.cropTop(id, 10);
   canvaaas.cropBottom(id, 10);
   canvaaas.cropLeft(id, 10);
   canvaaas.cropRight(id, 10);
-</script>
-```
-
-## Index
-
-```html
-<script>
   canvaaas.index(id, 1);
   canvaaas.index(id, -3);
-</script>
-```
-
-## Fit
-
-```html
-<script>
+  canvaaas.clickable(id);
+  canvaaas.editable(id);
+  canvaaas.movable(id);
+  canvaaas.resizable(id);
+  canvaaas.rotatable(id);
+  canvaaas.flippable(id);
+  canvaaas.croppable(id);
+  canvaaas.drawable(id);
   canvaaas.cover(id);
   canvaaas.contain(id);
-</script>
-```
-
-## Add filter
-
-```html
-<script>
-  canvaaas.filter(id, function(red, green, blue, alpha) {
-    var luma = red * 0.2126 + green * 0.7152 + blue * 0.0722;
-    return [luma, luma, luma, alpha]; // return [red, green, blue, alpha];
-  }, function(err, res) {
-    // Your code
-  })
-</script>
-```
-
-## Remove filter
-
-```html
-<script>
-  canvaaas.filter(id, null, function(err, res) {
-    // Your code
-  })
-</script>
-```
-
-## Handle style
-
-```html
-<script>
+  canvaaas.remove(id);
   canvaaas.handle(id, {
     'n': 'resize',
-    'ne': 'resize',
-    'e': 'resize',
-    'se': 'resize',
-    's': 'resize',
-    'sw': 'resize',
-    'w': 'resize',
-    'nw': 'resize',
-    "nn": "rotate",
-    "ee": "flip",
-    "nene": null, // hide
-  }, function(err, res){
-    // Your code
-  });
-</script>
-```
-
-```html
-<script>
-  canvaaas.handle(id, {
-    'n': 'crop',
-    'e': 'crop',
+    'e': 'rotate',
     's': 'crop',
-    'w': 'crop',
-  }, function(err, res){
-    // Your code
+    'w': 'flip',
+    'nw': 'click',
+    'nn': 'resize',
+    'nwnw': 'resize',
   });
-</script>
-```
-
-## Global handle style
-
-```html
-<script>
-  canvaaas.config({
-    showHandleAfterRender: {
-      'n': 'resize',
-      'ne': 'resize',
-      'e': 'resize',
-      'se': 'resize',
-      's': 'resize',
-      'sw': 'resize',
-      'w': 'resize',
-      'nw': 'resize',
-      "nn": "rotate",
-      "ee": "flip",
-      "nene": null, // hide
-    }
-  }, function(err, res){
-    // Your code
+  canvaaas.border(id, {
+    'n': 'resize',
+    'e': 'crop',
+    's': 'click',
+    'w': 'flip',
   });
 </script>
 ```
@@ -513,7 +384,7 @@
 ```html
 <script>
   canvaaas.handle(id, {
-    n: "none"
+    n: "click"
   });
 
   canvaaas.config({
