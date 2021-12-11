@@ -144,14 +144,14 @@
 			for (var i = 0; i < Object.keys(config.showBorderAfterRender).length; i++) {
 				var k = Object.keys(config.showBorderAfterRender)[i];
 				var v = config.showBorderAfterRender[k];
-				if (directionSet.indexOf(k) > -1) {						
+				if (hasArgument(borderDirectionSet, k)) {						
 					tmpBorderState[k] = v;
 				}
 			}
 			for (var i = 0; i < Object.keys(config.showHandleAfterRender).length; i++) {
 				var k = Object.keys(config.showHandleAfterRender)[i];
 				var v = config.showHandleAfterRender[k];
-				if (directionSet.indexOf(k) > -1) {						
+				if (hasArgument(handleDirectionSet, k)) {						
 					tmpHandleState[k] = v;
 				}
 			}
@@ -1515,6 +1515,8 @@
 					var scaleCropBottom = eventState.cropBottom / croppedH;
 					var scaleCropLeft = eventState.cropLeft / croppedW;
 					var scaleCropRight = eventState.cropRight / croppedW;
+					var directionSetY = ["n","nn","s","ss","ne","nene","nw","nwnw","se","sese","sw","swsw"];
+					var directionSetX = ["e","ee","w","ww","ne","nene","nw","nwnw","se","sese","sw","swsw"];
 
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
@@ -1633,11 +1635,11 @@
 					fixX = fixCoordinateX(diffX, rotate);
 					fixY = fixCoordinateY(diffY, rotate);
 
-					if (["n","nn","ne","nene","nw","nwnw","s","ss","se","sese","sw","swsw"].indexOf(flippedDirection) > -1) {
+					if (hasArgument(directionSetY, flippedDirection)) {
 						axisX += 0.5 * fixY[0];
 						axisY += 0.5 * fixY[1];
 					}
-					if (["e","ee","w","ww","ne","nene","nw","nwnw","se","sese","sw","swsw"].indexOf(flippedDirection) > -1) {
+					if (hasArgument(directionSetX, flippedDirection)) {
 						axisX += 0.5 * fixX[0];
 						axisY += 0.5 * fixX[1];
 					}
@@ -2861,7 +2863,9 @@
 					var moveY;
 					var fixX;
 					var fixY;
-	
+					var directionSetY = ["n","nn","s","ss","ne","nene","nw","nwnw","se","sese","sw","swsw"];
+					var directionSetX = ["e","ee","w","ww","ne","nene","nw","nwnw","se","sese","sw","swsw"];
+					
 					if (!eventState.onCrop) {
 						return false;
 					}
@@ -2971,11 +2975,11 @@
 					fixX = fixCoordinateX(diffX, rotate);
 					fixY = fixCoordinateY(diffY, rotate);
 
-					if (["n","nn","ne","nene","nw","nwnw","s","ss","se","sese","sw","swsw"].indexOf(flippedDirection) > -1) {
+					if (hasArgument(directionSetY, flippedDirection)) {
 						axisX += 0.5 * fixY[0];
 						axisY += 0.5 * fixY[1];
 					}
-					if (["e","ee","w","ww","ne","nene","nw","nwnw","se","sese","sw","swsw"].indexOf(flippedDirection) > -1) {
+					if (hasArgument(directionSetX, flippedDirection)) {
 						axisX += 0.5 * fixX[0];
 						axisY += 0.5 * fixX[1];
 					}
@@ -3474,7 +3478,7 @@
 						var isAllowed = false;
 						if (isStr) {
 							tmp = toString(newState.border[k]);
-							isAllowed = allowedBorderEvents.indexOf(tmp) > -1;
+							isAllowed = hasArgument(allowedBorderEvents, tmp);
 						}
 
 						if (isAllowed) {
@@ -3491,7 +3495,7 @@
 						var isAllowed = false;
 						if (isStr) {
 							tmp = toString(newState.handle[k]);
-							isAllowed = allowedHandleEvents.indexOf(tmp) > -1;
+							isAllowed = hasArgument(allowedHandleEvents, tmp);
 						}
 						if (isAllowed) {
 							obj[k] = toString(newState.handle[k]);
@@ -3817,7 +3821,7 @@
 						var k = borderDirectionSet[i];
 						var v = newConfig.showBorderAfterRender[k];
 						var isStr = isString(v);
-						var isAllowed = allowedBorderEvents.indexOf(v) > -1;
+						var isAllowed = hasArgument(allowedBorderEvents, v);
 
 						if (isStr && isAllowed) {
 							obj[k] = toString(v);
@@ -3835,7 +3839,7 @@
 						var k = handleDirectionSet[i];
 						var v = newConfig.showHandleAfterRender[k];
 						var isStr = isString(v);
-						var isAllowed = allowedHandleEvents.indexOf(v) > -1;
+						var isAllowed = hasArgument(allowedHandleEvents, v);
 
 						if (isStr && isAllowed) {
 							obj[k] = toString(v);
@@ -3905,7 +3909,8 @@
 				}
 				if (isString(newState.background)) {
 					var tmp = toString(newState.background);
-					if (["alpha","unset","transparent","none"].indexOf(tmp) > -1) {
+					var candidates = ["alpha","unset","transparent","none"];
+					if (hasArgument(candidates, tmp)) {
 						canvasState.background = "transparent";
 					} else if (isColor(tmp)) {
 						canvasState.background = tmp;
@@ -4991,7 +4996,8 @@
 					}
 					if (isString(option.background)) {
 						tmp = toString(option.background);
-						if (["alpha","unset","transparent","none"].indexOf(tmp) > -1) {
+						var candidates = ["alpha","unset","transparent","none"];
+						if (hasArgument(candidates, tmp)) {
 							background = "transparent";
 						} else if (isColor(tmp)) {
 							background = tmp;
@@ -5573,7 +5579,7 @@
 					// file
 					src = window.URL.createObjectURL(file);
 					// check mimetype
-					if (config.allowedMimeTypes.indexOf(file.type) < 0) {
+					if (!hasArgument(config.allowedMimeTypes, file.type)) {
 						if (cb) {
 							cb("File not allowed");
 						}
@@ -5583,7 +5589,8 @@
 					// url
 					src = file;
 					// check mimetype
-					if (config.allowedMimeTypes.indexOf(getMimetype(file)) < 0) {
+					var typ = getMimetype(file);
+					if (!hasArgument(config.allowedMimeTypes, typ)) {
 						if (cb) {
 							cb("File not allowed");
 						}
@@ -6259,6 +6266,17 @@
 			}
 			return n;
 		}
+
+		function hasArgument(arr, x) {
+			var found = false;
+			for (var i = 0; i < arr.length; i++) {
+				if (arr[i] === x) {
+					found = true;
+					break;
+				}
+			}
+			return found;
+		}
 		
 		function hasScrollbar() {
 			// The Modern solution
@@ -6315,165 +6333,274 @@
 		function getMimetype(str) {
 			try {
 				var ext = str.split('.').pop().toLowerCase();
-				switch(ext) {
-					case "html":
-					case "htm":
-					case "shtml":
-						return "text/html";
-					case "css":
-						return "text/css";
-					case "xml":
-						return "text/xml";
-					case "gif":
-						return "image/gif";
-					case "jpeg":
-					case "jpg":
-						return "image/jpeg";
-					case "js":
-						return "application/x-javascript";
-					case "atom":
-						return "application/atom+xml";
-					case "rss":
-						return "application/rss+xml";
-					case "mml":
-						return "text/mathml";
-					case "txt":
-						return "text/plain";
-					case "jad":
-						return "text/vnd.sun.j2me.app-descriptor";
-					case "wml":
-						return "text/vnd.wap.wml";
-					case "htc":
-						return "text/x-component";
-					case "png":
-						return "image/png";
-					case "tif":
-					case "tiff":
-						return "image/tiff";
-					case "wbmp":
-						return "image/vnd.wap.wbmp";
-					case "ico":
-						return "image/x-icon";
-					case "jng":
-						return "image/x-jng";
-					case "bmp":
-						return "image/x-ms-bmp";
-					case "svg":
-						return "image/svg+xml";
-					case "webp":
-						return "image/webp";
-					case "jar":
-					case "war":
-					case "ear":
-						return "application/java-archive";
-					case "hqx":
-						return "application/mac-binhex40";
-					case "doc":
-						return "application/msword";
-					case "pdf":
-						return "application/pdf";
-					case "ps":
-					case "eps":
-					case "ai":
-						return "application/postscript";
-					case "rtf":
-						return "application/rtf";
-					case "xls":
-						return "vnd.ms-excel";
-					case "ppt":
-						return "application/vnd.ms-powerpoint";
-					case "wmlc":
-						return "application/vnd.wap.wmlc";
-					case "kml":
-						return "application/vnd.google-earth.kml+xml";
-					case "kmz":
-						return "application/vnd.google-earth.kmz";
-					case "7z":
-						return "application/x-7z-compressed";
-					case "cco":
-						return "application/x-cocoa";
-					case "jardiff":
-						return "application/x-java-archive-diff";
-					case "jnlp":
-						return "application/x-java-jnlp-file";
-					case "run":
-						return "application/x-makeself";
-					case "pl":
-					case "pm":
-						return "application/x-perl";
-					case "prc":
-					case "pdb":
-						return "application/x-pilot";
-					case "rar":
-						return "application/x-rar-compressed";
-					case "rpm":
-						return "application/x-redhat-package-manager";
-					case "sea":
-						return "application/x-sea";
-					case "swf":
-						return "application/x-shockwave-flash";
-					case "sit":
-						return "application/x-stuffit";
-					case "tcl":
-					case "tk":
-						return "application/x-tcl";
-					case "der":
-					case "pem":
-					case "crt":
-						return "application/x-x509-ca-cert";
-					case "xpi":
-						return "application/x-xpinstall";
-					case "xhtml":
-						return "application/xhtml+xml";
-					case "zip":
-						return "application/zip";
-					case "bin":
-					case "exe":
-					case "dll":
-					case "deb":
-					case "dmg":
-					case "eot":
-					case "iso":
-					case "img":
-					case "msi":
-					case "msp":
-					case "msm":
-						return "application/octet-stream";
-					case "mid":
-					case "midi":
-					case "kar":
-						return "audio/midi";
-					case "audio/mpeg":
-						return "audio/mpeg";
-					case "ogg":
-						return "audio/ogg";
-					case "ra":
-						return "audio/x-realaudio";
-					case "3gpp":
-					case "3gp":
-						return "video/3gpp";
-					case "mpeg":
-					case "mpg":
-						return "video/mpeg";
-					case "mov":
-						return "video/quicktime";
-					case "flv":
-						return "video/x-flv";
-					case "mng":
-						return "video/x-mng";
-					case "asx":
-					case "asf":
-						return "video/x-ms-asf";
-					case "wmv":
-						return "video/x-ms-wmv";
-					case "avi":
-						return "video/x-msvideo";
-					case "m4v":
-					case "mp4":
-						return "video/mp4";
-					default:
-						return false;
+				if (ext === "html" || ext === "htm" || ext === "shtml") {
+					return "text/html";
 				}
+				if (ext === "css") {
+					return "text/css";
+				}
+				if (ext === "xml") {
+					return "text/xml";
+				}
+				if (ext === "gif") {
+					return "image/gif";
+				}
+				if (ext === "jpeg" || ext === "jpg") {
+					return "image/jpeg";
+				}
+				if (ext === "js") {
+					return "application/x-javascript";
+				}
+				if (ext === "atom") {
+					return "application/atom+xml";
+				}
+				if (ext === "rss") {
+					return "application/rss+xml";
+				}
+				if (ext === "mml") {
+					return "text/mathml";
+				}
+				if (ext === "txt") {
+					return "text/plain";
+				}
+				if (ext === "jad") {
+					return "text/vnd.sun.j2me.app-descriptor";
+				}
+				if (ext === "wml") {
+					return "text/vnd.wap.wml";
+				}
+				if (ext === "htc") {
+					return "text/x-component";
+				}
+				if (ext === "png") {
+					return "image/png";
+				}
+				if (ext === "tif") {
+					return "image/tiff";
+				}
+				if (ext === "tiff") {
+					return "image/tiff";
+				}
+				if (ext === "wbmp") {
+					return "image/vnd.wap.wbmp";
+				}
+				if (ext === "ico") {
+					return "image/x-icon";
+				}
+				if (ext === "jng") {
+					return "image/x-jng";
+				}
+				if (ext === "bmp") {
+					return "image/x-ms-bmp";
+				}
+				if (ext === "svg") {
+					return "image/svg+xml";
+				}
+				if (ext === "webp") {
+					return "image/webp";
+				}
+				if (ext === "jar") {
+					return "application/java-archive";
+				}
+				if (ext === "war") {
+					return "application/java-archive";
+				}
+				if (ext === "ear") {
+					return "application/java-archive";
+				}
+				if (ext === "hqx") {
+					return "application/mac-binhex40";
+				}
+				if (ext === "doc") {
+					return "application/msword";
+				}
+				if (ext === "pdf") {
+					return "application/pdf";
+				}
+				if (ext === "ps") {
+					return "application/postscript";
+				}
+				if (ext === "eps") {
+					return "application/postscript";
+				}
+				if (ext === "ai") {
+					return "application/postscript";
+				}
+				if (ext === "rtf") {
+					return "application/rtf";
+				}
+				if (ext === "xls") {
+					return "vnd.ms-excel";
+				}
+				if (ext === "ppt") {
+					return "application/vnd.ms-powerpoint";
+				}
+				if (ext === "wmlc") {
+					return "application/vnd.wap.wmlc";
+				}
+				if (ext === "kml") {
+					return "application/vnd.google-earth.kml+xml";
+				}
+				if (ext === "kmz") {
+					return "application/vnd.google-earth.kmz";
+				}
+				if (ext === "7z") {
+					return "application/x-7z-compressed";
+				}
+				if (ext === "cco") {
+					return "application/x-cocoa";
+				}
+				if (ext === "jardiff") {
+					return "application/x-java-archive-diff";
+				}
+				if (ext === "jnlp") {
+					return "application/x-java-jnlp-file";
+				}
+				if (ext === "run") {
+					return "application/x-makeself";
+				}
+				if (ext === "pl") {
+					return "application/x-perl";
+				}
+				if (ext === "pm") {
+					return "application/x-perl";
+				}
+				if (ext === "prc") {
+					return "application/x-pilot";
+				}
+				if (ext === "pdb") {
+					return "application/x-pilot";
+				}
+				if (ext === "rar") {
+					return "application/x-rar-compressed";
+				}
+				if (ext === "rpm") {
+					return "application/x-redhat-package-manager";
+				}
+				if (ext === "sea") {
+					return "application/x-sea";
+				}
+				if (ext === "swf") {
+					return "application/x-shockwave-flash";
+				}
+				if (ext === "sit") {
+					return "application/x-stuffit";
+				}
+				if (ext === "tcl") {
+					return "application/x-tcl";
+				}
+				if (ext === "tk") {
+					return "application/x-tcl";
+				}
+				if (ext === "der") {
+					return "application/x-x509-ca-cert";
+				}
+				if (ext === "pem") {
+					return "application/x-x509-ca-cert";
+				}
+				if (ext === "crt") {
+					return "application/x-x509-ca-cert";
+				}
+				if (ext === "xpi") {
+					return "application/x-xpinstall";
+				}
+				if (ext === "xhtml") {
+					return "application/xhtml+xml";
+				}
+				if (ext === "zip") {
+					return "application/zip";
+				}
+				if (ext === "bin") {
+					return "application/octet-stream";
+				}
+				if (ext === "exe") {
+					return "application/octet-stream";
+				}
+				if (ext === "dll") {
+					return "application/octet-stream";
+				}
+				if (ext === "deb") {
+					return "application/octet-stream";
+				}
+				if (ext === "dmg") {
+					return "application/octet-stream";
+				}
+				if (ext === "eot") {
+					return "application/octet-stream";
+				}
+				if (ext === "iso") {
+					return "application/octet-stream";
+				}
+				if (ext === "img") {
+					return "application/octet-stream";
+				}
+				if (ext === "msi") {
+					return "application/octet-stream";
+				}
+				if (ext === "msp") {
+					return "application/octet-stream";
+				}
+				if (ext === "msm") {
+					return "application/octet-stream";
+				}
+				if (ext === "mid") {
+					return "audio/midi";
+				}
+				if (ext === "midi") {
+					return "audio/midi";
+				}
+				if (ext === "kar") {
+					return "audio/midi";
+				}
+				if (ext === "audio/mpeg") {
+					return "audio/mpeg";
+				}
+				if (ext === "ogg") {
+					return "audio/ogg";
+				}
+				if (ext === "ra") {
+					return "audio/x-realaudio";
+				}
+				if (ext === "3gpp") {
+					return "video/3gpp";
+				}
+				if (ext === "3gp") {
+					return "video/3gpp";
+				}
+				if (ext === "mpeg") {
+					return "video/mpeg";
+				}
+				if (ext === "mpg") {
+					return "video/mpeg";
+				}
+				if (ext === "mov") {
+					return "video/quicktime";
+				}
+				if (ext === "flv") {
+					return "video/x-flv";
+				}
+				if (ext === "mng") {
+					return "video/x-mng";
+				}
+				if (ext === "asx") {
+					return "video/x-ms-asf";
+				}
+				if (ext === "asf") {
+					return "video/x-ms-asf";
+				}
+				if (ext === "wmv") {
+					return "video/x-ms-wmv";
+				}
+				if (ext === "avi") {
+					return "video/x-msvideo";
+				}
+				if (ext === "m4v") {
+					return "video/mp4";
+				}
+				if (ext === "mp4") {
+					return "video/mp4";
+				}
+				return false;
 			} catch (err) {
 				console.log(err);
 				return false;
@@ -9087,7 +9214,7 @@
 				}
 				return false;
 			}
-			if (handleDirectionSet.indexOf(direction) < 0) {
+			if (!hasArgument(handleDirectionSet, direction)) {
 				if (cb) {
 					cb("Argument `direction` is not available");
 				}
@@ -9127,7 +9254,7 @@
 				}
 				return false;
 			}
-			if (handleDirectionSet.indexOf(direction) < 0) {
+			if (!hasArgument(handleDirectionSet, direction)) {
 				if (cb) {
 					cb("Argument `direction` is not available");
 				}
@@ -9167,7 +9294,7 @@
 				}
 				return false;
 			}
-			if (borderDirectionSet.indexOf(direction) < 0) {
+			if (!hasArgument(borderDirectionSet, direction)) {
 				if (cb) {
 					cb("Argument `direction` is not available");
 				}
@@ -9207,7 +9334,7 @@
 				}
 				return false;
 			}
-			if (borderDirectionSet.indexOf(direction) < 0) {
+			if (!hasArgument(borderDirectionSet, direction)) {
 				if (cb) {
 					cb("Argument `direction` is not available");
 				}
@@ -9844,7 +9971,7 @@
 
 			var arr = [];
 			for(var i = 0; i < imageStates.length; i++) {
-				if (imageIds.indexOf(imageStates[i].id) > -1) {
+				if (hasArgument(imageIds, imageStates[i].id)) {
 					var tmp = copyImageState(imageStates[i].id);
 					arr.push(tmp);
 				}
