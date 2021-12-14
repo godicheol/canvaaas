@@ -9964,7 +9964,6 @@
 				}
 				return false;
 			}
-
 			if (cb) {
 				cb(null, found);
 			}
@@ -9999,7 +9998,7 @@
 			var found;
 			for (var i = 0; i < sortedStates.length; i++) {
 				if (sortedStates[i].id === id) {
-					if (sortedStates[i - 1]) {
+					if (sortedStates[i + 1]) {
 						found = copyImageState(sortedStates[i + 1].id);
 					}
 				}
@@ -10011,7 +10010,6 @@
 				}
 				return false;
 			}
-
 			if (cb) {
 				cb(null, found);
 			}
