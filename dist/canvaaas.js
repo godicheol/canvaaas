@@ -123,16 +123,16 @@
 			var fittedSizes = getContainedSizes(
 				newImage.width,
 				newImage.height,
-				coordinate.currentWidth * config.imageScaleAfterRender,
-				coordinate.currentHeight * config.imageScaleAfterRender
+				coordinate.relativeWidth * config.imageScaleAfterRender,
+				coordinate.relativeHeight * config.imageScaleAfterRender
 			);
 			var tmpHandleState = {};
 			var tmpBorderState = {};
 
 			var width = fittedSizes[0];
 			var height = fittedSizes[1];
-			var axisX = coordinate.currentX;
-			var axisY = coordinate.currentY;
+			var axisX = coordinate.relativeX;
+			var axisY = coordinate.relativeY;
 
 			for(var i = 0; i < imageStates.length; i++) {
 				if (imageStates[i].index < config.maxIndexAfterRender) {
@@ -5457,6 +5457,8 @@
 				tmp.screenHeight = canvasState.screenHeight;
 				tmp.screenX = canvasState.screenLeft + (0.5 * canvasState.screenWidth);
 				tmp.screenY = canvasState.screenTop + (0.5 * canvasState.screenHeight);
+				tmp.screenScaleX = canvasState.screenWidth / canvasState.width;
+				tmp.screenScaleY = canvasState.screenHeight / canvasState.height;
 
 				tmp.canvasLeft = canvasState.canvasLeft;
 				tmp.canvasTop = canvasState.canvasTop;
@@ -5472,12 +5474,12 @@
 				tmp.originalCanvasX = ((0.5 * canvasState.canvasWidth) + canvasState.canvasLeft) / canvasState.scaleX;
 				tmp.originalCanvasY = ((0.5 * canvasState.canvasHeight) + canvasState.canvasTop) / canvasState.scaleY;
 
-				tmp.currentLeft = canvasState.canvasLeft;
-				tmp.currentTop = canvasState.canvasTop;
-				tmp.currentWidth = canvasState.screenWidth;
-				tmp.currentHeight = canvasState.screenHeight;
-				tmp.currentX = (0.5 * canvasState.screenWidth) - canvasState.canvasLeft;
-				tmp.currentY = (0.5 * canvasState.screenHeight) - canvasState.canvasTop;
+				tmp.relativeLeft = canvasState.canvasLeft;
+				tmp.relativeTop = canvasState.canvasTop;
+				tmp.relativeWidth = canvasState.screenWidth;
+				tmp.relativeHeight = canvasState.screenHeight;
+				tmp.relativeX = (0.5 * canvasState.screenWidth) - canvasState.canvasLeft;
+				tmp.relativeY = (0.5 * canvasState.screenHeight) - canvasState.canvasTop;
 
 				if (e) {
 					if (typeof(e.touches) === "undefined") {
@@ -5489,8 +5491,8 @@
 					} else {
 						return tmp;
 					}
-					tmp.mouseX = (mouseX - containerCoordinate.left - canvasState.screenLeft) / canvasState.scaleX;
-					tmp.mouseY = (mouseY - containerCoordinate.top - canvasState.screenTop) / canvasState.scaleY;
+					tmp.mouseX = (mouseX - canvasState.canvasLeft - containerCoordinate.left - canvasState.screenLeft) / canvasState.scaleX;
+					tmp.mouseY = (mouseY - canvasState.canvasTop - containerCoordinate.top - canvasState.screenTop) / canvasState.scaleY;
 				}
 
 				return tmp;
@@ -9919,6 +9921,34 @@
 				cb(null, found);
 			}
 			return found;
+		}
+
+		myObject.getMouse = function(x, y, cb){
+			if (!isNumeric(x)) {
+				if (cb) {
+					cb("Argument `x` is not Numeric");
+				}
+				return false;
+			}
+			if (!isNumeric(y)) {
+				if (cb) {
+					cb("Argument `y` is not Numeric");
+				}
+				return false;
+			}
+			var mouseX = toNumber(x);
+			var mouseY = toNumber(y);
+			var coordinate = getCoordinate();
+			var tmp = {};
+			tmp.x = (mouseX - coordinate.canvasLeft - coordinate.containerLeft - coordinate.screenLeft) / coordinate.screenScaleX;
+			tmp.y = (mouseY - coordinate.canvasTop - coordinate.containerTop - coordinate.screenTop) / coordinate.screenScaleY;
+			// tmp.clientX = mouseX - coordinate.containerLeft - coordinate.screenLeft;
+			// tmp.clientY = mouseY - coordinate.containerTop - coordinate.screenTop;
+
+			if (cb) {
+				cb(null, tmp);
+			}
+			return tmp;
 		}
 
 		myObject.getUndo = function(cb){
