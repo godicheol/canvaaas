@@ -95,6 +95,7 @@
 			"sese",
 		];
 		var allowedHandleEvents = [
+			"none",
 			"click",
 			"resize",
 			"crop",
@@ -108,6 +109,7 @@
 			"w",
 		];
 		var allowedBorderEvents = [
+			"none",
 			"click",
 			"resize",
 			"crop",
@@ -4226,6 +4228,22 @@
 								cloneHandle.classList.add("canvaaas-hidden");
 							}
 						}
+
+						if (state["handle"][f] === "none") {
+							if (!originHandle.classList.contains("canvaaas-unclickable")) {
+								originHandle.classList.add("canvaaas-unclickable");
+							}
+							if (!cloneHandle.classList.contains("canvaaas-unclickable")) {
+								cloneHandle.classList.add("canvaaas-unclickable");
+							}
+						} else {
+							if (originHandle.classList.contains("canvaaas-unclickable")) {
+								originHandle.classList.remove("canvaaas-unclickable");
+							}
+							if (cloneHandle.classList.contains("canvaaas-unclickable")) {
+								cloneHandle.classList.remove("canvaaas-unclickable");
+							}
+						}
 					}
 				}
 
@@ -4268,6 +4286,22 @@
 							}
 							if (!cloneBorder.classList.contains("canvaaas-hidden")) {
 								cloneBorder.classList.add("canvaaas-hidden");
+							}
+						}
+
+						if (state["border"][f] === "none") {
+							if (!originBorder.classList.contains("canvaaas-unclickable")) {
+								originBorder.classList.add("canvaaas-unclickable");
+							}
+							if (!cloneBorder.classList.contains("canvaaas-unclickable")) {
+								cloneBorder.classList.add("canvaaas-unclickable");
+							}
+						} else {
+							if (originBorder.classList.contains("canvaaas-unclickable")) {
+								originBorder.classList.remove("canvaaas-unclickable");
+							}
+							if (cloneBorder.classList.contains("canvaaas-unclickable")) {
+								cloneBorder.classList.remove("canvaaas-unclickable");
 							}
 						}
 					}

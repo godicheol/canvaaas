@@ -522,6 +522,16 @@
 	border-width: 3px;
 }
 
+/* click handle */
+.canvaaas-handle.canvaaas-unclickable{
+	pointer-events: none !important;
+}
+
+/* click border */
+.canvaaas-border.canvaaas-unclickable{
+	pointer-events: none !important;
+}
+
 
 /* mobile */
 @media only screen and (max-width: 768px) {
