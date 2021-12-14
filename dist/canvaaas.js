@@ -3284,7 +3284,6 @@
 				}
 
 				// change element id
-
 				for (var i = 0; i < originHandles.length; i++) {
 					var d = getDirection(originHandles[i]);
 					originHandles[i].id = originHandleId + newStr + "-" + d;
@@ -5662,8 +5661,8 @@
 					additionalState = {};
 				}
 				if (additionalState.id) {
-					if (!isExist(id)) {
-						setId(additionalState.id);
+					if (!isExist(additionalState.id)) {
+						setId(state.id, additionalState.id);
 						id = additionalState.id;
 					}
 				}
