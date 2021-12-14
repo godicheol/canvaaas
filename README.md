@@ -325,6 +325,7 @@
 
 ```html
 <script>
+  canvaaas.states(exportedStates);
   canvaaas.id(id, newId);
   canvaaas.moveX(id, 45);
   canvaaas.moveY(id, -45);

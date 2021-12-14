@@ -6823,6 +6823,9 @@
 							if (config.upload) {
 								config.upload(err);
 							}
+							result.push({
+								error: err
+							});
 						} else {
 							var tmp = copyImageState(res);
 							if (config.upload) {
@@ -6897,6 +6900,9 @@
 							if (config.upload) {
 								config.upload(err);
 							}
+							result.push({
+								error: err
+							});
 						} else {
 							var tmp = copyImageState(res);
 							if (config.upload) {
@@ -6971,6 +6977,9 @@
 							if (config.upload) {
 								config.upload(err);
 							}
+							result.push({
+								error: err
+							});
 						} else {
 							var tmp = copyImageState(res);
 							if (config.upload) {
@@ -7055,6 +7064,9 @@
 							if (config.upload) {
 								config.upload(err);
 							}
+							result.push({
+								error: err
+							});
 						} else {
 							var tmp = copyImageState(res);
 							if (config.upload) {
@@ -7268,6 +7280,52 @@
 				cb(null, res);
 			}
 			return res;
+		}
+
+		myObject.states = function(newStates, cb) {
+			if (!isArray(newStates)) {
+				if (config.edit) {
+					config.edit("Argument `newStates` is not Array");
+				}
+				if (cb) {
+					cb("Argument `newStates` is not Array");
+				}
+				return false;
+			}
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+
+			var result = [];
+
+			for (var i = 0; i < newStates.length; i++) {
+				var id = newStates[i].id;
+				var state = getImageState(id);
+				var updates = importImageState(newStates[i]);
+
+				// save cache
+				saveUndo(id);
+
+				// save image state
+				setImage(id, updates);
+
+				// callback
+				var res = copyImageState(id);
+				if (config.edit) {
+					config.edit(null, res);
+				}
+				result.push(res);
+			}
+			if (cb) {
+				cb(null, result);
+			}
+			return result;
 		}
 
 		myObject.moveX = function(id, n, cb) {
