@@ -9924,7 +9924,7 @@
 			return arr;
 		}
 
-		myObject.getPreviousImage = function(id, cb){
+		myObject.getPrevious = function(id, cb){
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
@@ -9971,7 +9971,7 @@
 			return found;
 		}
 
-		myObject.getNextImage = function(id, cb){
+		myObject.getNext = function(id, cb){
 			if (!isExist(id)) {
 				if (cb) {
 					cb("Image not found");
