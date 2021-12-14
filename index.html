@@ -494,13 +494,13 @@
 				</div>
 				<div class="row selection rule">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.state(selectedId, {
-							id: window.prompt('ID', selectedId)
-						}, function(err, res){
-							if (err) {return false;}
-							selectedId = res.id;
-							chkSelected();
-						})
+						canvaaas.id(selectedId, 
+							window.prompt('ID', selectedId),
+							function(err, res){
+								if (err) {return false;}
+								selectedId = res.id;
+								chkSelected();
+							})
 					">ID</a>
 				</div>
 				<div class="row selection">
@@ -1222,6 +1222,13 @@
 							console.log('canvaaas.getDevice()', res);
 						})
 					">Get device data</a>
+				</div>
+				<div class="row">
+					<a href="javascript:void(0)" onclick="
+						canvaaas.getDevice(function(err, res){
+							alert(JSON.stringify(res, null, 2));
+						})
+					">Get device data for mobile</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="

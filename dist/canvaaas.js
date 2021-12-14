@@ -194,47 +194,47 @@
 			}
 		};
 
-		var _canvasTemplate = "";
-		_canvasTemplate += "<div class='canvaaas-screen'>";
-		_canvasTemplate += "<div class='canvaaas-canvas'>";
-		_canvasTemplate += "<div class='canvaaas-images'></div>";
-		_canvasTemplate += "<div class='canvaaas-background'></div>";
-		_canvasTemplate += "<div class='canvaaas-checker'></div>";
-		_canvasTemplate += "</div>";
-		_canvasTemplate += "<div class='canvaaas-mirror'>";
-		_canvasTemplate += "<div class='canvaaas-images'></div>";
-		_canvasTemplate += "</div>";
-		_canvasTemplate += "</div>";
+		var canvasTemplate = "";
+		canvasTemplate += "<div class='canvaaas-screen'>";
+		canvasTemplate += "<div class='canvaaas-canvas'>";
+		canvasTemplate += "<div class='canvaaas-images'></div>";
+		canvasTemplate += "<div class='canvaaas-background'></div>";
+		canvasTemplate += "<div class='canvaaas-checker'></div>";
+		canvasTemplate += "</div>";
+		canvasTemplate += "<div class='canvaaas-mirror'>";
+		canvasTemplate += "<div class='canvaaas-images'></div>";
+		canvasTemplate += "</div>";
+		canvasTemplate += "</div>";
 
-		var _imageTemplate = "";
-		_imageTemplate += "<div class='canvaaas-content'><img></div>";
-		_imageTemplate += "<div class='canvaaas-overlay'></div>";
-		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
-		_imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-n'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-s'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-e'></div>";
-		_imageTemplate += "<div class='canvaaas-grid canvaaas-direction-w'></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-n'><div class='canvaaas-border-line'></div></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-s'><div class='canvaaas-border-line'></div></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-e'><div class='canvaaas-border-line'></div></div>";
-		_imageTemplate += "<div class='canvaaas-border canvaaas-direction-w'><div class='canvaaas-border-line'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nn'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ee'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ss'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ww'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nene'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nwnw'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sese'><div class='canvaaas-handle-square'></div></div>";
-		_imageTemplate += "<div class='canvaaas-handle canvaaas-direction-swsw'><div class='canvaaas-handle-square'></div></div>";
+		var imageTemplate = "";
+		imageTemplate += "<div class='canvaaas-content'><img></div>";
+		imageTemplate += "<div class='canvaaas-overlay'></div>";
+		imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
+		imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-n'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-s'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-e'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-w'></div>";
+		imageTemplate += "<div class='canvaaas-border canvaaas-direction-n'><div class='canvaaas-border-line'></div></div>";
+		imageTemplate += "<div class='canvaaas-border canvaaas-direction-s'><div class='canvaaas-border-line'></div></div>";
+		imageTemplate += "<div class='canvaaas-border canvaaas-direction-e'><div class='canvaaas-border-line'></div></div>";
+		imageTemplate += "<div class='canvaaas-border canvaaas-direction-w'><div class='canvaaas-border-line'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nn'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ee'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ss'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ww'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nene'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nwnw'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sese'><div class='canvaaas-handle-square'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-swsw'><div class='canvaaas-handle-square'></div></div>";
 
 		var directionSet = [
 			"n",
@@ -255,20 +255,20 @@
 			"sese",
 		];
 
-		var MAX_WIDTH = 4096;
-		var MAX_HEIGHT = 4096;
-		var MIN_WIDTH = 1;
-		var MIN_HEIGHT = 1;
-		var SCROLLBAR_WIDTH;
+		var MAX_WIDTH = 4096; // canvas
+		var MAX_HEIGHT = 4096; // canvas
+		var MIN_WIDTH = 1; // canvas
+		var MIN_HEIGHT = 1; // canvas
+		var SCROLLBAR_WIDTH = 0;
 
-		var _originId = "canvaaas-o-";
-		var _cloneId = "canvaaas-c-";
-		var _originImgId = "canvaaas-oi-";
-		var _cloneImgId = "canvaaas-ci-";
-		var _originHandleId = "canvaaas-oh-";
-		var _cloneHandleId = "canvaaas-ch-";
-		var _originBorderId = "canvaaas-ob-";
-		var _cloneBorderId = "canvaaas-cb-";
+		var originId = "canvaaas-o-";
+		var cloneId = "canvaaas-c-";
+		var originImgId = "canvaaas-oi-";
+		var cloneImgId = "canvaaas-ci-";
+		var originHandleId = "canvaaas-oh-";
+		var cloneHandleId = "canvaaas-ch-";
+		var originBorderId = "canvaaas-ob-";
+		var cloneBorderId = "canvaaas-cb-";
 
 		var config = {};
 		var eventState = {};
@@ -3239,19 +3239,90 @@
 			}
 		}
 
+		function setId(oldId, newId) {
+			try {
+				if (!isString(oldId)) {
+					return false;
+				}
+				if (!isString(newId)) {
+					return false;
+				}
+				var oldStr = toString(oldId);
+				var newStr = toString(newId);
+				if (oldStr === newStr) {
+					return false;
+				}
+				if (!isExist(oldStr)) {
+					return false;
+				}
+				if (isExist(newStr)) {
+					return false;
+				}
+				var state = getImageState(oldStr);
+				var origin = document.getElementById(originId + oldStr);
+				var clone = document.getElementById(cloneId + oldStr);
+				var originImg = document.getElementById(originImgId + oldStr);
+				var cloneImg = document.getElementById(cloneImgId + oldStr);
+				var originHandles = origin.querySelectorAll("div.canvaaas-handle");
+				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
+				var originBorders = origin.querySelectorAll("div.canvaaas-border");
+				var cloneBorders = clone.querySelectorAll("div.canvaaas-border");
+
+				// change undo caches
+				for (var i = 0; i < undoCaches.length; i++) {
+					if (undoCaches[i].id === oldStr) {
+						undoCaches[i].id = newStr;
+						undoCaches[i].state.id = newStr;
+					}
+				}
+				// change redo caches
+				for (var i = 0; i < redoCaches.length; i++) {
+					if (redoCaches[i].id === oldStr) {
+						redoCaches[i].id = newStr;
+						redoCaches[i].state.id = newStr;
+					}
+				}
+
+				// change element id
+
+				for (var i = 0; i < originHandles.length; i++) {
+					var d = getDirection(originHandles[i]);
+					originHandles[i].id = originHandleId + newStr + "-" + d;
+				}
+				for (var i = 0; i < cloneHandles.length; i++) {
+					var d = getDirection(cloneHandles[i]);
+					cloneHandles[i].id = cloneHandleId + newStr + "-" + d;
+				}
+				for (var i = 0; i < originBorders.length; i++) {
+					var d = getDirection(originBorders[i]);
+					originBorders[i].id = originBorderId + newStr + "-" + d;
+				}
+				for (var i = 0; i < cloneBorders.length; i++) {
+					var d = getDirection(cloneBorders[i]);
+					cloneBorders[i].id = cloneBorderId + newStr + "-" + d;
+				}
+				originImg.id = originImgId + newStr;
+				cloneImg.id = cloneImgId + newStr;
+				origin.id = originId + newStr;
+				clone.id = cloneId + newStr;
+
+				// change state
+				state.id = newStr;
+
+				return true;
+			} catch(err) {
+				console.log(err);
+				return false;
+			}
+		}
+
 		function setImage(id, newState) {
 			try {
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-				var originImg = document.getElementById(_originImgId + id);
-				var cloneImg = document.getElementById(_cloneImgId + id);
-				var originBorders;
-				var cloneBorders;
-				var originHandles;
-				var cloneHandles;
-				var oldId = id;
-				var newId;
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
+				var originImg = document.getElementById(originImgId + id);
+				var cloneImg = document.getElementById(cloneImgId + id);
 				var newScaleX;
 				var oldScaleX;
 				var newScaleY;
@@ -3277,56 +3348,6 @@
 				}
 				if (!cloneImg) {
 					return false;
-				}
-
-				// id change
-				if (isString(newState.id)) {
-					tmp = toString(newState.id);
-					if (!isExist(tmp)) {
-						newId = tmp;
-						// change undo caches
-						for (var i = 0; i < undoCaches.length; i++) {
-							if (undoCaches[i].id === oldId) {
-								undoCaches[i].id = newId;
-								undoCaches[i].state.id = newId;
-							}
-						}
-						// change redo caches
-						for (var i = 0; i < redoCaches.length; i++) {
-							if (redoCaches[i].id === oldId) {
-								redoCaches[i].id = newId;
-								redoCaches[i].state.id = newId;
-							}
-						}
-						// change element id
-						originHandles = origin.querySelectorAll("div.canvaaas-handle");
-						cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
-						originBorders = origin.querySelectorAll("div.canvaaas-border");
-						cloneBorders = clone.querySelectorAll("div.canvaaas-border");
-						for (var i = 0; i < originHandles.length; i++) {
-							var d = getDirection(originHandles[i]);
-							originHandles[i].id = _originHandleId + newId + "-" + d;
-						}
-						for (var i = 0; i < cloneHandles.length; i++) {
-							var d = getDirection(cloneHandles[i]);
-							cloneHandles[i].id = _cloneHandleId + newId + "-" + d;
-						}
-						for (var i = 0; i < originBorders.length; i++) {
-							var d = getDirection(originBorders[i]);
-							originBorders[i].id = _originBorderId + newId + "-" + d;
-						}
-						for (var i = 0; i < cloneBorders.length; i++) {
-							var d = getDirection(cloneBorders[i]);
-							cloneBorders[i].id = _cloneBorderId + newId + "-" + d;
-						}
-						originImg.id = _originImgId + newId;
-						cloneImg.id = _cloneImgId + newId;
-						origin.id = _originId + newId;
-						clone.id = _cloneId + newId;
-
-						// change state
-						state.id = newId;
-					}
 				}
 				if (isNumeric(newState.index)) {
 					state.index = toNumber(newState.index);
@@ -3518,9 +3539,9 @@
 					state.cropBottom = tmp;
 				}
 
-				applyStyleToImage(state.id);
+				applyStyleToImage(id);
 
-				return state.id;
+				return true;
 			} catch(err) {
 				console.log(err);
 				return false;
@@ -3530,10 +3551,10 @@
 		function applyStyleToImage(id) {
 			try {
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-				var originImg = document.getElementById(_originImgId + id);
-				var cloneImg = document.getElementById(_cloneImgId + id);
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
+				var originImg = document.getElementById(originImgId + id);
+				var cloneImg = document.getElementById(cloneImgId + id);
 				var originPivots;
 				var clonePivots;
 				var originGrids;
@@ -4176,8 +4197,8 @@
 				var id = state.id;
 				var scaleX = state.scaleX;
 				var scaleY = state.scaleY;
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
 				if (!origin) {
 					return false;
 				}
@@ -4188,8 +4209,8 @@
 				for (var i = 0; i < handleDirectionSet.length; i++) {
 					var d = handleDirectionSet[i];
 					var f = flipDirection(d, scaleX, scaleY);
-					var originHandle = document.getElementById(_originHandleId+id+"-"+d);
-					var cloneHandle = document.getElementById(_cloneHandleId+id+"-"+d);
+					var originHandle = document.getElementById(originHandleId+id+"-"+d);
+					var cloneHandle = document.getElementById(cloneHandleId+id+"-"+d);
 					if (originHandle && cloneHandle) {
 						if (state["handle"][f]) {
 							if (originHandle.classList.contains("canvaaas-hidden")) {
@@ -4221,8 +4242,8 @@
 				var id = state.id;
 				var scaleX = state.scaleX;
 				var scaleY = state.scaleY;
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
 				if (!origin) {
 					return false;
 				}
@@ -4232,8 +4253,8 @@
 				for (var i = 0; i < borderDirectionSet.length; i++) {
 					var d = borderDirectionSet[i];
 					var f = flipDirection(d, scaleX, scaleY);
-					var originBorder = document.getElementById(_originBorderId+id+"-"+d);
-					var cloneBorder = document.getElementById(_cloneBorderId+id+"-"+d);
+					var originBorder = document.getElementById(originBorderId+id+"-"+d);
+					var cloneBorder = document.getElementById(cloneBorderId+id+"-"+d);
 					if (originBorder && cloneBorder) {
 						if (state["border"][f]) {
 							if (originBorder.classList.contains("canvaaas-hidden")) {
@@ -4263,8 +4284,8 @@
 		function addClassToImage(id, cls) {
 			try {
 				var candidate = toString(id);
-				var origin = document.getElementById(_originId + candidate);
-				var clone = document.getElementById(_cloneId + candidate);
+				var origin = document.getElementById(originId + candidate);
+				var clone = document.getElementById(cloneId + candidate);
 				if (!origin.classList.contains(cls)) {
 					origin.classList.add(cls);
 				}
@@ -4281,8 +4302,8 @@
 		function removeClassToImage(id, cls) {
 			try {
 				var candidate = toString(id);
-				var origin = document.getElementById(_originId + candidate);
-				var clone = document.getElementById(_cloneId + candidate);
+				var origin = document.getElementById(originId + candidate);
+				var clone = document.getElementById(cloneId + candidate);
 				if (origin.classList.contains(cls)) {
 					origin.classList.remove(cls);
 				}
@@ -4298,8 +4319,8 @@
 
 		function addClassToHandle(id, direction, cls) {
 			try {
-				var originHandle = document.getElementById(_originHandleId + id + "-" + direction);
-				var cloneHandle = document.getElementById(_cloneHandleId + id + "-" + direction);
+				var originHandle = document.getElementById(originHandleId + id + "-" + direction);
+				var cloneHandle = document.getElementById(cloneHandleId + id + "-" + direction);
 				if (!originHandle.classList.contains(cls)) {
 					originHandle.classList.add(cls);
 				}
@@ -4315,8 +4336,8 @@
 
 		function removeClassToHandle(id, direction, cls) {
 			try {
-				var originHandle = document.getElementById(_originHandleId + id + "-" + direction);
-				var cloneHandle = document.getElementById(_cloneHandleId + id + "-" + direction);
+				var originHandle = document.getElementById(originHandleId + id + "-" + direction);
+				var cloneHandle = document.getElementById(cloneHandleId + id + "-" + direction);
 				if (originHandle.classList.contains(cls)) {
 					originHandle.classList.remove(cls);
 				}
@@ -4332,8 +4353,8 @@
 
 		function addClassToBorder(id, direction, cls) {
 			try {
-				var originBorder = document.getElementById(_originBorderId + id + "-" + direction);
-				var cloneBorder = document.getElementById(_cloneBorderId + id + "-" + direction);
+				var originBorder = document.getElementById(originBorderId + id + "-" + direction);
+				var cloneBorder = document.getElementById(cloneBorderId + id + "-" + direction);
 				if (!originBorder.classList.contains(cls)) {
 					originBorder.classList.add(cls);
 				}
@@ -4349,8 +4370,8 @@
 
 		function removeClassToBorder(id, direction, cls) {
 			try {
-				var originBorder = document.getElementById(_originBorderId + id + "-" + direction);
-				var cloneBorder = document.getElementById(_cloneBorderId + id + "-" + direction);
+				var originBorder = document.getElementById(originBorderId + id + "-" + direction);
+				var cloneBorder = document.getElementById(cloneBorderId + id + "-" + direction);
 				if (originBorder.classList.contains(cls)) {
 					originBorder.classList.remove(cls);
 				}
@@ -4442,87 +4463,6 @@
 			}
 		}
 
-		// function getOriginalState(id) {
-		// 	try {
-		// 		var tmp = {};
-		// 		var state = getImageState(id);
-		// 		var origin = document.getElementById(_originId + id);
-		// 		var clone = document.getElementById(_cloneId + id);
-		// 		var originImg = document.getElementById(_originImgId + id);
-		// 		var cloneImg = document.getElementById(_cloneImgId + id);
-		// 		// var scaleRatioX = canvasState.width / canvasState.originalWidth;
-		// 		// var scaleRatioY = canvasState.height / canvasState.originalHeight;
-
-		// 		// test
-		// 		var scaleRatioX = canvasState.scaleX;
-		// 		var scaleRatioY = canvasState.scaleY;
-
-		// 		if (!state) {
-		// 			return false;
-		// 		}
-		// 		if (!origin) {
-		// 			return false;
-		// 		}
-		// 		if (!clone) {
-		// 			return false;
-		// 		}
-		// 		if (!originImg) {
-		// 			return false;
-		// 		}
-		// 		if (!cloneImg) {
-		// 			return false;
-		// 		}
-
-		// 		tmp.id = state.id;
-		// 		tmp.src = state.src;
-		// 		tmp.index = state.index;
-		// 		tmp.x = state.x / scaleRatioX;
-		// 		tmp.y = state.y / scaleRatioY;
-		// 		tmp.originalWidth = state.originalWidth;
-		// 		tmp.originalHeight = state.originalHeight;
-		// 		tmp.width = state.width / scaleRatioX;
-		// 		tmp.height = state.height / scaleRatioY;
-		// 		tmp.cropTop = state.cropTop / scaleRatioY;
-		// 		tmp.cropBottom = state.cropBottom / scaleRatioY;
-		// 		tmp.cropLeft = state.cropLeft / scaleRatioX;
-		// 		tmp.cropRight = state.cropRight / scaleRatioX;
-		// 		tmp.rotate = state.rotate;
-		// 		tmp.rotateX = state.rotateX;
-		// 		tmp.rotateY = state.rotateY;
-		// 		tmp.scaleX = state.scaleX;
-		// 		tmp.scaleY = state.scaleY;
-		// 		tmp.opacity = state.opacity;
-		// 		tmp.lockAspectRatio = state.lockAspectRatio;
-		// 		tmp.visible = state.visible;
-		// 		tmp.clickable = state.clickable;
-		// 		tmp.editable = state.editable;
-		// 		tmp.movable = state.movable;
-		// 		tmp.resizable = state.resizable;
-		// 		tmp.rotatable = state.rotatable;
-		// 		tmp.flippable = state.flippable;
-		// 		tmp.croppable = state.croppable;
-		// 		tmp.drawable = state.drawable;
-		// 		tmp.pivot = state.pivot;
-		// 		tmp.grid = state.grid;
-
-		// 		tmp.border = {};
-		// 		for (var i = 0; i < Object.keys(state.border); i++) {
-		// 			var k = Object.keys(state.border)[i];
-		// 			tmp.border[k] = state.border[k];
-		// 		}
-		// 		tmp.handle = {};
-		// 		for (var i = 0; i < Object.keys(state.handle); i++) {
-		// 			var k = Object.keys(state.handle)[i];
-		// 			tmp.handle[k] = state.handle[k];
-		// 		}
-
-		// 		return tmp;
-		// 	} catch(err) {
-		// 		console.log(err);
-		// 		return false;
-		// 	}
-		// }
-
 		function copyConfig() {
 			try {
 				var tmp = {};
@@ -4576,10 +4516,10 @@
 			try {
 				var tmp = {};
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-				var originImg = document.getElementById(_originImgId + id);
-				var cloneImg = document.getElementById(_cloneImgId + id);
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
+				var originImg = document.getElementById(originImgId + id);
+				var cloneImg = document.getElementById(cloneImgId + id);
 				var scaleRatioX = canvasState.scaleX;
 				var scaleRatioY = canvasState.scaleY;
 
@@ -4837,8 +4777,8 @@
 		function saveUndo(id, keepRedo) {
 			try {
 				var state = getImageState(id);
-				// var origin = document.getElementById(_originId + id);
-				// var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(originId + id);
+				// var clone = document.getElementById(cloneId + id);
 				var copiedState = {};
 				var newCache = {};
 				// var originCls = origin.className;
@@ -4870,8 +4810,8 @@
 		function saveRedo(id) {
 			try {
 				var state = getImageState(id);
-				// var origin = document.getElementById(_originId + id);
-				// var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(originId + id);
+				// var clone = document.getElementById(cloneId + id);
 				var copiedState = {};
 				var newCache = {};
 				// var originCls = origin.className;
@@ -4902,8 +4842,8 @@
 
 				var recent = undoCaches.pop();
 				var id = recent.id;
-				// var origin = document.getElementById(_originId + id);
-				// var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(originId + id);
+				// var clone = document.getElementById(cloneId + id);
 
 				saveRedo(id);
 
@@ -4927,8 +4867,8 @@
 	
 				var recent = redoCaches.pop();
 				var id = recent.id;
-				// var origin = document.getElementById(_originId + id);
-				// var clone = document.getElementById(_cloneId + id);
+				// var origin = document.getElementById(originId + id);
+				// var clone = document.getElementById(cloneId + id);
 
 				// keep redo
 				saveUndo(id, true);
@@ -5640,20 +5580,20 @@
 
 				// create origin element
 				newOriginImage.classList.add("canvaaas-image");
-				newOriginImage.id = _originId + state.id;
-				newOriginImage.innerHTML = _imageTemplate;
+				newOriginImage.id = originId + state.id;
+				newOriginImage.innerHTML = imageTemplate;
 
 				newOriginImg = newOriginImage.querySelector("img");
-				newOriginImg.id = _originImgId + state.id;
+				newOriginImg.id = originImgId + state.id;
 				newOriginImg.src = newImage.src;
 
 				// create clone element
 				newCloneImage.classList.add("canvaaas-image");
-				newCloneImage.id = _cloneId + state.id;
-				newCloneImage.innerHTML = _imageTemplate;
+				newCloneImage.id = cloneId + state.id;
+				newCloneImage.innerHTML = imageTemplate;
 
 				newCloneImg = newCloneImage.querySelector("img");
-				newCloneImg.id = _cloneImgId + state.id;
+				newCloneImg.id = cloneImgId + state.id;
 				newCloneImg.src = newImage.src;
 
 				// set events
@@ -5689,13 +5629,13 @@
 				// set handles
 				for (var i = 0; i < newOriginHandles.length; i++) {
 					var d = getDirection(newOriginHandles[i]);
-					newOriginHandles[i].id = _originHandleId + state.id + "-" + d;
+					newOriginHandles[i].id = originHandleId + state.id + "-" + d;
 					newOriginHandles[i].addEventListener("mousedown", handlers.startClickHandle, false);
 					newOriginHandles[i].addEventListener("touchstart", handlers.startClickHandle, false);
 				}
 				for (var i = 0; i < newCloneHandles.length; i++) {
 					var d = getDirection(newCloneHandles[i]);
-					newCloneHandles[i].id = _cloneHandleId + state.id + "-" + d;
+					newCloneHandles[i].id = cloneHandleId + state.id + "-" + d;
 					newCloneHandles[i].addEventListener("mousedown", handlers.startClickHandle, false);
 					newCloneHandles[i].addEventListener("touchstart", handlers.startClickHandle, false);
 				}
@@ -5703,13 +5643,13 @@
 				// set borders
 				for (var i = 0; i < newOriginBorders.length; i++) {
 					var d = getDirection(newOriginBorders[i]);
-					newOriginBorders[i].id = _originBorderId + state.id + "-" + d;
+					newOriginBorders[i].id = originBorderId + state.id + "-" + d;
 					newOriginBorders[i].addEventListener("mousedown", handlers.startClickBorder, false);
 					newOriginBorders[i].addEventListener("touchstart", handlers.startClickBorder, false);
 				}
 				for (var i = 0; i < newCloneBorders.length; i++) {
 					var d = getDirection(newCloneBorders[i]);
-					newCloneBorders[i].id = _cloneBorderId + state.id + "-" + d;
+					newCloneBorders[i].id = cloneBorderId + state.id + "-" + d;
 					newCloneBorders[i].addEventListener("mousedown", handlers.startClickBorder, false);
 					newCloneBorders[i].addEventListener("touchstart", handlers.startClickBorder, false);
 				}
@@ -5736,10 +5676,10 @@
 		function removeImage(id) {
 			try {
 				var state = getImageState(id);
-				var origin = document.getElementById(_originId + id);
-				var clone = document.getElementById(_cloneId + id);
-				var originImg = document.getElementById(_originImgId + id);
-				var cloneImg = document.getElementById(_cloneImgId + id);
+				var origin = document.getElementById(originId + id);
+				var clone = document.getElementById(cloneId + id);
+				var originImg = document.getElementById(originImgId + id);
+				var cloneImg = document.getElementById(cloneImgId + id);
 				var stateSrc
 				var originSrc;
 				var cloneSrc;
@@ -6136,7 +6076,7 @@
 		function isEmpty(candidate) {
 			if (typeof(candidate) === "string") {
 				return candidate.replace(/^\s+|\s+$/gm, "") === "";
-			} else if (Array.isArray(candidate)) {
+			} else if (isArray(candidate)) {
 				return candidate.length === 0;
 			} else if (typeof(candidate) === "object" && candidate !== null) {
 				return Object.keys(candidate).length === 0 && candidate.constructor === Object;
@@ -6168,7 +6108,7 @@
 		}
 
 		function isObject(obj) {
-			return obj !== undefined && typeof(obj) === "object" && obj !== null && !Array.isArray(obj);
+			return obj !== undefined && typeof(obj) === "object" && obj !== null && Object.prototype.toString.call(obj) !== '[object Array]';
 		}
 
 		function isFunction(func) {
@@ -6176,7 +6116,7 @@
 		}
 
 		function isArray(arr) {
-			return arr !== undefined && Array.isArray(arr);
+			return arr !== undefined && Object.prototype.toString.call(arr) === '[object Array]';
 		}
 
 		function isNode(obj){
@@ -6249,7 +6189,7 @@
 		}
 
 		function toArray(str) {
-			if (Array.isArray(str)) {
+			if (isArray(str)) {
 				return str;
 			} else {
 				return [str];
@@ -6664,13 +6604,11 @@
 					MAX_HEIGHT = maxCanvasSizes.maxHeight;
 				}
 
-				console.log("Test drawable maximum area to canvas: " + MAX_WIDTH + " x " + MAX_HEIGHT + " px");
-
 				// set scrollbar width
 				SCROLLBAR_WIDTH = getScrollbarWidth();
 
 				// set template
-				target.innerHTML = _canvasTemplate;
+				target.innerHTML = canvasTemplate;
 
 				// set elements
 				containerElement = target;
@@ -6755,14 +6693,14 @@
 				windowScrollEvent = undefined;
 
 				// reset ID
-				_originId = "canvaaas-o-";
-				_cloneId = "canvaaas-c-";
-				_originImgId = "canvaaas-oi-";
-				_cloneImgId = "canvaaas-ci-";
-				_originHandleId = "canvaaas-oh-";
-				_cloneHandleId = "canvaaas-ch-";
-				_originBorderId = "canvaaas-ob-";
-				_cloneBorderId = "canvaaas-cb-";
+				originId = "canvaaas-o-";
+				cloneId = "canvaaas-c-";
+				originImgId = "canvaaas-oi-";
+				cloneImgId = "canvaaas-ci-";
+				originHandleId = "canvaaas-oh-";
+				cloneHandleId = "canvaaas-ch-";
+				originBorderId = "canvaaas-ob-";
+				cloneBorderId = "canvaaas-cb-";
 		
 				MAX_WIDTH = 4096;
 				MAX_HEIGHT = 4096;
@@ -7144,9 +7082,72 @@
 			return founds;
 		}
 
+		myObject.id = function(oldId, newId, cb) {
+			if (!isExist(oldId)) {
+				if (config.edit) {
+					config.edit("Image not found");
+				}
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (!isString(newId)) {
+				if (config.edit) {
+					config.edit("Argument `newId` is not String");
+				}
+				if (cb) {
+					cb("Argument `newId` is not String");
+				}
+				return false;
+			}
+
+			var state = getImageState(oldId);
+			var str = toString(newId);
+
+			if (!canvasState.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by canvas settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by canvas settings");
+				}
+				return false;
+			}
+			if (!state.editable) {
+				if (config.edit) {
+					config.edit("You are not allowed to edit this image by image settings");
+				}
+				if (cb) {
+					cb("You are not allowed to edit this image by image settings");
+				}
+				return false;
+			}
+			if (isExist(str)) {
+				if (config.edit) {
+					config.edit("ID already exists");
+				}
+				if (cb) {
+					cb("ID already exists");
+				}
+				return false;
+			}
+
+			setId(oldId, str);
+
+			// callback
+			var res = copyImageState(str);
+			if (config.edit) {
+				config.edit(null, res);
+			}
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
 		/*
 			newState = {
-				id
 				index
 				width
 				height
@@ -7199,6 +7200,10 @@
 			var state = getImageState(id);
 			var updates = importImageState(newState);
 
+			if (typeof(updates.id) !== "undefined") {
+				updates.id === undefined;
+			}
+
 			if (!canvasState.editable) {
 				if (config.edit) {
 					config.edit("You are not allowed to edit this image by canvas settings");
@@ -7209,25 +7214,12 @@
 				return false;
 			}
 
-			if (isString(updates.id)) {
-				var tmp = toString(updates.id);
-				if (isExist(tmp)) {
-					if (config.edit) {
-						config.edit("ID duplicated");
-					}
-					if (cb) {
-						cb("ID duplicated");
-					}
-					return false;
-				}
-			}
-
 			// save cache
 			saveUndo(id);
 			// save image state
-			var resId = setImage(id, updates);
+			setImage(id, updates);
 			// callback
-			var res = copyImageState(resId);
+			var res = copyImageState(id);
 			if (config.edit) {
 				config.edit(null, res);
 			}
@@ -10126,5 +10118,15 @@
 
 	if (typeof(window.canvaaas) === 'undefined') {
 		window.canvaaas = canvaaas();
+	}
+	if (!String.prototype.trim) {
+		String.prototype.trim = function () {
+			return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+		};
+	}
+	if (!Array.isArray) {
+		Array.isArray = function(arg) {
+			return Object.prototype.toString.call(arg) === '[object Array]';
+		};
 	}
 })(window);

@@ -124,7 +124,7 @@
 ## Open image
 
 ```html
-<input id="blahblah" type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
+<input type="file" onchange="canvaaas.uploadFiles(this.files)" accept="image/*" multiple>
 ```
 
 ```html
@@ -151,24 +151,8 @@
     "cropLeft": 651.3696207894449,
     "cropRight": 621.4903760197732,
     "rotate": -17.881805128766516,
-    "scaleX": 1,
-    "scaleY": 1,
-    "opacity": 1,
-  }, {
-    "id": "test-2",
-    "src": "http://localhost:3000/img/1.png",
-    "index": 3,
-    "x": 1005.7025081608402,
-    "y": 233.64928605958755,
-    "width": 2124.7504194708827,
-    "height": 2124.7504194708827,
-    "cropTop": 801.2362568440648,
-    "cropBottom": 749.4330219066668,
-    "cropLeft": 671.584540163499,
-    "cropRight": 723.0107480910889,
-    "rotate": 6.213787277395312,
-    "scaleX": 1,
-    "scaleY": 1,
+    "scaleX": 1, // flipY
+    "scaleY": 1, // flipX
     "opacity": 1,
   }];
   // Argument type `Array`
@@ -292,7 +276,6 @@
 ```html
 <script>
   canvaaas.state(id, {
-    "id": "test", // string
     "index": 1, // number
     "x": 399.07235621521335, // number
     "y": 808.7198515769946, // number
@@ -342,6 +325,7 @@
 
 ```html
 <script>
+  canvaaas.id(id, newId);
   canvaaas.moveX(id, 45);
   canvaaas.moveY(id, -45);
   canvaaas.zoom(id, 1.1);
@@ -439,34 +423,6 @@ canvaaas.export([id1, id2], function(err, res){
     "cropLeft": 651.3696207894449,
     "cropRight": 621.4903760197732,
     "rotate": -17.881805128766516,
-    "scaleX": 1,
-    "scaleY": 1,
-    "opacity": 1,
-    "lockAspectRatio": false,
-    "visible": true,
-    "clickable": true,
-    "editable": true,
-    "movable": true,
-    "resizable": true,
-    "rotatable": true,
-    "flippable": true,
-    "croppable": true,
-    "drawable": true,
-    "pivot": true,
-    "grid": true,
-  }, {
-    "id": "test-2",
-    "src": "http://localhost:3000/img/1.png",
-    "index": 3,
-    "x": 1005.7025081608402,
-    "y": 233.64928605958755,
-    "width": 2124.7504194708827,
-    "height": 2124.7504194708827,
-    "cropTop": 801.2362568440648,
-    "cropBottom": 749.4330219066668,
-    "cropLeft": 671.584540163499,
-    "cropRight": 723.0107480910889,
-    "rotate": 6.213787277395312,
     "scaleX": 1,
     "scaleY": 1,
     "opacity": 1,
