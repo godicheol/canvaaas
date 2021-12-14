@@ -5655,16 +5655,23 @@
 				}
 
 				// save image state
+				var id = state.id;
 				if (isObject(exportedState)) {
 					additionalState = importImageState(exportedState);
 				} else {
 					additionalState = {};
 				}
-				var newId = setImage(state.id, additionalState);
+				if (additionalState.id) {
+					if (!isExist(id)) {
+						setId(additionalState.id);
+						id = additionalState.id;
+					}
+				}
+				setImage(id, additionalState);
 
 				// callback
 				if (cb) {
-					cb(null, newId);
+					cb(null, id);
 				}
 				return false;
 			}
@@ -7199,10 +7206,6 @@
 
 			var state = getImageState(id);
 			var updates = importImageState(newState);
-
-			if (typeof(updates.id) !== "undefined") {
-				updates.id === undefined;
-			}
 
 			if (!canvasState.editable) {
 				if (config.edit) {
