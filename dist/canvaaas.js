@@ -4570,16 +4570,19 @@
 				tmp.pivot = state.pivot;
 				tmp.grid = state.grid;
 
-				tmp.border = {};
-				for (var i = 0; i < Object.keys(state.border); i++) {
+				var tmpBorder = {};
+					for (var i = 0; i < Object.keys(state.border).length; i++) {
 					var k = Object.keys(state.border)[i];
-					tmp.border[k] = state.border[k];
+					tmpBorder[k] = state.border[k];
 				}
-				tmp.handle = {};
-				for (var i = 0; i < Object.keys(state.handle); i++) {
+				var tmpHandle = {};
+				for (var i = 0; i < Object.keys(state.handle).length; i++) {
 					var k = Object.keys(state.handle)[i];
-					tmp.handle[k] = state.handle[k];
+					tmpHandle[k] = state.handle[k];
 				}
+
+				tmp.border = tmpBorder;
+				tmp.handle = tmpHandle;
 
 				var croppedWidth = (state.width - (state.cropLeft + state.cropRight)) / scaleRatioX;
 				var croppedHeight = (state.height - (state.cropTop + state.cropBottom)) / scaleRatioY;
