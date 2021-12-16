@@ -211,51 +211,32 @@
 		var imageTemplate = "";
 		imageTemplate += "<div class='canvaaas-content'><img></div>";
 		imageTemplate += "<div class='canvaaas-overlay'></div>";
-		imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-x'></div>";
-		imageTemplate += "<div class='canvaaas-pivot canvaaas-direction-y'></div>";
-		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-n'></div>";
-		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-s'></div>";
-		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-e'></div>";
-		imageTemplate += "<div class='canvaaas-grid canvaaas-direction-w'></div>";
-		imageTemplate += "<div class='canvaaas-border canvaaas-direction-n'><div class='canvaaas-border-line'></div></div>";
-		imageTemplate += "<div class='canvaaas-border canvaaas-direction-s'><div class='canvaaas-border-line'></div></div>";
-		imageTemplate += "<div class='canvaaas-border canvaaas-direction-e'><div class='canvaaas-border-line'></div></div>";
-		imageTemplate += "<div class='canvaaas-border canvaaas-direction-w'><div class='canvaaas-border-line'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-n'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-e'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-s'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-w'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ne'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nw'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-se'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sw'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nn'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ee'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ss'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-ww'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nene'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-nwnw'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-sese'><div class='canvaaas-handle-square'></div></div>";
-		imageTemplate += "<div class='canvaaas-handle canvaaas-direction-swsw'><div class='canvaaas-handle-square'></div></div>";
-
-		var directionSet = [
-			"n",
-			"s",
-			"e",
-			"w",
-			"ne",
-			"nw",
-			"se",
-			"sw",
-			"nn",
-			"ss",
-			"ee",
-			"ww",
-			"nwnw",
-			"nene",
-			"swsw",
-			"sese",
-		];
+		imageTemplate += "<div class='canvaaas-pivot canvaaas-x'></div>";
+		imageTemplate += "<div class='canvaaas-pivot canvaaas-y'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-n'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-s'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-e'></div>";
+		imageTemplate += "<div class='canvaaas-grid canvaaas-w'></div>";
+		imageTemplate += "<div class='canvaaas-border-wrapper canvaaas-n'><div class='canvaaas-border canvaaas-n'></div></div>";
+		imageTemplate += "<div class='canvaaas-border-wrapper canvaaas-s'><div class='canvaaas-border canvaaas-s'></div></div>";
+		imageTemplate += "<div class='canvaaas-border-wrapper canvaaas-e'><div class='canvaaas-border canvaaas-e'></div></div>";
+		imageTemplate += "<div class='canvaaas-border-wrapper canvaaas-w'><div class='canvaaas-border canvaaas-w'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-n'><div class='canvaaas-handle canvaaas-n'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-e'><div class='canvaaas-handle canvaaas-e'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-s'><div class='canvaaas-handle canvaaas-s'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-w'><div class='canvaaas-handle canvaaas-w'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-ne'><div class='canvaaas-handle canvaaas-ne'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-nw'><div class='canvaaas-handle canvaaas-nw'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-se'><div class='canvaaas-handle canvaaas-se'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-sw'><div class='canvaaas-handle canvaaas-sw'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-nn'><div class='canvaaas-handle canvaaas-nn'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-ee'><div class='canvaaas-handle canvaaas-ee'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-ss'><div class='canvaaas-handle canvaaas-ss'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-ww'><div class='canvaaas-handle canvaaas-ww'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-nene'><div class='canvaaas-handle canvaaas-nene'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-nwnw'><div class='canvaaas-handle canvaaas-nwnw'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-sese'><div class='canvaaas-handle canvaaas-sese'></div></div>";
+		imageTemplate += "<div class='canvaaas-handle-wrapper canvaaas-swsw'><div class='canvaaas-handle canvaaas-swsw'></div></div>";
 
 		var MAX_WIDTH = 4096; // canvas
 		var MAX_HEIGHT = 4096; // canvas
@@ -3137,8 +3118,8 @@
 				}
 				if (
 					!elem.classList.contains("canvaaas-image") &&
-					!elem.classList.contains("canvaaas-handle") &&
-					!elem.classList.contains("canvaaas-border")
+					!elem.classList.contains("canvaaas-handle-wrapper") &&
+					!elem.classList.contains("canvaaas-border-wrapper")
 				) {
 					return {};
 				}
@@ -3183,8 +3164,8 @@
 							if (!candidate) {
 								if (
 									tmp.classList.contains("canvaaas-image") ||
-									tmp.classList.contains("canvaaas-handle") ||
-									tmp.classList.contains("canvaaas-border")
+									tmp.classList.contains("canvaaas-handle-wrapper") ||
+									tmp.classList.contains("canvaaas-border-wrapper")
 								) {
 									candidate = tmp;
 								} else {
@@ -3202,8 +3183,8 @@
 					if (!found) {
 						if (
 							candidate.classList.contains("canvaaas-image") ||
-							candidate.classList.contains("canvaaas-handle") ||
-							candidate.classList.contains("canvaaas-border")
+							candidate.classList.contains("canvaaas-handle-wrapper") ||
+							candidate.classList.contains("canvaaas-border-wrapper")
 						) {
 							found = candidate;
 						} else {
@@ -3265,10 +3246,10 @@
 				var clone = document.getElementById(cloneId + oldStr);
 				var originImg = document.getElementById(originImgId + oldStr);
 				var cloneImg = document.getElementById(cloneImgId + oldStr);
-				var originHandles = origin.querySelectorAll("div.canvaaas-handle");
-				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle");
-				var originBorders = origin.querySelectorAll("div.canvaaas-border");
-				var cloneBorders = clone.querySelectorAll("div.canvaaas-border");
+				var originHandles = origin.querySelectorAll("div.canvaaas-handle-wrapper");
+				var cloneHandles = clone.querySelectorAll("div.canvaaas-handle-wrapper");
+				var originBorders = origin.querySelectorAll("div.canvaaas-border-wrapper");
+				var cloneBorders = clone.querySelectorAll("div.canvaaas-border-wrapper");
 
 				// change undo caches
 				for (var i = 0; i < undoCaches.length; i++) {
@@ -5657,12 +5638,12 @@
 				imageStates.push(state);
 
 				// find handels
-				newOriginHandles = newOriginImage.querySelectorAll("div.canvaaas-handle");
-				newCloneHandles = newCloneImage.querySelectorAll("div.canvaaas-handle");
+				newOriginHandles = newOriginImage.querySelectorAll("div.canvaaas-handle-wrapper");
+				newCloneHandles = newCloneImage.querySelectorAll("div.canvaaas-handle-wrapper");
 
 				// find borders
-				newOriginBorders = newOriginImage.querySelectorAll("div.canvaaas-border");
-				newCloneBorders = newCloneImage.querySelectorAll("div.canvaaas-border");
+				newOriginBorders = newOriginImage.querySelectorAll("div.canvaaas-border-wrapper");
+				newCloneBorders = newCloneImage.querySelectorAll("div.canvaaas-border-wrapper");
 
 				// set handles
 				for (var i = 0; i < newOriginHandles.length; i++) {
@@ -5960,10 +5941,20 @@
 				if (!elem) {
 					return false;
 				}
-				for (var i = 0; i < directionSet.length; i++) {
-					if (elem.classList.contains("canvaaas-direction-" + directionSet[i])) {
-						found = directionSet[i];
+				if (elem.classList.contains("canvaaas-border-wrapper")) {
+					for (var i = 0; i < borderDirectionSet.length; i++) {
+						if (elem.classList.contains("canvaaas-" + borderDirectionSet[i])) {
+							found = borderDirectionSet[i];
+						}
 					}
+				} else if (elem.classList.contains("canvaaas-handle-wrapper")) {
+					for (var i = 0; i < handleDirectionSet.length; i++) {
+						if (elem.classList.contains("canvaaas-" + handleDirectionSet[i])) {
+							found = handleDirectionSet[i];
+						}
+					}
+				} else {
+					return false;
 				}
 				return found;
 			} catch(err) {

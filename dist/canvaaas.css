@@ -224,7 +224,7 @@
 .canvaaas-pivot.canvaaas-hidden{
 	display: none !important;
 }
-.canvaaas-pivot.canvaaas-direction-x{
+.canvaaas-pivot.canvaaas-x{
 	top: 50%;
 	left: 50%;
 	width: 12px;
@@ -232,7 +232,7 @@
 	transform: translate(-50%, -50%);
 	border-top: 1px solid #000000;
 }
-.canvaaas-pivot.canvaaas-direction-y{
+.canvaaas-pivot.canvaaas-y{
 	top: 50%;
 	left: 50%;
 	width: 0;
@@ -261,39 +261,39 @@
 .canvaaas-grid.canvaaas-hidden{
 	display: none !important;
 }
-.canvaaas-grid.canvaaas-direction-n{
+.canvaaas-grid.canvaaas-n{
 	top: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
 	border-top: 1px solid #000000;
 }
-.canvaaas-grid.canvaaas-direction-s{
+.canvaaas-grid.canvaaas-s{
 	bottom: 33%;
 	left: 0;
 	width: 100%;
 	height: 0;
 	border-bottom: 1px solid #000000;
 }
-.canvaaas-grid.canvaaas-direction-e{
+.canvaaas-grid.canvaaas-e{
 	top: 0;
 	right: 33%;
 	width: 0;
 	height: 100%;
 	border-right: 1px solid #000000;
 }
-.canvaaas-grid.canvaaas-direction-w{
+.canvaaas-grid.canvaaas-w{
 	top: 0;
 	left: 33%;
 	width: 0;
 	height: 100%;
 	border-left: 1px solid #000000;
 }
-/* /root/screen/canvas/images/image/border */
-/* /root/screen/mirror/images/image/border */
-/* /root/screen/canvas/images/image/border/border-line */
-/* /root/screen/mirror/images/image/border/border-line */
-.canvaaas-border-line{
+/* /root/screen/canvas/images/image/border-wrapper */
+/* /root/screen/mirror/images/image/border-wrapper */
+/* /root/screen/canvas/images/image/border-wrapper/border */
+/* /root/screen/mirror/images/image/border-wrapper/border */
+.canvaaas-border{
 	display: block;
 	position: absolute;
 	-webkit-touch-callout: none;
@@ -309,7 +309,7 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-border.canvaaas-direction-n .canvaaas-border-line{
+.canvaaas-border.canvaaas-n{
 	top: 50%;
 	left: 0;
 	width: 100%;
@@ -317,7 +317,7 @@
 	transform: translateY(-50%);
 	border-top: 1px solid #000000;
 }
-.canvaaas-border.canvaaas-direction-s .canvaaas-border-line{
+.canvaaas-border.canvaaas-s{
 	top: 50%;
 	left: 0;
 	width: 100%;
@@ -325,7 +325,7 @@
 	transform: translateY(-50%);
 	border-bottom: 1px solid #000000;
 }
-.canvaaas-border.canvaaas-direction-e .canvaaas-border-line{
+.canvaaas-border.canvaaas-e{
 	top: 0;
 	left: 50%;
 	width: 0;
@@ -333,7 +333,7 @@
 	transform: translateX(-50%);
 	border-right: 1px solid #000000;
 }
-.canvaaas-border.canvaaas-direction-w .canvaaas-border-line{
+.canvaaas-border.canvaaas-w{
 	top: 0;
 	left: 50%;
 	width: 0;
@@ -341,46 +341,46 @@
 	transform: translateX(-50%);
 	border-left: 1px solid #000000;
 }
-.canvaaas-border{
+.canvaaas-border-wrapper{
 	position: absolute;
 	display: block;
 }
-.canvaaas-border.canvaaas-hidden{
+.canvaaas-border-wrapper.canvaaas-hidden{
 	display: none !important;
 }
-.canvaaas-border.canvaaas-direction-n{
+.canvaaas-border-wrapper.canvaaas-n{
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 32px; /* click space */
 	transform: translateY(-50%);
 }
-.canvaaas-border.canvaaas-direction-s{
+.canvaaas-border-wrapper.canvaaas-s{
 	bottom: 0;
 	left: 0;
 	width: 100%;
 	height: 32px; /* click space */
 	transform: translateY(50%);
 }
-.canvaaas-border.canvaaas-direction-e{
+.canvaaas-border-wrapper.canvaaas-e{
 	top: 0;
 	right: 0;
 	height: 100%;
 	width: 32px; /* click space */
 	transform: translateX(50%);
 }
-.canvaaas-border.canvaaas-direction-w{
+.canvaaas-border-wrapper.canvaaas-w{
 	top: 0;
 	left: 0;
 	height: 100%;
 	width: 32px; /* click space */
 	transform: translateX(-50%);
 }
-/* /root/screen/canvas/images/image/handle */
-/* /root/screen/mirror/images/image/handle */
-/* /root/screen/canvas/images/image/handle/handle-square */
-/* /root/screen/mirror/images/image/handle/handle-square */
-.canvaaas-handle-square{
+/* /root/screen/canvas/images/image/handle-wrapper */
+/* /root/screen/mirror/images/image/handle-wrapper */
+/* /root/screen/canvas/images/image/handle-wrapper/handle */
+/* /root/screen/mirror/images/image/handle-wrapper/handle */
+.canvaaas-handle{
 	display: block;
 	position: absolute;
 	top: 50%;
@@ -404,91 +404,91 @@
 	border: 1px solid #000000;
 	background-color: #FFFFFF;
 }
-.canvaaas-handle{
+.canvaaas-handle-wrapper{
 	position: absolute;
 	display: block; /* hide */
 	width: 36px; /* click space */
 	height: 36px; /* click space */
 }
-.canvaaas-handle.canvaaas-hidden{
+.canvaaas-handle-wrapper.canvaaas-hidden{
 	display: none !important;
 }
-.canvaaas-handle.canvaaas-direction-n{
+.canvaaas-handle-wrapper.canvaaas-n{
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-ne{
+.canvaaas-handle-wrapper.canvaaas-ne{
 	top: 0;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-e{
+.canvaaas-handle-wrapper.canvaaas-e{
 	top: 50%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-se{
+.canvaaas-handle-wrapper.canvaaas-se{
 	top: 100%;
 	left: 100%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-s{
+.canvaaas-handle-wrapper.canvaaas-s{
 	top: 100%;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-sw{
+.canvaaas-handle-wrapper.canvaaas-sw{
 	top: 100%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-w{
+.canvaaas-handle-wrapper.canvaaas-w{
 	top: 50%;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-nw{
+.canvaaas-handle-wrapper.canvaaas-nw{
 	top: 0;
 	left: 0;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-nn{
+.canvaaas-handle-wrapper.canvaaas-nn{
 	top: -36px;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-nene{
+.canvaaas-handle-wrapper.canvaaas-nene{
 	top: -36px;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-ee{
+.canvaaas-handle-wrapper.canvaaas-ee{
 	top: 50%;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-sese{
+.canvaaas-handle-wrapper.canvaaas-sese{
 	bottom: -72px;
 	right: -72px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-ss{
+.canvaaas-handle-wrapper.canvaaas-ss{
 	bottom: -72px;
 	left: 50%;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-swsw{
+.canvaaas-handle-wrapper.canvaaas-swsw{
 	bottom: -72px;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-ww{
+.canvaaas-handle-wrapper.canvaaas-ww{
 	top: 50%;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
 }
-.canvaaas-handle.canvaaas-direction-nwnw{
+.canvaaas-handle-wrapper.canvaaas-nwnw{
 	top: -36px;
 	left: -36px;
 	transform: translateX(-50%) translateY(-50%);
@@ -513,29 +513,26 @@
 }
 
 /* click handle */
-.canvaaas-handle.canvaaas-editing .canvaaas-handle-square{
+.canvaaas-handle-wrapper.canvaaas-editing .canvaaas-handle{
 	background-color: #000000;
 }
 
 /* click border */
-.canvaaas-border.canvaaas-editing .canvaaas-border-line{
+.canvaaas-border-wrapper.canvaaas-editing .canvaaas-border{
 	border-width: 3px;
 }
 
 /* click handle */
-.canvaaas-handle.canvaaas-unclickable{
+.canvaaas-handle-wrapper.canvaaas-unclickable{
 	pointer-events: none !important;
 }
 
 /* click border */
-.canvaaas-border.canvaaas-unclickable{
+.canvaaas-border-wrapper.canvaaas-unclickable{
 	pointer-events: none !important;
 }
-
 
 /* mobile */
 @media only screen and (max-width: 768px) {
 
 }
-
-
