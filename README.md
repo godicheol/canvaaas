@@ -325,7 +325,12 @@
 
 ```html
 <script>
-  canvaaas.states(exportedStates);
+  canvaaas.findById(id);
+  canvaaas.find(object);
+  canvaaas.findNextIndex(id);
+  canvaaas.findPreviousIndex(id);
+  canvaaas.state(object);
+  canvaaas.states(object);
   canvaaas.id(id, newId);
   canvaaas.moveX(id, 45);
   canvaaas.moveY(id, -45);

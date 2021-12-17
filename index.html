@@ -1194,13 +1194,11 @@
 			<div class="list" style="display: none;">
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.find({
-							id: window.prompt('id', 'id')
-						}, function(err, res){
+						canvaaas.findById(window.prompt('id', 'id'), function(err, res){
 							if (err) {return false;}
 							alert(JSON.stringify(res, null, 2));
 						})
-					">Find for id</a>
+					">Find by id</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -1210,7 +1208,7 @@
 							if (err) {return false;}
 							alert(JSON.stringify(res, null, 2));
 						})
-					">Find for index</a>
+					">Find by index</a>
 				</div>
 				<div class="row rule">
 					<a href="javascript:void(0)" onclick="
@@ -1220,7 +1218,7 @@
 							if (err) {return false;}
 							alert(JSON.stringify(res, null, 2));
 						})
-					">Find for visible</a>
+					">Find by visible</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -1252,10 +1250,10 @@
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.getImages(function(err, res){
-							console.log('canvaaas.getImages()', res);
+						canvaaas.find({}, function(err, res){
+							console.log('canvaaas.find()', res);
 						})
-					">Get images data</a>
+					">Get all images data</a>
 				</div>
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
@@ -2276,7 +2274,7 @@
 				// drawable: document.getElementById("myDrawable"),
 			}
 			if (selectedId) {
-				canvaaas.getImage(selectedId, function(err, res){
+				canvaaas.findById(selectedId, function(err, res){
 					if (err) {return false;}
 					inputs.index.innerHTML = "(" + Math.floor(res.index) + ")";
 					inputs.id.innerHTML = res.id;

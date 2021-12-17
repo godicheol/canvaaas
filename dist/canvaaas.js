@@ -7105,6 +7105,20 @@
 		// edit image
 		//
 
+		myObject.findById = function(id, cb){
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			var res = copyImageState(id);
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
 		myObject.find = function(query, cb){
 			if (!isObject(query)) {
 				if (cb) {
@@ -7146,11 +7160,114 @@
 				}
 				return false;
 			}
+
+			founds.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
 			// callback
 			if (cb) {
 				cb(null, founds);
 			}
 			return founds;
+		}
+
+		myObject.findPreviousIndex = function(id, cb){
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var sortedStates = [];
+
+			for(var i = 0; i < imageStates.length; i++) {
+				sortedStates.push(imageStates[i]);
+			}
+
+			sortedStates.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
+			var found;
+			for (var i = 0; i < sortedStates.length; i++) {
+				if (sortedStates[i].id === id) {
+					if (sortedStates[i - 1]) {
+						found = copyImageState(sortedStates[i - 1].id);
+					}
+				}
+			}
+
+			if (!found) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (cb) {
+				cb(null, found);
+			}
+			return found;
+		}
+
+		myObject.findNextIndex = function(id, cb){
+			if (!isExist(id)) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+
+			var state = getImageState(id);
+			var sortedStates = [];
+
+			for(var i = 0; i < imageStates.length; i++) {
+				sortedStates.push(imageStates[i]);
+			}
+
+			sortedStates.sort(function(a, b){
+				if (a.index > b.index) {
+					return 1;
+				}
+				if (a.index < b.index) {
+					return -1;
+				}
+				return 0;
+			});
+
+			var found;
+			for (var i = 0; i < sortedStates.length; i++) {
+				if (sortedStates[i].id === id) {
+					if (sortedStates[i + 1]) {
+						found = copyImageState(sortedStates[i + 1].id);
+					}
+				}
+			}
+
+			if (!found) {
+				if (cb) {
+					cb("Image not found");
+				}
+				return false;
+			}
+			if (cb) {
+				cb(null, found);
+			}
+			return found;
 		}
 
 		myObject.id = function(oldId, newId, cb) {
@@ -9900,134 +10017,6 @@
 				cb(null, res);
 			}
 			return res;
-		}
-
-		myObject.getImage = function(id, cb){
-			if (!isExist(id)) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-			var res = copyImageState(id);
-			if (cb) {
-				cb(null, res);
-			}
-			return res;
-		}
-
-		myObject.getImages = function(cb){
-			var arr = [];
-			for(var i = 0; i < imageStates.length; i++) {
-				var tmp = copyImageState(imageStates[i].id);
-				arr.push(tmp);
-			}
-			arr.sort(function(a, b){
-				if (a.index > b.index) {
-					return 1;
-				}
-				if (a.index < b.index) {
-					return -1;
-				}
-				return 0;
-			});
-
-			if (cb) {
-				cb(null, arr);
-			}
-			return arr;
-		}
-
-		myObject.getPrevious = function(id, cb){
-			if (!isExist(id)) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			var state = getImageState(id);
-			var sortedStates = [];
-
-			for(var i = 0; i < imageStates.length; i++) {
-				sortedStates.push(imageStates[i]);
-			}
-
-			sortedStates.sort(function(a, b){
-				if (a.index > b.index) {
-					return 1;
-				}
-				if (a.index < b.index) {
-					return -1;
-				}
-				return 0;
-			});
-
-			var found;
-			for (var i = 0; i < sortedStates.length; i++) {
-				if (sortedStates[i].id === id) {
-					if (sortedStates[i - 1]) {
-						found = copyImageState(sortedStates[i - 1].id);
-					}
-				}
-			}
-
-			if (!found) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-			if (cb) {
-				cb(null, found);
-			}
-			return found;
-		}
-
-		myObject.getNext = function(id, cb){
-			if (!isExist(id)) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-
-			var state = getImageState(id);
-			var sortedStates = [];
-
-			for(var i = 0; i < imageStates.length; i++) {
-				sortedStates.push(imageStates[i]);
-			}
-
-			sortedStates.sort(function(a, b){
-				if (a.index > b.index) {
-					return 1;
-				}
-				if (a.index < b.index) {
-					return -1;
-				}
-				return 0;
-			});
-
-			var found;
-			for (var i = 0; i < sortedStates.length; i++) {
-				if (sortedStates[i].id === id) {
-					if (sortedStates[i + 1]) {
-						found = copyImageState(sortedStates[i + 1].id);
-					}
-				}
-			}
-
-			if (!found) {
-				if (cb) {
-					cb("Image not found");
-				}
-				return false;
-			}
-			if (cb) {
-				cb(null, found);
-			}
-			return found;
 		}
 
 		myObject.getMouse = function(x, y, cb){
