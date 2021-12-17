@@ -3083,29 +3083,7 @@
 						return false;
 					}
 
-					// var oldCanvasWidth = canvasState.canvasWidth;
-					// var oldCanvasHeight = canvasState.canvasHeight;
-
 					applyStyleToCanvas();
-
-					// var newCanvasWidth = canvasState.canvasWidth;
-					// var newCanvasHeight = canvasState.canvasHeight;
-					// var scaleRatioX = newCanvasWidth / oldCanvasWidth;
-					// var scaleRatioY = newCanvasHeight / oldCanvasHeight;
-	
-					// for(var i = 0; i < imageStates.length; i++) {
-					// 	var state = imageStates[i];
-					// 	setImage(state.id, {
-					// 		x: state.x * scaleRatioX,
-					// 		y: state.y * scaleRatioY,
-					// 		width: state.width * scaleRatioX,
-					// 		height: state.height * scaleRatioY,
-					// 		cropTop: state.cropTop * scaleRatioY,
-					// 		cropBottom: state.cropBottom * scaleRatioY,
-					// 		cropLeft: state.cropLeft * scaleRatioX,
-					// 		cropRight: state.cropRight * scaleRatioX
-					// 	});
-					// }
 
 				} catch(err) {
 					console.log(err);
@@ -3913,6 +3891,9 @@
 
 		function setCanvas(newState) {
 			try {
+				var oldOriginalWidth = canvasState.originalWidth;
+				var oldOriginalHeight = canvasState.originalHeight;
+
 				if (!isObject(newState)) {
 					return false;
 				}
@@ -3984,6 +3965,27 @@
 				}
 				if (typeof(canvasState.y) === "undefined") {
 					canvasState.y = 0.5 * canvasState.originalHeight;
+				}
+
+				var newOriginalWidth = canvasState.originalWidth;
+				var newOriginalHeight = canvasState.originalHeight;
+				var scaleRatioX = oldOriginalWidth / newOriginalWidth;
+				var scaleRatioY = oldOriginalHeight / newOriginalHeight;
+
+				if (oldOriginalWidth && oldOriginalHeight) {
+					for(var i = 0; i < imageStates.length; i++) {
+						var state = imageStates[i];
+						setImage(state.id, {
+							x: state.x * scaleRatioX,
+							y: state.y * scaleRatioY,
+							width: state.width * scaleRatioX,
+							height: state.height * scaleRatioY,
+							cropTop: state.cropTop * scaleRatioY,
+							cropBottom: state.cropBottom * scaleRatioY,
+							cropLeft: state.cropLeft * scaleRatioX,
+							cropRight: state.cropRight * scaleRatioX
+						});
+					}
 				}
 
 				applyStyleToCanvas();

@@ -753,9 +753,15 @@
 			<div class="list" style="display: none;">
 				<div class="row">
 					<a href="javascript:void(0)" onclick="
+						var w = window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().originalWidth);
+						var h = window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().originalHeight);
 						canvaaas.canvas({
-							originalWidth: window.prompt('Width (e.g. 1200)', canvaaas.getCanvas().originalWidth),
-							originalHeight: window.prompt('Height (e.g. 1200)', canvaaas.getCanvas().originalHeight)
+							originalWidth: w,
+							originalHeight: h,
+							x: 0.5 * w,
+							y: 0.5 * h,
+							width: w,
+							height: h
 						})
 					">Resize</a>
 				</div>
