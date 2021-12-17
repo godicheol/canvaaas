@@ -3891,8 +3891,15 @@
 
 		function setCanvas(newState) {
 			try {
-				var oldOriginalWidth = canvasState.originalWidth;
-				var oldOriginalHeight = canvasState.originalHeight;
+				// tmp
+				if (canvasState.originalWidth) {
+					canvasState.oldOriginalWidth = canvasState.originalWidth;
+				}
+				// tmp
+				if (canvasState.originalHeight) {
+					canvasState.oldOriginalHeight = canvasState.originalHeight;
+				}
+
 
 				if (!isObject(newState)) {
 					return false;
@@ -3965,27 +3972,6 @@
 				}
 				if (typeof(canvasState.y) === "undefined") {
 					canvasState.y = 0.5 * canvasState.originalHeight;
-				}
-
-				var newOriginalWidth = canvasState.originalWidth;
-				var newOriginalHeight = canvasState.originalHeight;
-				var scaleRatioX = oldOriginalWidth / newOriginalWidth;
-				var scaleRatioY = oldOriginalHeight / newOriginalHeight;
-
-				if (oldOriginalWidth && oldOriginalHeight) {
-					for(var i = 0; i < imageStates.length; i++) {
-						var state = imageStates[i];
-						setImage(state.id, {
-							x: state.x * scaleRatioX,
-							y: state.y * scaleRatioY,
-							width: state.width * scaleRatioX,
-							height: state.height * scaleRatioY,
-							cropTop: state.cropTop * scaleRatioY,
-							cropBottom: state.cropBottom * scaleRatioY,
-							cropLeft: state.cropLeft * scaleRatioX,
-							cropRight: state.cropRight * scaleRatioX
-						});
-					}
 				}
 
 				applyStyleToCanvas();
@@ -4105,6 +4091,17 @@
 
 				canvasState.isInitialized = true;
 
+				var originalScaleRatioX = 1;
+				if (canvasState.oldOriginalWidth) {
+					originalScaleRatioX = canvasState.oldOriginalWidth / canvasState.originalWidth;
+					canvasState.oldOriginalWidth = undefined;
+				}
+				var originalScaleRatioY = 1;
+				if (canvasState.oldOriginalHeight) {
+					originalScaleRatioY = canvasState.oldOriginalHeight / canvasState.originalHeight;
+					canvasState.oldOriginalHeight = undefined;
+				}
+
 				var newCanvasWidth = canvasState.canvasWidth;
 				var newCanvasHeight = canvasState.canvasHeight;
 				var scaleRatioX = newCanvasWidth / oldCanvasWidth;
@@ -4113,14 +4110,14 @@
 				for(var i = 0; i < imageStates.length; i++) {
 					var state = imageStates[i];
 					setImage(state.id, {
-						x: state.x * scaleRatioX,
-						y: state.y * scaleRatioY,
-						width: state.width * scaleRatioX,
-						height: state.height * scaleRatioY,
-						cropTop: state.cropTop * scaleRatioY,
-						cropBottom: state.cropBottom * scaleRatioY,
-						cropLeft: state.cropLeft * scaleRatioX,
-						cropRight: state.cropRight * scaleRatioX
+						x: state.x * scaleRatioX * originalScaleRatioX,
+						y: state.y * scaleRatioY * originalScaleRatioY,
+						width: state.width * scaleRatioX * originalScaleRatioX,
+						height: state.height * scaleRatioY * originalScaleRatioY,
+						cropTop: state.cropTop * scaleRatioY * originalScaleRatioY,
+						cropBottom: state.cropBottom * scaleRatioY * originalScaleRatioY,
+						cropLeft: state.cropLeft * scaleRatioX * originalScaleRatioX,
+						cropRight: state.cropRight * scaleRatioX * originalScaleRatioX
 					});
 				}
 				
