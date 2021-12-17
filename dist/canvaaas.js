@@ -3082,7 +3082,30 @@
 					if (!canvasState.isInitialized) {
 						return false;
 					}
+
+					var oldCanvasWidth = canvasState.canvasWidth;
+					var oldCanvasHeight = canvasState.canvasHeight;
+
 					applyStyleToCanvas();
+
+					var newCanvasWidth = canvasState.canvasWidth;
+					var newCanvasHeight = canvasState.canvasHeight;
+					var scaleRatioX = newCanvasWidth / oldCanvasWidth;
+					var scaleRatioY = newCanvasHeight / oldCanvasHeight;
+	
+					for(var i = 0; i < imageStates.length; i++) {
+						var state = imageStates[i];
+						setImage(state.id, {
+							x: state.x * scaleRatioX,
+							y: state.y * scaleRatioY,
+							width: state.width * scaleRatioX,
+							height: state.height * scaleRatioY,
+							cropTop: state.cropTop * scaleRatioY,
+							cropBottom: state.cropBottom * scaleRatioY,
+							cropLeft: state.cropLeft * scaleRatioX,
+							cropRight: state.cropRight * scaleRatioX
+						});
+					}
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -3153,28 +3176,25 @@
 
 		function getTargetElement(e) {
 			try {
+				var candidate;
 				var found;
-				var target;
 				if (typeof(e.touches) === "undefined") {
-					target = e.target;
+					candidate = e.target;
 				} else if (e.touches.length > 0) {
 					for(var i = 0; i < e.touches.length; i++) {
-						if (target) {
-							break;
-						}
-						var tmpTarget = e.touches[i].target;
+						var tmp = e.touches[i].target;
 						for(var j = 0; j < 2; j++) {
-							if (
-								tmpTarget.classList.contains("canvaaas-image") ||
-								tmpTarget.classList.contains("canvaaas-handle-wrapper") ||
-								tmpTarget.classList.contains("canvaaas-border-wrapper")
-							) {
-								target = tmpTarget;
-								break;
-							} else {
-								if (tmpTarget.parentNode) {
-									var tmp = tmpTarget.parentNode;
-									tmpTarget = tmp;
+							if (!candidate) {
+								if (
+									tmp.classList.contains("canvaaas-image") ||
+									tmp.classList.contains("canvaaas-handle-wrapper") ||
+									tmp.classList.contains("canvaaas-border-wrapper")
+								) {
+									candidate = tmp;
+								} else {
+									if (tmp.parentNode) {
+										tmp = tmp.parentNode;
+									}
 								}
 							}
 						}
@@ -3182,21 +3202,18 @@
 				} else {
 					return false;
 				}
-				if (!target) {
-					return false;
-				}
 				for(var i = 0; i < 2; i++) {
-					if (
-						target.classList.contains("canvaaas-image") ||
-						target.classList.contains("canvaaas-handle-wrapper") ||
-						target.classList.contains("canvaaas-border-wrapper")
-					) {
-						found = target;
-						break;
-					} else {
-						if (target.parentNode) {
-							var tmp = target.parentNode;
-							target = tmp;
+					if (!found) {
+						if (
+							candidate.classList.contains("canvaaas-image") ||
+							candidate.classList.contains("canvaaas-handle-wrapper") ||
+							candidate.classList.contains("canvaaas-border-wrapper")
+						) {
+							found = candidate;
+						} else {
+							if (candidate.parentNode) {
+								candidate = candidate.parentNode;
+							}
 						}
 					}
 				}
@@ -3219,7 +3236,6 @@
 				for (var i = 0; i < imageStates.length; i++) {
 					if (candidate === imageStates[i].id) {
 						found = imageStates[i];
-						break;
 					}
 				}
 				return found;
@@ -3980,9 +3996,6 @@
 
 		function applyStyleToCanvas() {
 			try {
-				var oldCanvasWidth = canvasState.canvasWidth;
-				var oldCanvasHeight = canvasState.canvasHeight;
-
 				var containerPadding = getPadding(containerElement);
 				var containerPaddingX = containerPadding[1] + containerPadding[3];
 				var containerPaddingY = containerPadding[0] + containerPadding[2];
@@ -4085,26 +4098,7 @@
 				}
 
 				canvasState.isInitialized = true;
-
-				var newCanvasWidth = canvasState.canvasWidth;
-				var newCanvasHeight = canvasState.canvasHeight;
-				var scaleRatioX = newCanvasWidth / oldCanvasWidth;
-				var scaleRatioY = newCanvasHeight / oldCanvasHeight;
-
-				for(var i = 0; i < imageStates.length; i++) {
-					var state = imageStates[i];
-					setImage(state.id, {
-						x: state.x * scaleRatioX,
-						y: state.y * scaleRatioY,
-						width: state.width * scaleRatioX,
-						height: state.height * scaleRatioY,
-						cropTop: state.cropTop * scaleRatioY,
-						cropBottom: state.cropBottom * scaleRatioY,
-						cropLeft: state.cropLeft * scaleRatioX,
-						cropRight: state.cropRight * scaleRatioX
-					});
-				}
-
+				
 				return true;
 			} catch(err) {
 				console.log(err);
@@ -5952,14 +5946,12 @@
 					for (var i = 0; i < borderDirectionSet.length; i++) {
 						if (elem.classList.contains("canvaaas-" + borderDirectionSet[i])) {
 							found = borderDirectionSet[i];
-							break;
 						}
 					}
 				} else if (elem.classList.contains("canvaaas-handle-wrapper")) {
 					for (var i = 0; i < handleDirectionSet.length; i++) {
 						if (elem.classList.contains("canvaaas-" + handleDirectionSet[i])) {
 							found = handleDirectionSet[i];
-							break;
 						}
 					}
 				} else {
@@ -9954,7 +9946,6 @@
 				if (sortedStates[i].id === id) {
 					if (sortedStates[i - 1]) {
 						found = copyImageState(sortedStates[i - 1].id);
-						break;
 					}
 				}
 			}
@@ -10001,7 +9992,6 @@
 				if (sortedStates[i].id === id) {
 					if (sortedStates[i + 1]) {
 						found = copyImageState(sortedStates[i + 1].id);
-						break;
 					}
 				}
 			}
@@ -10239,10 +10229,13 @@
 
 	}
 
-	// 
-	// polyfill
-	// 
+	//
+	// global export
+	//
 
+	if (typeof(window.canvaaas) === 'undefined') {
+		window.canvaaas = canvaaas();
+	}
 	if (!String.prototype.trim) {
 		String.prototype.trim = function () {
 			return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
@@ -10252,13 +10245,5 @@
 		Array.isArray = function(arg) {
 			return Object.prototype.toString.call(arg) === '[object Array]';
 		};
-	}
-
-	//
-	// global export
-	//
-
-	if (typeof(window.canvaaas) === 'undefined') {
-		window.canvaaas = canvaaas();
 	}
 })(window);
