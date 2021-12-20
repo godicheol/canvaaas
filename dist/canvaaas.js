@@ -3891,16 +3891,12 @@
 
 		function setCanvas(newState) {
 			try {
-				// tmp
-				if (canvasState.originalWidth) {
+				// fix images coordinate
+				if (canvasState.isInitialized) {
 					canvasState.oldOriginalWidth = canvasState.originalWidth;
-				}
-				// tmp
-				if (canvasState.originalHeight) {
 					canvasState.oldOriginalHeight = canvasState.originalHeight;
 				}
-
-
+				// main
 				if (!isObject(newState)) {
 					return false;
 				}
@@ -10017,6 +10013,20 @@
 				cb(null, res);
 			}
 			return res;
+		}
+
+		myObject.getImage = myObject.findById;
+
+		myObject.getImages = function(cb){
+			var arr = [];
+			for (var i = 0; i < imageStates.length; i++) {
+				var tmp = copyImageState(imageStates[i].id);
+				arr.push(tmp);
+			}
+			if (cb) {
+				cb(null, arr);
+			}
+			return arr;
 		}
 
 		myObject.getMouse = function(x, y, cb){
