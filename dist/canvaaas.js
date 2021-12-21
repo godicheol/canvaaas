@@ -1076,8 +1076,21 @@
 					diff = Math.abs(moveX) + Math.abs(moveY);
 
 					if (diff > 2) {
-						// end click
-						handlers.endClick(e);
+						// end click without callback
+						// clear event state
+						eventState.click = false;
+						eventState.onClick = false;
+						eventState.target = undefined;
+
+						// remove class
+						removeClassToImage(id, "canvaaas-editing");
+
+						// remove events
+						document.removeEventListener("mousemove", handlers.onClick, false);
+						document.removeEventListener("mouseup", handlers.endClick, false);
+
+						document.removeEventListener("touchmove", handlers.onClick, false);
+						document.removeEventListener("touchend", handlers.endClick, false);
 
 						// event propagation
 						return handlers.startMove(e);
