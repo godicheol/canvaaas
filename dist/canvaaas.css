@@ -18,6 +18,7 @@
 	user-drag: none;
 
 	overflow: hidden;
+	z-index: 1;
 }
 /* /root/screen/canvas */
 /* /root/screen/mirror */
@@ -39,11 +40,11 @@
 }
 .canvaaas-canvas{
 	overflow: hidden;
-	z-index: 1002;
+	z-index: 2;
 }
 .canvaaas-mirror{
 	overflow: visible;
-	z-index: 1001;
+	z-index: 1;
 }
 .canvaaas-mirror.canvaaas-hidden{
 	display: none !important;
@@ -56,7 +57,7 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	z-index: 1002;
+	z-index: 2;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -78,7 +79,7 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	z-index: 1001;
+	z-index: 1;
 	background: -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -webkit-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
 	background: -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), -moz-linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
 	background: linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), linear-gradient(45deg, rgba(0, 0, 0, 0.0980392) 25%, transparent 25%, transparent 75%, rgba(0, 0, 0, 0.0980392) 75%, rgba(0, 0, 0, 0.0980392) 0), white;
@@ -124,7 +125,7 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	z-index: 1003;
+	z-index: 3;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
