@@ -598,7 +598,6 @@
 			startClickHandle: function(e) {
 				try {
 					var target = getTargetElement(e);
-				
 					var targetData = getTargetData(target);
 					var id = targetData.id;
 					var type = targetData.type;
@@ -622,6 +621,8 @@
 					}
 					e.preventDefault();
 					e.stopPropagation();
+					
+					// event propagation
 					if (state["handle"][flippedDirection] === "resize") {
 						return handlers.startResize(e);
 					} else if (state["handle"][flippedDirection] === "rotate") {
@@ -706,25 +707,21 @@
 					moveX = mouseX - eventState.mouseX;
 					moveY = mouseY - eventState.mouseY;
 
+					// cancel
 					if (Math.abs(moveX) > 12 || Math.abs(moveY) > 12) {
+						// clear event state
 						eventState.click = false;
 						eventState.onClick = false;
-					}
+						eventState.target = undefined;
 
-					// callback
-					// var res = copyImageState(id);
-					// var evt = {
-					// 	id: id,
-					// 	method: "click",
-					// 	status: "continue",
-					// 	type: type,
-					// 	direction: direction,
-					// 	mouseX: mouseX,
-					// 	mouseY: mouseY
-					// }
-					// if (config.edit) {	
-					// 	config.edit(null, res, evt);
-					// }
+						// remove events
+						document.removeEventListener("mousemove", handlers.onClickHandle, false);
+						document.removeEventListener("mouseup", handlers.endClickHandle, false);
+
+						document.removeEventListener("touchmove", handlers.onClickHandle, false);
+						document.removeEventListener("touchend", handlers.endClickHandle, false);
+						return false;
+					}
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -808,9 +805,11 @@
 					if (!state["border"][flippedDirection]) {
 						return false;
 					}
+
 					e.preventDefault();
 					e.stopPropagation();
 
+					// event propagation
 					if (state["border"][flippedDirection] === "resize") {
 						return handlers.startResize(e);
 					} else if (state["border"][flippedDirection] === "crop") {
@@ -893,25 +892,21 @@
 					moveX = mouseX - eventState.mouseX;
 					moveY = mouseY - eventState.mouseY;
 
+					// cancel
 					if (Math.abs(moveX) > 12 || Math.abs(moveY) > 12) {
+						// clear event state
 						eventState.click = false;
 						eventState.onClick = false;
-					}
+						eventState.target = undefined;
 
-					// callback
-					// var res = copyImageState(id);
-					// var evt = {
-					// 	id: id,
-					// 	method: "click",
-					// 	status: "continue",
-					// 	type: type,
-					// 	direction: direction,
-					// 	mouseX: mouseX,
-					// 	mouseY: mouseY
-					// }
-					// if (config.edit) {	
-					// 	config.edit(null, res, evt);
-					// }
+						// remove events
+						document.removeEventListener("mousemove", handlers.onClickBorder, false);
+						document.removeEventListener("mouseup", handlers.endClickBorder, false);
+
+						document.removeEventListener("touchmove", handlers.onClickBorder, false);
+						document.removeEventListener("touchend", handlers.endClickBorder, false);
+						return false;
+					}
 				} catch(err) {
 					console.log(err);
 					return false;
@@ -991,8 +986,10 @@
 					if (!canvasState.clickable || !state.clickable) {
 						return false;
 					}
+
 					e.preventDefault();
 					e.stopPropagation();
+
 					if (typeof(e.touches) === "undefined") {
 						mouseX = e.clientX;
 						mouseY = e.clientY;
@@ -1075,8 +1072,8 @@
 					moveY = mouseY - eventState.mouseY;
 					diff = Math.abs(moveX) + Math.abs(moveY);
 
+					// cancel
 					if (diff > 2) {
-						// end click without callback
 						// clear event state
 						eventState.click = false;
 						eventState.onClick = false;
@@ -2671,6 +2668,10 @@
 					var rotateY = state.rotateY;
 					var scaleX = state.scaleX;
 					var scaleY = state.scaleY;
+					var cropTop = state.cropTop;
+					var cropBottom = state.cropBottom;
+					var cropLeft = state.cropLeft;
+					var cropRight = state.cropRight;
 					var mouseX;
 					var mouseY;
 					if (typeof(e.changedTouches) === "undefined") {
@@ -2685,15 +2686,29 @@
 	
 					if (Math.abs(rotateX) > 90) {
 						scaleY = -1 * scaleY;
+
+						// fix flip
+						var tmp = cropTop;
+						cropTop = cropBottom;
+						cropBottom = tmp;
 					}
 					if (Math.abs(rotateY) > 90) {
 						scaleX = -1 * scaleX;
+
+						// fix flip
+						var tmp = cropLeft;
+						cropLeft = cropRight;
+						cropRight = tmp;
 					}
 	
 					// save image state
 					setImage(id, {
 						rotateX: 0,
 						rotateY: 0,
+						cropTop: cropTop,
+						cropBottom: cropBottom,
+						cropLeft: cropLeft,
+						cropRight: cropRight,
 						scaleX: scaleX,
 						scaleY: scaleY,
 					});
@@ -3380,46 +3395,18 @@
 						state.opacity = tmp;
 					}
 				}
-				if (isBoolean(newState.visible)) {
-					state.visible = toBoolean(newState.visible);
-				}
-				if (isBoolean(newState.clickable)) {
-					state.clickable = toBoolean(newState.clickable);
-				}
-				if (isBoolean(newState.editable)) {
-					state.editable = toBoolean(newState.editable);
-				}
-				if (isBoolean(newState.movable)) {
-					state.movable = toBoolean(newState.movable);
-				}
-				if (isBoolean(newState.resizable)) {
-					state.resizable = toBoolean(newState.resizable);
-				}
-				if (isBoolean(newState.rotatable)) {
-					state.rotatable = toBoolean(newState.rotatable);
-				}
-				if (isBoolean(newState.flippable)) {
-					state.flippable = toBoolean(newState.flippable);
-				}
-				if (isBoolean(newState.croppable)) {
-					state.croppable = toBoolean(newState.croppable);
-				}
-				if (isBoolean(newState.drawable)) {
-					state.drawable = toBoolean(newState.drawable);
-				}
-				// before flip
 				if (isNumeric(newState.scaleX)) {
 					oldScaleX = state.scaleX;
 					newScaleX = toNumber(newState.scaleX);
 					if (newScaleX === 1 || newScaleX === -1) {
 						state.scaleX = newScaleX;
 					}
-					// fix flip Y
-					if (newScaleX !== oldScaleX) {
-						tmp = state.cropLeft;
-						state.cropLeft = state.cropRight;
-						state.cropRight = tmp;
-					}
+					// deprecated
+					// if (newScaleX !== oldScaleX) {
+					// 	tmp = state.cropLeft;
+					// 	state.cropLeft = state.cropRight;
+					// 	state.cropRight = tmp;
+					// }
 				}
 				if (isNumeric(newState.scaleY)) {
 					oldScaleY = state.scaleY;
@@ -3427,14 +3414,13 @@
 					if (newScaleY === 1 || newScaleY === -1) {
 						state.scaleY = newScaleY;
 					}
-					// fix flip X
-					if (newScaleY !== oldScaleY) {
-						tmp = state.cropTop;
-						state.cropTop = state.cropBottom;
-						state.cropBottom = tmp;
-					}
+					// deprecated
+					// if (newScaleY !== oldScaleY) {
+					// 	tmp = state.cropTop;
+					// 	state.cropTop = state.cropBottom;
+					// 	state.cropBottom = tmp;
+					// }
 				}
-				// after flip
 				if (isNumeric(newState.cropTop)) {
 					tmp = toNumber(newState.cropTop);
 					if (tmp < 0) {
@@ -3466,6 +3452,33 @@
 					} else {
 						state.cropRight = tmp;
 					}
+				}
+				if (isBoolean(newState.visible)) {
+					state.visible = toBoolean(newState.visible);
+				}
+				if (isBoolean(newState.clickable)) {
+					state.clickable = toBoolean(newState.clickable);
+				}
+				if (isBoolean(newState.editable)) {
+					state.editable = toBoolean(newState.editable);
+				}
+				if (isBoolean(newState.movable)) {
+					state.movable = toBoolean(newState.movable);
+				}
+				if (isBoolean(newState.resizable)) {
+					state.resizable = toBoolean(newState.resizable);
+				}
+				if (isBoolean(newState.rotatable)) {
+					state.rotatable = toBoolean(newState.rotatable);
+				}
+				if (isBoolean(newState.flippable)) {
+					state.flippable = toBoolean(newState.flippable);
+				}
+				if (isBoolean(newState.croppable)) {
+					state.croppable = toBoolean(newState.croppable);
+				}
+				if (isBoolean(newState.drawable)) {
+					state.drawable = toBoolean(newState.drawable);
 				}
 				if (isBoolean(newState.lockAspectRatio)) {
 					oldLAR = state.lockAspectRatio;
@@ -3536,7 +3549,7 @@
 					state.handle = obj;
 				}
 
-				applyStyleToImage(id);
+				applyStyleToImage(state);
 
 				return true;
 			} catch(err) {
@@ -3545,13 +3558,12 @@
 			}
 		}
 
-		function applyStyleToImage(id) {
+		function applyStyleToImage(state) {
 			try {
-				var state = getImageState(id);
-				var origin = document.getElementById(originId + id);
-				var clone = document.getElementById(cloneId + id);
-				var originImg = document.getElementById(originImgId + id);
-				var cloneImg = document.getElementById(cloneImgId + id);
+				var origin = document.getElementById(originId + state.id);
+				var clone = document.getElementById(cloneId + state.id);
+				var originImg = document.getElementById(originImgId + state.id);
+				var cloneImg = document.getElementById(cloneImgId + state.id);
 				var originPivots;
 				var clonePivots;
 				var originGrids;
@@ -3636,7 +3648,7 @@
 				croppedT = Math.floor(axisY - (0.5 * croppedH));
 				croppedL = Math.floor(axisX - (0.5 * croppedW));
 
-				// chk flip
+				// fix flip
 				if (scaleX < 0) {
 					var tmp = cropLeft;
 					cropLeft = cropRight;
@@ -3648,13 +3660,13 @@
 					cropBottom = tmp
 				}
 				
-				// for img
+				// fix cropped img coordinate
 				imgT = Math.floor(-cropTop);
 				imgL = Math.floor(-cropLeft);
 				imgW = Math.floor(width);
 				imgH = Math.floor(height);
 
-				// set image
+				// set style
 				origin.style.zIndex = index;
 				origin.style.top = croppedT + "px";;
 				origin.style.left = croppedL + "px";
@@ -3671,7 +3683,6 @@
 				clone.style.transform = transform;
 				clone.style.webkitTransform = webkitTransform; // deprecated
 
-				// set img
 				originImg.style.top = imgT + "px";
 				originImg.style.left = imgL + "px";
 				originImg.style.width = imgW + "px";
@@ -3686,83 +3697,51 @@
 
 				// set visible
 				if (!state.visible) {
-					if (!origin.classList.contains("canvaaas-hidden")) {
-						origin.classList.add("canvaaas-hidden");
-					}
-					if (!clone.classList.contains("canvaaas-hidden")) {
-						clone.classList.add("canvaaas-hidden");
-					}
+					origin.style.display = "none";
+					clone.style.display = "none";
 				} else {
-					if (origin.classList.contains("canvaaas-hidden")) {
-						origin.classList.remove("canvaaas-hidden");
-					}
-					if (clone.classList.contains("canvaaas-hidden")) {
-						clone.classList.remove("canvaaas-hidden");
-					}
+					origin.style.display = "";
+					clone.style.display = "";
 				}
 
 				// set clickable
 				if (!state.clickable) {
-					if (!origin.classList.contains("canvaaas-unclickable")) {
-						origin.classList.add("canvaaas-unclickable");
-					}
-					if (!clone.classList.contains("canvaaas-unclickable")) {
-						clone.classList.add("canvaaas-unclickable");
-					}
+					origin.style.pointerEvents = "none";
+					clone.style.pointerEvents = "none";
 				} else {
-					if (origin.classList.contains("canvaaas-unclickable")) {
-						origin.classList.remove("canvaaas-unclickable");
-					}
-					if (clone.classList.contains("canvaaas-unclickable")) {
-						clone.classList.remove("canvaaas-unclickable");
-					}
+					origin.style.pointerEvents = "";
+					clone.style.pointerEvents = "";
 				}
 
 				// set pivots
 				for (var i = 0; i < originPivots.length; i++) {
 					if (!state.pivot) {
-						if (!originPivots[i].classList.contains("canvaaas-hidden")) {
-							originPivots[i].classList.add("canvaaas-hidden");
-						}
+						originPivots[i].style.display = "none";
 					} else {
-						if (originPivots[i].classList.contains("canvaaas-hidden")) {
-							originPivots[i].classList.remove("canvaaas-hidden");
-						}
+						originPivots[i].style.display = "";
 					}
 				}
 				for (var i = 0; i < clonePivots.length; i++) {
 					if (!state.pivot) {
-						if (!clonePivots[i].classList.contains("canvaaas-hidden")) {
-							clonePivots[i].classList.add("canvaaas-hidden");
-						}
+						clonePivots[i].style.display = "none";
 					} else {
-						if (clonePivots[i].classList.contains("canvaaas-hidden")) {
-							clonePivots[i].classList.remove("canvaaas-hidden");
-						}
+						clonePivots[i].style.display = "";
 					}
 				}
 
 				// set grids
 				for (var i = 0; i < originGrids.length; i++) {
 					if (!state.grid) {
-						if (!originGrids[i].classList.contains("canvaaas-hidden")) {
-							originGrids[i].classList.add("canvaaas-hidden");
-						}
+						originGrids[i].style.display = "none";
 					} else {
-						if (originGrids[i].classList.contains("canvaaas-hidden")) {
-							originGrids[i].classList.remove("canvaaas-hidden");
-						}
+						originGrids[i].style.display = "";
 					}
 				}
 				for (var i = 0; i < cloneGrids.length; i++) {
 					if (!state.grid) {
-						if (!cloneGrids[i].classList.contains("canvaaas-hidden")) {
-							cloneGrids[i].classList.add("canvaaas-hidden");
-						}
+						cloneGrids[i].style.display = "none";
 					} else {
-						if (cloneGrids[i].classList.contains("canvaaas-hidden")) {
-							cloneGrids[i].classList.remove("canvaaas-hidden");
-						}
+						cloneGrids[i].style.display = "";
 					}
 				}
 
@@ -4071,33 +4050,21 @@
 	
 				// set class names
 				if (!canvasState.checker) {
-					if (!checkerElement.classList.contains("canvaaas-hidden")) {
-						checkerElement.classList.add("canvaaas-hidden");
-					}
+					checkerElement.style.display = "none";
 				} else {
-					if (checkerElement.classList.contains("canvaaas-hidden")) {
-						checkerElement.classList.remove("canvaaas-hidden");
-					}
+					checkerElement.style.display = "";
 				}
 
 				if (!canvasState.overflow) {
-					if (!mirrorElement.classList.contains("canvaaas-hidden")) {
-						mirrorElement.classList.add("canvaaas-hidden");
-					}
+					mirrorElement.style.display = "none";
 				} else {
-					if (mirrorElement.classList.contains("canvaaas-hidden")) {
-						mirrorElement.classList.remove("canvaaas-hidden");
-					}
+					mirrorElement.style.display = "";
 				}
 
 				if (!canvasState.clickable) {
-					if (!screenElement.classList.contains("canvaaas-unclickable")) {
-						screenElement.classList.add("canvaaas-unclickable");
-					}
+					screenElement.style.pointerEvents = "none";
 				} else {
-					if (screenElement.classList.contains("canvaaas-unclickable")) {
-						screenElement.classList.remove("canvaaas-unclickable");
-					}
+					screenElement.style.pointerEvents = "";
 				}
 
 				canvasState.isInitialized = true;
@@ -4172,33 +4139,21 @@
 				backgroundElement.style.background = canvasState.background;
 
 				if (!canvasState.checker) {
-					if (!checkerElement.classList.contains("canvaaas-hidden")) {
-						checkerElement.classList.add("canvaaas-hidden");
-					}
+					checkerElement.style.display = "none";
 				} else {
-					if (checkerElement.classList.contains("canvaaas-hidden")) {
-						checkerElement.classList.remove("canvaaas-hidden");
-					}
+					checkerElement.style.display = "";
 				}
 
 				if (!canvasState.overflow) {
-					if (!mirrorElement.classList.contains("canvaaas-hidden")) {
-						mirrorElement.classList.add("canvaaas-hidden");
-					}
+					mirrorElement.style.display = "none";
 				} else {
-					if (mirrorElement.classList.contains("canvaaas-hidden")) {
-						mirrorElement.classList.remove("canvaaas-hidden");
-					}
+					mirrorElement.style.display = "";
 				}
 
 				if (!canvasState.clickable) {
-					if (!screenElement.classList.contains("canvaaas-unclickable")) {
-						screenElement.classList.add("canvaaas-unclickable");
-					}
+					screenElement.style.pointerEvents = "none";
 				} else {
-					if (screenElement.classList.contains("canvaaas-unclickable")) {
-						screenElement.classList.remove("canvaaas-unclickable");
-					}
+					screenElement.style.pointerEvents = "";
 				}
 
 				return true;
@@ -4228,36 +4183,19 @@
 					var originHandle = document.getElementById(originHandleId+id+"-"+d);
 					var cloneHandle = document.getElementById(cloneHandleId+id+"-"+d);
 					if (originHandle && cloneHandle) {
-						if (state["handle"][f]) {
-							if (originHandle.classList.contains("canvaaas-hidden")) {
-								originHandle.classList.remove("canvaaas-hidden");
-							}
-							if (cloneHandle.classList.contains("canvaaas-hidden")) {
-								cloneHandle.classList.remove("canvaaas-hidden");
-							}
+						if (!state["handle"][f]) {
+							originHandle.style.display = "none";
+							cloneHandle.style.display = "none";
 						} else {
-							if (!originHandle.classList.contains("canvaaas-hidden")) {
-								originHandle.classList.add("canvaaas-hidden");
-							}
-							if (!cloneHandle.classList.contains("canvaaas-hidden")) {
-								cloneHandle.classList.add("canvaaas-hidden");
-							}
+							originHandle.style.display = "";
+							cloneHandle.style.display = "";
 						}
-
 						if (state["handle"][f] === "none") {
-							if (!originHandle.classList.contains("canvaaas-unclickable")) {
-								originHandle.classList.add("canvaaas-unclickable");
-							}
-							if (!cloneHandle.classList.contains("canvaaas-unclickable")) {
-								cloneHandle.classList.add("canvaaas-unclickable");
-							}
+							originHandle.style.pointerEvents = "none";
+							cloneHandle.style.pointerEvents = "none";
 						} else {
-							if (originHandle.classList.contains("canvaaas-unclickable")) {
-								originHandle.classList.remove("canvaaas-unclickable");
-							}
-							if (cloneHandle.classList.contains("canvaaas-unclickable")) {
-								cloneHandle.classList.remove("canvaaas-unclickable");
-							}
+							originHandle.style.pointerEvents = "";
+							cloneHandle.style.pointerEvents = "";
 						}
 					}
 				}
@@ -4288,36 +4226,19 @@
 					var originBorder = document.getElementById(originBorderId+id+"-"+d);
 					var cloneBorder = document.getElementById(cloneBorderId+id+"-"+d);
 					if (originBorder && cloneBorder) {
-						if (state["border"][f]) {
-							if (originBorder.classList.contains("canvaaas-hidden")) {
-								originBorder.classList.remove("canvaaas-hidden");
-							}
-							if (cloneBorder.classList.contains("canvaaas-hidden")) {
-								cloneBorder.classList.remove("canvaaas-hidden");
-							}
+						if (!state["border"][f]) {
+							originBorder.style.display = "none";
+							cloneBorder.style.display = "none";
 						} else {
-							if (!originBorder.classList.contains("canvaaas-hidden")) {
-								originBorder.classList.add("canvaaas-hidden");
-							}
-							if (!cloneBorder.classList.contains("canvaaas-hidden")) {
-								cloneBorder.classList.add("canvaaas-hidden");
-							}
+							originBorder.style.display = "";
+							cloneBorder.style.display = "";
 						}
-
 						if (state["border"][f] === "none") {
-							if (!originBorder.classList.contains("canvaaas-unclickable")) {
-								originBorder.classList.add("canvaaas-unclickable");
-							}
-							if (!cloneBorder.classList.contains("canvaaas-unclickable")) {
-								cloneBorder.classList.add("canvaaas-unclickable");
-							}
+							originBorder.style.pointerEvents = "none";
+							cloneBorder.style.pointerEvents = "none";
 						} else {
-							if (originBorder.classList.contains("canvaaas-unclickable")) {
-								originBorder.classList.remove("canvaaas-unclickable");
-							}
-							if (cloneBorder.classList.contains("canvaaas-unclickable")) {
-								cloneBorder.classList.remove("canvaaas-unclickable");
-							}
+							originBorder.style.pointerEvents = "";
+							cloneBorder.style.pointerEvents = "";
 						}
 					}
 				}
@@ -6982,6 +6903,19 @@
 
 			function recursiveFunc() {
 				if (count < index) {
+					if (exportedStates[count].id) {
+						if (isExist(exportedStates[count].id)) {
+							if (config.upload) {
+								config.upload("ID already exists");
+							}
+							result.push({
+								error: "ID already exists"
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						}
+					}
 					renderImage(exportedStates[count].src, exportedStates[count], function(err, res) {
 						if (err) {
 							if (config.upload) {
@@ -7063,12 +6997,29 @@
 						if (config.upload) {
 							config.upload("Argument is not DOM Object");
 						}
+						result.push({
+							error: "Argument is not DOM Object"
+						});
 						count++;
 						recursiveFunc();
 						return false;
 					}
 					var attrs = getDatasetFromElement(imgElements[count]);
 					var src = imgElements[count].src || attrs.src;
+
+					if (attrs.id) {
+						if (isExist(attrs.id)) {
+							if (config.upload) {
+								config.upload("ID already exists");
+							}
+							result.push({
+								error: "ID already exists"
+							});
+							count++;
+							recursiveFunc();
+							return false;
+						}
+					}
 					renderImage(src, attrs, function(err, res) {
 						if (err) {
 							if (config.upload) {
@@ -7436,6 +7387,10 @@
 				var state = getImageState(id);
 				var updates = importImageState(newStates[i]);
 
+				if (!state) {
+					continue;
+				}
+				
 				// save cache
 				saveUndo(id);
 
@@ -7793,6 +7748,7 @@
 			return res;
 		}
 
+		// deprecated
 		myObject.cover = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -7890,6 +7846,7 @@
 			return res;
 		}
 
+		// deprecated
 		myObject.contain = function(id, cb) {
 			if (!isExist(id)) {
 				if (config.edit) {
@@ -8081,7 +8038,9 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				scaleY: state.scaleY * -1
+				scaleY: state.scaleY * -1,
+				cropTop: state.cropBottom,
+				cropBottom: state.cropTop
 			});
 			// callback
 			var res = copyImageState(id);
@@ -8130,7 +8089,9 @@
 			saveUndo(id);
 			// save image state
 			setImage(id, {
-				scaleX: state.scaleX * -1
+				scaleX: state.scaleX * -1,
+				cropLeft: state.cropRight,
+				cropRight: state.cropLeft
 			});
 			// callback
 			var res = copyImageState(id);

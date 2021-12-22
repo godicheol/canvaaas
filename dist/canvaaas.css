@@ -46,9 +46,7 @@
 	overflow: visible;
 	z-index: 1;
 }
-.canvaaas-mirror.canvaaas-hidden{
-	display: none !important;
-}
+
 /* /root/screen/canvas/background */
 .canvaaas-background{
 	display: block;
@@ -115,9 +113,6 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-checker.canvaaas-hidden{
-	display: none !important;
-}
 /* /root/screen/canvas/images */
 /* /root/screen/mirror/images */
 .canvaaas-images{
@@ -145,10 +140,6 @@
 	position: absolute;
 	transform-origin: center center;
 	-webkit-transform: translateZ(0);
-}
-.canvaaas-image.canvaaas-hidden{
-	visibility: hidden !important;
-	pointer-events: none;
 }
 /* /root/screen/canvas/images/image/content */
 /* /root/screen/mirror/images/image/content */
@@ -222,9 +213,6 @@
 	user-drag: none;
 	pointer-events: none;
 }
-.canvaaas-pivot.canvaaas-hidden{
-	display: none !important;
-}
 .canvaaas-pivot.canvaaas-x{
 	top: 50%;
 	left: 50%;
@@ -258,9 +246,6 @@
 	-o-user-drag: none;
 	user-drag: none;
 	pointer-events: none;
-}
-.canvaaas-grid.canvaaas-hidden{
-	display: none !important;
 }
 .canvaaas-grid.canvaaas-n{
 	top: 33%;
@@ -346,9 +331,6 @@
 	position: absolute;
 	display: block;
 }
-.canvaaas-border-wrapper.canvaaas-hidden{
-	display: none !important;
-}
 .canvaaas-border-wrapper.canvaaas-n{
 	top: 0;
 	left: 0;
@@ -410,9 +392,6 @@
 	display: block; /* hide */
 	width: 36px; /* click space */
 	height: 36px; /* click space */
-}
-.canvaaas-handle-wrapper.canvaaas-hidden{
-	display: none !important;
 }
 .canvaaas-handle-wrapper.canvaaas-n{
 	top: 0;
@@ -495,16 +474,6 @@
 	transform: translateX(-50%) translateY(-50%);
 }
 
-/* canvas.clickable = false */
-.canvaaas-screen.canvaaas-unclickable .canvaaas-image{
-	pointer-events: none !important;
-}
-
-/* image.clickable = false */
-.canvaaas-image.canvaaas-unclickable{
-	pointer-events: none !important;
-}
-
 /* click image */
 .canvaaas-mirror .canvaaas-image.canvaaas-editing .canvaaas-overlay{
 	opacity: 0.8;
@@ -521,16 +490,6 @@
 /* click border */
 .canvaaas-border-wrapper.canvaaas-editing .canvaaas-border{
 	border-width: 3px;
-}
-
-/* click handle */
-.canvaaas-handle-wrapper.canvaaas-unclickable{
-	pointer-events: none !important;
-}
-
-/* click border */
-.canvaaas-border-wrapper.canvaaas-unclickable{
-	pointer-events: none !important;
 }
 
 /* mobile */

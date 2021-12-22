@@ -575,16 +575,6 @@
 				</div>
 				<div class="row selection">
 					<a href="javascript:void(0)" onclick="
-						canvaaas.cover(selectedId)
-					">Cover</a>
-				</div>
-				<div class="row selection rule">
-					<a href="javascript:void(0)" onclick="
-						canvaaas.contain(selectedId)
-					">Contain</a>
-				</div>
-				<div class="row selection">
-					<a href="javascript:void(0)" onclick="
 						canvaaas.flipX(selectedId)
 					">Flip X</a>
 				</div>
@@ -1426,34 +1416,6 @@
 				class="tool"
 				href="javascript:void(0)"
 				onclick="selectTool(this)"
-				data-method="cover"
-				data-value=""
-				data-help="Cover to canvas"
-				>
-				<span class="material-icons">
-					open_in_full
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
-				data-method="contain"
-				data-value=""
-				data-help="Contain to canvas"
-				>
-				<span class="material-icons">
-					open_in_full
-				</span>
-			</a>
-		</div>
-		<div class="row">
-			<a
-				class="tool"
-				href="javascript:void(0)"
-				onclick="selectTool(this)"
 				data-method="rotate"
 				data-value="45"
 				data-help="Rotate right 45 deg"
@@ -2119,14 +2081,6 @@
 							canvaaas.pivot(id)
 							cancelTool(tool);
 							break;
-						case "cover":
-							canvaaas.cover(id)
-							cancelTool(tool);
-							break;
-						case "contain":
-							canvaaas.contain(id)
-							cancelTool(tool);
-							break;
 					}
 				}
 			},
@@ -2394,12 +2348,6 @@
 			var v = self.getAttribute("data-value");
 			var id = self.getAttribute("data-id");
 			switch(m) {
-				case "cover":
-					canvaaas.cover(id);
-					break;
-				case "contain":
-					canvaaas.contain(id);
-					break;
 				case "rotate":
 					canvaaas.rotate(id, v);
 					break;
@@ -2436,8 +2384,6 @@
 			var t = document.createElement("div");
 			t.className = "popup";
 			t.style = x + y;
-			t.innerHTML += createList(id, "Cover", "cover", "");
-			t.innerHTML += createList(id, "Contain", "contain", "");
 			t.innerHTML += createList(id, "Rotate R", "rotate", "45");
 			t.innerHTML += createList(id, "Rotate L", "rotate", "-45");
 			t.innerHTML += createList(id, "Zoom in", "zoom", "1.1");
