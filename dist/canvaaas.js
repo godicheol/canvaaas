@@ -3407,6 +3407,34 @@
 				if (isBoolean(newState.drawable)) {
 					state.drawable = toBoolean(newState.drawable);
 				}
+				// before flip
+				if (isNumeric(newState.scaleX)) {
+					oldScaleX = state.scaleX;
+					newScaleX = toNumber(newState.scaleX);
+					if (newScaleX === 1 || newScaleX === -1) {
+						state.scaleX = newScaleX;
+					}
+					// fix flip Y
+					if (newScaleX !== oldScaleX) {
+						tmp = state.cropLeft;
+						state.cropLeft = state.cropRight;
+						state.cropRight = tmp;
+					}
+				}
+				if (isNumeric(newState.scaleY)) {
+					oldScaleY = state.scaleY;
+					newScaleY = toNumber(newState.scaleY);
+					if (newScaleY === 1 || newScaleY === -1) {
+						state.scaleY = newScaleY;
+					}
+					// fix flip X
+					if (newScaleY !== oldScaleY) {
+						tmp = state.cropTop;
+						state.cropTop = state.cropBottom;
+						state.cropBottom = tmp;
+					}
+				}
+				// after flip
 				if (isNumeric(newState.cropTop)) {
 					tmp = toNumber(newState.cropTop);
 					if (tmp < 0) {
@@ -3437,20 +3465,6 @@
 						state.cropRight = 0;
 					} else {
 						state.cropRight = tmp;
-					}
-				}
-				if (isNumeric(newState.scaleX)) {
-					oldScaleX = state.scaleX;
-					newScaleX = toNumber(newState.scaleX);
-					if (newScaleX === 1 || newScaleX === -1) {
-						state.scaleX = newScaleX;
-					}
-				}
-				if (isNumeric(newState.scaleY)) {
-					oldScaleY = state.scaleY;
-					newScaleY = toNumber(newState.scaleY);
-					if (newScaleY === 1 || newScaleY === -1) {
-						state.scaleY = newScaleY;
 					}
 				}
 				if (isBoolean(newState.lockAspectRatio)) {
@@ -3520,20 +3534,6 @@
 						}
 					}
 					state.handle = obj;
-				}
-
-				// fix flip Y
-				if (newScaleX !== oldScaleX) {
-					tmp = state.cropLeft;
-					state.cropLeft = state.cropRight;
-					state.cropRight = tmp;
-				}
-
-				// fix flip X
-				if (newScaleY !== oldScaleY) {
-					tmp = state.cropTop;
-					state.cropTop = state.cropBottom;
-					state.cropBottom = tmp;
 				}
 
 				applyStyleToImage(id);
@@ -3627,7 +3627,9 @@
 					transform += "scaleY(" + scaleY + ")";
 					webkitTransform += "scaleY(" + scaleY + ")"; // deprecated
 				}
-
+				transform += "translateZ(0)";
+				webkitTransform += "translateZ(0)"; // deprecated
+				
 				// for image
 				croppedW = Math.floor(width - (cropLeft + cropRight));
 				croppedH = Math.floor(height - (cropTop + cropBottom));
