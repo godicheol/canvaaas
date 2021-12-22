@@ -4657,17 +4657,8 @@
 				if (!isObject(state)) {
 					return false;
 				}
-				if (isString(state._id)) {
-					tmp.id = toString(state._id);
-				}
 				if (isString(state.id)) {
 					tmp.id = toString(state.id);
-				}
-				if (isString(state.url)) {
-					tmp.src = toString(state.url);
-				}
-				if (isString(state.path)) {
-					tmp.src = toString(state.path);
 				}
 				if (isString(state.src)) {
 					tmp.src = toString(state.src);
@@ -4772,8 +4763,6 @@
 				var datasetKeys = [
 					"id",
 					"src",
-					"url",
-					"path",
 					"index",
 					"x",
 					"y",
@@ -5038,10 +5027,6 @@
 
 						if (isString(imgStates[i].src)) {
 							obj.src = toString(imgStates[i].src);
-						} else if (isString(imgStates[i].path)) {
-							obj.src = toString(imgStates[i].path);
-						} else if (isString(imgStates[i].url)) {
-							obj.src = toString(imgStates[i].url);
 						} else {
 							isAllowed = false;
 						}
