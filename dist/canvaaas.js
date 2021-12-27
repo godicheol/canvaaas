@@ -3643,10 +3643,10 @@
 				webkitTransform += "translateZ(0)"; // deprecated
 				
 				// for image
-				croppedW = Math.floor(width - (cropLeft + cropRight));
-				croppedH = Math.floor(height - (cropTop + cropBottom));
-				croppedT = Math.floor(axisY - (0.5 * croppedH));
-				croppedL = Math.floor(axisX - (0.5 * croppedW));
+				croppedW = width - (cropLeft + cropRight);
+				croppedH = height - (cropTop + cropBottom);
+				croppedT = axisY - (0.5 * croppedH);
+				croppedL = axisX - (0.5 * croppedW);
 
 				// fix flip
 				if (scaleX < 0) {
@@ -3661,10 +3661,10 @@
 				}
 				
 				// fix cropped img coordinate
-				imgT = Math.floor(-cropTop);
-				imgL = Math.floor(-cropLeft);
-				imgW = Math.floor(width);
-				imgH = Math.floor(height);
+				imgT = -cropTop;
+				imgL = -cropLeft;
+				imgW = width;
+				imgH = height;
 
 				// set style
 				origin.style.zIndex = index;
@@ -3994,10 +3994,10 @@
 				var screenTop = containerPadding[0] + (0.5 * containerHeight) - (0.5 * screenHeight);
 				var screenAspectRatio = screenWidth / screenHeight;
 
-				screenElement.style.width =  Math.floor(screenWidth) + "px";
-				screenElement.style.height =  Math.floor(screenHeight) + "px";
-				screenElement.style.left =  Math.floor(screenLeft) + "px";
-				screenElement.style.top =  Math.floor(screenTop) + "px";
+				screenElement.style.width = screenWidth + "px";
+				screenElement.style.height = screenHeight + "px";
+				screenElement.style.left = screenLeft + "px";
+				screenElement.style.top = screenTop + "px";
 
 				// fix scrollbar width
 				if (hasScrollbar()) {
@@ -4006,10 +4006,10 @@
 					screenLeft = containerPadding[3] + (0.5 * containerWidth) - (0.5 * screenWidth);
 					screenTop = containerPadding[0] + (0.5 * containerHeight) - (0.5 * screenHeight);
 	
-					screenElement.style.width =  Math.floor(screenWidth) + "px";
-					screenElement.style.height =  Math.floor(screenHeight) + "px";
-					screenElement.style.left =  Math.floor(screenLeft) + "px";
-					screenElement.style.top =  Math.floor(screenTop) + "px";
+					screenElement.style.width = screenWidth + "px";
+					screenElement.style.height = screenHeight + "px";
+					screenElement.style.left = screenLeft + "px";
+					screenElement.style.top = screenTop + "px";
 				}
 
 				// calculate scale after fix scrollbar 
@@ -4036,15 +4036,15 @@
 				canvasState.canvasLeft = canvasLeft;
 				canvasState.canvasTop = canvasTop;
 
-				canvasElement.style.width = Math.floor(canvasWidth) + "px";
-				canvasElement.style.height = Math.floor(canvasHeight) + "px";
-				canvasElement.style.left = Math.floor(canvasLeft) + "px";
-				canvasElement.style.top = Math.floor(canvasTop) + "px";
+				canvasElement.style.width = canvasWidth + "px";
+				canvasElement.style.height = canvasHeight + "px";
+				canvasElement.style.left = canvasLeft + "px";
+				canvasElement.style.top = canvasTop + "px";
 	
-				mirrorElement.style.width = Math.floor(canvasWidth) + "px";
-				mirrorElement.style.height = Math.floor(canvasHeight) + "px";
-				mirrorElement.style.left = Math.floor(canvasLeft) + "px";
-				mirrorElement.style.top = Math.floor(canvasTop) + "px";
+				mirrorElement.style.width = canvasWidth + "px";
+				mirrorElement.style.height = canvasHeight + "px";
+				mirrorElement.style.left = canvasLeft + "px";
+				mirrorElement.style.top = canvasTop + "px";
 
 				backgroundElement.style.background = canvasState.background || "transparent";
 	
