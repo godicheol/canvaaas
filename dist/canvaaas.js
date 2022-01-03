@@ -3994,10 +3994,10 @@
 				var screenTop = containerPadding[0] + (0.5 * containerHeight) - (0.5 * screenHeight);
 				var screenAspectRatio = screenWidth / screenHeight;
 
-				screenElement.style.width = screenWidth + "px";
-				screenElement.style.height = screenHeight + "px";
-				screenElement.style.left = screenLeft + "px";
-				screenElement.style.top = screenTop + "px";
+				screenElement.style.width =  screenWidth + "px";
+				screenElement.style.height =  screenHeight + "px";
+				screenElement.style.left =  screenLeft + "px";
+				screenElement.style.top =  screenTop + "px";
 
 				// fix scrollbar width
 				if (hasScrollbar()) {
@@ -9727,6 +9727,30 @@
 			}
 
 			setCanvas(option);
+
+			// callback
+			var res = copyCanvasState();
+			if (cb) {
+				cb(null, res);
+			}
+			return res;
+		}
+
+		myObject.refresh = function(cb) {
+			if (!containerElement || !screenElement || !canvasElement || !mirrorElement) {
+				if (cb) {
+					cb("Canvaaas has been not initialized");
+				}
+				return false;
+			}
+			if (!canvasState.isInitialized) {
+				if (cb) {
+					cb("Canvas has been not initialized");
+				}
+				return false;
+			}
+
+			applyStyleToCanvas();
 
 			// callback
 			var res = copyCanvasState();
