@@ -997,6 +997,21 @@
 						mouseX = e.touches[0].clientX;
 						mouseY = e.touches[0].clientY;
 					} else if (e.touches.length > 1) {
+						// clear event state
+						eventState.click = false;
+						eventState.onClick = false;
+						eventState.target = undefined;
+
+						// remove class
+						removeClassToImage(id, "canvaaas-editing");
+
+						// remove events
+						document.removeEventListener("mousemove", handlers.onClick, false);
+						document.removeEventListener("mouseup", handlers.endClick, false);
+
+						document.removeEventListener("touchmove", handlers.onClick, false);
+						document.removeEventListener("touchend", handlers.endClick, false);
+
 						// mobile
 						return handlers.startPinchZoom(e);
 					} else {
@@ -1968,6 +1983,9 @@
 					// save cache
 					saveUndo(id);
 
+					// add class
+					addClassToImage(id, "canvaaas-editing");
+
 					// add events
 					document.addEventListener("touchmove", handlers.onPinchZoom, false);
 					document.addEventListener("touchend", handlers.endPinchZoom, false);
@@ -2090,6 +2108,9 @@
 					// clear event state
 					eventState.onZoom = false;
 					eventState.target = undefined;
+
+					// remove class
+					removeClassToImage(id, "canvaaas-editing");
 
 					// remove event
 					document.removeEventListener("touchmove", handlers.onPinchZoom, false);
