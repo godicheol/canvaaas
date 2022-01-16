@@ -139,17 +139,16 @@
 	display: block;
 	position: absolute;
 	transform-origin: center center;
-	-webkit-transform: translateZ(0);
 }
 /* /root/screen/canvas/images/image/content */
 /* /root/screen/mirror/images/image/content */
 .canvaaas-content{
 	display: block;
 	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	top: 0.02px; /* fix mac error */
+	bottom: 0.02px; /* fix mac error */
+	left: 0.02px; /* fix mac error */
+	right: 0.02px; /* fix mac error */
 	overflow: hidden;
 }
 .canvaaas-content img{
